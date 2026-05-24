@@ -1,0 +1,24 @@
+{
+  "name": "ai-plugins",
+  "owner": {
+    "name": "ai-plugins maintainers"
+  },
+  "metadata": {
+    "description": "Dual-runtime plugin collection for context engineering and related agent tooling (Cursor + Claude Code)."
+  },
+  "plugins": [
+    {
+      "name": "context-eng-hero",
+      "source": "plugins/context-eng-hero",
+      "description": "Design and validate skills, agents, commands, and context artifacts for reliable agent behavior.",
+      "category": "developer-tools",
+      "keywords": [
+        "context-engineering",
+        "skills",
+        "agents",
+        "prompts",
+        "workflows"
+      ]
+    }
+  ]
+}

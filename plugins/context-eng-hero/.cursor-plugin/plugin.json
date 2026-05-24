@@ -1,0 +1,20 @@
+{
+  "name": "context-eng-hero",
+  "displayName": "Context Eng Hero",
+  "version": "0.0.1",
+  "description": "Design and validate skills, agents, commands, and context artifacts",
+  "license": "Unlicense",
+  "keywords": [
+    "context-engineering",
+    "skills",
+    "agents",
+    "prompts"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "context-engineering",
+    "skills",
+    "agents",
+    "prompts"
+  ]
+}

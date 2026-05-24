@@ -1,0 +1,63 @@
+[project]
+name = "ai-plugins-dev"
+version = "0.0.1"
+description = "Development and test tooling for the ai-plugins marketplace repository"
+requires-python = ">=3.14"
+dependencies = ["pyyaml>=6.0"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+    "black>=25.0",
+    "mypy>=1.14",
+    "bandit[toml]>=1.8",
+    "pip-audit>=2.7",
+    "pre-commit>=4.0",
+    "types-pyyaml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+src = ["plugins/context-eng-hero/scripts", "tests/context-eng-hero"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.black]
+line-length = 88
+target-version = ["py314"]
+
+[tool.mypy]
+python_version = "3.14"
+mypy_path = "plugins/context-eng-hero/scripts"
+files = ["plugins/context-eng-hero/scripts"]
+explicit_package_bases = true
+warn_return_any = true
+warn_unused_ignores = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[tool.coverage.run]
+source = ["audit_static"]
+relative_files = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+# B105: counter dict uses key "pass" — not a credential
+skips = ["B105"]

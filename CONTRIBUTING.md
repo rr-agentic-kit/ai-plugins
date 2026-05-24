@@ -1,0 +1,103 @@
+# Contributing to ai-plugins
+
+Development tooling applies to the **monorepo checkout** only. Installed plugins (`plugins/<name>/`) do not include `tests/`, root `pyproject.toml`, or CI configs.
+
+## Prerequisites
+
+- [uv](https://docs.astral.sh/uv/)
+- **Python 3.14**
+
+## Setup
+
+From the repository root:
+
+```bash
+uv sync --all-groups
+uv run pre-commit install
+```
+
+First-time baseline (optional, matches CI lint/format/type/security hooks):
+
+```bash
+uv run pre-commit run --all-files
+```
+
+## Quality checks (local)
+
+Same commands as [`.github/workflows/python-quality.yml`](.github/workflows/python-quality.yml):
+
+```bash
+uv run ruff check plugins/context-eng-hero/scripts tests/context-eng-hero
+uv run black --check plugins/context-eng-hero/scripts tests/context-eng-hero
+uv run mypy
+uv run bandit -r plugins/context-eng-hero/scripts -c pyproject.toml
+uv export --frozen --format requirements.txt -o /tmp/requirements.txt
+uv run pip-audit -r /tmp/requirements.txt
+```
+
+Format/fix locally:
+
+```bash
+uv run ruff check --fix plugins/context-eng-hero/scripts tests/context-eng-hero
+uv run black plugins/context-eng-hero/scripts tests/context-eng-hero
+```
+
+## Tests
+
+Full suite (all plugins):
+
+```bash
+uv run pytest tests/ -v
+```
+
+Single plugin:
+
+```bash
+uv run pytest tests/context-eng-hero/ -v
+```
+
+Coverage (matches CI + SonarCloud):
+
+```bash
+uv run pytest tests/ -v \
+  --cov=plugins/context-eng-hero/scripts/audit_static \
+  --cov-report=term-missing \
+  --cov-report=xml
+```
+
+## CI
+
+[`.github/workflows/python-quality.yml`](.github/workflows/python-quality.yml) runs Ruff, Black, Mypy, Bandit, pip-audit, pytest with `coverage.xml`, and SonarCloud on pull requests and pushes to `main`.
+
+### SonarCloud (one-time setup)
+
+1. Import this repository at [sonarcloud.io](https://sonarcloud.io) (GitHub App).
+2. Set `sonar.organization` and `sonar.projectKey` in [`sonar-project.properties`](sonar-project.properties) to match the SonarCloud project.
+3. Add repository secret **`SONAR_TOKEN`** (SonarCloud → My Account → Security).
+4. Disable **Automatic Analysis** if you only want CI-driven scans (recommended for this layout).
+
+Until `SONAR_TOKEN` and placeholders are configured, the `sonarcloud` job will fail; other quality jobs still run.
+
+## Running the static audit script (dev convenience)
+
+From a monorepo checkout, after `uv sync`:
+
+```bash
+cd plugins/context-eng-hero
+uv run --project ../.. python scripts/audit_static.py . skills/context-engineer/SKILL.md
+```
+
+End users and agents inside the **installed plugin** use plugin-only bootstrap — see `plugins/context-eng-hero/skills/context-engineer/refs/python-runtime.md` and `plugins/context-eng-hero/CLAUDE.md`.
+
+## Plugin validation
+
+From repo root:
+
+```bash
+claude plugin validate .
+claude plugin validate ./plugins/context-eng-hero
+```
+
+## Fork notes
+
+Edit `owner` / `author` placeholders in marketplace and plugin manifests when you fork. Add a `repository` URL to plugin manifests once the remote is known.
