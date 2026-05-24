@@ -72,6 +72,19 @@ def test_cli_json_format(plugin_root, repo_root):
         assert set(row.keys()) >= {"id", "severity", "result", "evidence"}
 
 
+def test_cli_dot_relative_resolves_single_skill(plugin_root, repo_root):
+    """From monorepo root: plugin_root + '.' audits the sole skills/*/SKILL.md."""
+    script = plugin_root / "scripts" / "audit_static.py"
+    proc = run_cli(
+        plugin_root,
+        ".",
+        script=script,
+        repo_root=repo_root,
+    )
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "skills/context-engineer/SKILL.md" in proc.stdout
+
+
 def test_cli_markdown_severity_summary(plugin_root, repo_root):
     script = plugin_root / "scripts" / "audit_static.py"
     proc = run_cli(
