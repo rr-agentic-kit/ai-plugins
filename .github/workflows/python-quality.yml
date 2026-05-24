@@ -51,7 +51,6 @@ jobs:
             --cov-report=xml
 
   sonarcloud:
-    needs: quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
