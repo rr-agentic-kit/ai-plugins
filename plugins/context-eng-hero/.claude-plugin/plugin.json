@@ -1,0 +1,9 @@
+{
+  "name": "context-eng-hero",
+  "version": "0.0.1",
+  "description": "Design and validate skills, agents, commands, and context artifacts",
+  "license": "Unlicense",
+  "author": {
+    "name": "ai-plugins maintainers"
+  }
+}

@@ -1,0 +1,23 @@
+---
+description: Enforces fixture rule.
+alwaysApply: false
+globs: ["*.py"]
+---
+
+# Rule
+
+## Intent
+
+Prevent bad patterns.
+
+## Requirements
+
+MUST NOT use eval.
+
+## Scope
+
+Python files.
+
+## Exceptions
+
+None.
