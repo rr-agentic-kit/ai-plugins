@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
-
 import audit_static as m
+import pytest
 from conftest import all_pass, result_by_id
 
 

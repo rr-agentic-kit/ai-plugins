@@ -3,9 +3,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        files: ^(plugins/context-eng-hero/scripts|tests/context-eng-hero)/.*\.py$
+        types: [python]
       - id: end-of-file-fixer
-        files: ^(plugins/context-eng-hero/scripts|tests/context-eng-hero)/.*\.py$
+        types: [python]
       - id: check-yaml
         files: \.(ya?ml)$
 
@@ -19,7 +19,6 @@ repos:
     rev: 26.5.1
     hooks:
       - id: black
-        files: ^(plugins/context-eng-hero/scripts|tests/context-eng-hero)/
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.1
@@ -36,4 +35,13 @@ repos:
     hooks:
       - id: bandit
         args: [-c, pyproject.toml]
-        files: ^plugins/context-eng-hero/scripts/
+        types: [python]
+
+  - repo: local
+    hooks:
+      - id: validate-plugin-versions
+        name: validate plugin versions align
+        entry: uv run python scripts/validate_plugin_versions.py
+        language: system
+        pass_filenames: false
+        files: ^(pyproject\.toml|plugins/[^/]+/\.(cursor|claude)-plugin/plugin\.json)$

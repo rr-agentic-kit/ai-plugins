@@ -5,9 +5,8 @@ from __future__ import annotations
 import subprocess
 import sys
 
-import pytest
-
 import audit_static as m
+import pytest
 from conftest import FIXTURES_DIR, all_pass
 
 

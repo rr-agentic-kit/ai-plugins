@@ -89,6 +89,14 @@ uv run --project ../.. python scripts/audit_static.py . skills/context-engineer/
 
 End users and agents inside the **installed plugin** use plugin-only bootstrap — see `plugins/context-eng-hero/skills/context-engineer/refs/python-runtime.md` and `plugins/context-eng-hero/CLAUDE.md`.
 
+## Version alignment
+
+`pyproject.toml` `[project].version` and each plugin’s `.cursor-plugin/plugin.json` and `.claude-plugin/plugin.json` `version` fields must match. CI and pre-commit run:
+
+```bash
+uv run python scripts/validate_plugin_versions.py
+```
+
 ## Plugin validation
 
 From repo root:

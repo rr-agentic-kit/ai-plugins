@@ -23,7 +23,8 @@ def _resolve_relative_path(plugin_root: Path, rel_path: str) -> str:
         return skills[0].relative_to(plugin_root).as_posix()
     if not skills:
         raise SystemExit(
-            f"no {_DEFAULT_SKILL_GLOB} under {plugin_root}; pass a plugin-relative file path"
+            f"no {_DEFAULT_SKILL_GLOB} under {plugin_root}; "
+            "pass a plugin-relative file path"
         )
     paths = ", ".join(p.relative_to(plugin_root).as_posix() for p in skills)
     raise SystemExit(
@@ -50,7 +51,10 @@ def main() -> int:
     parser.add_argument("plugin_root", type=Path, help="Plugin root directory")
     parser.add_argument(
         "relative_path",
-        help="Artifact path relative to plugin root, or '.' for the sole skills/*/SKILL.md",
+        help=(
+            "Artifact path relative to plugin root, or '.' "
+            "for the sole skills/*/SKILL.md"
+        ),
     )
     parser.add_argument(
         "--format",

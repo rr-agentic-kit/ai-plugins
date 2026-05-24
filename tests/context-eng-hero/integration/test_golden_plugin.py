@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 import audit_static as m
+import pytest
 from conftest import PLUGIN_ROOT, all_pass
 
 
