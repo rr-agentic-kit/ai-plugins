@@ -49,7 +49,7 @@ class AuditContext:
 
         text = target.read_text(encoding="utf-8")
         rel = Path(rel_path)
-        artifact_type = detect_type(plugin_root, rel)
+        artifact_type = detect_type(rel)
         from audit_static.frontmatter import parse_frontmatter
 
         fm, body, fm_err = parse_frontmatter(text)

@@ -7,7 +7,7 @@ from audit_static.cli import main
 from audit_static.detect import detect_type
 from audit_static.frontmatter import parse_frontmatter
 from audit_static.headings import headings_present
-from audit_static.links import resolve_link
+from audit_static.links import is_insecure_http_link, resolve_link
 from audit_static.orchestrator import run_checks
 from audit_static.report import check, format_markdown, severity_summary
 
@@ -18,6 +18,7 @@ __all__ = [
     "detect_type",
     "format_markdown",
     "headings_present",
+    "is_insecure_http_link",
     "main",
     "parse_frontmatter",
     "resolve_link",

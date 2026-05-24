@@ -14,6 +14,7 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | `static.paths.no-absolute` | major |
 | `static.sections.required` | critical |
 | `static.links.internal-resolve` | major |
+| `static.links.https-only` | critical |
 
 ## Judgment
 

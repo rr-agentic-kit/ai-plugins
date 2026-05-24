@@ -26,7 +26,7 @@ def main() -> int:
     if args.format == "json":
         print(json.dumps(results, indent=2))
     else:
-        artifact_type = detect_type(args.plugin_root.resolve(), Path(rel))
+        artifact_type = detect_type(Path(rel))
         print(format_markdown(results, rel, artifact_type))
     return 0 if all(r["result"] == "PASS" for r in results) else 1
 

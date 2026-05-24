@@ -19,6 +19,19 @@ def test_resolve_link_skips_external_and_anchor(plugin_root: Path):
     assert m.resolve_link(plugin_root, source, "mailto:a@b.c")
 
 
+def test_is_insecure_http_link():
+    assert m.is_insecure_http_link("http://example.com")
+    assert m.is_insecure_http_link("HTTP://example.com")
+    assert not m.is_insecure_http_link("https://example.com")
+    assert not m.is_insecure_http_link("sibling.md")
+    assert not m.is_insecure_http_link("#section")
+
+
+def test_resolve_link_http_not_broken_relative(plugin_root: Path):
+    source = plugin_root / "README.md"
+    assert m.resolve_link(plugin_root, source, "http://example.com")
+
+
 def test_resolve_link_valid_relative(mini_plugin):
     root = mini_plugin("skill_valid_link")
     source = root / "skills/my-skill/SKILL.md"

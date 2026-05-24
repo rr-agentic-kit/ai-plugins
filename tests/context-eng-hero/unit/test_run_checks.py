@@ -19,6 +19,7 @@ from conftest import all_pass, result_by_id
         ("skill_parent_path", "skills/my-skill/SKILL.md", False),
         ("skill_broken_link", "skills/my-skill/SKILL.md", False),
         ("skill_valid_link", "skills/my-skill/SKILL.md", True),
+        ("skill_http_link", "skills/my-skill/SKILL.md", False),
         ("skill_long_description", "skills/my-skill/SKILL.md", False),
         ("command_valid", "commands/my-cmd.md", True),
         ("command_missing_output", "commands/my-cmd.md", False),
@@ -75,6 +76,11 @@ def test_path_outside_plugin(mini_plugin, tmp_path):
             "skill_broken_link",
             "skills/my-skill/SKILL.md",
             "static.links.internal-resolve",
+        ),
+        (
+            "skill_http_link",
+            "skills/my-skill/SKILL.md",
+            "static.links.https-only",
         ),
         (
             "skill_long_description",

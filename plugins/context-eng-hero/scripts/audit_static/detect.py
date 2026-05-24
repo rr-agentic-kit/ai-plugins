@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def detect_type(plugin_root: Path, rel_path: Path) -> str:
+def detect_type(rel_path: Path) -> str:
     parts = rel_path.parts
     name = rel_path.name.lower()
     if len(parts) >= 2 and parts[0] == "skills" and name == "skill.md":
