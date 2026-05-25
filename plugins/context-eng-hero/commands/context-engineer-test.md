@@ -15,11 +15,11 @@ description: Run fixed behavior probes against one agent context definition (rep
 
 Before any other step:
 
-1. Read and execute `refs/actions/test.md` in skill **context-engineer**.
+1. Execute **Action: test** in skill **context-engineer** (follow skill **Run:** to load the internal procedure).
 2. Call **TodoWrite** with `merge: false` and one todo per step (`test-1-classify` … `test-3-report`).
 3. Mark each todo `completed` before starting the next. Do not skip steps.
 
-Execute **Action: test** in skill **context-engineer**. No file edits.
+No file edits.
 
 ## Output
 

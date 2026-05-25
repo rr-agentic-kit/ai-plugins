@@ -56,4 +56,4 @@ No universal YAML schema; document:
 
 ## Validity
 
-After authoring, run `scripts/audit_static.py` (Python **3.14+**, see `python-runtime.md`) then `pre-ship-checklist.md` for **create** / **rewrite** before writing files.
+After authoring, run static → `pre-write-reflection.md` → `pre-ship-checklist.md` (see `refs/actions/shared-write-gates.md`) for **create** / **fix** / **redesign** / **design assist write** before writing files.

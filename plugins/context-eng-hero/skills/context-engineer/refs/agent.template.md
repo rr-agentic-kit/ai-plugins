@@ -31,4 +31,4 @@ description: Role and domain boundary in one or two sentences.
 
 ## Validity
 
-Validate against `frontmatter-schemas.md` and run `pre-ship-checklist.md` before ship (same `refs/` directory as templates in **context-engineer**).
+Validate against `frontmatter-schemas.md`; before ship run static → `pre-write-reflection.md` → `pre-ship-checklist.md` (see `shared-write-gates.md` in **context-engineer** refs).

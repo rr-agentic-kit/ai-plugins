@@ -21,6 +21,8 @@ List each probe id from `<type>.test-prompts.md` and the exact prompt variant us
 ## Regression risks
 - …
 
-## Suggested follow-ups
-- …
+## Suggested follow-ups (user)
+- Probe FAIL on **same contract** (wording, stop rule, missing step): `/context-engineer-fix` + this report
+- FAIL or user story implies **wrong outcome or capability**: `/context-engineer-redesign`
+- PASS with unverified ship: optional `/context-engineer-audit`
 ```

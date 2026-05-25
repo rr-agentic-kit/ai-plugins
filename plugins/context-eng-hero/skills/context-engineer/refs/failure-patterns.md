@@ -7,7 +7,7 @@ Use these labels in **audit** narrative findings. Map each failed check **id** (
 | **STRUCTURE** | Frontmatter, naming, or required sections break discovery or parsing | `static.*`, `*.sections.*` |
 | **SCOPE** | Responsibility too broad, merges unrelated concerns, or leaks domain | `*.scope.*`, `workflow.steps.bounded` |
 | **VAGUE** | Goals, inputs, outputs, or stop rules not operational | `*.procedure.*`, `*.requirements.testable` |
-| **REDUNDANT** | Duplicates another artifact without extension or deprecation pointer | (judgment narrative) |
+| **REDUNDANT** | Duplicates another artifact or co-loaded ref without unique extension | `*.refs.no-body-echo`, `*.refs.unique-contribution`, `*.refs.load-efficiency`, `harness.consistent.no-cross-echo` |
 | **DISCOVERY** | `description` too generic; false positives/negatives likely | `*.discovery.*` |
 | **CONTRACT** | Missing or ambiguous input/output/stop for invokers | `command.input.*`, `agent.outputs.*` |
 | **SAFETY** | Absolute paths, `..`, command-chaining-only routing, or unsafe defaults | `static.paths.*`, `*.routing.no-chain-only` |

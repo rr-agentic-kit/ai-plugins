@@ -32,6 +32,7 @@ Do not reference paths outside this plugin tree unless the user explicitly provi
   ```
 
 - If install or run still fails: report **STATIC SKIPPED** with reason — do not silently omit static checks.
+- The skill does not execute Python — the agent shell runs the script for audit and write-path gates.
 
 ## No pytest in this tree
 

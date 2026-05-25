@@ -87,7 +87,7 @@ cd plugins/context-eng-hero
 uv run --project ../.. python scripts/audit_static.py . skills/context-engineer/SKILL.md
 ```
 
-End users and agents inside the **installed plugin** use plugin-only bootstrap — see `plugins/context-eng-hero/skills/context-engineer/refs/python-runtime.md` and `plugins/context-eng-hero/CLAUDE.md`.
+End users and agents inside the **installed plugin** use plugin-only bootstrap — see `plugins/context-eng-hero/CLAUDE.md` **Python runtime**.
 
 ## Version alignment
 

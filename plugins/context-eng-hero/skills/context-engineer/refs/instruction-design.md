@@ -1,6 +1,6 @@
 # Instruction design (context artifacts)
 
-Principles for **skills**, **commands**, **agents**, **rules**, and **workflows**. Load with **create**, **extract**, and **rewrite**.
+Principles for **skills**, **commands**, **agents**, **rules**, and **workflows**. Load with **create**, **extract**, **fix**, **redesign**, and **design assist write** (`refs/actions/design.md`).
 
 ## Signal vs noise
 
@@ -8,6 +8,8 @@ Principles for **skills**, **commands**, **agents**, **rules**, and **workflows*
 - **Noise**: generic encouragement, repeated restatements of the obvious, or prose that duplicates tool docs.
 
 Cut noise until every paragraph changes behavior or discovery.
+
+- **Cross-file echo**: if a ref's **Load** chain includes file X, do not restate X's constraints in the loading file. The agent reads both; the restatement is pure noise.
 
 ## Forcing function
 
@@ -41,10 +43,3 @@ Do not duplicate the same policy in three places; **link** the canonical ref onc
 
 **Bad:** “Use best practices.”  
 **Good:** “Match surrounding file’s import style (top-level only).”
-
-## Orchestration in authored text
-
-- **Commands (verbs):** **Progress** section mandates TodoWrite step ids—see `chat-orchestration.md`.
-- **Workflows:** **Steps** `todo_id` column + required **Orchestration** TodoWrite rule.
-- **Skills:** describe when authors should use AskQuestion/TodoWrite/Task; ambient skill does not auto-spawn todos.
-- Use `disable-model-invocation: true` when the artifact must be slash-only (action-like), not ambient auto-invoke.

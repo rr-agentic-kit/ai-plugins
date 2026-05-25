@@ -1,22 +1,6 @@
 # Agent audit rubric
 
-Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **Judgment** only in audit step 3. **Static** ids are produced by `scripts/audit_static.py`.
-
-## Static (script)
-
-| id | Severity |
-|----|----------|
-| `static.frontmatter.delimiters` | critical |
-| `static.frontmatter.parseable` | critical |
-| `static.keys.required` | critical |
-| `static.name.format` | critical |
-| `static.name.path-match` | critical |
-| `static.description.present` | critical |
-| `static.paths.no-parent-segment` | critical |
-| `static.paths.no-absolute` | major |
-| `static.sections.required` | critical |
-| `static.links.internal-resolve` | major |
-| `static.links.https-only` | critical |
+Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **Judgment** only in audit step 3. **Static** ids are produced by `scripts/audit_static.py`—do not re-score manually unless script skipped.
 
 ## Judgment
 
@@ -43,3 +27,4 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 |----|----------|-----------|
 | `agent.orchestration.subagents` | minor | **Orchestration** documents Task/subagent use when multi-step, or one-line N/A for single-shot |
 | `agent.noise.signal-ratio` | minor | No generic filler without testable constraints |
+| `agent.refs.load-efficiency` | minor | Files in this artifact's **Load** list do not duplicate each other's content; no ref is a strict subset of another co-loaded ref |

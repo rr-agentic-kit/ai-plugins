@@ -1,6 +1,6 @@
 ---
 name: your-skill-id
-description: Third-person WHAT + WHEN for design/classify only. No audit/rewrite/test triggers here.
+description: Third-person WHAT + WHEN for design/classify only. No audit/fix/redesign/test triggers here.
 ---
 
 # <!-- REQUIRED: skill title -->
@@ -31,4 +31,4 @@ description: Third-person WHAT + WHEN for design/classify only. No audit/rewrite
 
 ## Validity
 
-Validate against `frontmatter-schemas.md` and run `pre-ship-checklist.md` before ship (same `refs/` directory as templates in **context-engineer**).
+Validate against `frontmatter-schemas.md`; before ship run static → `pre-write-reflection.md` → `pre-ship-checklist.md` (see `shared-write-gates.md` in **context-engineer** refs).

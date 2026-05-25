@@ -30,7 +30,7 @@ Fill static rows from `scripts/audit_static.py`. Evaluate **Judgment** rows from
 
 ## Recommended next step (user)
 - PASS: ship or run `/context-engineer-test` if behavior unverified
-- FAIL: `/context-engineer-rewrite <path>` with this report; rewrite must address **every** FAIL
+- FAIL: `/context-engineer-fix <path>` with this report; fix must address **every** FAIL
 ```
 
 **Verdict:** **PASS** only if **all** static and judgment checks pass. Any FAIL → verdict **FAIL**.

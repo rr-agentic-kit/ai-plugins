@@ -1,6 +1,8 @@
 # Pre-ship checklist (binary)
 
-Run before **create** or **rewrite** writes a file. For each item: **PASS** or **FAIL** with one line of evidence (quote or line ref).
+Run after **pre-write reflection** passes and before **write** on **create**, **fix**, **redesign**, and **design assist write**. Judgment rubric depth is in `pre-write-reflection.md`—do not re-score rubric ids here.
+
+For each item: **PASS** or **FAIL** with one line of evidence (quote or line ref).
 
 **Stop rule:** any **FAIL** → emit `PRE-SHIP FAILED` and **do not** write the target file.
 
@@ -10,7 +12,7 @@ Run before **create** or **rewrite** writes a file. For each item: **PASS** or *
 
 | # | Check |
 |---|--------|
-| 1.1 | Bootstrap PyYAML per `python-runtime.md` if needed; run `python3 scripts/audit_static.py . <path>` from plugin root—all static rows **PASS** |
+| 1.1 | Bootstrap PyYAML per plugin root `CLAUDE.md` **Python runtime** if needed; run `python3 scripts/audit_static.py . <path>` from plugin root—all static rows **PASS** |
 | 1.2 | Required keys and naming match `frontmatter-schemas.md` (covered by static script; re-check only if script skipped) |
 | 1.3 | Skill `description` length ≤1024 (static `static.description.max-length` when applicable) |
 
@@ -19,7 +21,7 @@ Run before **create** or **rewrite** writes a file. For each item: **PASS** or *
 | # | Check |
 |---|--------|
 | 2.1 | Folder/file naming matches conventions (skill folder = `name`, command stem = `name`, etc.) |
-| 2.2 | Skill `description` does not embed unrelated action verbs (audit/rewrite/test) if those are slash-only |
+| 2.2 | Skill `description` does not embed unrelated action verbs (audit/fix/redesign/test) if those are slash-only |
 | 2.3 | Paths in doc are relative; no `..` |
 
 ## 3. Contracts

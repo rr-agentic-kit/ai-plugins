@@ -15,11 +15,11 @@ description: Extract a durable agent context draft from chat or workflow notes w
 
 Before any other step:
 
-1. Read and execute `refs/actions/extract.md` in skill **context-engineer**.
+1. Execute **Action: extract** in skill **context-engineer** (follow skill **Run:** to load the internal procedure).
 2. Call **TodoWrite** with `merge: false` and one todo per step (`extract-1-ingest` … `extract-5-output`).
 3. Mark each todo `completed` before starting the next. Do not skip steps.
 
-Execute **Action: extract** in skill **context-engineer**. Prefer chat output unless the user explicitly approved a write and pre-ship passes.
+Prefer chat output unless the user explicitly approved a write and pre-ship passes.
 
 ## Output
 

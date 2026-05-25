@@ -2,7 +2,6 @@
 
 ## Load (Read)
 
-- `extract.md`
 - `instruction-design.md`
 - `frontmatter-schemas.md`
 - Matching artifact template (same set as create)
@@ -17,7 +16,7 @@
 ### Step 2: `extract-2-classify`
 
 - **Outcome:** Target type and provenance recorded.
-- **Done when:** Type chosen; provenance block lists source, assumptions, open questions.
+- **Done when:** Type chosen; provenance block lists **source**, **assumptions**, **open questions** (no secrets in source).
 
 ### Step 3: `extract-3-draft`
 

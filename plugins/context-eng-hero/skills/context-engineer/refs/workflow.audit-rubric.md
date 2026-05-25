@@ -1,18 +1,6 @@
 # Workflow audit rubric
 
-Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **Judgment** only in audit step 3. **Static** ids are produced by `scripts/audit_static.py`.
-
-## Static (script)
-
-| id | Severity |
-|----|----------|
-| `static.frontmatter.delimiters` | critical |
-| `static.frontmatter.parseable` | critical |
-| `static.paths.no-parent-segment` | critical |
-| `static.paths.no-absolute` | major |
-| `static.sections.required` | critical |
-| `static.links.internal-resolve` | major |
-| `static.links.https-only` | critical |
+Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **Judgment** only in audit step 3. **Static** ids are produced by `scripts/audit_static.py`—do not re-score manually unless script skipped.
 
 ## Judgment
 
@@ -40,3 +28,4 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 |----|----------|-----------|
 | `workflow.preconditions` | minor | **Preconditions** lists inputs/branches or states “none” |
 | `workflow.consistency` | minor | **Delegation** owners match **Steps** owners |
+| `workflow.refs.load-efficiency` | minor | Files in this artifact's **Load** list do not duplicate each other's content; no ref is a strict subset of another co-loaded ref |

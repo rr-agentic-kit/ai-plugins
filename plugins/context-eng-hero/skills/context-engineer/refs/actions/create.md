@@ -24,16 +24,11 @@
 - **Outcome:** Draft file content from template; `<!-- REQUIRED -->` markers replaced.
 - **Done when:** Full draft in memory; workflow steps include `todo_id` column if type is workflow.
 
-### Step 4: `create-4-pre-ship`
+### Step 4: `create-4-gates`
 
-- **Outcome:** Pre-ship gate result known.
-- **Done when:** `pre-ship-checklist.md` run line by line; §1 schema items satisfied via static script when applicable; table with PASS/FAIL per item.
-
-### Step 5: `create-5-write`
-
-- **Outcome:** File written or blocked with report.
-- **Done when:** If pre-ship PASSED: file at user-approved plugin-relative path; if FAILED: `PRE-SHIP FAILED` + table, draft in chat only.
+- **Outcome:** Shared write gates passed or write blocked.
+- **Done when:** All four gates in `refs/actions/shared-write-gates.md` completed in order (static → reflect → pre-ship → write).
 
 ## Stop
 
-Do not bypass pre-ship. Do not write outside agreed plugin-relative paths.
+Do not bypass reflection or pre-ship. Do not write outside agreed plugin-relative paths.

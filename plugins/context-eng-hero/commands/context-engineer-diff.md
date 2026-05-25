@@ -15,11 +15,11 @@ description: Compare two agent context definitions for intent, contracts, and tr
 
 Before any other step:
 
-1. Read and execute `refs/actions/diff.md` in skill **context-engineer**.
+1. Execute **Action: diff** in skill **context-engineer** (follow skill **Run:** to load the internal procedure).
 2. Call **TodoWrite** with `merge: false` and one todo per step (`diff-1-read` … `diff-3-report`).
 3. Mark each todo `completed` before starting the next. Do not skip steps.
 
-Execute **Action: diff** in skill **context-engineer**. No file edits.
+No file edits.
 
 ## Output
 
