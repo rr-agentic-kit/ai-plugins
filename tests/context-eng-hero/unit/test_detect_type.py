@@ -8,7 +8,7 @@ import audit_static as m
 
 
 def test_skill_path():
-    rel = Path("skills/context-engineer/SKILL.md")
+    rel = Path("skills/recipe-context-engineer/SKILL.md")
     assert m.detect_type(rel) == "skill"
 
 

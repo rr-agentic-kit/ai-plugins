@@ -15,7 +15,7 @@ description: Redesign one agent context definition—with static, pre-write refl
 
 Before any other step:
 
-1. Execute **Action: redesign** in skill **context-engineer** (follow skill **Run:** to load the internal procedure).
+1. Execute **Action: redesign** in skill **recipe-context-engineer** (follow skill **Run:** to load the internal procedure).
 2. Call **TodoWrite** with `merge: false` and one todo per step (`redesign-1-clarify` … `redesign-4-gates`).
 3. Mark each todo `completed` before starting the next. Do not skip steps.
 

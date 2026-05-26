@@ -40,4 +40,4 @@ Regression tests live in the **ai-plugins monorepo** only. Do not run or expect 
 
 ## Product behavior
 
-Skill authors and action procedures: [`skills/context-engineer/SKILL.md`](skills/context-engineer/SKILL.md) and `skills/context-engineer/refs/`.
+Skill authors and action procedures: [`skills/recipe-context-engineer/SKILL.md`](skills/recipe-context-engineer/SKILL.md) and `skills/recipe-context-engineer/refs/`.

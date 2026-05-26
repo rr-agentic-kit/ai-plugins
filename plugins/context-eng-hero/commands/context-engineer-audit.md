@@ -15,7 +15,7 @@ description: Audit one agent context definition with static script plus severity
 
 Before any other step:
 
-1. Execute **Action: audit** in skill **context-engineer** (follow skill **Run:** to load the internal procedure).
+1. Execute **Action: audit** in skill **recipe-context-engineer** (follow skill **Run:** to load the internal procedure).
 2. Call **TodoWrite** with `merge: false` and one todo per step (`audit-1-load` … `audit-5-report`).
 3. Mark each todo `completed` before starting the next. Do not skip steps.
 

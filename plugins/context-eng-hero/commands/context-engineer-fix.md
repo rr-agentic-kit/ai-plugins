@@ -15,7 +15,7 @@ description: Fix one agent context definition to match existing intent—with st
 
 Before any other step:
 
-1. Execute **Action: fix** in skill **context-engineer** (follow skill **Run:** to load the internal procedure).
+1. Execute **Action: fix** in skill **recipe-context-engineer** (follow skill **Run:** to load the internal procedure).
 2. Call **TodoWrite** with `merge: false` and one todo per step (`fix-1-read` … `fix-4-gates`).
 3. Mark each todo `completed` before starting the next. Do not skip steps.
 

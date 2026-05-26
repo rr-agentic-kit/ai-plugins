@@ -19,12 +19,6 @@ Fill static rows from `scripts/audit_static.py`. Evaluate **Judgment** rows from
 - Major: {pass}/{total}
 - Minor: {pass}/{total}
 
-## Static checks
-| id | Severity | PASS/FAIL | Evidence |
-
-## Judgment checks (LLM)
-| id | Severity | PASS/FAIL | Evidence |
-
 ## Findings (narrative)
 - …
 

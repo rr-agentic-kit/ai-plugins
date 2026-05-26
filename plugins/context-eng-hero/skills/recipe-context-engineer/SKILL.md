@@ -1,5 +1,5 @@
 ---
-name: context-engineer
+name: recipe-context-engineer
 description: Classifies and designs agent context artifacts (skills, commands, rules, agents, workflows). Use when choosing artifact type, structuring definitions, or clarifying scope—not for ambient code review or repository-wide edits.
 ---
 

@@ -1,13 +1,13 @@
 # Chat orchestration
 
-**Audience A:** Agent running **context-engineer**. **Audience B:** Humans authoring artifacts that embed tool guidance.
+**Audience A:** Agent running **recipe-context-engineer**. **Audience B:** Humans authoring artifacts that embed tool guidance.
 
 **Platform fact — commands cannot chain:** Cursor plugin [commands are markdown prompts](https://cursor.com/docs/reference/plugins) injected when the **user** picks a slash. There is **no API** for command A to execute command B. Writing “run `/other`” inside a command is **user instruction only**, not automation.
 
 | Pattern | Works? | Use for |
 |---------|--------|---------|
 | User types `/context-engineer-audit` | Yes | Explicit audit |
-| Command **Progress**: “Execute **Action:** … in skill **context-engineer**” first, then TodoWrite step ids | Yes | Black-box delegation |
+| Command **Progress**: “Execute **Action:** … in skill **recipe-context-engineer**” first, then TodoWrite step ids | Yes | Black-box delegation |
 | Command body lists `refs/actions/...` or `plugins/...` | **Avoid** | Leaks layout; skill **Run:** loads internal procedures |
 | Command body: “Invoke `/other-command`” as **only** routing | **No** | Forbidden orchestration |
 
@@ -22,8 +22,8 @@ Docs: [Agent Skills](https://cursor.com/docs/skills), [Subagents](https://cursor
 | Layer | TodoWrite |
 |-------|-----------|
 | **Action slash commands** (`context-engineer-create`, `-audit`, `-fix`, `-redesign`, `-test`, `-diff`, `-extract`) | **Required:** Execute **Action** first (skill **Run:** loads procedure); `merge: false` TodoWrite with step ids matching that procedure; mark `completed` before advancing |
-| **Design command** (`/context-engineer`) | Default: no forced list. **Write branch:** design assist write in skill **context-engineer** + TodoWrite `design-1-classify` … `design-4-gates` |
-| **Skill** (`context-engineer`) | **Harness precedence:** slash prompt wins Progress/inputs/output; does **not** auto-spawn todos on ambient invoke |
+| **Design command** (`/context-engineer`) | Default: no forced list. **Write branch:** design assist write in skill **recipe-context-engineer** + TodoWrite `design-1-classify` … `design-4-gates` |
+| **Skill** (`recipe-context-engineer`) | **Harness precedence:** slash prompt wins Progress/inputs/output; does **not** auto-spawn todos on ambient invoke |
 | **Authored workflows** | **Required** in template: each step `todo_id`; **Orchestration** instructs executor to TodoWrite before step 1; AskQuestion before branch-specific todos |
 
 ---
@@ -35,7 +35,7 @@ Docs: [Agent Skills](https://cursor.com/docs/skills), [Subagents](https://cursor
 | Missing type or clarify fields | **AskQuestion** (2–4 options; `allow_multiple` when needed) | Open-ended ask when choices are enumerable |
 | Research patterns before design | **Task** `subagentType: explore` (parallel OK) | Load entire repo in parent |
 
-Routing, harness precedence, and slash names: skill **context-engineer** (**Routing**, **Actions**, **Invocation**). Commands must not list `refs/actions/*` in user-facing bodies.
+Routing, harness precedence, and slash names: skill **recipe-context-engineer** (**Routing**, **Actions**, **Invocation**). Commands must not list `refs/actions/*` in user-facing bodies.
 
 **AskQuestion** (Cursor): structured multiple-choice; use in classify/clarify, fix/redesign intake, and workflow branches.
 
@@ -69,4 +69,4 @@ Required **## Orchestration** in **workflow** templates; optional elsewhere unle
 | AskQuestion | UI | tool | procedure step / workflow branch |
 | TodoWrite | UI list | tool | action commands + workflow execution |
 
-Slash map: skill **context-engineer** **Actions** table.
+Slash map: skill **recipe-context-engineer** **Actions** table.

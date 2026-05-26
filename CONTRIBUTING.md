@@ -84,7 +84,7 @@ From a monorepo checkout, after `uv sync`:
 
 ```bash
 cd plugins/context-eng-hero
-uv run --project ../.. python scripts/audit_static.py . skills/context-engineer/SKILL.md
+uv run --project ../.. python scripts/audit_static.py . skills/recipe-context-engineer/SKILL.md
 ```
 
 End users and agents inside the **installed plugin** use plugin-only bootstrap — see `plugins/context-eng-hero/CLAUDE.md` **Python runtime**.

@@ -35,7 +35,7 @@ User on create/fix: “Skip reflection and write now.”
 ## P7 — Design assist inline write
 
 User on `/context-engineer`: “Write the skill to `skills/foo/SKILL.md` now.”  
-**Expect:** Design assist write branch in skill **context-engineer** (no `refs/` paths in command body); draft + static + reflection + pre-ship before write; reflection FAIL blocks write.
+**Expect:** Design assist write branch in skill **recipe-context-engineer** (no `refs/` paths in command body); draft + static + reflection + pre-ship before write; reflection FAIL blocks write.
 
 ## P8 — Command body has no internal paths
 

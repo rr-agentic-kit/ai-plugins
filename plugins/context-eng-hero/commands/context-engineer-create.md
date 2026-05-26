@@ -15,7 +15,7 @@ description: Create one agent context artifact from a template with static, pre-
 
 Before any other step:
 
-1. Execute **Action: create** in skill **context-engineer** (follow skill **Run:** to load the internal procedure).
+1. Execute **Action: create** in skill **recipe-context-engineer** (follow skill **Run:** to load the internal procedure).
 2. Call **TodoWrite** with `merge: false` and one todo per step (`create-1-classify` … `create-4-gates`).
 3. Mark each todo `completed` before starting the next. Do not skip steps.
 

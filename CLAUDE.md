@@ -42,7 +42,7 @@ Full quality matrix (Black, Mypy, Bandit, pip-audit, coverage, Sonar): see `CONT
 | Working on… | Read first |
 |-------------|------------|
 | Plugin runtime / static audit / PyYAML bootstrap | `plugins/context-eng-hero/CLAUDE.md` |
-| Authoring skills, commands, rubrics | `plugins/context-eng-hero/skills/context-engineer/SKILL.md` |
+| Authoring skills, commands, rubrics | `plugins/context-eng-hero/skills/recipe-context-engineer/SKILL.md` |
 | CI, pre-commit, Sonar, fork setup | `CONTRIBUTING.md` |
 | Install / marketplace usage | `README.md` |
 
@@ -53,5 +53,12 @@ For **context-eng-hero** authoring, audit gates, or `audit_static.py`: use `plug
 ## Non-goals for this file
 
 - Per-plugin feature documentation (use each plugin’s `README.md`)
-- Long rubrics or pre-ship checklists (use `skills/context-engineer/refs/` inside the plugin)
+- Long rubrics or pre-ship checklists (use `skills/recipe-context-engineer/refs/` inside the plugin)
 - Personal preferences (use gitignored `CLAUDE.local.md` at repo root if needed)
+
+## Conventions
+
+- Skills start with `recipe-` to make it easier to identify
+- Commands sub-divisions:
+    - `-fix` it focus on do ajust a wrong behavior based on previous assessment/review or human input
+    - `-design|add|create` for start something new
