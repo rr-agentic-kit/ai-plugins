@@ -19,6 +19,19 @@
         "prompts",
         "workflows"
       ]
+    },
+    {
+      "name": "jobseeker",
+      "source": "plugins/jobseeker",
+      "description": "Master and tailor resumes and cover letters for senior+ tech roles with ATS and integrity gates.",
+      "category": "developer-tools",
+      "keywords": [
+        "resume",
+        "cover-letter",
+        "job-search",
+        "senior-engineer",
+        "ats"
+      ]
     }
   ]
 }
