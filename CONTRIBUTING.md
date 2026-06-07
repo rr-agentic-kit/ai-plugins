@@ -109,3 +109,5 @@ claude plugin validate ./plugins/context-eng-hero
 ## Fork notes
 
 Edit `owner` / `author` placeholders in marketplace and plugin manifests when you fork. Add a `repository` URL to plugin manifests once the remote is known.
+
+Fork PRs do not require maintainer **review** approval to merge upstream — quality gates are CI status checks (`quality`, `sonarcloud`) plus CodeQL/code-quality rules on `master`. External contributors **do** need maintainer approval to **run** GitHub Actions on fork PRs (repo setting: all external contributors).
