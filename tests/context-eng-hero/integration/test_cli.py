@@ -36,7 +36,7 @@ def test_cli_skill_passes(plugin_root, repo_root):
     script = plugin_root / "scripts" / "audit_static.py"
     proc = run_cli(
         plugin_root,
-        "skills/context-engineer/SKILL.md",
+        "skills/recipe-context-engineer/SKILL.md",
         script=script,
         repo_root=repo_root,
     )
@@ -60,7 +60,7 @@ def test_cli_json_format(plugin_root, repo_root):
     script = plugin_root / "scripts" / "audit_static.py"
     proc = run_cli(
         plugin_root,
-        "skills/context-engineer/SKILL.md",
+        "skills/recipe-context-engineer/SKILL.md",
         script=script,
         repo_root=repo_root,
         fmt="json",
@@ -72,8 +72,8 @@ def test_cli_json_format(plugin_root, repo_root):
         assert set(row.keys()) >= {"id", "severity", "result", "evidence"}
 
 
-def test_cli_dot_relative_resolves_single_skill(plugin_root, repo_root):
-    """From monorepo root: plugin_root + '.' audits the sole skills/*/SKILL.md."""
+def test_cli_dot_relative_ambiguous_when_multiple_skills(plugin_root, repo_root):
+    """'.' under plugin_root lists skills when multiple skills/*/SKILL.md exist."""
     script = plugin_root / "scripts" / "audit_static.py"
     proc = run_cli(
         plugin_root,
@@ -81,15 +81,17 @@ def test_cli_dot_relative_resolves_single_skill(plugin_root, repo_root):
         script=script,
         repo_root=repo_root,
     )
-    assert proc.returncode == 0, proc.stdout + proc.stderr
-    assert "skills/context-engineer/SKILL.md" in proc.stdout
+    assert proc.returncode != 0, proc.stdout + proc.stderr
+    assert "ambiguous" in proc.stderr
+    assert "skills/recipe-context-engineer/SKILL.md" in proc.stderr
+    assert "skills/recipe-static-memory/SKILL.md" in proc.stderr
 
 
 def test_cli_markdown_severity_summary(plugin_root, repo_root):
     script = plugin_root / "scripts" / "audit_static.py"
     proc = run_cli(
         plugin_root,
-        "skills/context-engineer/SKILL.md",
+        "skills/recipe-context-engineer/SKILL.md",
         script=script,
         repo_root=repo_root,
     )

@@ -45,3 +45,17 @@ repos:
         language: system
         pass_filenames: false
         files: ^(pyproject\.toml|plugins/[^/]+/\.(cursor|claude)-plugin/plugin\.json)$
+
+      - id: pip-audit
+        name: pip-audit
+        entry: bash -c 'uv export --frozen --format requirements.txt -o /tmp/requirements.txt >/dev/null && uv run pip-audit -r /tmp/requirements.txt'
+        language: system
+        pass_filenames: false
+        files: ^(pyproject\.toml|uv\.lock)$
+
+      - id: pytest
+        name: pytest (full suite)
+        entry: uv run pytest tests/ -v
+        language: system
+        pass_filenames: false
+        files: ^(plugins/|scripts/|tests/|pyproject\.toml)

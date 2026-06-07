@@ -38,13 +38,14 @@ def main() -> int:
         epilog=(
             "Examples:\n"
             "  From plugin root:\n"
-            "    python3 scripts/audit_static.py . skills/context-engineer/SKILL.md\n"
+            "    python3 scripts/audit_static.py . "
+            "skills/recipe-context-engineer/SKILL.md\n"
             "  From monorepo root (audit default skill when only one exists):\n"
             "    python3 plugins/context-eng-hero/scripts/audit_static.py "
             "plugins/context-eng-hero .\n"
             "  From monorepo root (explicit artifact):\n"
             "    python3 plugins/context-eng-hero/scripts/audit_static.py "
-            "plugins/context-eng-hero skills/context-engineer/SKILL.md"
+            "plugins/context-eng-hero skills/recipe-context-engineer/SKILL.md"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
