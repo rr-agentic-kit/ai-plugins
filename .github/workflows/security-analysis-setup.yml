@@ -1,0 +1,36 @@
+name: security-analysis-setup
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - .github/code-quality/setup.json
+      - .github/code-scanning/default-setup.json
+      - .github/workflows/security-analysis-setup.yml
+  workflow_dispatch:
+
+permissions:
+  administration: write
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable GitHub Code Quality
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method PATCH repos/${{ github.repository }}/code-quality/setup \
+            --input .github/code-quality/setup.json
+
+      - name: Enable CodeQL default setup
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method PATCH repos/${{ github.repository }}/code-scanning/default-setup \
+            --input .github/code-scanning/default-setup.json

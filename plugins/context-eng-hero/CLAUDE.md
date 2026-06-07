@@ -32,6 +32,7 @@ Do not reference paths outside this plugin tree unless the user explicitly provi
   ```
 
 - If install or run still fails: report **STATIC SKIPPED** with reason — do not silently omit static checks.
+- The skill does not execute Python — the agent shell runs the script for audit and write-path gates.
 
 ## No pytest in this tree
 
@@ -39,4 +40,4 @@ Regression tests live in the **ai-plugins monorepo** only. Do not run or expect 
 
 ## Product behavior
 
-Skill authors and action procedures: [`skills/context-engineer/SKILL.md`](skills/context-engineer/SKILL.md) and `skills/context-engineer/refs/`.
+Skill authors and action procedures: [`skills/recipe-context-engineer/SKILL.md`](skills/recipe-context-engineer/SKILL.md) and `skills/recipe-context-engineer/refs/`.
