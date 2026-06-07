@@ -45,3 +45,10 @@ repos:
         language: system
         pass_filenames: false
         files: ^(pyproject\.toml|plugins/[^/]+/\.(cursor|claude)-plugin/plugin\.json)$
+
+      - id: pytest
+        name: pytest (full suite)
+        entry: uv run pytest tests/ -v
+        language: system
+        pass_filenames: false
+        files: ^(plugins/|scripts/|tests/|pyproject\.toml)

@@ -38,7 +38,7 @@ Load as needed (not all every turn):
 | `refs/questioning.md` | Graceful intake; never block on REQUIRED lists |
 | `refs/chat-orchestration.md` | TodoWrite, Task, platform constraints for authors |
 
-## Orchestration loop
+## Procedure
 
 Every invocation follows this loop. Do not skip steps; compress only when the user message already satisfies them.
 
