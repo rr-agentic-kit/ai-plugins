@@ -1,6 +1,6 @@
 # context-eng-hero
 
-**Version:** 0.0.1  
+**Version:** 0.0.2  
 **License:** Unlicense (see repo root `LICENSE`)
 
 Design and validate **skills**, **commands**, **rules**, **agents**, and **workflows**—and author **user-global / project CLAUDE.md** static memory.
