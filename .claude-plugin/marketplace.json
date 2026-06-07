@@ -12,6 +12,11 @@
       "name": "context-eng-hero",
       "source": "./plugins/context-eng-hero",
       "description": "Design and validate skills, agents, commands, and context artifacts for reliable agent behavior."
+    },
+    {
+      "name": "jobseeker",
+      "source": "./plugins/jobseeker",
+      "description": "Master and tailor resumes and cover letters for senior+ tech roles with ATS and integrity gates."
     }
   ]
 }
