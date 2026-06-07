@@ -1,6 +1,6 @@
 ---
 name: recipe-context-engineer
-description: Classifies and designs agent context artifacts (skills, commands, rules, agents, workflows). Use when choosing artifact type, structuring definitions, or clarifying scope—not for ambient code review or repository-wide edits.
+description: Classifies and designs agent context artifacts (skills, commands, rules, agents, workflows). Use when choosing artifact type, structuring definitions, auditing, fixing, or creating—not for ambient code review or repository-wide edits.
 ---
 
 # Context engineer
@@ -9,18 +9,47 @@ description: Classifies and designs agent context artifacts (skills, commands, r
 
 Make **skills, commands, rules, agents, and workflows** discoverable, bounded, and safe to reuse—without mixing judgment workflows with high-risk edits.
 
+**This skill is the orchestrator.** It intake → classifies → routes → acts → closes the loop. It never ends with "run a slash command next"—it asks, routes, and continues (or stops cleanly with **Next Up**).
+
 ## When to use
 
 - Picking or narrowing **artifact type**
+- **Auditing**, **fixing**, **creating**, **extracting**, **testing**, or **comparing** a scoped artifact file
 - **Clarifying** outcome, audience, and failure modes before authoring
 - Designing **contracts** (inputs, outputs, stop rules) and **progressive disclosure** (refs)
-- Pointing authors to the right **slash action** (audit, fix, redesign, test, diff, create, extract)
 
 ## When not to use
 
 - Ad-hoc **production code review** with no artifact path
-- **Ambient** “audit everything” without a declared target file
-- Tasks that need **repo-wide** exploration without a scoped question—use a explore subagent at the user’s direction first
+- **Ambient** "audit everything" without a declared target file
+- Tasks that need **repo-wide** exploration without a scoped question—use an explore subagent at the user's direction first
+
+## Shared refs
+
+Load as needed (not all every turn):
+
+| Ref | Use |
+|-----|-----|
+| `refs/ui-brand.md` | Stage banners, status symbols, liveness, **Next Up** block |
+| `refs/gate-prompts.md` | AskQuestion patterns for routing and post-action menus |
+| `refs/questioning.md` | Graceful intake; never block on REQUIRED lists |
+| `refs/chat-orchestration.md` | TodoWrite, Task, platform constraints for authors |
+
+## Orchestration loop
+
+Every invocation follows this loop. Do not skip steps; compress only when the user message already satisfies them.
+
+```
+1. Intake   — read user message + open file/editor context
+2. Classify — if artifact type unclear → one AskQuestion (max); see Classify + questioning.md
+3. Route    — if action unclear → action-routing gate (gate-prompts.md)
+4. Act      — Read and execute refs/actions/<action-id>.md inline; TodoWrite step ids from that ref
+5. Close    — post-action routing gate (gate-prompts.md) or Next Up block (ui-brand.md)
+```
+
+**Intent seeding:** If the user message states an action ("audit this", "fix the skill", intent: audit), skip step 3 and jump to step 4.
+
+**No deferral:** After step 5, if the user picks a follow-on option, re-enter the loop at step 4 for that action—do not tell them to type a command.
 
 ## Classify
 
@@ -38,71 +67,55 @@ Do not merge types (e.g. a skill is not a command unless both files exist for a 
 
 ## Clarify
 
-Before authoring, resolve (ask if missing):
+Before authoring, resolve (use `questioning.md`—ask, do not block):
 
 1. **Outcome** — what changes in the world when this succeeds?
 2. **Audience** — which runtime/human applies this?
 3. **Failure mode** — what bad behavior must this block?
 
-Use **AskQuestion** when choices are enumerable. For multi-step **implementation** across files, prefer a user **action slash** (tracked todos)—see `chat-orchestration.md`. This skill does not auto-spawn TodoWrite on ambient invoke.
-
-## Procedure
-
-1. Run **Classify** and **Clarify** for design tasks.
-2. If the user message is a plugin command for verb V: execute **Action: V** (Read **Run:** ref first), then honor that command’s **Progress** TodoWrite ids. Otherwise route per **Routing**—no write actions without an explicit slash or approved write branch.
-3. Do **not** chain commands as automation—commands cannot invoke each other on the platform.
-
-Rubrics, templates, and step-by-step procedures stay under `refs/`; load via each action’s **Run:** ref. Refs are loaded via action **Load** sections; see `refs/` directory.
-
-## Harness precedence
-
-- **Plugin command prompt** wins for **Progress**, **REQUIRED** inputs, and **Output** this turn.
-- **Action** + **Run:** is the only path to load `refs/actions/*` and write gates—do not invent steps outside the active action ref.
-- **Ambient invoke** (no slash): **Classify** + **Clarify** + **Routing**; end with **Next step (user)**; no TodoWrite unless the user chose the `/context-engineer` write branch.
-- When the user message includes a command **Progress** block, do not skip **TodoWrite** step tracking.
+Use **AskQuestion** when choices are enumerable. For multi-step **implementation** across files, use TodoWrite step ids from the active action ref.
 
 ## Actions
 
-| Action id | User slash (Cursor) | One-line outcome | Run |
-|-----------|---------------------|------------------|-----|
-| create | `/context-engineer-create` | New artifact from template + static + reflection + pre-ship | `refs/actions/create.md` |
-| extract | `/context-engineer-extract` | Draft artifact + provenance from context | `refs/actions/extract.md` |
-| audit | `/context-engineer-audit` | Static script + severity rubric (no edits) | `refs/actions/audit.md` |
-| fix | `/context-engineer-fix` | Match existing intent; all FAILs + static + reflection + pre-ship | `refs/actions/fix.md` |
-| redesign | `/context-engineer-redesign` | Change outcome/scope + static + reflection + pre-ship; re-audit after | `refs/actions/redesign.md` |
-| test | `/context-engineer-test` | Behavior probe report | `refs/actions/test.md` |
-| diff | `/context-engineer-diff` | Two-path tradeoff summary | `refs/actions/diff.md` |
+| Action id | One-line outcome | Run |
+|-----------|------------------|-----|
+| create | New artifact from template + static + reflection + pre-ship | `refs/actions/create.md` |
+| extract | Draft artifact + provenance from context | `refs/actions/extract.md` |
+| audit | Static script + severity rubric (no edits) | `refs/actions/audit.md` |
+| fix | Match existing intent; all FAILs + static + reflection + pre-ship | `refs/actions/fix.md` |
+| redesign | Change outcome/scope + static + reflection + pre-ship; re-audit after | `refs/actions/redesign.md` |
+| test | Behavior probe report | `refs/actions/test.md` |
+| diff | Two-path tradeoff summary | `refs/actions/diff.md` |
+| design | Inline write from classify/clarify when user requests file this turn | `refs/actions/design.md` |
 
 Read and execute the **Run** ref for the active action; contracts (purpose, inputs, output, stop) live there—not in this table.
 
 ## Routing (fix vs redesign)
 
-| Signal | Next slash |
-|--------|------------|
-| Audit verdict FAIL | `/context-engineer-fix` + report |
-| Test probe FAIL, same contract | `/context-engineer-fix` + test report |
-| Test FAIL / user story = wrong capability or outcome | `/context-engineer-redesign` |
-| User: add step, remove gate, change audience | `/context-engineer-redesign` |
-| User: wording, typo, violates own stop rule | `/context-engineer-fix` |
-| Extract → production with **resolved** open questions | `/context-engineer-redesign` (first ship) or `/context-engineer-fix` (polish only) |
+| Signal | Action |
+|--------|--------|
+| Audit verdict FAIL | **fix** + audit report |
+| Test probe FAIL, same contract | **fix** + test report |
+| Test FAIL / user story = wrong capability or outcome | **redesign** |
+| User: add step, remove gate, change audience | **redesign** |
+| User: wording, typo, violates own stop rule | **fix** |
+| Extract → production with **resolved** open questions | **redesign** (first ship) or **fix** (polish only) |
 
-When ambiguous, one **AskQuestion**: “Changing what it does?” → redesign if yes, else fix.
+When ambiguous → **fix-vs-redesign** gate (`gate-prompts.md`).
 
-## Design assist (`/context-engineer`)
+## Design assist (classify + clarify only)
 
-- **Default:** **Classify** + **Clarify** only; end with **Next step (user)** to one action slash—no file write.
-- **If writing this turn:** user explicitly requests a file at an approved plugin-relative path → Read and execute `refs/actions/design.md` (same gates as create).
+When the user has not picked an action and is not asking for a file write:
 
-## Orchestration
+1. Run **Classify** + **Clarify**
+2. If action still unclear → **action-routing** gate
+3. If they chose an action → execute that action ref
 
-Commands **cannot chain** on the platform. **Action slash commands** own **TodoWrite** step tracking. Skills and workflows **describe** todo mapping for authors and executors—see `chat-orchestration.md`.
+**Inline write:** When the user **explicitly requests writing a file** at an approved plugin-relative path this turn → **design** action (`refs/actions/design.md`), same write gates as create.
 
-## Plugin commands (human map)
+## Execution rules
 
-Design assist: `/context-engineer` → **Classify** + **Clarify**; **Next step (user)** unless user requests inline write (then `refs/actions/design.md`).  
-Actions: see **Actions** table above—each command file is a black box that names this skill + Action id only.
-
-## Invocation
-
-- **Cursor:** `/context-engineer` and `/context-engineer-*` as installed from the plugin.
-- **Claude Code:** `/context-eng-hero:context-engineer` and `/context-eng-hero:context-engineer-*`.
+- **Action ref is source of truth** for steps, Load list, and stop rules—do not invent steps outside the active ref.
+- **TodoWrite:** On action execution, `merge: false` with one todo per step id in the action ref; mark `completed` before advancing.
+- **Visual output:** Emit stage banner at action start (`ui-brand.md`); liveness before silent shell work.
+- **Post-action:** Always run the matching post-*-routing gate or show **Next Up**—never end on a bare report.

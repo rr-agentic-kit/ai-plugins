@@ -2,6 +2,9 @@
 
 ## Load (Read)
 
+- `ui-brand.md`
+- `gate-prompts.md`
+- `questioning.md`
 - `failure-patterns.md`
 - `audit-output.template.md`
 - Rubric for detected type: `skill.audit-rubric.md` | `command.audit-rubric.md` | `agent.audit-rubric.md` | `rule.audit-rubric.md` | `workflow.audit-rubric.md`
@@ -11,11 +14,13 @@
 ### Step 1: `audit-1-load`
 
 - **Outcome:** Target file and artifact type are known; rubric and templates are loaded.
-- **Done when:** Path read; type stated (or assumption noted once); all Load files read.
+- **Done when:** Path resolved via `questioning.md` if missing; type stated (or assumption noted once); all Load files read.
+- **Banner:** `CE ► AUDIT` per `ui-brand.md`.
 
 ### Step 2: `audit-2-static`
 
 - **Outcome:** Static check table is produced from `scripts/audit_static.py`.
+- **Liveness:** Emit `◆ Running static audit (~5–10s)…` per `ui-brand.md` **before** the shell call.
 - **Done when:** From plugin root (Python **3.14+**, see plugin root `CLAUDE.md` **Python runtime**):
   1. If PyYAML is missing, run `python3 -m pip install -r scripts/requirements.txt` (plugin root).
   2. Run `python3 scripts/audit_static.py . <relative-path>` (or `.venv/bin/python` if using a venv).
@@ -34,9 +39,9 @@
 
 ### Step 5: `audit-5-report`
 
-- **Outcome:** Full audit report emitted per `audit-output.template.md`.
-- **Done when:** Report includes narrative findings (pattern labels), recommended next step; any FAIL recommends `/context-engineer-fix` for that path.
+- **Outcome:** Full audit report emitted per `audit-output.template.md`; loop closed with routing gate.
+- **Done when:** Report includes narrative findings (pattern labels), severity summary, static + judgment tables; **post-audit-routing** AskQuestion per `gate-prompts.md`; on selection, skill continues to the routed action (do not defer to slash commands).
 
 ## Stop
 
-**Diagnosis only.** No edits unless the user separately runs **Action: fix** or **Action: redesign** (or explicit out-of-band ask).
+**Diagnosis only** during steps 1–5. No edits unless the user selects **Fix failures now** in **post-audit-routing** (routes to **fix**) or explicitly requests redesign.

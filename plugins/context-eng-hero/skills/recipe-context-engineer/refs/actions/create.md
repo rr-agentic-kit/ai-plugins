@@ -2,6 +2,9 @@
 
 ## Load (Read)
 
+- `ui-brand.md`
+- `gate-prompts.md`
+- `questioning.md`
 - `frontmatter-schemas.md`
 - `instruction-design.md`
 - `chat-orchestration.md`
@@ -12,12 +15,13 @@
 ### Step 1: `create-1-classify`
 
 - **Outcome:** Artifact type is the narrowest fit.
-- **Done when:** Type named; if unknown, stopped with questions—no draft started.
+- **Done when:** Type named via Classify + `questioning.md` if unknown—no draft started until type known.
+- **Banner:** `CE ► CREATE` per `ui-brand.md`.
 
 ### Step 2: `create-2-clarify`
 
 - **Outcome:** Outcome, audience, and failure mode are resolved (or explicitly deferred with open questions listed).
-- **Done when:** SKILL **Clarify** fields answered or AskQuestion completed.
+- **Done when:** Clarify fields answered per `questioning.md` (one question at a time); no REQUIRED hard-stop.
 
 ### Step 3: `create-3-draft`
 
@@ -28,6 +32,11 @@
 
 - **Outcome:** Shared write gates passed or write blocked.
 - **Done when:** All four gates in `refs/actions/shared-write-gates.md` completed in order (static → reflect → pre-ship → write).
+
+### Step 5: `create-5-close`
+
+- **Outcome:** User routed to next action or done.
+- **Done when:** **post-create-routing** AskQuestion per `gate-prompts.md`; on selection, skill continues to routed action; else **Next Up** block per `ui-brand.md`.
 
 ## Stop
 
