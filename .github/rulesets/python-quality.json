@@ -26,6 +26,24 @@
           { "context": "sonarcloud" }
         ]
       }
+    },
+    {
+      "type": "code_scanning",
+      "parameters": {
+        "code_scanning_tools": [
+          {
+            "tool": "CodeQL",
+            "security_alerts_threshold": "medium_or_higher",
+            "alerts_threshold": "errors_and_warnings"
+          }
+        ]
+      }
+    },
+    {
+      "type": "code_quality",
+      "parameters": {
+        "severity": "warnings"
+      }
     }
   ]
 }

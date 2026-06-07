@@ -1,0 +1,6 @@
+{
+  "state": "configured",
+  "languages": ["python"],
+  "query_suite": "default",
+  "runner_type": "standard"
+}
