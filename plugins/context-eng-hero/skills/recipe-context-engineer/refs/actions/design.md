@@ -4,6 +4,9 @@ Conditional procedure when **`/context-engineer`** or skill **Classify** + **Cla
 
 ## Load (Read)
 
+- `disambiguation.md`
+- `advisory.md`
+- `questioning.md`
 - `instruction-design.md`
 - `frontmatter-schemas.md`
 - `chat-orchestration.md`

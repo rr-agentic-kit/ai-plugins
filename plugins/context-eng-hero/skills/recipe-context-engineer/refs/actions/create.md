@@ -2,6 +2,8 @@
 
 ## Load (Read)
 
+- `disambiguation.md`
+- `advisory.md`
 - `ui-brand.md`
 - `gate-prompts.md`
 - `questioning.md`

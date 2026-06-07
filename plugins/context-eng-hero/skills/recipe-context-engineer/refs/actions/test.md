@@ -2,6 +2,7 @@
 
 ## Load (Read)
 
+- `disambiguation.md`
 - `test-output.template.md`
 - `chat-orchestration.md`
 - Probes: `skill.test-prompts.md` | `command.test-prompts.md` | `agent.test-prompts.md` | `rule.test-prompts.md` | `workflow.test-prompts.md`

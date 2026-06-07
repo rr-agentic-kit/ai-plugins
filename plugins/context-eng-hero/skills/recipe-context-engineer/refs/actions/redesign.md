@@ -4,6 +4,8 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 
 ## Load (Read)
 
+- `disambiguation.md`
+- `advisory.md`
 - `redesign-intake.md`
 - `instruction-design.md`
 - `frontmatter-schemas.md`

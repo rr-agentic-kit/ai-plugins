@@ -2,6 +2,7 @@
 
 ## Load (Read)
 
+- `disambiguation.md`
 - `diff-output.template.md`
 - `frontmatter-schemas.md`
 - `instruction-design.md` (if intent comparison needs signal/noise lens)

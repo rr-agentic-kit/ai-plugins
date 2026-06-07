@@ -47,6 +47,29 @@ When user wants fix but supplied no audit/test report:
   - **options:** Audit report | Test report | Symptom list
 - Then collect the chosen source in the next turn (paste report, or list symptoms)—one item at a time.
 
+## Contradiction detection
+
+When the same message contains conflicting signals (see `disambiguation.md`):
+
+- **Conflicting verbs** — e.g. "fix the typos but change the outcome" → route to **fix-vs-redesign** gate before planning
+- **Outcome vs wording** — polish language that also changes capability → **fix-vs-redesign** gate
+- **Type vs action mismatch** — e.g. "audit and rewrite" → one AskQuestion to pick primary intent
+- **Resolution:** one AskQuestion round max; if unresolved → conservative default (fix < redesign < create) per `disambiguation.md`, or hard stop if unsafe
+
+Do not proceed to Act while contradictions remain unaddressed.
+
+## Unclear instruction
+
+Distinguish **missing** (field absent) from **unclear** (user said something but intent cannot be parsed):
+
+| Case | Treatment |
+|------|-----------|
+| Enumerable interpretations (2–4) | **AskQuestion** with labeled options |
+| Non-enumerable / open-ended | One open-text ask, then proceed with stated assumption |
+| Partial signal (ambiguous, not unclear) | State assumption inline per `disambiguation.md`; do NOT ask |
+
+Retry cap: 1 AskQuestion + 1 open ask for unclear; then proceed.
+
 ## Fix vs redesign signal
 
 Any outcome/capability change language → **fix-vs-redesign** gate before planning edits. See `fix-intake.md` for reject rules.

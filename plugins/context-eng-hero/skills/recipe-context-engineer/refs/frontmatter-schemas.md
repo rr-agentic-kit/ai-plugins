@@ -10,6 +10,7 @@
 | `name` | Required; **must equal** parent folder name `<name>` |
 | `name` format | `[a-z0-9-]{1,64}` |
 | `description` | Required; max **1024** characters; third-person WHAT + WHEN for discovery |
+| `allowed-tools` | Optional; comma-separated tool names with optional specifiers per Claude Code syntax (e.g. `Bash(python3 scripts/audit_static.py*)`) |
 | Path | `skills/<name>/SKILL.md` |
 
 Optional: `disable-model-invocation` (boolean)—when `true`, manual slash/`@` only.

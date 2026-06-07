@@ -2,6 +2,8 @@
 
 ## Load (Read)
 
+- `disambiguation.md`
+- `advisory.md`
 - `instruction-design.md`
 - `frontmatter-schemas.md`
 - Matching artifact template (same set as create)
