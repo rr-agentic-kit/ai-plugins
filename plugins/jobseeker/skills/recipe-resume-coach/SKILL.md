@@ -54,13 +54,13 @@ Load as needed (not all every turn):
 Every invocation follows this loop. Compress only when the user message already satisfies a step.
 
 ```
-1. Intake     — detect starting state + workflow intent (disambiguation.md)
-2. Preflight  — verify ~/career/ exists; check prerequisites for tailor/cover paths
-3. Gather     — questioning.md: role variant, JD, company, target level
-4. Act        — execute matching refs/workflows/<workflow>.md; TodoWrite step ids from that ref
-5. Gate       — run refs/gates.md; all 6 gates must PASS
-6. Write      — confirm-before-write; save per refs/file-paths.md
-7. Close      — Next: tailor other doc, quarterly master review, or roast cover
+1. Intake [`coach-intake`]      — detect starting state + workflow intent (disambiguation.md). Done: workflow selected.
+2. Preflight [`coach-preflight`] — verify ~/career/ exists; check prerequisites. Done: prerequisites confirmed or prerequisite workflow triggered.
+3. Gather [`coach-gather`]     — questioning.md: role variant, JD, company, target level. Done: required fields present or gaps flagged.
+4. Act [`coach-act`]           — execute matching refs/workflows/<workflow>.md; TodoWrite step ids from that ref. Done: workflow complete, no open gate fails.
+5. Gate [`coach-gate`]         — run refs/gates.md; all 6 gates must PASS. Done: gate summary shows all applicable gates PASS.
+6. Write [`coach-write`]       — confirm-before-write; save per refs/file-paths.md. Done: file written at confirmed path.
+7. Close [`coach-close`]       — Next: tailor other doc, quarterly master review, or roast cover. Done: follow-on options surfaced.
 ```
 
 **Intent seeding:** If the user states intent ("tailor my resume for Stripe"), skip intake ambiguity and route directly after preflight.
@@ -69,25 +69,12 @@ Every invocation follows this loop. Compress only when the user message already 
 
 ## Workflow routing
 
-| User intent | Prerequisite | Workflow ref |
-|-------------|--------------|--------------|
-| Build or expand master resume | Starting state detected at intake | `refs/workflows/master-resume.md` |
-| Tailor resume to role | Master resume exists | `refs/workflows/tailor-resume.md` |
-| Build master cover components | Master resume recommended | `refs/workflows/master-cover.md` |
-| Tailor cover letter | Tailored resume + components + JD | `refs/workflows/tailor-cover.md` |
-| Full application | Master resume | `refs/workflows/full-application.md` |
+See `refs/disambiguation.md` → Workflow intent detection.
 
-## Role variants (required for tailor flows)
+## Role variants
 
-Lock one variant before tailoring — ask if unclear:
-
-| Variant | Center of gravity |
-|---------|-------------------|
-| **Staff SWE / Platform** | System design, org-wide impact, platform multiplier |
-| **AI Engineer** | RAG, agents, evals, production LLM — not model training |
-| **ML Engineer** | Pipelines, serving, drift, A/B testing — not chat apps |
-| **Hybrid** | Staff + AI platform signals |
-
+Four variants (Staff SWE/Platform, AI Engineer, ML Engineer, Hybrid).
+Lock one before any tailor flow. See `refs/disambiguation.md` → Role variant classification.
 Load keyword taxonomy from `refs/reference/keyword-taxonomies.md` for the locked variant.
 
 ## Stop rules
