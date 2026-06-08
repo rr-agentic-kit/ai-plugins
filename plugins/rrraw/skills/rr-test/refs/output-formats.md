@@ -24,21 +24,22 @@
 
 1. Print `summary` line first.
 2. If `status === failed`, print `data.error.message` or top failure reason.
-3. Phase-specific highlights (max 5 bullets):
+3. Phase-specific highlights:
 
 | Phase | Text highlights |
 |-------|-----------------|
-| assess | aggregate `verdict`, `counts` (include `overtest`) |
-| identify-missing | top 3 `items` by priority |
-| plan | count of `maintain` + `add` steps |
-| write | files changed, execution pass/fail, oracle pass/fail |
+| assess | aggregate `verdict`, `counts` (include `overtest`), `enumeration_complete` |
+| identify-missing | all `items` by priority (or count + "see md" when >10) |
+| plan | count of `maintain` + `add` steps; `maintain_before_add` flag |
+| write | files changed, steps completed/skipped, execution pass/fail, oracle pass/fail |
 | fix / migrate | fix/step count, rerun pass/fail |
 | flaky | `likely_root_cause`, `severity` |
 | debug | `diagnosis`, first fix_plan step |
 | perf-audit | top 3 hotspots by `share_pct` |
 | init-discovery | stack summary, blocking questions count |
 
-4. Omit empty arrays and null fields.
+4. When `final_status === partial`, print residual count and re-run guidance.
+5. Omit empty arrays and null fields.
 
 ## Mapping: chain → json
 
@@ -48,11 +49,12 @@
   "resolution_trace": {},
   "epochs": [{ "epoch": 1, "phases": { "assess": {}, "write": {} } }],
   "exit_reason": "quality_gate_met",
-  "final_status": "ok"
+  "final_status": "ok",
+  "residual_count": 0
 }
 ```
 
-Include `resolution_trace` from input-resolution in root payload.
+Include `resolution_trace` from input-resolution in root payload. When `final_status` is `partial`, include `residuals[]` with all `flagged` findings.
 
 ## Mapping: chain → md
 
@@ -66,6 +68,7 @@ Primary user-facing artifact. Apply [report-template.md](report-template.md).
 4. After verify + reassess (or oracle pass for standalone write): matching paths → `fixed`.
 5. User `wontfix` from plan `constraints_applied` → `wontfix`.
 6. Epoch carry-over: persist `flagged` from prior epoch; retain `fixed` for audit.
+7. At chain end: any remaining `flagged` (not `wontfix`) → emit Residuals section; `final_status: partial` when `exit_reason: epoch_budget_exhausted`.
 
 ### Row construction by phase
 

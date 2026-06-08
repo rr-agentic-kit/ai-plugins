@@ -16,6 +16,16 @@ description: Flag-driven test excellence — assess, identify gaps, write/fix/mi
 
 Agents under `agents/test/*` are function-style executors: they receive normalized payload, return typed output, and do not own routing or continuation.
 
+## Exhaustiveness doctrine
+
+| Rule | Meaning |
+|------|---------|
+| **Enumerate all** | Every production + test file in normalized scope gets a row in phase output; no sampling, no "top N". |
+| **Complete all plan steps** | Write executes every `maintain` then every `add` step in epoch; unexecuted steps → `status: partial`. |
+| **Clean before add** | In `complete-missing`, all `maintain`/`trim`/`redundant` work must complete before any `add` step runs. |
+| **Residual = exception** | Exit `ok` only when findings are `fixed` or `wontfix`; anything `flagged` blocks success exit. |
+| **Budget exhaustion = failure** | `epoch_budget_exhausted` sets `final_status: partial` and lists all residuals. |
+
 ## Primary action flags
 
 Exactly one required per invocation (unless `--init` exclusivity rules apply — see [input-resolution](refs/input-resolution.md)):
@@ -27,7 +37,7 @@ Exactly one required per invocation (unless `--init` exclusivity rules apply —
 | `--identify-missing` | identify-missing |
 | `--identify-redundant-tests` | assess |
 | `--write-tests` | write |
-| `--complete-missing-tests` | assess → identify-missing → plan → write → assess (epoch loop) |
+| `--complete-missing-tests` | assess → identify-missing → plan → write → verify → assess (epoch loop) |
 | `--generate-test-data` | write |
 | `--write-parameterized-tests` | write |
 | `--plan-test-strategy` | plan |
@@ -58,6 +68,15 @@ raw input → input-resolution (normalize) → route(action) → invoke agent(s)
 | `--migrate-tests` | migrate → verify → assess |
 
 Epoch exit, verify gates, and reassess rules: [refs/determinism.md](refs/determinism.md).
+
+### Orchestration: exhaustiveness
+
+After each phase in `complete-missing` chains, skill applies these checks before continuing:
+
+1. **Enumeration gate:** Parse `enumeration_complete` from assess and identify-missing — if `false`, hard-stop with `exit_reason: enumeration_incomplete`, `final_status: failed`; do not invoke subsequent phases or start next epoch.
+2. **Maintain-before-add gate:** Before write, verify all plan `maintain` steps from prior epochs are `solved`, `fixed`, or `wontfix`; block write `add` track otherwise.
+3. **Write completeness gate:** After write, if `steps_skipped` contains entries without `wontfix` in plan constraints → treat write as `partial`; do not declare epoch success.
+4. **Residual gate:** After reassess, count `flagged` findings — continue epoch only if count > 0 and `epoch < max_epochs`; exit `ok` only when zero `flagged` (or all `wontfix`).
 
 ### Determinism hooks (skill layer)
 
