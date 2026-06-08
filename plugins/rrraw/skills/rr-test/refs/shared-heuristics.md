@@ -152,10 +152,43 @@ Do not require bundled PIT/Stryker — heuristic only unless project already run
 For identify-missing priority (skill may sort; agent assigns raw risk):
 
 | Risk | Signals |
-|------|-----------|
+|------|---------|
 | `high` | Public API, payment/auth, data mutation, concurrency |
 | `medium` | Branching logic, error paths, integration boundaries |
 | `low` | Trivial getters, generated code, thin delegates |
+
+## Exhaustive enumeration
+
+No sampling, no "top N". Every file in normalized scope gets a row; every signal in scope gets emitted.
+
+### Production surface definition
+
+Per detected stack, enumerate:
+
+| Stack | Surfaces to score |
+|-------|-------------------|
+| Backend (Java/Kotlin/C#) | Public types, exported functions, REST handlers, service methods |
+| Frontend (React/Vue) | Components with logic (not pure layout), hooks, stores |
+| CLI / scripts | Commands, subcommands, entry points |
+| DevOps | Pipeline stages with testable logic, config validators |
+
+### Test pairing
+
+- Every production file in `scope_manifest.production_files` must map to ≥0 test files.
+- When no test file exists → emit `missing_test` signal (required).
+- When test exists but gaps remain → emit `missing_coverage` on specific behaviors.
+
+### Redundant + overtest scan
+
+- Every test method in scope must be scanned for redundancy and overtest signals — not only files with obvious smells.
+- `redundant_tests[]` and `overtest_tests[]` counts must reconcile with per-scope `signals[]`.
+
+### identify-missing reconciliation
+
+- Emit an `items[]` entry for every `missing_test` and `missing_coverage` signal from assess.
+- `items.length` + adequately-covered paths must equal `scope_manifest.production_files.length`.
+- `uncovered_production_paths` must be empty for `enumeration_complete: true`.
+- Sort by priority ascending, then `production_path` lexicographically — **no truncation**.
 
 ## Signal kind enum (assess `signals[].kind`)
 

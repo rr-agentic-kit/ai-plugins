@@ -35,37 +35,34 @@ When combining plan tracks or epoch carry-over:
 
 ## Epoch loop (`complete-missing`)
 
-Default `--max-epochs`: 3.
+Default `--max-epochs`: 3 (safety cap — not an expected exit path; see [input-resolution.md](input-resolution.md)).
 
 ```
 assess → exit? → identify-missing → plan → write → verify → reassess → exit or continue
 ```
 
-### Exit semantics (any satisfied → stop chain)
+### Exit semantics (strict gates)
 
-| Condition | Exit reason |
-|-----------|-------------|
-| Reassess `verdict` is `pass` for all in-scope production files | `quality_gate_met` |
-| Reassess has zero `fail` and zero high-priority missing items | `acceptable_residual` |
-| Reassess has zero high-severity `overtest_tests[]` and zero high `over_assertion` signals in scope | `overtest_gate_met` (combined with acceptable residual when overtest was flagged) |
-| `epoch >= max_epochs` | `epoch_budget_exhausted` |
-| Write `oracle_check.passed` is false after retry | `oracle_failed` |
-| Verify rerun `passed` is false | `verify_failed` |
+| Condition | `exit_reason` | `final_status` |
+|-----------|---------------|----------------|
+| Reassess: all scopes `pass`, zero `flagged` findings, `enumeration_complete: true` on assess + identify-missing | `quality_gate_met` | `ok` |
+| User-recorded `wontfix` covers every remaining `flagged` item | `wontfix_acknowledged` | `ok` |
+| Write `oracle_check.passed` is false after retry | `oracle_failed` | `failed` |
+| Verify rerun `passed` is false | `verify_failed` | `failed` |
+| Phase returns `enumeration_complete: false` | `enumeration_incomplete` | `failed` (hard-stop, no next epoch) |
+| `epoch >= max_epochs` with any `flagged` not `wontfix` | `epoch_budget_exhausted` | `partial` |
 
-### Overtest gate (epoch quality)
+**No `acceptable_residual` or `overtest_gate_met` success exits.** Overtest, redundant, and maintainability findings are `flagged` rows like any other — chain exits `ok` only when zero `flagged` remain (or all covered by `wontfix`).
 
-After **reassess** in complete-missing chains:
+### Per-epoch invariants
 
-1. If prior epoch assess had `counts.overtest > 0` or any high-severity `over_assertion` / `ai_artifact` signal:
-   - Reassess must show `counts.overtest === 0` and no high-severity `over_assertion` / `ai_artifact` for chain to exit via `acceptable_residual` or `quality_gate_met`.
-2. Medium-severity residual overtest may exit only when zero `fail` scopes and no high-priority missing items.
-3. Skill surfaces unresolved overtest in markdown findings with status `flagged` until cleared or `wontfix` (user constraint).
-
-### Per-epoch requirements
-
+- **Enumeration:** assess and identify-missing must set `enumeration_complete: true` or orchestrator hard-stops with `enumeration_incomplete`.
+- **Maintain before add:** epoch N cannot start write `add` track until all `maintain` steps from plan are `solved`, `fixed`, or `wontfix`.
+- **Write completeness:** write must execute every plan step in order (`maintain` → `add`); unexecuted steps without `wontfix` → write `status: partial`.
+- **Reassess:** mandatory after write in complete-missing; must re-run full exhaustive assess (not delta-only).
+- **Carry-over:** only `wontfix` and `fixed` persist across epochs; `flagged` must shrink each epoch or signal stuck skill quality.
 - **write:** Must run test command, validation pipeline, and oracle check before epoch counts as complete.
 - **verify** (fix/migrate/complete-missing): Rerun implicated tests; `exit_code === 0` required.
-- **reassess:** Mandatory after write in complete-missing; optional after fix-broken.
 
 ## Verify and reassess gates
 
@@ -100,6 +97,7 @@ Applies when `--output md` (see [output-formats.md](output-formats.md)). Inter-a
 3. `fixed` requires verify `passed: true` AND (reassess scope `pass`/`warn` without the same high-severity signal OR write `oracle_check.passed` for that path).
 4. Epoch carry-over: unresolved `flagged` persist into next epoch report; `fixed` rows kept for audit trail.
 5. `wontfix` only via explicit user constraint recorded in plan `constraints_applied`.
+6. **Residual rule:** anything still `flagged` at chain end blocks `final_status: ok` unless marked `wontfix`.
 
 ### ID stability
 

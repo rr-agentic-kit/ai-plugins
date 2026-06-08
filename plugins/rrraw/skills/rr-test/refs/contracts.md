@@ -61,6 +61,8 @@ Used by input-resolution and orchestrator hard-stops. Agents return `status: fai
 2. One retry on parse failure (see [determinism.md](determinism.md)).
 3. Second failure → orchestrator hard-stop with `code: AGENT_OUTPUT_PARSE_FAILED`.
 
+**Orchestrator hard-stop:** if any phase returns `data.enumeration_complete === false`, stop chain immediately with `exit_reason: enumeration_incomplete` and `final_status: failed` — do not invoke subsequent phases or start next epoch.
+
 ---
 
 ## Per-agent output contracts (`data` field)
@@ -82,6 +84,12 @@ Used by input-resolution and orchestrator hard-stops. Agents return `status: fai
 
 ```json
 {
+  "enumeration_complete": true,
+  "scope_manifest": {
+    "production_files": [],
+    "test_files": [],
+    "unassessed": []
+  },
   "verdict": "pass|warn|fail",
   "scopes": [{
     "path": "",
@@ -101,6 +109,8 @@ Used by input-resolution and orchestrator hard-stops. Agents return `status: fai
 
 | Field | Notes |
 |-------|-------|
+| `enumeration_complete` | `true` only when `scope_manifest.unassessed` is empty |
+| `scope_manifest` | Every production and test file in normalized scope; `unassessed` lists paths not scored |
 | `signals[].kind` | Standard enum — [shared-heuristics.md](shared-heuristics.md) § Signal kind enum |
 | `signals[].smell_id` | Optional testsmells.org id (e.g. `SensitiveEquality`) |
 | `overtest_tests[]` | Over-assertion / implementation-coupling cases per shared-heuristics § Overtest signals |
@@ -108,10 +118,13 @@ Used by input-resolution and orchestrator hard-stops. Agents return `status: fai
 
 Verdict rules: bidirectional calibration scoring in [shared-heuristics.md](shared-heuristics.md). Scope `fail` when critical path has `missing_test` or `ai_artifact` high; scope `warn` when overtest or weak assertion dominates without critical gaps.
 
+`status: partial` when `scope_manifest.unassessed.length > 0` (sets `enumeration_complete: false`).
+
 ### identify-missing
 
 ```json
 {
+  "enumeration_complete": true,
   "items": [{
     "id": "m1",
     "priority": 1,
@@ -120,9 +133,15 @@ Verdict rules: bidirectional calibration scoring in [shared-heuristics.md](share
     "rationale": "",
     "risk": "low|medium|high"
   }],
-  "summary_counts": { "high": 0, "medium": 0, "low": 0 }
+  "summary_counts": { "high": 0, "medium": 0, "low": 0 },
+  "uncovered_production_paths": []
 }
 ```
+
+| Field | Notes |
+|-------|-------|
+| `enumeration_complete` | `true` only when `uncovered_production_paths` is empty |
+| `uncovered_production_paths` | Production paths from assess `scope_manifest` without adequate coverage and without matching `items[]` entry |
 
 ### plan
 
@@ -130,9 +149,16 @@ Verdict rules: bidirectional calibration scoring in [shared-heuristics.md](share
 {
   "maintain": [{ "id": "p1", "action": "", "path": "", "priority": 1, "rationale": "" }],
   "add": [{ "id": "p2", "action": "", "path": "", "priority": 1, "rationale": "" }],
-  "constraints_applied": []
+  "constraints_applied": [],
+  "steps_total": 0,
+  "maintain_before_add": true
 }
 ```
+
+| Field | Notes |
+|-------|-------|
+| `steps_total` | `maintain.length + add.length` |
+| `maintain_before_add` | Required `true` in complete-missing chains; write blocks `add` until maintain queue cleared or `wontfix` |
 
 Merge/sort rules: [determinism.md](determinism.md).
 
@@ -141,6 +167,8 @@ Merge/sort rules: [determinism.md](determinism.md).
 ```json
 {
   "changes": [{ "path": "", "operation": "create|modify", "description": "" }],
+  "steps_completed": [{ "plan_id": "p1", "track": "maintain|add" }],
+  "steps_skipped": [{ "plan_id": "p2", "track": "maintain|add", "reason": "" }],
   "execution": { "command": "", "exit_code": 0, "passed": true },
   "oracle_check": { "passed": true, "failures": [] },
   "validation_pipeline": {
@@ -152,6 +180,11 @@ Merge/sort rules: [determinism.md](determinism.md).
   "write_mode": "standard|test-data|parameterized"
 }
 ```
+
+| Field | Notes |
+|-------|-------|
+| `steps_completed` | Plan steps executed this epoch, in execution order |
+| `steps_skipped` | Plan steps not executed; if any skip lacks `wontfix` in plan constraints → `status: partial` |
 
 Oracle and verify gates: [determinism.md](determinism.md).
 
