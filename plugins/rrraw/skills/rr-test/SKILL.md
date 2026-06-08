@@ -67,9 +67,10 @@ Apply [refs/determinism.md](refs/determinism.md) after each agent invocation. Sk
 
 | Mode | Ref |
 |------|-----|
-| `text` (default) | [refs/output-formats.md](refs/output-formats.md) |
+| `md` (default) | [refs/output-formats.md](refs/output-formats.md) — findings tables + status |
+| `text` | Concise bullets via [refs/output-formats.md](refs/output-formats.md) |
 | `json` | Full payload + `resolution_trace` |
-| `report` | [refs/report-template.md](refs/report-template.md) via output-formats |
+| `report` | Deprecated alias for `md` |
 
 ## Shared refs (load on demand)
 
@@ -78,11 +79,11 @@ Apply [refs/determinism.md](refs/determinism.md) after each agent invocation. Sk
 | [input-resolution.md](refs/input-resolution.md) | Flag parsing, NL intent, conflict matrix, precedence, normalized payload schema |
 | [contracts.md](refs/contracts.md) | Phase input/output/error schemas per agent |
 | [determinism.md](refs/determinism.md) | Ordering, retries, epoch exit, merge rules, verify gates |
-| [output-formats.md](refs/output-formats.md) | text / json / report adapters |
+| [output-formats.md](refs/output-formats.md) | md / text / json adapters; status merge |
 | [shared-heuristics.md](refs/shared-heuristics.md) | Cross-phase verdict rules (assess, identify-missing, flaky) |
 | [init-mode.md](refs/init-mode.md) | `--init` workflow, question/suggestion protocol, completion criteria |
 | [claude-md-schema.md](refs/claude-md-schema.md) | `CLAUDE.md` section contract and idempotent patch rules |
-| [report-template.md](refs/report-template.md) | Optional report layout (format only) |
+| [report-template.md](refs/report-template.md) | Markdown table schemas for `md` output |
 
 Phase-specific tactics stay in `agents/test/*` — skill does not duplicate agent execution steps.
 

@@ -39,8 +39,17 @@
 |----------|--------|---------|
 | `--scope` | `repo`, `diff`, `uncommitted`, `paths:<csv>` | `diff` |
 | `--target` | `frontend`, `backend`, `devops`, `scripts`, `auto` | `auto` |
-| `--output` | `text`, `json`, `report` | `text` |
+| `--output` | `md`, `text`, `json`, `report` | `md` |
 | `--max-epochs` | positive integer | `3` (multi-pass chains only) |
+
+### Output mode notes
+
+| Value | Behavior |
+|-------|----------|
+| `md` | Default — structured markdown tables with status column ([output-formats.md](output-formats.md)) |
+| `text` | Concise plain-text bullets for quick chat glance |
+| `json` | Full structured payload for CI/automation |
+| `report` | **Deprecated alias** for `md` — normalize to `md` in `resolution_trace` |
 
 ### Scope normalization
 
@@ -77,7 +86,7 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 | `--init` | Mutually exclusive with all other primary actions |
 | Scope | One scope kind only; `paths:` cannot combine with `repo`/`diff`/`uncommitted` |
 | Target | Single value; `auto` resolves at assess/write time via stack detection |
-| Output | Single value |
+| Output | Single value; `report` treated as `md` |
 
 ## Precedence
 
@@ -92,7 +101,7 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
   "action": "assess",
   "scope": { "kind": "diff", "paths": [] },
   "target": "auto",
-  "output": "text",
+  "output": "md",
   "max_epochs": 3,
   "chain": ["assess"],
   "write_mode": null,

@@ -12,6 +12,11 @@
       "name": "context-eng-hero",
       "source": "./plugins/context-eng-hero",
       "description": "Design and validate skills, agents, commands, and context artifacts for reliable agent behavior."
+    },
+    {
+      "name": "rrraw",
+      "source": "./plugins/rrraw",
+      "description": "Flag-driven test excellence \u2014 assess, write, fix, and migrate tests via phase agents."
     }
   ]
 }
