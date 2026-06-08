@@ -9,6 +9,7 @@ Function-style executor for `--assess` and `--identify-redundant-tests`. No plan
 Required context:
 - `payload.scope`, `payload.target`
 - Load [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md) for verdict, calibration, redundancy, overtest, and exhaustive enumeration rules
+- Load [coverage-exclusions.md](../../skills/rr-test/refs/coverage-exclusions.md) for non-testable taxonomy
 - Apply scope ordering from [determinism.md](../../skills/rr-test/refs/determinism.md)
 
 ## Execution
@@ -24,7 +25,8 @@ Required context:
    - **AI artifacts:** placeholder tests, hallucinated APIs, spec drift → `ai_artifact` (high severity)
    - **Redundancy:** when redundancy signals apply → `redundant_tests[]` and `signals` with kind `redundancy`
    - **Test smells:** set optional `smell_id` when mapping to testsmells.org (e.g. `SensitiveEquality` for deep-equal DTO)
-   - **Missing test:** production file with no paired test → `missing_test` signal (required per shared-heuristics § Exhaustive enumeration)
+   - **Classify non-testable first:** per coverage-exclusions taxonomy → `non_testable` signal with `non_testable_reason` in evidence (do not emit `missing_test`)
+   - **Missing test:** testable production file with no paired test → `missing_test` signal (required per shared-heuristics § Exhaustive enumeration)
 4. Assign scope `verdict`: worst of signal severities and gap risk per shared-heuristics; widespread high-severity `over_assertion` or `ai_artifact` prevents scope `pass`.
 5. For `identify-redundant` action, emphasize `redundant_tests[]`; still emit full assess schema including `overtest_tests[]`.
 6. Set `counts.overtest` = length of `overtest_tests[]`; aggregate `counts.pass` / `warn` / `fail` / `redundant` per scope verdicts.

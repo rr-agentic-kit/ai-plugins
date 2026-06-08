@@ -11,7 +11,8 @@ Function-style executor for `--init`. No routing logic.
 1. Run discovery depth checklist from [init-mode.md](../../skills/rr-test/refs/init-mode.md).
 2. Infer stack, conventions, and philosophy from repo evidence.
 3. Emit questions per question protocol; recommendations per suggestion protocol.
-4. Build `claude_md_patch` per [claude-md-schema.md](../../skills/rr-test/refs/claude-md-schema.md).
+4. Discover existing coverage exclusion config and non-testable patterns per [coverage-exclusions.md](../../skills/rr-test/refs/coverage-exclusions.md).
+5. Build `claude_md_patch` per [claude-md-schema.md](../../skills/rr-test/refs/claude-md-schema.md) including Coverage exclusions field.
 
 ## Output
 
