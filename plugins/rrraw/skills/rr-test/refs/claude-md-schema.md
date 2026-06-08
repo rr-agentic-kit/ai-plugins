@@ -20,6 +20,7 @@ Fixed header (exact match):
 | Test layout | paths and naming convention |
 | Run command | primary test command(s) |
 | Philosophy | one paragraph: pyramid, mocking stance, flake policy |
+| Coverage exclusions | bullet list: shared exclusion file path, runner exclude glob(s), Sonar property key, project-specific non-testable patterns |
 | Open decisions | optional bullets from non-blocking questions |
 
 ## Idempotent update behavior

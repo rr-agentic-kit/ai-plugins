@@ -155,7 +155,9 @@ For identify-missing priority (skill may sort; agent assigns raw risk):
 |------|---------|
 | `high` | Public API, payment/auth, data mutation, concurrency |
 | `medium` | Branching logic, error paths, integration boundaries |
-| `low` | Trivial getters, generated code, thin delegates |
+| `low` | Trivial getters, thin delegates with testable behavior |
+
+**Low-risk routing:** When low-risk signals coincide with a non-testable category from [coverage-exclusions.md](coverage-exclusions.md), assess emits `non_testable` (not `missing_test`). Low-risk + testable behavior → `missing_test` with `risk: low`.
 
 ## Exhaustive enumeration
 
@@ -175,7 +177,9 @@ Per detected stack, enumerate:
 ### Test pairing
 
 - Every production file in `scope_manifest.production_files` must map to ≥0 test files.
-- When no test file exists → emit `missing_test` signal (required).
+- **Classify first** per [coverage-exclusions.md](coverage-exclusions.md) non-testable taxonomy.
+- Non-testable production file → emit `non_testable` (required); do **not** emit `missing_test`.
+- Testable production file with no test file → emit `missing_test` (required).
 - When test exists but gaps remain → emit `missing_coverage` on specific behaviors.
 
 ### Redundant + overtest scan
@@ -185,10 +189,18 @@ Per detected stack, enumerate:
 
 ### identify-missing reconciliation
 
+Three-bucket invariant (must reconcile):
+
+```
+items.length + excluded.length + adequately_covered.length === production_files.length
+uncovered_production_paths must be empty
+```
+
 - Emit an `items[]` entry for every `missing_test` and `missing_coverage` signal from assess.
-- `items.length` + adequately-covered paths must equal `scope_manifest.production_files.length`.
-- `uncovered_production_paths` must be empty for `enumeration_complete: true`.
-- Sort by priority ascending, then `production_path` lexicographically — **no truncation**.
+- Emit an `excluded[]` entry for every `non_testable` signal from assess.
+- `excluded[]` paths must **not** appear in `items[]` or `uncovered_production_paths`.
+- `enumeration_complete: true` only when reconciliation holds and `uncovered_production_paths` is empty.
+- Sort `items[]` by priority ascending, then `production_path` lexicographically — **no truncation**.
 
 ## Signal kind enum (assess `signals[].kind`)
 
@@ -209,7 +221,10 @@ Standard values for `signals[].kind`:
 | `missing_coverage` | gap (scope-level) |
 | `ai_artifact` | LLM-generated defect |
 | `mutation_gap` | weak fault detection |
-| `missing_test` | no test file for production path |
+| `missing_test` | no test file for testable production path |
+| `non_testable` | production path excluded from coverage (resolution, not gap) |
+
+Optional `non_testable_reason` on signal evidence when kind is `non_testable` (category from coverage-exclusions.md).
 
 Optional `smell_id`: testsmells.org identifier (e.g. `SensitiveEquality`).
 

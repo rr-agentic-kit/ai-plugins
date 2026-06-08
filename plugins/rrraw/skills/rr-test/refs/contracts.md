@@ -95,7 +95,7 @@ Used by input-resolution and orchestrator hard-stops. Agents return `status: fai
     "path": "",
     "verdict": "pass|warn|fail",
     "signals": [{
-      "kind": "weak_assertion|over_assertion|redundancy|maintainability|multi_behavior|implementation_coupling|mock_boundary|over_mock_verify|boundary_leak|flakiness_risk|missing_coverage|ai_artifact|mutation_gap|missing_test",
+      "kind": "weak_assertion|over_assertion|redundancy|maintainability|multi_behavior|implementation_coupling|mock_boundary|over_mock_verify|boundary_leak|flakiness_risk|missing_coverage|ai_artifact|mutation_gap|missing_test|non_testable",
       "severity": "low|medium|high",
       "evidence": "",
       "smell_id": ""
@@ -113,6 +113,7 @@ Used by input-resolution and orchestrator hard-stops. Agents return `status: fai
 | `scope_manifest` | Every production and test file in normalized scope; `unassessed` lists paths not scored |
 | `signals[].kind` | Standard enum — [shared-heuristics.md](shared-heuristics.md) § Signal kind enum |
 | `signals[].smell_id` | Optional testsmells.org id (e.g. `SensitiveEquality`) |
+| `signals[].evidence` | Concrete pattern; for `non_testable`, include `non_testable_reason` category from coverage-exclusions.md |
 | `overtest_tests[]` | Over-assertion / implementation-coupling cases per shared-heuristics § Overtest signals |
 | `counts.overtest` | Length of `overtest_tests[]` (denormalized for adapters) |
 
@@ -133,6 +134,13 @@ Verdict rules: bidirectional calibration scoring in [shared-heuristics.md](share
     "rationale": "",
     "risk": "low|medium|high"
   }],
+  "excluded": [{
+    "id": "x1",
+    "production_path": "",
+    "category": "type_only|constants|barrel|route_shell|fixture|generated|dev_diagnostic",
+    "rationale": "",
+    "tooling_targets": ["vitest", "sonar"]
+  }],
   "summary_counts": { "high": 0, "medium": 0, "low": 0 },
   "uncovered_production_paths": []
 }
@@ -140,25 +148,39 @@ Verdict rules: bidirectional calibration scoring in [shared-heuristics.md](share
 
 | Field | Notes |
 |-------|-------|
-| `enumeration_complete` | `true` only when `uncovered_production_paths` is empty |
-| `uncovered_production_paths` | Production paths from assess `scope_manifest` without adequate coverage and without matching `items[]` entry |
+| `enumeration_complete` | `true` only when `uncovered_production_paths` is empty AND reconciliation equation holds (see shared-heuristics § identify-missing reconciliation) |
+| `excluded[]` | One entry per assess `non_testable` signal; paths must not appear in `items[]` |
+| `excluded[].category` | Non-testable taxonomy from [coverage-exclusions.md](coverage-exclusions.md) |
+| `excluded[].tooling_targets` | Detected coverage tools to update in write exclude track |
+| `uncovered_production_paths` | Production paths from assess `scope_manifest` without adequate coverage, without matching `items[]` entry, and not in `excluded[]` |
 
 ### plan
 
 ```json
 {
   "maintain": [{ "id": "p1", "action": "", "path": "", "priority": 1, "rationale": "" }],
+  "exclude": [{
+    "id": "e1",
+    "action": "coverage_exclude",
+    "path": "",
+    "tooling": ["vitest", "sonar"],
+    "priority": 1,
+    "rationale": ""
+  }],
   "add": [{ "id": "p2", "action": "", "path": "", "priority": 1, "rationale": "" }],
   "constraints_applied": [],
   "steps_total": 0,
-  "maintain_before_add": true
+  "maintain_before_exclude_before_add": true
 }
 ```
 
 | Field | Notes |
 |-------|-------|
-| `steps_total` | `maintain.length + add.length` |
-| `maintain_before_add` | Required `true` in complete-missing chains; write blocks `add` until maintain queue cleared or `wontfix` |
+| `steps_total` | `maintain.length + exclude.length + add.length` |
+| `exclude[]` | One step per `excluded[]` entry; `action` must be `coverage_exclude` |
+| `exclude[].tooling` | Coverage tools to update per [coverage-exclusions.md](coverage-exclusions.md) |
+| `maintain_before_exclude_before_add` | Required `true` in complete-missing chains; execution order: maintain → exclude → add |
+| `maintain_before_add` | Deprecated alias; use `maintain_before_exclude_before_add` |
 
 Merge/sort rules: [determinism.md](determinism.md).
 
@@ -167,13 +189,15 @@ Merge/sort rules: [determinism.md](determinism.md).
 ```json
 {
   "changes": [{ "path": "", "operation": "create|modify", "description": "" }],
-  "steps_completed": [{ "plan_id": "p1", "track": "maintain|add" }],
-  "steps_skipped": [{ "plan_id": "p2", "track": "maintain|add", "reason": "" }],
+  "steps_completed": [{ "plan_id": "p1", "track": "maintain|exclude|add" }],
+  "steps_skipped": [{ "plan_id": "p2", "track": "maintain|exclude|add", "reason": "" }],
   "execution": { "command": "", "exit_code": 0, "passed": true },
+  "coverage_verify": { "passed": true, "paths_confirmed": [], "failures": [] },
   "oracle_check": { "passed": true, "failures": [] },
   "validation_pipeline": {
     "compile": { "passed": true },
     "run": { "passed": true },
+    "coverage_verify": { "passed": true, "skipped": false },
     "oracle": { "passed": true },
     "mutation_spot_check": { "passed": null, "skipped": true, "note": "" }
   },
@@ -183,8 +207,10 @@ Merge/sort rules: [determinism.md](determinism.md).
 
 | Field | Notes |
 |-------|-------|
-| `steps_completed` | Plan steps executed this epoch, in execution order |
-| `steps_skipped` | Plan steps not executed; if any skip lacks `wontfix` in plan constraints → `status: partial` |
+| `steps_completed` | Plan steps executed this epoch, in execution order (maintain → exclude → add) |
+| `steps_skipped` | Plan steps not executed; if any skip lacks user `wontfix` in plan constraints → `status: partial` |
+| `coverage_verify` | After exclude track: paths absent from coverage report; see [coverage-exclusions.md](coverage-exclusions.md) |
+| `validation_pipeline.coverage_verify` | Runs after `run`, before `oracle`; may set `skipped: true` when no coverage tooling |
 
 Oracle and verify gates: [determinism.md](determinism.md).
 
