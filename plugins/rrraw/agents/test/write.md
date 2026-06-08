@@ -9,19 +9,36 @@ Function-style executor for `--write-tests`, `--generate-test-data`, `--write-pa
 Required:
 - `payload.write_mode` (`standard` | `test-data` | `parameterized`)
 - `prior_outputs.plan` when in chain, or direct scope/goal from payload
+- Optional `prior_outputs.assess` for calibration context (avoid repeating over-assertion patterns)
 
 ## Execution
 
 1. Implement plan steps or direct write goal for in-scope paths.
 2. Follow repo conventions (from CLAUDE.md section or detected layout).
-3. Run project test command; capture `execution`.
-4. Run oracle validation per agent tactics below.
-5. Respect verify gate: [determinism.md](../../skills/rr-test/refs/determinism.md).
+3. **Minimal-assertion tactics** per [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md):
+   - Assert observable outcomes for the behavior under test; match assertion depth to test role (unit vs integration vs E2E).
+   - Avoid full-object deep equality when ≤3 fields define the contract.
+   - No private API or internal snapshot assertions unless explicitly required by plan.
+   - Split multi-behavior cases into separate tests when writing new code.
+4. Run **AI validation pipeline** (populate `validation_pipeline` in output):
+   | Stage | Requirement |
+   |-------|-------------|
+   | `compile` | Project compiles / test sources valid |
+   | `run` | Test command green → `execution` |
+   | `oracle` | Behavior-breaking check or mutation-style assertion on critical paths → `oracle_check` |
+   | `mutation_spot_check` | If project has mutation tooling, run targeted check; else `skipped: true` with note |
+   Pipeline order: compile → run → oracle → mutation_spot_check. Any stage failure stops later stages.
+5. **Oracle failure taxonomy** (record in `oracle_check.failures[]`):
+   - `no_behavioral_assertion` — test passes but assertion cannot detect regression
+   - `spec_drift` — test asserts outdated contract vs production
+   - `ai_hallucination` — references non-existent API
+   - `over_coupled` — assertion binds to implementation detail
+6. Respect verify gate: [determinism.md](../../skills/rr-test/refs/determinism.md).
 
 ### Oracle tactics (agent-local)
 
 - Prefer behavior-breaking change or mutation-style check on critical assertions.
-- If infeasible, document in `oracle_check.failures` and set `passed: false`.
+- If infeasible, document in `oracle_check.failures` with taxonomy code and set `passed: false`.
 - Parameterized mode: table-driven cases with distinct behavioral dimensions.
 - Test-data mode: factories/fixtures with realistic edge cases, not random strings.
 
@@ -31,9 +48,9 @@ Required:
 
 | `status` | When |
 |----------|------|
-| `ok` | Tests green and oracle passed |
-| `partial` | Tests green, oracle incomplete |
-| `failed` | Tests fail or write error |
+| `ok` | Tests green, oracle passed, compile+run stages passed |
+| `partial` | Tests green, oracle incomplete or mutation_spot_check skipped only |
+| `failed` | Compile/run fail, write error, or oracle failed |
 
 ## Constraints
 
