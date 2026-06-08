@@ -29,9 +29,9 @@
 | Phase | Text highlights |
 |-------|-----------------|
 | assess | aggregate `verdict`, `counts` (include `overtest`), `enumeration_complete` |
-| identify-missing | all `items` by priority (or count + "see md" when >10) |
-| plan | count of `maintain` + `add` steps; `maintain_before_add` flag |
-| write | files changed, steps completed/skipped, execution pass/fail, oracle pass/fail |
+| identify-missing | all `items` by priority + `excluded` count (or count + "see md" when >10) |
+| plan | count of `maintain` + `exclude` + `add` steps; `maintain_before_exclude_before_add` flag |
+| write | files changed, steps completed/skipped, coverage verify, execution pass/fail, oracle pass/fail |
 | fix / migrate | fix/step count, rerun pass/fail |
 | flaky | `likely_root_cause`, `severity` |
 | debug | `diagnosis`, first fix_plan step |
@@ -66,9 +66,10 @@ Primary user-facing artifact. Apply [report-template.md](report-template.md).
 2. Initial status: `flagged` for all new findings ([determinism.md](determinism.md) § Finding status lifecycle).
 3. After write/fix/migrate: matching paths → `solved`.
 4. After verify + reassess (or oracle pass for standalone write): matching paths → `fixed`.
-5. User `wontfix` from plan `constraints_applied` → `wontfix`.
-6. Epoch carry-over: persist `flagged` from prior epoch; retain `fixed` for audit.
-7. At chain end: any remaining `flagged` (not `wontfix`) → emit Residuals section; `final_status: partial` when `exit_reason: epoch_budget_exhausted`.
+5. Write exclude track + `coverage_verify.passed` → `excluded`.
+6. User `wontfix` from plan `constraints_applied` (source: `user`) → `wontfix`.
+7. Epoch carry-over: persist `flagged` from prior epoch; retain `fixed` for audit.
+8. At chain end: any remaining `flagged` (not `wontfix`) → emit Residuals section; `final_status: partial` when `exit_reason: epoch_budget_exhausted`.
 
 ### Row construction by phase
 
@@ -78,7 +79,8 @@ Primary user-facing artifact. Apply [report-template.md](report-template.md).
 | assess `overtest_tests[]` | `F{n}` | `over_assertion` |
 | assess `redundant_tests[]` | `F{n}` | `redundancy` |
 | identify-missing `items[]` | `M{n}` | `missing_coverage` |
-| plan `maintain` / `add` | `P{n}` | `plan_maintain` / `plan_add` |
+| identify-missing `excluded[]` | `X{n}` | `non_testable` |
+| plan `maintain` / `exclude` / `add` | `P{n}` / `E{n}` | `plan_maintain` / `plan_exclude` / `plan_add` |
 | write `changes[]` | link to finding ID | update status → `solved` |
 | flaky / perf-audit | `F{n}` | phase-specific |
 

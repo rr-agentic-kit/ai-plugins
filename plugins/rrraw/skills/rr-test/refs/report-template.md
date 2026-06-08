@@ -33,11 +33,11 @@ List **all** findings — no truncation.
 
 | Column | Source |
 |--------|--------|
-| ID | `F{n}` findings, `M{n}` missing, `P{n}` plan steps — stable within run |
+| ID | `F{n}` findings, `M{n}` missing, `X{n}` excluded, `P{n}` / `E{n}` plan steps — stable within run |
 | Path | test file, production file, or `file::method` |
 | Kind | standardized `signals[].kind` or phase-specific (see output-formats) |
 | Severity | `low` \| `medium` \| `high` |
-| Status | `flagged` \| `solved` \| `fixed` \| `wontfix` |
+| Status | `flagged` \| `solved` \| `fixed` \| `excluded` \| `wontfix` |
 | Evidence | concrete pattern from assess signal or agent rationale |
 | Action | recommended fix or plan step summary |
 
@@ -73,6 +73,20 @@ List all items — no "top 3" truncation.
 |----|-----------------|------|----------------|--------|
 ```
 
+
+### Excluded
+
+List all excluded paths — no truncation.
+
+```markdown
+## Excluded
+
+| ID | Production path | Category | Tooling | Status |
+|----|-----------------|----------|---------|--------|
+```
+
+Status: `flagged` until write exclude completes; `excluded` after `coverage_verify.passed`.
+
 ### Plan
 
 ```markdown
@@ -82,7 +96,7 @@ List all items — no "top 3" truncation.
 |----|-------|------|----------|--------|-----------|
 ```
 
-Track: `maintain` \| `add`. Status `flagged` until step executed.
+Track: `maintain` \| `exclude` \| `add`. Status `flagged` until step executed; exclude → `excluded` after verify.
 
 ### Changes
 
@@ -117,7 +131,7 @@ Emit when chain ends with `exit_reason: epoch_budget_exhausted` or any `flagged`
 |----|------|------|----------|-----------------|----------|
 | F2 | src/foo/Bar.java | missing_coverage | high | 3 | no error-path test |
 
-Re-run with `--max-epochs N` or mark `wontfix` in plan constraints.
+Re-run with `--max-epochs N`, apply exclude track for non-testable files, or mark user `wontfix` in plan constraints.
 ```
 
 Style `epoch_budget_exhausted` as failure, not success — `final_status: partial` in header.

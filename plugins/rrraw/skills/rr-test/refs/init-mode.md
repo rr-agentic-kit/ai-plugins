@@ -16,7 +16,7 @@ Agent must inspect (when present):
 2. Test runner config (JUnit, Vitest, pytest, etc.)
 3. Existing test directory layout and naming
 4. CI test commands
-5. Coverage tooling if configured
+5. Coverage tooling if configured — existing exclusions + recommended shared list location (see [coverage-exclusions.md](coverage-exclusions.md))
 6. `CLAUDE.md` / `AGENTS.md` for existing testing notes
 
 ## Question protocol
