@@ -13,14 +13,19 @@ Required:
 
 ## Execution
 
-1. Implement plan steps or direct write goal for in-scope paths.
-2. Follow repo conventions (from CLAUDE.md section or detected layout).
-3. **Minimal-assertion tactics** per [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md):
+1. Execute plan steps in order when `prior_outputs.plan` present:
+   - All `maintain` steps first, then all `add` steps.
+   - Do not start `add` track until all `maintain` steps are completed or marked `wontfix` in plan `constraints_applied`.
+   - Record each executed step in `steps_completed[]` with `plan_id` and `track`.
+   - Record any skipped step in `steps_skipped[]` with `reason`; skipping without `wontfix` → `status: partial`.
+2. Implement plan steps or direct write goal for in-scope paths.
+3. Follow repo conventions (from CLAUDE.md section or detected layout).
+4. **Minimal-assertion tactics** per [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md):
    - Assert observable outcomes for the behavior under test; match assertion depth to test role (unit vs integration vs E2E).
    - Avoid full-object deep equality when ≤3 fields define the contract.
    - No private API or internal snapshot assertions unless explicitly required by plan.
    - Split multi-behavior cases into separate tests when writing new code.
-4. Run **AI validation pipeline** (populate `validation_pipeline` in output):
+5. Run **AI validation pipeline** (populate `validation_pipeline` in output):
    | Stage | Requirement |
    |-------|-------------|
    | `compile` | Project compiles / test sources valid |
@@ -28,12 +33,12 @@ Required:
    | `oracle` | Behavior-breaking check or mutation-style assertion on critical paths → `oracle_check` |
    | `mutation_spot_check` | If project has mutation tooling, run targeted check; else `skipped: true` with note |
    Pipeline order: compile → run → oracle → mutation_spot_check. Any stage failure stops later stages.
-5. **Oracle failure taxonomy** (record in `oracle_check.failures[]`):
+6. **Oracle failure taxonomy** (record in `oracle_check.failures[]`):
    - `no_behavioral_assertion` — test passes but assertion cannot detect regression
    - `spec_drift` — test asserts outdated contract vs production
    - `ai_hallucination` — references non-existent API
    - `over_coupled` — assertion binds to implementation detail
-6. Respect verify gate: [determinism.md](../../skills/rr-test/refs/determinism.md).
+7. Respect verify gate: [determinism.md](../../skills/rr-test/refs/determinism.md).
 
 ### Oracle tactics (agent-local)
 
@@ -46,12 +51,15 @@ Required:
 
 `PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § write.
 
+Required fields: `changes`, `steps_completed`, `steps_skipped`, `execution`, `oracle_check`, `validation_pipeline`, `write_mode`.
+
 | `status` | When |
 |----------|------|
-| `ok` | Tests green, oracle passed, compile+run stages passed |
-| `partial` | Tests green, oracle incomplete or mutation_spot_check skipped only |
+| `ok` | All plan steps executed (or skipped with `wontfix`); tests green; oracle passed; compile+run stages passed |
+| `partial` | Plan steps skipped without `wontfix`, or tests green but oracle incomplete or mutation_spot_check skipped only |
 | `failed` | Compile/run fail, write error, or oracle failed |
 
 ## Constraints
 
 - No routing or epoch decisions.
+- Do not cherry-pick plan steps.
