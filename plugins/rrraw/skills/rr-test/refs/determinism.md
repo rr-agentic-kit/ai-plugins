@@ -23,15 +23,15 @@ Applies to agent final messages and structured tool outputs:
 
 No further retries. No partial acceptance of malformed JSON.
 
-## Plan merge rules (maintain + add)
+## Plan merge rules (maintain + exclude + add)
 
 When combining plan tracks or epoch carry-over:
 
 1. Dedupe by `(action, path)`; later epoch wins on conflict.
 2. Sort by `priority` ascending, then `path` lexicographically.
 3. Tie-break equal priority: `risk` high > medium > low (from identify-missing linkage when available).
-4. `maintain` track processed before `add` track in execution order.
-5. Trim-before-add: `maintain` steps sourced from `overtest_tests[]` or over-calibration signals execute before `add` steps in same epoch.
+4. Execution order: `maintain` → `exclude` → `add`.
+5. Trim-before-add: `maintain` steps sourced from `overtest_tests[]` or over-calibration signals execute before `exclude` and `add` steps in same epoch.
 
 ## Epoch loop (`complete-missing`)
 
@@ -46,6 +46,7 @@ assess → exit? → identify-missing → plan → write → verify → reassess
 | Condition | `exit_reason` | `final_status` |
 |-----------|---------------|----------------|
 | Reassess: all scopes `pass`, zero `flagged` findings, `enumeration_complete: true` on assess + identify-missing | `quality_gate_met` | `ok` |
+| All remaining gaps resolved via exclude track + `coverage_verify.passed` (or skipped per coverage-exclusions) | `exclusions_applied` | `ok` |
 | User-recorded `wontfix` covers every remaining `flagged` item | `wontfix_acknowledged` | `ok` |
 | Write `oracle_check.passed` is false after retry | `oracle_failed` | `failed` |
 | Verify rerun `passed` is false | `verify_failed` | `failed` |
@@ -57,8 +58,8 @@ assess → exit? → identify-missing → plan → write → verify → reassess
 ### Per-epoch invariants
 
 - **Enumeration:** assess and identify-missing must set `enumeration_complete: true` or orchestrator hard-stops with `enumeration_incomplete`.
-- **Maintain before add:** epoch N cannot start write `add` track until all `maintain` steps from plan are `solved`, `fixed`, or `wontfix`.
-- **Write completeness:** write must execute every plan step in order (`maintain` → `add`); unexecuted steps without `wontfix` → write `status: partial`.
+- **Maintain before exclude before add:** epoch N cannot start write `exclude` track until all `maintain` steps are `solved`, `fixed`, or user `wontfix`; cannot start `add` until all `exclude` steps are `excluded`, `fixed`, or user `wontfix`.
+- **Write completeness:** write must execute every plan step in order (`maintain` → `exclude` → `add`); unexecuted steps without user `wontfix` → write `status: partial`.
 - **Reassess:** mandatory after write in complete-missing; must re-run full exhaustive assess (not delta-only).
 - **Carry-over:** only `wontfix` and `fixed` persist across epochs; `flagged` must shrink each epoch or signal stuck skill quality.
 - **write:** Must run test command, validation pipeline, and oracle check before epoch counts as complete.
@@ -88,7 +89,8 @@ Applies when `--output md` (see [output-formats.md](output-formats.md)). Inter-a
 | `flagged` | Issue identified, no action yet | assess, identify-missing, flaky, perf-audit |
 | `solved` | Change applied this run | write, fix, migrate (`changes` / `fixes` / `artifacts`) |
 | `fixed` | Verified — tests green + reassess pass or oracle ok | verify + reassess for that scope |
-| `wontfix` | Acknowledged, intentionally deferred | user prompt or plan constraint |
+| `excluded` | Coverage exclusion applied and verified | write exclude track + `coverage_verify` |
+| `wontfix` | Acknowledged, intentionally deferred | user prompt only (plan `constraints_applied` with `source: "user"`) |
 
 ### Transition rules
 
@@ -96,9 +98,11 @@ Applies when `--output md` (see [output-formats.md](output-formats.md)). Inter-a
 2. `solved` requires matching entry in write `changes[]`, fix `fixes[]`, or migrate `steps_executed[]` for that path/kind.
 3. `fixed` requires verify `passed: true` AND (reassess scope `pass`/`warn` without the same high-severity signal OR write `oracle_check.passed` for that path).
 4. Epoch carry-over: unresolved `flagged` persist into next epoch report; `fixed` rows kept for audit trail.
-5. `wontfix` only via explicit user constraint recorded in plan `constraints_applied`.
-6. **Residual rule:** anything still `flagged` at chain end blocks `final_status: ok` unless marked `wontfix`.
+5. `excluded` requires write `coverage_exclude` step completed and `coverage_verify.passed: true` (or `validation_pipeline.coverage_verify.skipped: true` when no coverage tooling). Transitions like `fixed` for residual clearing.
+6. `wontfix` only via explicit user constraint in `payload.constraints.wontfix[]` or user prompt text recorded in plan `constraints_applied` with `source: "user"`. Agents must not self-assign `wontfix`.
+7. **Hard-stop:** plan/write must not record `wontfix` without `constraints_applied[].source === "user"`.
+8. **Residual rule:** anything still `flagged` at chain end blocks `final_status: ok` unless marked user `wontfix` or `excluded`. Agent-origin wontfix for non-testable files is invalid — those must route through exclude track.
 
 ### ID stability
 
-Findings use `F{n}`, missing `M{n}`, plan `P{n}` within a run. Status updates merge on `(ID)` or `(path, kind)` when ID absent.
+Findings use `F{n}`, missing `M{n}`, excluded `X{n}`, plan `P{n}` / exclude `E{n}` within a run. Status updates merge on `(ID)` or `(path, kind)` when ID absent.

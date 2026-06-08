@@ -7,6 +7,7 @@ Flag-driven test excellence: one skill routes phase agents to assess quality, fi
 ## Philosophy
 
 - **High-signal tests** — Fail when protected behavior breaks (oracle validation). Fewer, stronger tests beat coverage padding.
+- **Non-testable → exclude** — Type-only, generated, and barrel files get coverage exclusion, not padding tests.
 - **Determinism** — Same inputs → same scope, ordering, routing.
 - **Exhaustive per-epoch** — Every file in scope is assessed; every gap is identified; every plan step is executed. Multi-epoch flows default to 3 passes as a safety cap. Residuals at epoch cap indicate scope or skill failure, not a normal exit — re-run with higher `--max-epochs` or mark `wontfix`.
 
@@ -58,7 +59,8 @@ rr-test --diagnose-flaky --scope paths:tests/foo/BarTest.java
 - **Ambiguous action** — One primary flag per call; run `--init` separately.
 - **Wrong scope** — Use `--scope diff` for PRs; `paths:...` for surgical runs.
 - **Misclassified target** — Set `--target` explicitly instead of `auto`.
-- **Partial exit at epoch cap** — Residual `flagged` findings remain; re-run with `--max-epochs N` or mark `wontfix` in constraints.
+- **Partial exit at epoch cap** — Residual `flagged` findings remain; re-run with `--max-epochs N` or mark user `wontfix` in constraints.
+- **Residual `missing_test` on type-only file** — Re-run `--init` to seed coverage exclusions, or run complete-missing so assess emits `non_testable` → exclude track.
 
 ## Further reading
 
@@ -71,5 +73,6 @@ rr-test --diagnose-flaky --scope paths:tests/foo/BarTest.java
 | Ordering / retries / exit | [refs/determinism.md](refs/determinism.md) |
 | Output adapters | [refs/output-formats.md](refs/output-formats.md) |
 | Verdict heuristics | [refs/shared-heuristics.md](refs/shared-heuristics.md) |
+| Coverage exclusions | [refs/coverage-exclusions.md](refs/coverage-exclusions.md) |
 | Init workflow | [refs/init-mode.md](refs/init-mode.md) |
 | CLAUDE.md testing section | [refs/claude-md-schema.md](refs/claude-md-schema.md) |

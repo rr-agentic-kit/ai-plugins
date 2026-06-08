@@ -21,9 +21,9 @@ Agents under `agents/test/*` are function-style executors: they receive normaliz
 | Rule | Meaning |
 |------|---------|
 | **Enumerate all** | Every production + test file in normalized scope gets a row in phase output; no sampling, no "top N". |
-| **Complete all plan steps** | Write executes every `maintain` then every `add` step in epoch; unexecuted steps → `status: partial`. |
-| **Clean before add** | In `complete-missing`, all `maintain`/`trim`/`redundant` work must complete before any `add` step runs. |
-| **Residual = exception** | Exit `ok` only when findings are `fixed` or `wontfix`; anything `flagged` blocks success exit. |
+| **Complete all plan steps** | Write executes every `maintain`, then every `exclude`, then every `add` step in epoch; unexecuted steps → `status: partial`. |
+| **Clean before exclude before add** | In `complete-missing`, all `maintain`/`trim`/`redundant` work must complete before `exclude`, then `add`. |
+| **Residual = exception** | Exit `ok` only when findings are `fixed`, `excluded`, or user `wontfix`; anything `flagged` blocks success exit. |
 | **Budget exhaustion = failure** | `epoch_budget_exhausted` sets `final_status: partial` and lists all residuals. |
 
 ## Primary action flags
@@ -74,9 +74,9 @@ Epoch exit, verify gates, and reassess rules: [refs/determinism.md](refs/determi
 After each phase in `complete-missing` chains, skill applies these checks before continuing:
 
 1. **Enumeration gate:** Parse `enumeration_complete` from assess and identify-missing — if `false`, hard-stop with `exit_reason: enumeration_incomplete`, `final_status: failed`; do not invoke subsequent phases or start next epoch.
-2. **Maintain-before-add gate:** Before write, verify all plan `maintain` steps from prior epochs are `solved`, `fixed`, or `wontfix`; block write `add` track otherwise.
-3. **Write completeness gate:** After write, if `steps_skipped` contains entries without `wontfix` in plan constraints → treat write as `partial`; do not declare epoch success.
-4. **Residual gate:** After reassess, count `flagged` findings — continue epoch only if count > 0 and `epoch < max_epochs`; exit `ok` only when zero `flagged` (or all `wontfix`).
+2. **Maintain-before-exclude-before-add gate:** Before write, verify all plan `maintain` steps are `solved`, `fixed`, or user `wontfix` before `exclude` track; all `exclude` steps `excluded`, `fixed`, or user `wontfix` before `add` track.
+3. **Write completeness gate:** After write, if `steps_skipped` contains entries without user `wontfix` in plan constraints → treat write as `partial`; agent-assigned wontfix is invalid.
+4. **Residual gate:** After reassess, count `flagged` findings — continue epoch only if count > 0 and `epoch < max_epochs`; exit `ok` only when zero `flagged` (or all user `wontfix` / `excluded`). Agent-origin wontfix for non-testable files → write `partial`.
 
 ### Determinism hooks (skill layer)
 
@@ -103,6 +103,8 @@ Apply [refs/determinism.md](refs/determinism.md) after each agent invocation. Sk
 | [init-mode.md](refs/init-mode.md) | `--init` workflow, question/suggestion protocol, completion criteria |
 | [claude-md-schema.md](refs/claude-md-schema.md) | `CLAUDE.md` section contract and idempotent patch rules |
 | [report-template.md](refs/report-template.md) | Markdown table schemas for `md` output |
+| [coverage-exclusions.md](refs/coverage-exclusions.md) | Non-testable taxonomy, stack exclusion patterns, verify rules |
+| [agent-index.md](refs/agent-index.md) | Packaged agent path fallback for Task delegation |
 
 Phase-specific tactics stay in `agents/test/*` — skill does not duplicate agent execution steps.
 
