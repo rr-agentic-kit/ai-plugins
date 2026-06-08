@@ -14,6 +14,11 @@
       "description": "Design and validate skills, agents, commands, and context artifacts for reliable agent behavior."
     },
     {
+      "name": "rrraw",
+      "source": "./plugins/rrraw",
+      "description": "Flag-driven test excellence \u2014 assess, write, fix, and migrate tests via phase agents."
+    },
+    {
       "name": "jobseeker",
       "source": "./plugins/jobseeker",
       "description": "Master and tailor resumes and cover letters for senior+ tech roles with ATS and integrity gates."
