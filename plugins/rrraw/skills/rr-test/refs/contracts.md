@@ -30,7 +30,6 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 {
   "phase": "assess",
   "status": "ok",
-  "data": {},
   "summary": "string",
   "artifacts": []
 }
@@ -87,14 +86,27 @@ Used by input-resolution and orchestrator hard-stops. Agents return `status: fai
   "scopes": [{
     "path": "",
     "verdict": "pass|warn|fail",
-    "signals": [{ "kind": "", "severity": "low|medium|high", "evidence": "" }]
+    "signals": [{
+      "kind": "weak_assertion|over_assertion|redundancy|maintainability|multi_behavior|implementation_coupling|mock_boundary|over_mock_verify|boundary_leak|flakiness_risk|missing_coverage|ai_artifact|mutation_gap|missing_test",
+      "severity": "low|medium|high",
+      "evidence": "",
+      "smell_id": ""
+    }]
   }],
-  "counts": { "pass": 0, "warn": 0, "fail": 0, "redundant": 0 },
-  "redundant_tests": [{ "path": "", "reason": "" }]
+  "counts": { "pass": 0, "warn": 0, "fail": 0, "redundant": 0, "overtest": 0 },
+  "redundant_tests": [{ "path": "", "reason": "" }],
+  "overtest_tests": [{ "path": "", "reason": "", "calibration": "over", "smell_id": "" }]
 }
 ```
 
-Verdict rules: [shared-heuristics.md](shared-heuristics.md).
+| Field | Notes |
+|-------|-------|
+| `signals[].kind` | Standard enum — [shared-heuristics.md](shared-heuristics.md) § Signal kind enum |
+| `signals[].smell_id` | Optional testsmells.org id (e.g. `SensitiveEquality`) |
+| `overtest_tests[]` | Over-assertion / implementation-coupling cases per shared-heuristics § Overtest signals |
+| `counts.overtest` | Length of `overtest_tests[]` (denormalized for adapters) |
+
+Verdict rules: bidirectional calibration scoring in [shared-heuristics.md](shared-heuristics.md). Scope `fail` when critical path has `missing_test` or `ai_artifact` high; scope `warn` when overtest or weak assertion dominates without critical gaps.
 
 ### identify-missing
 
@@ -131,6 +143,12 @@ Merge/sort rules: [determinism.md](determinism.md).
   "changes": [{ "path": "", "operation": "create|modify", "description": "" }],
   "execution": { "command": "", "exit_code": 0, "passed": true },
   "oracle_check": { "passed": true, "failures": [] },
+  "validation_pipeline": {
+    "compile": { "passed": true },
+    "run": { "passed": true },
+    "oracle": { "passed": true },
+    "mutation_spot_check": { "passed": null, "skipped": true, "note": "" }
+  },
   "write_mode": "standard|test-data|parameterized"
 }
 ```

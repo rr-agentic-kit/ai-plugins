@@ -18,7 +18,7 @@ One primary action flag + optional selectors. Explicit flags win on conflict ([r
 |----------|--------|---------|
 | `--scope` | `repo`, `diff`, `uncommitted`, `paths:<csv>` | `diff` |
 | `--target` | `frontend`, `backend`, `devops`, `scripts`, `auto` | `auto` |
-| `--output` | `text`, `json`, `report` | `text` |
+| `--output` | `md`, `text`, `json`, `report` (alias `md`) | `md` |
 | `--max-epochs` | integer | `3` (multi-pass only) |
 
 ## Common flows
