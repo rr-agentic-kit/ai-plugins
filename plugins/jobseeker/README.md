@@ -1,6 +1,6 @@
 # Job Seeker (jobseeker)
 
-**Version:** 0.0.2  
+**Version:** 0.0.2-beta-4  
 **License:** Unlicense (see repo root `LICENSE`)
 
 Master and tailor **resumes** and **cover letters** for senior+ Software Engineer, AI Engineer, and ML Engineer roles — with hard-stop integrity gates before every write.
