@@ -1,6 +1,6 @@
 [project]
 name = "ai-plugins-dev"
-version = "0.0.1"
+version = "0.0.2-beta-4"
 description = "Development and test tooling for the ai-plugins marketplace repository"
 requires-python = ">=3.14"
 dependencies = ["pyyaml>=6.0"]

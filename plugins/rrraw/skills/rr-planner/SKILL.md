@@ -1,0 +1,161 @@
+---
+name: rr-planner
+description: Flag-driven software planning docs — progressive top-down discovery (exec-summary → MRD → BRD → PRD → FRD), compose, research, and challenge. Orchestrates phase agents under agents/planning/*; no command files.
+---
+
+# rr-planner (runtime)
+
+**Human overview:** [README.md](README.md)
+
+## Interaction boundary
+
+Question surfacing is orchestrator-owned. `Task` subagents are non-interactive and return one message.
+
+| Concern | Owner |
+|---------|-------|
+| Discovery (disambiguate, clarify, confirm nuance) | **Skill (inline)** — surfaces questions per `question_mode` |
+| Compose, research, challenge | **Task subagents** — return `clarifications_needed[]` on gaps; skill surfaces and re-invokes |
+| User prompts | **Never** from subagents |
+
+### Question modes
+
+| Mode | Flag | Behavior |
+|------|------|----------|
+| **Ask** (default) | _(none)_ | Use `AskQuestion` for structured options |
+| **Text** | `--text-mode` | Ask inline in chat; user replies in conversation |
+
+Both modes follow the same [goal-anchor](refs/goal-anchor.md) protocol. Only the delivery mechanism differs.
+
+### Clarification loop
+
+Loops continue until **all** of:
+
+- No pending `clarifications_needed[]` from agents
+- No blocking discovery gaps at the current level
+- User confirms done for the level or session ("done", "that's enough", "good to proceed", etc.)
+
+There is **no round cap**. User may stop at any time → checkpoint and resume later.
+
+## Activation
+
+1. Read [refs/input-resolution.md](refs/input-resolution.md) — normalize raw flags and prompt into canonical payload **before** any agent call.
+2. Load shared refs on demand per phase (see **Shared refs** below).
+3. Route to inline discovery, one agent, or deterministic phase chain.
+4. Write artifacts to `--output-dir` via [refs/output-formats.md](refs/output-formats.md).
+
+Agents under `agents/planning/*` are function-style executors: they receive normalized payload, return typed output, and do not own routing, continuation, or user interaction.
+
+## Cascade model
+
+Progressive top-down discovery; each level inherits and narrows the level above:
+
+```
+exec-summary (vision / problem / why)
+  → mrd (market)
+    → brd (business requirements)
+      → prd (product requirements)
+        → frd (functional detail)
+```
+
+Level order, inheritance rules, and per-level gates: [refs/cascade.md](refs/cascade.md).
+Doc structure per level: [refs/doc-standards/](refs/doc-standards/).
+
+## Primary action flags
+
+Exactly one required per invocation (see [input-resolution](refs/input-resolution.md)):
+
+| Flag | Handler |
+|------|---------|
+| `--discover` (default) | Inline discovery → cascade all levels → compose each |
+| `--all` | Same as `--discover` |
+| `--exec-summary` | Inline discovery + compose for exec-summary only |
+| `--mrd` | Inline discovery + compose for MRD (inherits exec-summary facts) |
+| `--brd` | Inline discovery + compose for BRD |
+| `--prd` | Inline discovery + compose for PRD |
+| `--frd` | Inline discovery + compose for FRD |
+| `--research` | research agent (post-composition market evaluation) |
+| `--challenge` / `--review` | challenge agent (critique existing docs) |
+
+Shared selectors: `--input`, `--output-dir`, `--format`, `--depth`, `--text-mode`, `--resume` — normalized by [input-resolution](refs/input-resolution.md); defaults in [README](README.md).
+
+## Runtime flow
+
+```
+raw input → input-resolution (normalize) → [resume? load checkpoint]
+  → [discover inline + question loops]
+  → compose agent(s) per level
+  → [optional research / challenge]
+  → success-criteria gate → write artifacts → checkpoint
+```
+
+### Default `--discover` chain
+
+1. Load [refs/cascade.md](refs/cascade.md). If `--resume`, load `session-state.json` from `--output-dir` and continue from checkpoint.
+2. For each cascade level (exec-summary → mrd → brd → prd → frd):
+   - Load matching `refs/doc-standards/<level>.md` for the current level.
+   - Run inline discovery for that level (inherit facts from prior levels).
+   - On ambiguity → load [refs/goal-anchor.md](refs/goal-anchor.md); surface question (`AskQuestion` or inline per `question_mode`); record decisions/assumptions.
+   - On reflect/explore trigger → load [refs/proactivity.md](refs/proactivity.md).
+   - Gate: level completion criteria in cascade.md must pass before next level.
+   - Invoke `compose` agent with `doc_type` = level.
+   - While `clarifications_needed[]` non-empty → surface question → merge answers → re-invoke compose.
+   - User may stop anytime → checkpoint `session-state.json` + partial docs; exit cleanly.
+3. Optional: invoke `research` agent when `--research` flag or user requests market validation.
+4. Apply [refs/success-criteria.md](refs/success-criteria.md) gate before final write.
+5. Checkpoint session state to `--output-dir` (on stop or completion).
+
+### `--challenge` / `--review` chain
+
+1. Load existing docs from `--input` or `--output-dir`.
+2. Load [refs/blind-spots.md](refs/blind-spots.md).
+3. Invoke `challenge` agent.
+4. Surface findings; user may re-run `--discover` with refinements.
+
+### Orchestration gates
+
+| Gate | Rule |
+|------|------|
+| **Level inheritance** | Child level must not contradict parent facts; conflicts → goal-anchor + question |
+| **Level completion** | Per-level done-when in cascade.md + doc-standards before advancing |
+| **Clarification loop** | Re-invoke compose after each answer until no pending clarifications or user says done |
+| **Stop / resume** | User stop → checkpoint; `--resume` reloads `session-state.json` and continues |
+| **Success criteria** | FRD req → PRD goal → BRD objective → exec vision traceability; zero unresolved ambiguity |
+| **Parse retry** | One retry on agent JSON parse failure; second failure → hard-stop |
+
+## Output
+
+| Artifact | Location |
+|----------|----------|
+| Per-doc files | `--output-dir` (default `docs/planning/`) |
+| Session checkpoint | `--output-dir/session-state.json` |
+| Session chat log | `--output-dir/session-log.md` |
+| Format | `--format` md (default) or json — [refs/output-formats.md](refs/output-formats.md) |
+
+## Shared refs (load on demand)
+
+| Ref | When |
+|-----|------|
+| [input-resolution.md](refs/input-resolution.md) | Every invocation |
+| [cascade.md](refs/cascade.md) | Start of any `--discover` run |
+| `refs/doc-standards/<level>.md` | Discovering/composing that level only |
+| [proactivity.md](refs/proactivity.md) | Reflect/explore trigger fires |
+| [goal-anchor.md](refs/goal-anchor.md) | Ambiguity/conflict/nuance detected |
+| [blind-spots.md](refs/blind-spots.md) | Challenge step only |
+| [research-method.md](refs/research-method.md) | Research phase only |
+| [output-formats.md](refs/output-formats.md) | Write step only |
+| [success-criteria.md](refs/success-criteria.md) | Pre-write gate |
+| [contracts.md](refs/contracts.md) | Before any subagent `Task` call |
+
+Phase-specific execution steps stay in `agents/planning/*` — skill does not duplicate agent execution steps.
+
+## Agent delegation
+
+Invoke via `Task` with `PhaseInput` per [refs/contracts.md](refs/contracts.md). Parse agent JSON: one retry on failure, then hard-stop.
+
+| Agent | Path | Contract |
+|-------|------|----------|
+| compose | `agents/planning/compose.md` | [contracts § compose](refs/contracts.md) |
+| research | `agents/planning/research.md` | [contracts § research](refs/contracts.md) |
+| challenge | `agents/planning/challenge.md` | [contracts § challenge](refs/contracts.md) |
+
+**No discover agent** — discovery runs inline in this skill to preserve interactive question loops.

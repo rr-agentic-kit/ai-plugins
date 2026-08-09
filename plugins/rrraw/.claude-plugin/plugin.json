@@ -1,0 +1,9 @@
+{
+  "name": "rrraw",
+  "version": "0.0.2-beta-4",
+  "description": "Flag-driven test excellence \u2014 assess, write, fix, and migrate tests via phase agents",
+  "license": "Unlicense",
+  "author": {
+    "name": "ai-plugins maintainers"
+  }
+}
