@@ -1,0 +1,22 @@
+{
+  "name": "jobseeker",
+  "displayName": "Job Seeker",
+  "version": "0.0.2-beta-4",
+  "description": "Master and tailor resumes and cover letters for senior+ tech roles with integrity gates",
+  "license": "Unlicense",
+  "keywords": [
+    "resume",
+    "cover-letter",
+    "job-search",
+    "senior-engineer",
+    "ats"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "resume",
+    "cover-letter",
+    "job-search",
+    "senior-engineer",
+    "ats"
+  ]
+}
