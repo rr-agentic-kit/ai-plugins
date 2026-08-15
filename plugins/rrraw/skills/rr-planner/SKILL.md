@@ -1,156 +1,45 @@
 ---
 name: rr-planner
-description: Flag-driven software planning docs — progressive top-down discovery (exec-summary → MRD → BRD → PRD → FRD), compose, research, and challenge. Orchestrates phase agents under agents/planning/*; no command files.
+description: Flag-driven software planning docs — progressive top-down discovery (exec-summary → MRD → BRD → PRD → FRD), compose, research, and challenge. Use when producing exec-summary → FRD planning docs, resuming a checkpoint, or researching/challenging existing ones. Orchestrates phase agents under agents/planning/*; no command files.
 ---
 
-# rr-planner (runtime)
+# rr-planner
 
 **Human overview:** [README.md](README.md)
 
+## Purpose
+
+Produce cascade planning docs (exec-summary → FRD) from flags and conversation. This skill owns question loops and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`.
+
+## When to use
+
+- Discover a product or plan (`--discover` / `--all`, or a cascade level flag)
+- Resume a paused session (`--resume`)
+- Research or challenge **existing** planning docs
+
+## When not to use
+
+- Implementation, code review, or ticket writing that is not cascade planning
+- `--challenge` / `--research` with no docs in `--input` or `--output-dir` — hard-stop `MISSING_DOCS`; do not invent docs
+- Ad-hoc child-level polish that skips parent cascade levels (`cascade_levels` expansion is owned by [input-resolution.md](refs/input-resolution.md))
+
+## Procedure
+
+TodoWrite `merge: false` before step 1 with stable ids `resolve`, `posture`, `level-<n>` (one per `payload.cascade_levels` entry), `compose`, `stage-exit`, `write`. Mark `completed` before advancing. Re-add `compose` and `stage-exit` with `merge: true` when entering the next level. Omit `posture` / `level-*` / `compose` / `stage-exit` when `action` is `research` or `challenge`.
+
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Normalize raw flags and NL into `NormalizedPayload`. Do not restate flag handlers; `cascade_levels` is owned there. Done: payload emitted. Stop: that ref's deterministic errors.
+2. **posture** (discover / level-focus) — Load [project-posture.md](refs/project-posture.md). Classify before exec-summary. `--resume` skips if `user_confirmed` and uncontradicted. Done: posture persisted on session-state.
+3. **Discover** — For each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md) per-level discovery flow. Do not duplicate that ref's steps. Mark `level-<n>` on entry, `compose` after the compose `Task`, `stage-exit` after Gate 6 freeze. Done: level frozen. User pause → checkpoint, skip pre-save, exit.
+4. **`--research` / `--challenge`** — Require docs in `--input` or `--output-dir`; else hard-stop `MISSING_DOCS`. Run `python3 scripts/validate_planning.py <output-dir>` from plugin root; pass `payload.static_validation`. `Task` the matching agent per [contracts.md](refs/contracts.md). Persist the report per [output-formats.md](refs/output-formats.md); that persist completes `write`. Done: report written.
+5. **write** (discover, after last freeze) — Apply [success-criteria.md](refs/success-criteria.md), then pre-save reflection ([proactivity.md](refs/proactivity.md)), then persist per [output-formats.md](refs/output-formats.md). Pause skips pre-save. Agent JSON parse: one retry, then hard-stop `AGENT_OUTPUT_PARSE_FAILED`. Done: artifacts written.
+
+Load remaining refs on demand from **Shared refs**.
+
 ## Interaction boundary
 
-Question surfacing is orchestrator-owned. `Task` subagents are non-interactive and return one message.
+Question surfacing is orchestrator-owned. Discovery runs **inline** in this skill (no discover agent) so question loops stay interactive. Compose/research/challenge `Task` agents are non-interactive; this skill asks and re-invokes. Delivery: [input-resolution.md](refs/input-resolution.md) `question_mode`. Protocol: [goal-anchor.md](refs/goal-anchor.md).
 
-| Concern | Owner |
-|---------|-------|
-| Discovery (disambiguate, clarify, confirm nuance) | **Skill (inline)** — surfaces questions per `question_mode` |
-| Compose, research, challenge | **Task subagents** — return `clarifications_needed[]` on gaps; skill surfaces and re-invokes |
-| User prompts | **Never** from subagents |
-
-### Question modes
-
-| Mode | Flag | Behavior |
-|------|------|----------|
-| **Ask** (default) | _(none)_ | Use `AskQuestion` for structured options |
-| **Text** | `--text-mode` | Ask inline in chat; user replies in conversation |
-
-Both modes follow the same [goal-anchor](refs/goal-anchor.md) protocol. Only the delivery mechanism differs.
-
-### Clarification loop
-
-Loops continue until **all** of:
-
-- No pending `clarifications_needed[]` from agents
-- No blocking discovery gaps at the current level
-- User confirms done for the level or session ("done", "that's enough", "good to proceed", etc.)
-
-There is **no round cap**. User may stop at any time → checkpoint and resume later.
-
-## Activation
-
-1. Read [refs/input-resolution.md](refs/input-resolution.md) — normalize raw flags and prompt into canonical payload **before** any agent call.
-2. Load shared refs on demand per phase (see **Shared refs** below).
-3. Route to inline discovery, one agent, or deterministic phase chain.
-4. Write artifacts to `--output-dir` via [refs/output-formats.md](refs/output-formats.md).
-
-Agents under `agents/planning/*` are function-style executors: they receive normalized payload, return typed output, and do not own routing, continuation, or user interaction.
-
-## Cascade model
-
-Progressive top-down discovery; each level inherits and narrows the level above. **Posture gate first** ([project-posture.md](refs/project-posture.md)) — existence × commitment — then:
-
-```
-exec-summary (posture / vision / problem / why)
-  → mrd (market)
-    → brd (business requirements)
-      → prd (product requirements)
-        → frd (functional detail)
-```
-
-Do not skip MRD/BRD for signed v1. Off-level answers park on the affected doc ([note-sessions.md](refs/note-sessions.md)).
-
-Level order, inheritance rules, and per-level gates: [refs/cascade.md](refs/cascade.md).
-Doc structure per level: [refs/doc-standards/](refs/doc-standards/). Shared item contract: [refs/doc-standards/item-schema.md](refs/doc-standards/item-schema.md).
-
-## Primary action flags
-
-Exactly one required per invocation (see [input-resolution](refs/input-resolution.md)):
-
-| Flag | Handler |
-|------|---------|
-| `--discover` (default) | Inline discovery → cascade all levels → compose each |
-| `--all` | Same as `--discover` |
-| `--exec-summary` | Inline discovery + compose for exec-summary only |
-| `--mrd` | Inline discovery + compose for MRD (inherits exec-summary facts) |
-| `--brd` | Inline discovery + compose for BRD |
-| `--prd` | Inline discovery + compose for PRD |
-| `--frd` | Inline discovery + compose for FRD |
-| `--research` | research agent (post-composition market evaluation) |
-| `--challenge` / `--review` | challenge agent (critique existing docs) |
-
-Shared selectors: `--input`, `--output-dir`, `--format`, `--depth`, `--text-mode`, `--resume` — normalized by [input-resolution](refs/input-resolution.md); defaults in [README](README.md).
-
-## Runtime flow
-
-```
-raw input → input-resolution (normalize) → [resume? load checkpoint]
-  → [posture gate: scan + confirm unless already confirmed]
-  → [discover inline + question loops; classify owning level each Q&A; append raw-history]
-  → compose agent(s) per level
-  → stage-exit blind-spots (this level's row) → freeze
-  → [optional research / challenge]
-  → success-criteria gate → pre-save reflection → write md|yaml docs
-  → write items.json + session-state.json → checkpoint
-```
-
-Pause checkpoints without pre-save reflection. Composed docs wait for stage-exit + pre-save.
-
-### Default `--discover` chain
-
-1. Load [refs/cascade.md](refs/cascade.md). If `--resume`, load `session-state.json` from `--output-dir` and continue from checkpoint. Append further Q&A to `raw_history_path` (create `raw-history/{UTC}.yaml` if missing).
-2. **Posture gate** (before exec-summary): load [refs/project-posture.md](refs/project-posture.md). Scan + confirm unless `--resume` already has `project_posture.user_confirmed`. Persist `session_state.project_posture` and the exec-summary Posture leaf. Skip re-ask unless the user contradicts stored posture.
-3. For each cascade level (exec-summary → mrd → brd → prd → frd):
-   - Load matching `refs/doc-standards/<level>.md` and [refs/doc-standards/item-schema.md](refs/doc-standards/item-schema.md) for the current level.
-   - Load [refs/note-sessions.md](refs/note-sessions.md). If `{level}.notes.yaml` exists, present parked notes as the first inherited-facts slice (promote `ready_to_incorporate`, question `partial`).
-   - Load [refs/goal-anchor.md](refs/goal-anchor.md) for the **entire** discovery pass at this level (not on a trigger). Unclear or ambiguous statements are blocking — do not record as fact until resolved or explicitly accepted as `assumption` with `blocking` set.
-   - Run inline discovery for that level (inherit facts from prior levels). After every Q&A round: classify which cascade level owns the answer ([note-sessions.md](refs/note-sessions.md)); same-level → current facts; other-level → park / deepen / apply — never a current-level fact. Append a turn to `raw-history/{UTC}.yaml`.
-   - On reflect/explore trigger → load [refs/proactivity.md](refs/proactivity.md) (discovery-time Gate 5; `standard`/`deep` only). PRD after MoSCoW: run the posture cut-pass.
-   - Invoke `compose` agent with `doc_type` = level. Compose consumes notes for this `doc_type` only.
-   - While `clarifications_needed[]` non-empty → surface question → append raw-history → merge answers → re-invoke compose.
-   - Load [refs/blind-spots.md](refs/blind-spots.md). Skill-inline scan **this level's applicability row** (`in_scope` + `inherit_check` only). `critical`/`high` → questioning before freeze; `medium`/`low` → assumptions/open questions. User may explicitly accept remaining. Findings that belong in the doc merge via re-compose. Do **not** spawn the challenge agent per level.
-   - Gate: level completion criteria in cascade.md must pass before next level (static: `python3 scripts/validate_planning.py <output-dir>` from plugin root). Freeze blocked on leftover `partial` notes. Freeze the level on pass.
-   - User may stop anytime → checkpoint `session-state.json` + `items.json` + raw-history; skip pre-save; exit cleanly. Do not write composed docs on pause unless already frozen.
-4. Optional: invoke `research` agent when `--research` flag or user requests market validation.
-5. Apply [refs/success-criteria.md](refs/success-criteria.md) gate before final write.
-6. Pre-save reflection ([proactivity.md](refs/proactivity.md) § Pre-save): all depths; one pass + max one fix cycle. Pause does not trigger this.
-7. Write human docs (`md` or `yaml`) then `items.json` + `session-state.json`. Checkpoint session state to `--output-dir`.
-
-### `--challenge` / `--review` chain
-
-1. Load existing docs from `--input` or `--output-dir`.
-2. Run `python3 scripts/validate_planning.py <output-dir>` from plugin root. Pass the result into the agent as `payload.static_validation` (`passed` / `failed` / `skipped`). Do not ask the challenge agent to re-check refs.
-3. Load [refs/blind-spots.md](refs/blind-spots.md), [refs/project-posture.md](refs/project-posture.md), and [refs/note-sessions.md](refs/note-sessions.md). Challenge scans the **union** of all applicability rows (full taxonomy), plus posture/legend and off-level misfile, not a per-level `in_scope` slice.
-4. Invoke `challenge` agent. Write `challenge-report.md` or `challenge-report.yaml` per `--format`.
-5. Surface findings; user may re-run `--discover` with refinements.
-
-### Orchestration gates
-
-| Gate | Rule |
-|------|------|
-| **Posture classified** | `project_posture` confirmed before exec-summary; `--resume` skips if already confirmed and uncontradicted |
-| **Off-level routed** | Answers owned by another level park / deepen / apply per [note-sessions.md](refs/note-sessions.md); never recorded as current-level facts |
-| **Level inheritance** | Child level must not contradict parent facts; conflicts → goal-anchor + question |
-| **Clarify (always-on)** | Unclear/ambiguous statements block the level; do not record as fact until resolved or accepted as `assumption` |
-| **Level completion** | Per-level done-when in cascade.md + doc-standards before advancing; leftover `partial` notes block freeze |
-| **Stage-exit blind-spots** | Scan this level's row; `critical`/`high` resolved or accepted before freeze |
-| **Clarification loop** | Re-invoke compose after each answer until no pending clarifications or user says done |
-| **Stop / resume** | User stop → checkpoint (no pre-save); `--resume` reloads `session-state.json` and appends the same raw-history file |
-| **Success criteria** | Static: `validate_planning.py` parent walk + spec/build. Judgment: atomic leaves, rank inflation, triad/AC quality, posture, parked notes |
-| **Pre-save reflection** | After success-criteria, all depths, one pass + one fix cycle; then write |
-| **Parse retry** | One retry on agent JSON parse failure; second failure → hard-stop |
-
-## Output
-
-| Artifact | Location |
-|----------|----------|
-| Per-doc files | `--output-dir` (default `{PROJECT_ROOT}/docs/plans/`) — `exec-summary`, `mrd`, `brd`, `prd`, `frd` with `.md` or `.yaml` |
-| Off-level notes | `--output-dir/{level}.notes.yaml` (always YAML; not `--format`, not validator input) |
-| Item graph | `--output-dir/items.json` (always; validator target) |
-| Session checkpoint | `--output-dir/session-state.json` (always; resume + agent I/O) |
-| Q&A history | `--output-dir/raw-history/{UTC compact ISO-8601}.yaml` (append after each Q&A) |
-| Format | `--format` `md` (default) or `yaml` — [refs/output-formats.md](refs/output-formats.md). JSON is not a plan-doc format |
-
-`PROJECT_ROOT` = git toplevel else workspace root. `--output-dir` wins. Old `docs/planning/` checkpoint: auto-resume once, state the new default, do not copy files — [input-resolution](refs/input-resolution.md).
+**No per-level challenge agent** — stage-exit is skill-inline; `--challenge` is a full-pass union scan.
 
 ## Shared refs (load on demand)
 
@@ -162,7 +51,7 @@ Pause checkpoints without pre-save reflection. Composed docs wait for stage-exit
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A (classify owner); on level entry (load sidecar) |
 | [doc-standards/item-schema.md](refs/doc-standards/item-schema.md) | Discovering/composing any level (IDs, split, spec/build) |
 | `refs/doc-standards/<level>.md` | Discovering/composing that level only |
-| [goal-anchor.md](refs/goal-anchor.md) | Entire discovery pass (always-on; unclear + ambiguous are blocking) |
+| [goal-anchor.md](refs/goal-anchor.md) | Entire discovery pass (always-on) |
 | [proactivity.md](refs/proactivity.md) | Reflect/explore trigger during discovery; PRD cut-pass after MoSCoW; **and** pre-save reflection before write |
 | [blind-spots.md](refs/blind-spots.md) | Stage-exit (this level's row) **and** `--challenge` (union) |
 | [research-method.md](refs/research-method.md) | Research phase only |
@@ -174,13 +63,10 @@ Phase-specific execution steps stay in `agents/planning/*` — skill does not du
 
 ## Agent delegation
 
-Invoke via `Task` with `PhaseInput` per [refs/contracts.md](refs/contracts.md). Parse agent JSON: one retry on failure, then hard-stop.
+Invoke via `Task` with `PhaseInput` per [contracts.md](refs/contracts.md). Parse per that ref's parsing policy.
 
 | Agent | Path | Contract |
 |-------|------|----------|
 | compose | `agents/planning/compose.md` | [contracts § compose](refs/contracts.md) |
 | research | `agents/planning/research.md` | [contracts § research](refs/contracts.md) |
 | challenge | `agents/planning/challenge.md` | [contracts § challenge](refs/contracts.md) |
-
-**No discover agent** — discovery runs inline in this skill to preserve interactive question loops.
-**No per-level challenge agent** — stage-exit blind-spots are skill-inline; `--challenge` is a full-pass union scan only.
