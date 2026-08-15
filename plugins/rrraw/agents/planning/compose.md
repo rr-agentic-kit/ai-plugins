@@ -30,7 +30,7 @@ Required context:
 6. Fill the **level’s** priority method on leaves (MoSCoW / Kano / triad). Unranked leaves: native key `—`. Containers: unmarked.
 7. **FRD:** inherit `if_absent` magnitude from parent PRD MoSCoW (Must → high, Should → moderate, Could → low). Do not compose children of Won’t. Fill `if_wrong`; set `Class` from the item-schema partition. Do not copy MoSCoW onto FRD.
 8. **Status:** default new items `spec: idea`. Set `draft` when this compose is specifying them. Never auto-promote to `ready` (user/gate). Never set `build` except FRD leaves (`none` until `spec: ready`). Replacement: new id `draft`/`idea` + `supersedes`; old id `deprecated` + `superseded_by` immediately.
-9. Render markdown with closed heading + metadata vocabulary (item-schema templates). Body after the blank line is free markdown. End the file with the item index table.
+9. Render the document with closed heading + metadata vocabulary (item-schema templates). Body after the blank line is free markdown. End markdown files with the item index table. When `payload.format` is `yaml`, still emit parseable `items[]`; the skill serializes closed-key YAML.
 10. Emit `items[]` records matching contracts (same data as markdown headers). Skill writes `items.json` and merges `item_registry`.
 11. For each required section with insufficient facts: do not invent; add `ClarificationItem` (`severity: blocking` or `high`).
 12. Set `sections_completed` and `sections_incomplete` explicitly.

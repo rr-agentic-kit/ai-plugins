@@ -3,7 +3,8 @@
 **Cascade level:** 4  
 **Inherits from:** exec-summary + MRD + BRD  
 **Narrows to:** product capabilities, user outcomes, and priorities  
-**Priority method:** MoSCoW on goals, stories, and features — [item-schema.md](item-schema.md)
+**Priority method:** MoSCoW on goals, stories, and features — [item-schema.md](item-schema.md)  
+**Blind-spots (stage-exit):** Scan only the prd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 

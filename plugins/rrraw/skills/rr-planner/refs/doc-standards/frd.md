@@ -3,7 +3,8 @@
 **Cascade level:** 5  
 **Inherits from:** exec-summary + MRD + BRD + PRD  
 **Narrows to:** functional behaviors, acceptance criteria, and interfaces  
-**Priority method:** consequence triad + derived class — [item-schema.md](item-schema.md)
+**Priority method:** consequence triad + derived class — [item-schema.md](item-schema.md)  
+**Blind-spots (stage-exit):** Scan only the frd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 

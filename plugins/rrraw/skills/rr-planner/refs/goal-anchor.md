@@ -2,11 +2,22 @@
 
 **Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format.
 
-**Load when:** Ambiguity, conflict, or nuance detected during inline discovery.
+**Load when:** Entire discovery pass at every cascade level (always-on). Not a trigger. Also on parent/child fact conflict.
+
+Unclear and ambiguous user statements are **blocking**. Do not record them as facts, and do not treat an unresolved guess as a true assumption, until the protocol below completes or the user explicitly accepts an `assumption` with `blocking` set.
+
+## Unclear vs ambiguous
+
+| Kind | Test | Action |
+|------|------|--------|
+| **Unclear** | Cannot parse a single meaning | Ask; do not guess. Do not record as fact. |
+| **Ambiguous** | Two or more valid meanings | Name the ambiguity, offer 2–4 options, capture nuance. Do not pick silently. |
+
+Both block advancing the level unless the user explicitly accepts the gap.
 
 ## Disambiguation protocol
 
-When input is vague (multiple valid interpretations):
+When input is unclear or ambiguous:
 
 1. **Name the ambiguity** — State what is unclear in one sentence.
 2. **Offer 2–4 concrete options** (not open-ended unless necessary).
@@ -15,10 +26,11 @@ When input is vague (multiple valid interpretations):
    - `text` → numbered options inline in chat; user replies in conversation
 4. **Capture nuance** — If user picks "other" or adds qualifiers, record full text, not just the label.
 5. **Re-anchor** — After resolution, restate the decision tied to the user's stated goal.
+6. **Append history** — After every Q&A turn, append to `raw-history/{UTC}.yaml` ([output-formats.md](output-formats.md)).
 
-Do not proceed to compose until blocking ambiguities are resolved.
+Do not proceed to compose (and do not freeze the level) until blocking clarifications are resolved or explicitly accepted.
 
-Parent-id existence, numbering, spec/build legality, and md/`items.json` drift are **static** — `scripts/validate_planning.py`. This ref owns judgment only (vague input, conflict, nuance). Do not re-check whether a parent id exists.
+Parent-id existence, numbering, spec/build legality, and md|yaml vs `items.json` drift are **static** — `scripts/validate_planning.py`. This ref owns judgment only (vague input, conflict, nuance). Do not re-check whether a parent id exists.
 
 ## Clarify-before-assume
 
@@ -26,11 +38,16 @@ Parent-id existence, numbering, spec/build legality, and md/`items.json` drift a
 |-----------|--------|
 | Missing fact, non-blocking | Record as `assumption` with `blocking: false`; note in doc |
 | Missing fact, blocking | Surface question; do not invent |
+| Unclear statement | Ask; do not guess; do not record as fact |
+| Ambiguous statement | Name it; offer options; do not record as fact until resolved |
 | Implied fact from context | Confirm with user before recording |
 | Industry default | State the default; ask accept/reject/modify |
 | Prior level fact seems wrong | Flag conflict; ask user to reconcile |
+| User accepts a gap | Record as `assumption` with `blocking` set as the user stated; not as fact |
 
 **Never silently drop** user qualifiers (e.g. "mostly", "except for", "only in prod").
+
+**Never record as fact** a statement that is still unclear or ambiguous. An accepted gap is an assumption, not truth.
 
 ## Nuance capture
 
@@ -63,6 +80,8 @@ When child level contradicts parent:
 
 ## Decision log format
 
+Stored in `session-state.json` (not raw-history). Verbatim Q&A is YAML history only.
+
 ```json
 {
   "id": "d-001",
@@ -91,6 +110,8 @@ When child level contradicts parent:
 }
 ```
 
+`source: inferred` requires confirm-before-record. Do not set `validated: true` unless the user confirmed or evidence landed.
+
 ## Question patterns
 
 | Pattern | `ask` mode | `text` mode |
@@ -100,7 +121,7 @@ When child level contradicts parent:
 | Confirm | `AskQuestion` confirm | "Confirm: [statement] — yes/no?" |
 | Free-text follow-up | `AskQuestion` with Other | "Or describe in your own words:" |
 
-After each answer, append to decision log before continuing discovery.
+After each answer: append raw-history YAML, then update the decision/assumption log in session state, then continue discovery.
 
 ## Session completion signals
 

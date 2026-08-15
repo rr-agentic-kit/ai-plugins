@@ -3,7 +3,8 @@
 **Cascade level:** 2  
 **Inherits from:** exec-summary (vision, problem, constraints)  
 **Narrows to:** market context relevant to the stated vision  
-**Priority method:** Kano on needs — [item-schema.md](item-schema.md)
+**Priority method:** Kano on needs — [item-schema.md](item-schema.md)  
+**Blind-spots (stage-exit):** Scan only the mrd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 

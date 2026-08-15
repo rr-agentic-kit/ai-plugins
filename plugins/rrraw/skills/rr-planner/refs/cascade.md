@@ -40,7 +40,7 @@ Each level **inherits** all resolved facts from levels above and **narrows** sco
 
 1. **No contradiction** — child facts must align with parent facts. Conflict → [goal-anchor.md](goal-anchor.md) + question (per `question_mode`).
 2. **No orphan items** — every item’s `parent:` exists (ES roots: `—`). Cross-doc parent is the previous cascade level only. Verified by `validate_planning.py` (Gate 3 + success-criteria static).
-3. **Explicit narrowing** — when a parent fact is too broad for the child level, record the narrowing as a decision in the session decision log.
+3. **Explicit narrowing** — when a parent fact is too broad for the child level, record the narrowing as a decision in `session-state.json`.
 4. **Deferred detail** — details not yet known at a level are recorded as `assumptions[]` or `open_questions[]`, not silently invented.
 5. **Priority inheritance** — FRD may default `if_absent` magnitude from parent PRD MoSCoW (Must → high, Should → moderate, Could → low). Won’t PRD items get no FRD children. Do not copy MoSCoW onto FRD.
 
@@ -50,27 +50,29 @@ For each level in `cascade_levels`:
 
 1. Load `doc-standards/<level>.md` and [doc-standards/item-schema.md](doc-standards/item-schema.md).
 2. Extract required sections from the standard; treat claims as items (prose overviews stay unnumbered).
-3. Run progressive discovery:
+3. Load [goal-anchor.md](goal-anchor.md) for the **entire** discovery pass. Unclear or ambiguous statements are blocking.
+4. Run progressive discovery:
    - Present inherited facts summary to user (brief).
    - Ask targeted questions for gaps in required sections.
    - New items default `spec: idea`; move to `draft` when specifying. Do not auto-promote to `ready`.
-   - On vague input → disambiguate per [goal-anchor.md](goal-anchor.md).
-   - On reflect trigger → apply [proactivity.md](proactivity.md).
-4. Accumulate `level_facts` object for compose agent; keep `item_registry` in sync after compose.
-5. Gate check (below).
+   - Unclear/ambiguous input → disambiguate per goal-anchor; do not record as fact until resolved or accepted as `assumption`.
+   - After every Q&A, append to `raw-history/{UTC}.yaml`.
+   - On reflect trigger → apply [proactivity.md](proactivity.md) (Gate 5; `standard`/`deep` only).
+5. Accumulate `level_facts` object for compose agent; keep `item_registry` in sync after compose.
 6. Invoke compose agent.
-7. While `clarifications_needed[]` non-empty → surface question → merge answer → re-invoke compose. Loop until cleared or user says done.
-8. On Gate pass: **freeze** this level (see Freeze and remap). Run `scripts/validate_planning.py` on `--output-dir` as the static half of Gate 3.
+7. While `clarifications_needed[]` non-empty → surface question → append raw-history → merge answer → re-invoke compose. Loop until cleared or user says done.
+8. Stage-exit blind-spots (Gate 6): load [blind-spots.md](blind-spots.md); scan **this level's** `in_scope` + `inherit_check` only. `critical`/`high` → question before freeze. Do not spawn the challenge agent.
+9. Remaining gates (below). On Gate pass: **freeze** this level (see Freeze and remap). Run `scripts/validate_planning.py` on `--output-dir` as the static half of Gate 3.
 
 ## Stop and resume
 
 User may stop at any point ("stop", "pause", "done for now", etc.):
 
-1. Write partial composed docs for completed levels plus `items.json`.
-2. Checkpoint full `session-state.json` to `--output-dir` (see [output-formats.md](output-formats.md)).
+1. Write partial composed docs for **frozen** levels plus `items.json`. Do not run pre-save reflection.
+2. Checkpoint full `session-state.json` to `--output-dir` (include `raw_history_path`; see [output-formats.md](output-formats.md)).
 3. Set `checkpoint.status: paused` with `current_level` and `pending_clarifications`.
 
-To resume: `rr-planner --resume --output-dir <same-dir>` (or NL "continue planning"). Skill loads checkpoint and picks up at `current_level`. Remap uses `item_registry`.
+To resume: `rr-planner --resume --output-dir <same-dir>` (or NL "continue planning"). Skill loads checkpoint, appends Q&A to `raw_history_path`, and picks up at `current_level`. Remap uses `item_registry`. Default dir is `{PROJECT_ROOT}/docs/plans/`; old `docs/planning/` fallback is in [input-resolution.md](input-resolution.md).
 
 ## Per-level completion gates
 
@@ -82,9 +84,10 @@ Every **required section** in the matching doc-standard has at least one resolve
 
 ### Gate 2: Goal anchor
 
-- Zero unresolved ambiguities at this level.
-- All decisions recorded in session decision log with `goal_ref` (an `ES-*` id when available).
+- Zero unresolved unclear or ambiguous statements at this level (always-on [goal-anchor.md](goal-anchor.md)).
+- All decisions recorded in `session-state.json` with `goal_ref` (an `ES-*` id when available).
 - Nuance captured where user provided qualifiers (not flattened).
+- Q&A for this level is in raw-history YAML.
 
 ### Gate 3: Inheritance integrity (parent walk)
 
@@ -93,7 +96,7 @@ Every **required section** in the matching doc-standard has at least one resolve
 - Every `parent` / `supersedes` / `superseded_by` id exists (ES roots `—`).
 - No cycles; no cascade-level skips; numbering dense among siblings; max depth 2.
 - Kind invariant (container has children, leaf has none); `idea` has no children.
-- Required keys, spec/build legality, md vs `items.json` drift.
+- Required keys, spec/build legality, md|yaml vs `items.json` drift.
 
 **Judgment** (compose/challenge): compound leaves, inflated MoSCoW, weak triad prose, vague AC.
 
@@ -105,8 +108,16 @@ Every **required section** in the matching doc-standard has at least one resolve
 
 ### Gate 5: Proactivity (standard/deep depth only)
 
-- At least one reflection pass completed (see [proactivity.md](proactivity.md)).
+- At least one discovery-time reflection pass completed (see [proactivity.md](proactivity.md)).
 - Open risks or assumptions surfaced to user before advancing.
+- Write-time pre-save reflection is **not** this gate (runs after freeze + success-criteria, all depths).
+
+### Gate 6: Stage-exit blind-spots (all depths)
+
+- One skill-inline pass against this level's applicability row in [blind-spots.md](blind-spots.md) (`in_scope` + `inherit_check` only).
+- Every `critical` / `high` finding is resolved, re-composed, or explicitly accepted before freeze.
+- `medium` / `low` recorded as assumptions or open questions; do not block unless the user wants them.
+- No per-level `challenge-report`. `--challenge` is a later union scan.
 
 ## Freeze and remap
 
@@ -122,11 +133,11 @@ Every **required section** in the matching doc-standard has at least one resolve
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass | Freeze level; advance to next cascade level |
+| All gates pass (including Gate 6) | Freeze level; advance to next cascade level |
 | Pending clarifications or gate gaps | Surface question → re-discover or re-compose (no round cap) |
 | User says done for level | Accept current state; advance or checkpoint per user intent |
-| User requests stop / pause | Checkpoint `session-state.json`; write partial docs + `items.json`; exit cleanly |
-| `--resume` | Load checkpoint; continue from `current_level` |
+| User requests stop / pause | Checkpoint `session-state.json`; write frozen docs + `items.json` + raw-history; skip pre-save; exit cleanly |
+| `--resume` | Load checkpoint; append raw-history; continue from `current_level` |
 
 ## Fact accumulation schema
 
@@ -166,10 +177,11 @@ Skill maintains across levels:
     "pending_clarifications": [],
     "question_mode": "ask",
     "updated": "ISO-8601"
-  }
+  },
+  "raw_history_path": "raw-history/2026-08-15T185203Z.yaml"
 }
 ```
 
 `item_registry` maps every minted id → `{ doc, parent, kind, spec, class? }` so resume and re-compose can remap child `parent:` values.
 
-Checkpointed to `--output-dir/session-state.json` on stop and after each level completion. Resume loads this file.
+Checkpointed to `--output-dir/session-state.json` on stop and after each level completion (`raw_history_path` required once Q&A has started). Resume loads this file.

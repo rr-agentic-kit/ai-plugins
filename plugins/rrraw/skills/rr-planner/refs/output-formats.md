@@ -1,32 +1,46 @@
 # output-formats
 
-**Owner:** Doc file naming, chat-log format, and md/json output adapters.
+**Owner:** Doc file naming, md/yaml human adapters, JSON internals (`items.json`, `session-state.json`), and append-only Q&A history.
 
-**Load when:** Write step — persisting artifacts to `--output-dir`.
+**Load when:** Write step — persisting artifacts to `--output-dir`. Also first Q&A (create/append `raw-history/`).
 
 Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md). Schema: [schemas/items.schema.json](schemas/items.schema.json).
 
-## File naming
+## Layout
 
-All files written to `payload.output_dir` (default `docs/planning/`):
+All files written to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`):
+
+```
+{PROJECT_ROOT}/docs/plans/
+  exec-summary.md | exec-summary.yaml
+  mrd.md | mrd.yaml
+  brd.md | brd.yaml
+  prd.md | prd.yaml
+  frd.md | frd.yaml
+  items.json                      # relationship graph only
+  session-state.json              # internal checkpoint / agent I/O
+  research-report.md | .yaml
+  challenge-report.md | .yaml
+  raw-history/
+    2026-08-15T185203Z.yaml
+```
 
 | Doc type | Filename |
 |----------|----------|
-| exec-summary | `exec-summary.md` |
-| mrd | `mrd.md` |
-| brd | `brd.md` |
-| prd | `prd.md` |
-| frd | `frd.md` |
-| item registry | `items.json` |
-| session checkpoint | `session-state.json` |
-| session log | `session-log.md` |
-| decisions export | `decisions.json` |
-| research report | `research-report.md` |
-| challenge report | `challenge-report.md` |
+| exec-summary | `exec-summary.md` or `exec-summary.yaml` |
+| mrd | `mrd.md` or `mrd.yaml` |
+| brd | `brd.md` or `brd.yaml` |
+| prd | `prd.md` or `prd.yaml` |
+| frd | `frd.md` or `frd.yaml` |
+| item graph | `items.json` (always JSON) |
+| session checkpoint | `session-state.json` (always JSON) |
+| Q&A history | `raw-history/{UTC compact ISO-8601}.yaml` |
+| research report | `research-report.md` or `.yaml` |
+| challenge report | `challenge-report.md` or `.yaml` |
 
-Create `--output-dir` if it does not exist.
+Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A.
 
-**Always write `items.json`** (union of all composed items), including when `--format md`. `--format json` also embeds the same records in `planning-bundle.json`.
+`--format` selects the human-doc extension (`md` default, `yaml` alternative). `items.json` and `session-state.json` are always written as JSON. `--format json` is `UNSUPPORTED_FORMAT` — JSON is not a plan document format. Do not write `planning-bundle.json` or `session-log.md`. `decisions.json` is not a user artifact; decisions live in `session-state.json`.
 
 ## Markdown doc format
 
@@ -54,9 +68,50 @@ traces_from: [exec-summary.md, mrd.md, brd.md]
 
 Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Heading + metadata keys are a closed vocabulary — parser is regex, not an LLM.
 
+## YAML doc format (`--format yaml`)
+
+Same cascade docs, `.yaml` extension. Closed keys match the markdown header vocabulary as mappings under each item id. Skill serializes from compose `items[]` + prose; compose still returns JSON to the skill.
+
+```yaml
+doc_type: prd
+version: 1
+created: 2026-06-24T10:00:00Z
+traces_from:
+  - exec-summary.yaml
+  - mrd.yaml
+  - brd.yaml
+title: Checkout
+
+items:
+  PRD-3:
+    title: Checkout
+    Parent: BRD-2
+    Kind: container
+    Spec: draft
+  PRD-3.1:
+    title: Guest checkout
+    Parent: PRD-3
+    Kind: leaf
+    Spec: ready
+    MoSCoW: Must
+    body: |
+      As a guest, I can complete checkout without an account.
+```
+
+| Rule | Detail |
+|------|--------|
+| Item ids | Keys under `items:` matching `{DOC}-{n}` / `{DOC}-{n.m}` |
+| Closed keys | `Parent`, `Kind`, `Spec`, plus native method / FRD keys — same as md headers |
+| `title` / `body` | Not closed metadata; title is the heading text; body is free prose (AI-judged) |
+| Unranked / null | `—` or YAML `null` |
+| Unknown keys | Validator FAIL (same as md) |
+| Item index | Optional `item_index` list; not required for validation |
+
+Do not wrap the human plan in a JSON bundle.
+
 ## `items.json`
 
-Written on every compose (merged registry). Must match markdown headers; drift is a validator FAIL.
+Written on every compose (merged registry). Must match md headers or yaml closed keys; drift is a validator FAIL. Graph checks (parent walk, numbering, spec/build) run on this file.
 
 ```json
 {
@@ -75,54 +130,55 @@ Written on every compose (merged registry). Must match markdown headers; drift i
 }
 ```
 
-## Session log format
+## Raw-history YAML
 
-`session-log.md` captures the planning conversation arc:
+Verbatim Q&A only. Decisions and assumptions stay in `session-state.json`. Append after **every** Q&A round (discovery, compose clarifications, stage-exit blind-spots). Pause still leaves reanalyzable history.
 
-```markdown
-# Planning Session Log
+Filename: UTC compact ISO-8601 (`YYYY-MM-DDTHHMMSSZ.yaml`), e.g. `2026-08-15T185203Z.yaml`. One file per session. `--resume` appends to `session-state.raw_history_path`.
 
-**Started:** ISO-8601
-**Action:** discover
-**Depth:** standard
-
-## Decisions
-
-| ID | Level | Decision | Goal ref |
-|----|-------|----------|----------|
-| d-001 | exec-summary | ... | ES-1 |
-
-## Assumptions
-
-| ID | Level | Assumption | Validated |
-|----|-------|------------|-----------|
-| a-001 | mrd | ... | false |
-
-## Level progression
-
-### exec-summary
-- Status: ok
-- Frozen: true
-
-### mrd
-- Status: in_progress
-
-## Clarifications
-
-| # | Level | Question | Answer |
-|---|-------|----------|--------|
-| 1 | brd | ... | ... |
-
-## Checkpoints
-
-| Timestamp | Status | Level | Notes |
-|-----------|--------|-------|-------|
-| ISO-8601 | paused | brd | User requested stop |
+```yaml
+session:
+  started: 2026-08-15T18:52:03Z
+  action: discover
+  output_dir: /abs/path/docs/plans
+  question_mode: ask
+  depth: standard
+turns:
+  - ts: 2026-08-15T18:53:01Z
+    level: exec-summary
+    source: discovery
+    question:
+      id: q-001
+      text: Who feels this pain?
+      mode: ask
+      options:
+        - Engineering managers
+        - ICs
+        - Both equally
+    answer:
+      text: Engineering managers
+      selected:
+        - Engineering managers
 ```
+
+| Field | Notes |
+|-------|-------|
+| `session.started` | ISO-8601 UTC of first Q&A (file create) |
+| `session.action` | Normalized `action` |
+| `session.output_dir` | Resolved output directory |
+| `session.question_mode` | `ask` \| `text` |
+| `session.depth` | `shallow` \| `standard` \| `deep` |
+| `turns[].ts` | ISO-8601 UTC of the answer |
+| `turns[].level` | Cascade level or `session` |
+| `turns[].source` | `discovery` \| `compose` \| `blind-spots` \| `research` \| `challenge` \| `presave` |
+| `turns[].question` | `id`, `text`, `mode`, `options[]` |
+| `turns[].answer` | `text` (verbatim), `selected` (option labels when applicable) |
+
+Append-only: never rewrite prior turns. Create `raw-history/` on first Q&A. If the session file is missing on resume, create a new timestamped file and update `raw_history_path`.
 
 ## Session checkpoint (`session-state.json`)
 
-Written on **every stop** and after **each level completion**. Required for `--resume`.
+Written on **every stop** and after **each level completion**. Required for `--resume`. Internal only — not a human plan doc.
 
 ```json
 {
@@ -130,7 +186,9 @@ Written on **every stop** and after **each level completion**. Required for `--r
     "action": "discover",
     "depth": "standard",
     "question_mode": "ask",
-    "output_dir": "docs/planning/",
+    "format": "md",
+    "output_dir": "{PROJECT_ROOT}/docs/plans/",
+    "raw_history_path": "raw-history/2026-08-15T185203Z.yaml",
     "updated": "ISO-8601"
   },
   "checkpoint": {
@@ -149,42 +207,9 @@ Written on **every stop** and after **each level completion**. Required for `--r
 }
 ```
 
+`raw_history_path` is relative to `output_dir`. Resume loads this file, continues from `checkpoint.current_level`, and appends Q&A to that history file.
+
 `item_registry`: id → `{ doc, parent, kind, spec, class? }`. Resume and re-compose remap child `parent:` from this map.
-
-Resume loads this file and continues from `checkpoint.current_level`.
-
-## JSON format (`--format json`)
-
-Write `planning-bundle.json` **and** `items.json`:
-
-```json
-{
-  "metadata": {
-    "action": "discover",
-    "depth": "standard",
-    "output_dir": "docs/planning/",
-    "created": "ISO-8601",
-    "final_status": "ok|partial|failed"
-  },
-  "docs": {
-    "exec-summary": { "content": "...", "status": "ok" },
-    "mrd": { "content": "...", "status": "ok" }
-  },
-  "items": [],
-  "session_state": {
-    "decisions": [],
-    "assumptions": [],
-    "level_facts": {},
-    "item_registry": {},
-    "frozen_levels": []
-  },
-  "research": null,
-  "challenge": null,
-  "resolution_trace": {}
-}
-```
-
-`items` in the bundle is the same array as `items.json`. When `format: md` (default), also write individual `.md` files plus `session-log.md`.
 
 ## Status merge
 
@@ -197,9 +222,10 @@ Write `planning-bundle.json` **and** `items.json`:
 ## Adapter rules
 
 1. Never overwrite without user confirmation if files exist and `--input` did not imply refresh.
-2. Include `resolution_trace` in json output.
-3. Always write `session-state.json` on stop or level completion for resume.
-4. Always write `items.json` after compose (md and json formats).
-5. Chat log is append-friendly — new session creates new log or timestamps section if continuing.
-6. Research and challenge reports are standalone files, not merged into doc files.
-7. After write, skill runs `python3 scripts/validate_planning.py <output-dir>` (plugin root). FAIL blocks `final_status: ok`.
+2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`).
+3. Always write `items.json` after compose (both `md` and `yaml` formats).
+4. Append a raw-history turn after every Q&A; do not wait for stage-exit.
+5. Research and challenge reports are standalone files, not merged into cascade docs. Extension follows `--format`.
+6. Skill writes human files. Agents return JSON (`doc_content` + `items[]`); when `format: yaml`, skill serializes closed-key YAML from `items[]` + prose.
+7. After write, skill runs `python3 scripts/validate_planning.py <output-dir>` (plugin root). Pass `--format md|yaml` when known; otherwise the script sniffs `.md`/`.yaml`. FAIL blocks `final_status: ok`.
+8. Pause does not run pre-save reflection and does not write unfrozen composed docs.

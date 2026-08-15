@@ -47,7 +47,7 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 | `status` | `ok` \| `partial` \| `failed` | Completion state |
 | `data` | object | Phase-specific contract (below) |
 | `summary` | string | One-line human summary |
-| `artifacts` | string[] | File paths written (informational) |
+| `artifacts` | string[] | File paths written by the **skill** (informational). Agents do not write files. |
 
 ### PhaseError
 
@@ -118,12 +118,12 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
 }
 ```
 
-Item identity, closed markdown keys, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json).
+Item identity, closed markdown/yaml keys, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json).
 
 | Field | Notes |
 |-------|-------|
 | `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd`, `frd` |
-| `doc_content` | Full markdown document per [doc-standards/](doc-standards/) + item-schema templates |
+| `doc_content` | Full document per `--format`: markdown templates, or closed-key YAML mappings. Skill writes the file; agent does not. |
 | `sections_completed` | Required sections with content |
 | `sections_incomplete` | Required sections with gaps |
 | `clarifications_needed` | `ClarificationItem[]` — non-empty blocks `status: ok` |
@@ -198,12 +198,14 @@ Item identity, closed markdown keys, spec/build: [doc-standards/item-schema.md](
 }
 ```
 
+`docs_reviewed` uses the actual filenames (`.yaml` when `--format yaml`).
+
 | Field | Notes |
 |-------|-------|
-| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy — judgment only when `payload.static_validation.status` is `passed` or `failed` |
+| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** — judgment only when `payload.static_validation.status` is `passed` or `failed`. Do not apply per-level `in_scope` (that is skill-inline stage-exit). |
 | `comparison_tables` | When single-option decisions lack alternatives analysis |
 | `clarifications_needed` | Questions that block severity assessment |
-| `docs_reviewed` | All docs scanned |
+| `docs_reviewed` | All docs scanned (`.md` or `.yaml` per `--format`) |
 
 Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.py`. If `passed`/`failed`, do not re-check refs. If `skipped`, may flag build-on-non-ready.
 
@@ -223,7 +225,7 @@ Emitted by input-resolution; embedded in `PhaseInput.payload`:
 {
   "action": "discover",
   "input": null,
-  "output_dir": "docs/planning/",
+  "output_dir": "{PROJECT_ROOT}/docs/plans/",
   "format": "md",
   "depth": "standard",
   "question_mode": "ask",
@@ -234,4 +236,4 @@ Emitted by input-resolution; embedded in `PhaseInput.payload`:
 }
 ```
 
-Full schema: [input-resolution.md](input-resolution.md).
+Full schema: [input-resolution.md](input-resolution.md). `format` is `md` or `yaml` only. JSON is reserved for `items.json`, `session-state.json`, and this Task envelope — not a saved plan doc.

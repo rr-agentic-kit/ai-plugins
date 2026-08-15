@@ -3,7 +3,8 @@
 **Cascade level:** 3  
 **Inherits from:** exec-summary + MRD  
 **Narrows to:** business objectives, stakeholders, and business-level constraints  
-**Priority method:** MoSCoW on objectives, rules, and dependencies — [item-schema.md](item-schema.md)
+**Priority method:** MoSCoW on objectives, rules, and dependencies — [item-schema.md](item-schema.md)  
+**Blind-spots (stage-exit):** Scan only the brd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 

@@ -2,7 +2,7 @@
 
 **Owner:** Build-precise gate before final write — split **static** (script) vs **judgment** (compose/challenge).
 
-**Load when:** Pre-write gate after compose chain completes; also after each level’s Gate 3.
+**Load when:** Pre-write gate after compose chain completes (before pre-save reflection); also after each level’s Gate 3.
 
 Item identity and DoR: [doc-standards/item-schema.md](doc-standards/item-schema.md).
 
@@ -28,7 +28,7 @@ python3 scripts/validate_planning.py <output-dir>
 - Required closed keys; spec/build legality (DoR-as-code)
 - `spec == ready` ⇒ method fields present; cross-doc parent `ready` (same-doc container exempt)
 - `build != none` ⇒ FRD leaf with `spec == ready`
-- md headers vs `items.json` drift
+- md headers or yaml closed keys vs `items.json` drift
 
 Schema: [schemas/items.schema.json](schemas/items.schema.json).
 
@@ -73,7 +73,8 @@ Every `must-correct` / `must-present` FRD leaf must have:
 - No open `clarifications_needed[]` unless user explicitly accepted gaps.
 - No `assumptions` with `blocking: true` and `validated: false`.
 - No conflicting facts across levels (per cascade inheritance rules).
-- Decision log complete for all user-facing choices.
+- Decision log in `session-state.json` complete for all user-facing choices.
+- Verbatim Q&A for those choices is in `raw-history/` (not a substitute for the decision log).
 
 ## Criterion: Decision traceability
 
@@ -127,8 +128,10 @@ When `gate_passed: false` but user accepts partial:
 - Prepend warning to each doc:
 
 ```markdown
-> **Status: PARTIAL** — Success criteria not fully met. See session-log.md for gaps.
+> **Status: PARTIAL** — Success criteria not fully met. See session-state.json assumptions/decisions and raw-history/ for gaps.
 ```
 
-- List failing criteria in `session-log.md`.
+YAML equivalent: `status: PARTIAL` at document root plus the same sentence in `warning`.
+
+- List failing criteria in `session-state.json` (`checkpoint.pending_clarifications` and unvalidated `assumptions[]`). Do not write `session-log.md`.
 - Set `final_status: partial` in output metadata.

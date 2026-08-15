@@ -4,7 +4,7 @@
 
 **Load when:** Discovering, composing, validating, or challenging any cascade doc.
 
-Audience: compose agent + orchestrator. Humans read the markdown.
+Audience: compose agent + orchestrator. Humans read markdown or YAML per `--format`. Validation target is structured (`items.json`).
 
 ## Shared fields
 
@@ -157,11 +157,13 @@ Omit `build` on ES/MRD/BRD/PRD and on all containers. PRD “delivered” is **d
 - Login leaf solid, already coding: `FRD-4.1 spec:ready build:in_progress`. Authz still fuzzy: `FRD-4.2 spec:draft build:none`. Container `FRD-4 spec:draft`.
 - Replace a requirement: `FRD-4.1 spec:deprecated superseded_by:FRD-9`; `FRD-9 spec:draft supersedes:FRD-4.1 build:none` until triad+AC exist and user promotes `ready`.
 
-## Canonical markdown (closed vocabulary)
+## Canonical item surface (closed vocabulary)
 
-Working surface is markdown. Validation target is structured. Compose always writes both `*.md` and `items.json`.
+Working surface is markdown **or** YAML per `--format`. Validation target is structured. Compose always emits `items[]`; the skill writes `*.md` or `*.yaml` plus `items.json`.
 
-Heading (regex, not an LLM):
+YAML docs use the same closed keys (`Parent`, `Kind`, `Spec`, …) as mappings under each item id. See [output-formats.md](../output-formats.md).
+
+Heading (regex, not an LLM) — markdown:
 
 ```
 ^(#{2,4}) (ES|MRD|BRD|PRD|FRD)-(\d+(?:\.\d+)?): (.+)$
@@ -180,13 +182,13 @@ Metadata lines immediately under the heading, until a blank line:
 | **Leaves, native method** | `MoSCoW` \| `Kano` \| `If present` / `If absent` / `If wrong` / `Class` |
 | **Optional** | `Supersedes`, `Superseded-by` |
 
-Unknown keys or missing required keys → validator FAIL. Body after the blank line is free markdown (AI-judged).
+Unknown keys or missing required keys → validator FAIL. Body after the blank line (md) or `body:` (yaml) is free prose (AI-judged).
 
-`Parent: —` and native rank `—` mean null / unranked. Triad lines: `<magnitude> — <effect>` (em dash preferred).
+`Parent: —` and native rank `—` mean null / unranked. Triad lines: `<magnitude> — <effect>` (em dash preferred). YAML may use `null` instead of `—`.
 
-JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph checks: `plugins/rrraw/scripts/validate_planning.py`.
+JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph checks: `plugins/rrraw/scripts/validate_planning.py` (sniffs `.md`/`.yaml` or takes `--format`).
 
-**Code owns:** unique IDs, parent/supersede pointers, numbering density, kind invariant, required keys, status legality, md/json drift.
+**Code owns:** unique IDs, parent/supersede pointers, numbering density, kind invariant, required keys, status legality, doc/`items.json` drift.
 
 **AI owns:** whether a leaf is actually atomic, whether MoSCoW is inflated, whether `if_wrong` is a real blast radius, whether the shall is testable.
 
@@ -245,7 +247,7 @@ The system shall allow checkout without an account.
 
 ## Item index
 
-Each composed markdown file ends with an index. Column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Containers and unranked leaves show `—`.
+Each composed markdown file (and the yaml `item_index` if present) ends with an index. Column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Containers and unranked leaves show `—`.
 
 ```markdown
 ## Item index

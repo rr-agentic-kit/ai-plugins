@@ -3,7 +3,8 @@
 **Cascade level:** 1 (foundation)  
 **Inherits from:** user input, conversation context  
 **Narrows to:** strategic vision and problem framing for MRD  
-**Priority method:** MoSCoW — [item-schema.md](item-schema.md)
+**Priority method:** MoSCoW — [item-schema.md](item-schema.md)  
+**Blind-spots (stage-exit):** Scan only the exec-summary row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 

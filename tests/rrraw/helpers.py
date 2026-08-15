@@ -101,6 +101,106 @@ The system shall allow checkout without an account.
 """,
 }
 
+VALID_YAML_FILES: dict[str, str] = {
+    "exec-summary.yaml": """\
+doc_type: exec-summary
+title: Exec summary
+items:
+  ES-1:
+    title: Guest checkout growth
+    Parent: —
+    Kind: leaf
+    Spec: ready
+    MoSCoW: —
+    body: |
+      Vision.
+  ES-2:
+    title: Account wall drop-off
+    Parent: —
+    Kind: leaf
+    Spec: ready
+    MoSCoW: —
+    body: |
+      Problem.
+  ES-3:
+    title: Self-serve conversion
+    Parent: —
+    Kind: leaf
+    Spec: ready
+    MoSCoW: Must
+""",
+    "mrd.yaml": """\
+doc_type: mrd
+title: MRD
+items:
+  MRD-1:
+    title: SMB buyers
+    Parent: ES-2
+    Kind: leaf
+    Spec: ready
+    Kano: —
+    body: |
+      Primary segment.
+  MRD-2:
+    title: Account-free purchase
+    Parent: ES-2
+    Kind: leaf
+    Spec: ready
+    Kano: basic
+""",
+    "brd.yaml": """\
+doc_type: brd
+title: BRD
+items:
+  BRD-1:
+    title: Increase self-serve revenue
+    Parent: MRD-2
+    Kind: leaf
+    Spec: ready
+    MoSCoW: Must
+""",
+    "prd.yaml": """\
+doc_type: prd
+title: PRD
+items:
+  PRD-1:
+    title: Checkout
+    Parent: BRD-1
+    Kind: container
+    Spec: draft
+  PRD-1.1:
+    title: Guest checkout
+    Parent: PRD-1
+    Kind: leaf
+    Spec: ready
+    MoSCoW: Must
+    body: |
+      As a guest, I can complete checkout without an account.
+""",
+    "frd.yaml": """\
+doc_type: frd
+title: FRD
+items:
+  FRD-1:
+    title: Checkout
+    Parent: PRD-1.1
+    Kind: container
+    Spec: draft
+  FRD-1.1:
+    title: Guest checkout without account
+    Parent: FRD-1
+    Kind: leaf
+    Spec: ready
+    Build: in_progress
+    "If present": high — Unlocks self-serve conversion without an account
+    "If absent": high — PLG blocked
+    "If wrong": critical — Bad tax/entitlements
+    Class: must-correct
+    body: |
+      The system shall allow checkout without an account.
+""",
+}
+
 
 def write_planning(
     root: Path,

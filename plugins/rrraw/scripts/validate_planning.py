@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.14
-"""Validate rr-planner markdown item headers, graph, status, and items.json drift."""
+"""Validate rr-planner md/yaml item headers, graph, status, and items.json drift."""
 
 from __future__ import annotations
 
@@ -12,13 +12,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-DOC_FILES: dict[str, str] = {
-    "exec-summary": "exec-summary.md",
-    "mrd": "mrd.md",
-    "brd": "brd.md",
-    "prd": "prd.md",
-    "frd": "frd.md",
-}
+import yaml
+
+DOC_STEMS: tuple[str, ...] = ("exec-summary", "mrd", "brd", "prd", "frd")
+YAML_SKIP_KEYS = frozenset({"title", "body"})
 
 PREFIX_TO_DOC: dict[str, str] = {
     "ES": "exec-summary",
@@ -264,6 +261,116 @@ def parse_markdown(text: str, source_file: str) -> tuple[list[Item], list[Issue]
     return items, issues
 
 
+def _yaml_scalar(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value).strip()
+
+
+def parse_yaml_doc(text: str, source_file: str) -> tuple[list[Item], list[Issue]]:
+    issues: list[Issue] = []
+    try:
+        data = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        return [], [Issue("error", "INVALID_YAML", f"{source_file}: {exc}")]
+    if data is None:
+        return [], []
+    if not isinstance(data, dict):
+        return [], [Issue("error", "INVALID_YAML", f"{source_file} must be a mapping")]
+    items_map = data.get("items")
+    if items_map is None:
+        items_map = {key: value for key, value in data.items() if ID_RE.match(str(key))}
+    if not isinstance(items_map, dict):
+        return [], [Issue("error", "INVALID_YAML", "items must be a mapping")]
+    items: list[Item] = []
+    for raw_id, raw in items_map.items():
+        item_id = str(raw_id)
+        if not isinstance(raw, dict):
+            issues.append(
+                Issue(
+                    "error",
+                    "INVALID_YAML",
+                    f"{item_id} must be a mapping",
+                    item_id,
+                )
+            )
+            continue
+        title = _yaml_scalar(raw.get("title", ""))
+        meta: dict[str, str] = {}
+        for key, value in raw.items():
+            if key in YAML_SKIP_KEYS:
+                continue
+            if key not in CLOSED_KEYS:
+                issues.append(
+                    Issue(
+                        "error", "UNKNOWN_KEY", f"unknown metadata key {key!r}", item_id
+                    )
+                )
+            if key in meta:
+                issues.append(
+                    Issue(
+                        "error",
+                        "DUPLICATE_KEY",
+                        f"duplicate metadata key {key!r}",
+                        item_id,
+                    )
+                )
+            meta[key] = _yaml_scalar(value)
+        match = ID_RE.match(item_id)
+        prefix = match.group(1) if match else ""
+        if not prefix:
+            issues.append(
+                Issue("error", "INVALID_ID", f"malformed id {item_id!r}", item_id)
+            )
+            continue
+        items.append(_item_from_meta(item_id, title, prefix, meta, source_file, issues))
+    return items, issues
+
+
+def detect_doc_format(
+    planning_dir: Path, requested: str | None = None
+) -> tuple[str | None, list[Issue]]:
+    issues: list[Issue] = []
+    if requested == "json":
+        issues.append(
+            Issue(
+                "error",
+                "UNSUPPORTED_FORMAT",
+                "format json is not a plan document format; use md or yaml",
+            )
+        )
+        return None, issues
+    if requested is not None and requested not in {"md", "yaml"}:
+        issues.append(
+            Issue(
+                "error",
+                "UNSUPPORTED_FORMAT",
+                f"format {requested!r} is not a plan document format; use md or yaml",
+            )
+        )
+        return None, issues
+    md_stems = [stem for stem in DOC_STEMS if (planning_dir / f"{stem}.md").is_file()]
+    yaml_stems = [
+        stem for stem in DOC_STEMS if (planning_dir / f"{stem}.yaml").is_file()
+    ]
+    if requested in {"md", "yaml"}:
+        return requested, issues
+    if md_stems and yaml_stems:
+        issues.append(
+            Issue(
+                "error",
+                "MIXED_FORMAT",
+                "both .md and .yaml planning docs present; pass --format md|yaml",
+            )
+        )
+        return None, issues
+    if yaml_stems:
+        return "yaml", issues
+    return "md", issues
+
+
 def _item_from_meta(
     item_id: str,
     title: str,
@@ -420,17 +527,26 @@ def derived_class(present: str, absent: str, wrong: str) -> str:
     return "optional"
 
 
-def parse_planning_dir(planning_dir: Path) -> tuple[list[Item], list[Issue]]:
+def parse_planning_dir(
+    planning_dir: Path, *, doc_format: str | None = None
+) -> tuple[list[Item], list[Issue]]:
+    fmt, issues = detect_doc_format(planning_dir, doc_format)
     items: list[Item] = []
-    issues: list[Issue] = []
-    found_md = False
-    for doc, filename in DOC_FILES.items():
+    if fmt is None:
+        return items, issues
+    found = False
+    ext = "yaml" if fmt == "yaml" else "md"
+    for doc in DOC_STEMS:
+        filename = f"{doc}.{ext}"
         path = planning_dir / filename
         if not path.is_file():
             continue
-        found_md = True
-        parsed, parse_issues = parse_markdown(
-            path.read_text(encoding="utf-8"), filename
+        found = True
+        text = path.read_text(encoding="utf-8")
+        parsed, parse_issues = (
+            parse_yaml_doc(text, filename)
+            if fmt == "yaml"
+            else parse_markdown(text, filename)
         )
         prefix = DOC_TO_PREFIX[doc]
         for item in parsed:
@@ -445,9 +561,9 @@ def parse_planning_dir(planning_dir: Path) -> tuple[list[Item], list[Issue]]:
                 )
         items.extend(parsed)
         issues.extend(parse_issues)
-    if not found_md:
+    if not found:
         issues.append(
-            Issue("error", "NO_DOCS", f"no planning markdown files in {planning_dir}")
+            Issue("error", "NO_DOCS", f"no planning {ext} files in {planning_dir}")
         )
     return items, issues
 
@@ -899,16 +1015,12 @@ def check_drift(md_items: list[Item], json_rows: list[dict[str, Any]]) -> list[I
     for item_id in sorted(set(md_by_id) | set(json_by_id)):
         if item_id not in md_by_id:
             issues.append(
-                Issue(
-                    "error", "DRIFT", "present in items.json but not markdown", item_id
-                )
+                Issue("error", "DRIFT", "present in items.json but not doc", item_id)
             )
             continue
         if item_id not in json_by_id:
             issues.append(
-                Issue(
-                    "error", "DRIFT", "present in markdown but not items.json", item_id
-                )
+                Issue("error", "DRIFT", "present in doc but not items.json", item_id)
             )
             continue
         md_record = md_by_id[item_id].to_record()
@@ -939,7 +1051,7 @@ def check_drift(md_items: list[Item], json_rows: list[dict[str, Any]]) -> list[I
                     Issue(
                         "error",
                         "DRIFT",
-                        f"{key} markdown={left!r} json={right!r}",
+                        f"{key} doc={left!r} json={right!r}",
                         item_id,
                     )
                 )
@@ -950,9 +1062,12 @@ def validate_dir(
     planning_dir: Path,
     *,
     depth: str = "standard",
+    doc_format: str | None = None,
 ) -> list[Issue]:
     del depth  # keys required on leaves at every depth; kept for CLI contract
-    md_items, issues = parse_planning_dir(planning_dir)
+    md_items, issues = parse_planning_dir(planning_dir, doc_format=doc_format)
+    if any(issue.code in {"UNSUPPORTED_FORMAT", "MIXED_FORMAT"} for issue in issues):
+        return issues
     json_rows, json_issues = load_items_json(planning_dir / "items.json")
     issues.extend(json_issues)
     issues.extend(check_unique_and_ids(md_items))
@@ -1012,6 +1127,13 @@ def main(argv: list[str] | None = None) -> int:
         choices=("shallow", "standard", "deep"),
         default="standard",
     )
+    parser.add_argument(
+        "--format",
+        choices=("md", "yaml", "json"),
+        default=None,
+        dest="doc_format",
+        help="Human plan doc extension. json is rejected (UNSUPPORTED_FORMAT).",
+    )
     parser.add_argument("--schema", type=Path, default=SCHEMA_PATH)
     args = parser.parse_args(argv)
     if not args.planning_dir.is_dir():
@@ -1021,7 +1143,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if not args.schema.is_file():
         print(f"WARN [SCHEMA_MISSING]: {args.schema} not found", file=sys.stderr)
-    issues = validate_dir(args.planning_dir, depth=args.depth)
+    issues = validate_dir(
+        args.planning_dir, depth=args.depth, doc_format=args.doc_format
+    )
     for issue in issues:
         stream = sys.stderr if issue.severity == "error" else sys.stdout
         print(issue.format(), file=stream)

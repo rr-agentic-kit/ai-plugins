@@ -2,7 +2,7 @@
 
 **Owner:** Auto-reflection loop, challenge prompts, exploration, and targeted-search rules during discovery.
 
-**Load when:** Reflect/explore trigger fires during inline discovery (not during research phase — see [research-method.md](research-method.md)).
+**Load when:** Reflect/explore trigger fires during inline discovery (not during research phase — see [research-method.md](research-method.md)). **Also** at write-time pre-save reflection (after stage-exit blind-spots + success-criteria; all depths). Pre-save does not replace stage-exit blind-spots.
 
 ## Auto-reflection loop
 
@@ -56,6 +56,19 @@ Fire reflection when any of:
 - Level gate 5 (proactivity) not yet satisfied.
 - User says "I think", "probably", "maybe" on a blocking fact.
 - Compose agent returns `clarifications_needed[]` with `severity: high`.
+
+## Pre-save reflection (write-time)
+
+Runs **after** stage-exit blind-spots (Gate 6) and [success-criteria.md](success-criteria.md), **before** writing human docs. All depths. Pause / stop does **not** trigger this.
+
+This is thinner than discovery-time Gate 5 and does **not** re-run the blind-spot taxonomy:
+
+1. **One pass** over remaining gaps and obvious improvements (missing non-goal, unmeasurable metric, unaccepted `blocking` assumption, compose `sections_incomplete`).
+2. Surface at most a handful of questions; user may accept gaps.
+3. **Max one fix cycle** — re-compose affected levels once if the user supplies fixes. Do not loop.
+4. Then write md|yaml docs + `items.json` + `session-state.json`.
+
+Do not invent FRD-level detail during pre-save of an earlier level. Do not spawn the challenge agent.
 
 ## Output to session state
 
