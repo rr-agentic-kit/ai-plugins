@@ -20,26 +20,35 @@ Produce cascade planning docs (exec-summary → FRD) from flags and conversation
 ## When not to use
 
 - Implementation, code review, or ticket writing that is not cascade planning
-- `--challenge` / `--research` with no docs in `--input` or `--output-dir` — hard-stop `MISSING_DOCS`; do not invent docs
-- Ad-hoc child-level polish that skips parent cascade levels (`cascade_levels` expansion is owned by [input-resolution.md](refs/input-resolution.md))
+- Inventing docs to run research or challenge — those actions require existing docs ([input-resolution.md](refs/input-resolution.md))
+- Skipping parent cascade levels — expansion is owned by [input-resolution.md](refs/input-resolution.md)
 
 ## Procedure
 
 TodoWrite `merge: false` before step 1 with stable ids `resolve`, `posture`, `level-<n>` (one per `payload.cascade_levels` entry), `compose`, `stage-exit`, `write`. Mark `completed` before advancing. Re-add `compose` and `stage-exit` with `merge: true` when entering the next level. Omit `posture` / `level-*` / `compose` / `stage-exit` when `action` is `research` or `challenge`.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Normalize raw flags and NL into `NormalizedPayload`. Do not restate flag handlers; `cascade_levels` is owned there. Done: payload emitted. Stop: that ref's deterministic errors.
-2. **posture** (discover / level-focus) — Load [project-posture.md](refs/project-posture.md). Classify before exec-summary. `--resume` skips if `user_confirmed` and uncontradicted. Done: posture persisted on session-state.
-3. **Discover** — For each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md) per-level discovery flow. Do not duplicate that ref's steps. Mark `level-<n>` on entry, `compose` after the compose `Task`, `stage-exit` after Gate 6 freeze. Done: level frozen. User pause → checkpoint, skip pre-save, exit.
-4. **`--research` / `--challenge`** — Require docs in `--input` or `--output-dir`; else hard-stop `MISSING_DOCS`. Run `python3 scripts/validate_planning.py <output-dir>` from plugin root; pass `payload.static_validation`. `Task` the matching agent per [contracts.md](refs/contracts.md). Persist the report per [output-formats.md](refs/output-formats.md); that persist completes `write`. Done: report written.
-5. **write** (discover, after last freeze) — Apply [success-criteria.md](refs/success-criteria.md), then pre-save reflection ([proactivity.md](refs/proactivity.md)), then persist per [output-formats.md](refs/output-formats.md). Pause skips pre-save. Agent JSON parse: one retry, then hard-stop `AGENT_OUTPUT_PARSE_FAILED`. Done: artifacts written.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Normalize raw flags and NL into `NormalizedPayload`. Done: payload emitted. Stop: that ref's deterministic errors.
+
+Branch on `payload.action`. Do not run the sibling primary path.
+
+| `payload.action` | Next | Todos after `resolve` |
+|------------------|------|------------------------|
+| `discover`, `exec-summary`…`frd` | step 2, then step 4 | `posture`, `level-*`, `compose`, `stage-exit`, `write` |
+| `research`, `challenge` | step 3 (completes `write`) | `write` only |
+
+If `payload.chain` includes `research` and/or `challenge` after a discover write, run step 3 for those phases (docs now exist). Do not start a second discover pass.
+
+2. **discover** — Load [project-posture.md](refs/project-posture.md). Done: that ref's persist condition. Then for each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md). Mark `level-<n>` on entry, `compose` after the compose `Task`, `stage-exit` after Gate 6 freeze. Done: last listed level frozen. Stop/pause: cascade.md.
+
+3. **research / challenge** — Load [contracts.md](refs/contracts.md). Research also loads [research-method.md](refs/research-method.md); challenge also loads [blind-spots.md](refs/blind-spots.md). `Task` the matching agent. Persist the report per [output-formats.md](refs/output-formats.md); that persist completes `write`. Done: report written. Stop: input-resolution deterministic errors; contracts parsing policy.
+
+4. **write** (discover only, after last freeze) — Apply [success-criteria.md](refs/success-criteria.md), then pre-save reflection ([proactivity.md](refs/proactivity.md)), then persist per [output-formats.md](refs/output-formats.md). Done: artifacts written. Stop: contracts parsing policy.
 
 Load remaining refs on demand from **Shared refs**.
 
 ## Interaction boundary
 
-Question surfacing is orchestrator-owned. Discovery runs **inline** in this skill (no discover agent) so question loops stay interactive. Compose/research/challenge `Task` agents are non-interactive; this skill asks and re-invokes. Delivery: [input-resolution.md](refs/input-resolution.md) `question_mode`. Protocol: [goal-anchor.md](refs/goal-anchor.md).
-
-**No per-level challenge agent** — stage-exit is skill-inline; `--challenge` is a full-pass union scan.
+Discovery runs **inline** (no discover agent) so question loops stay interactive. Compose/research/challenge `Task` agents are non-interactive; this skill asks and re-invokes ([contracts.md](refs/contracts.md)).
 
 ## Shared refs (load on demand)
 
@@ -47,7 +56,7 @@ Question surfacing is orchestrator-owned. Discovery runs **inline** in this skil
 |-----|------|
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
 | [cascade.md](refs/cascade.md) | Start of any `--discover` run |
-| [project-posture.md](refs/project-posture.md) | Discover start (pre-cascade); resume only if posture unconfirmed or contradicted |
+| [project-posture.md](refs/project-posture.md) | Discover start (pre-cascade); resume per that ref |
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A (classify owner); on level entry (load sidecar) |
 | [doc-standards/item-schema.md](refs/doc-standards/item-schema.md) | Discovering/composing any level (IDs, split, spec/build) |
 | `refs/doc-standards/<level>.md` | Discovering/composing that level only |

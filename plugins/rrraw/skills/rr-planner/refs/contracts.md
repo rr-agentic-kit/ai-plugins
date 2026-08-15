@@ -225,21 +225,4 @@ Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` 
 
 ## NormalizedPayload reference
 
-Emitted by input-resolution; embedded in `PhaseInput.payload`:
-
-```json
-{
-  "action": "discover",
-  "input": null,
-  "output_dir": "{PROJECT_ROOT}/docs/plans/",
-  "format": "md",
-  "depth": "standard",
-  "question_mode": "ask",
-  "resume": false,
-  "cascade_levels": ["exec-summary", "mrd", "brd", "prd", "frd"],
-  "chain": ["discover", "compose"],
-  "resolution_trace": {}
-}
-```
-
-Full schema: [input-resolution.md](input-resolution.md). `format` is `md` or `yaml` only. JSON is reserved for `items.json`, `session-state.json`, and this Task envelope — not a saved plan doc.
+Shape and field rules: [input-resolution.md](input-resolution.md). Embedded as `PhaseInput.payload`.
