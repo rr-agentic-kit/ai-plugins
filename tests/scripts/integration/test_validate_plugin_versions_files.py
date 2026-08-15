@@ -8,6 +8,17 @@ import pytest
 from conftest import REPO_ROOT, m
 
 
+def test_manifest_paths_lists_both_runtimes(mini_repo):
+    root = mini_repo(plugins={"bar": "1.0.0", "foo": "1.0.0"})
+    rels = [p.relative_to(root).as_posix() for p in m.manifest_paths(root)]
+    assert rels == [
+        "plugins/bar/.cursor-plugin/plugin.json",
+        "plugins/bar/.claude-plugin/plugin.json",
+        "plugins/foo/.cursor-plugin/plugin.json",
+        "plugins/foo/.claude-plugin/plugin.json",
+    ]
+
+
 def test_collect_versions_aligned(mini_repo):
     root = mini_repo(pyproject_version="0.2.0", plugins={"foo": "0.2.0"})
     versions = m.collect_versions(root)

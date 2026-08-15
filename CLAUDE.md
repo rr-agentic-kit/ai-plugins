@@ -9,6 +9,7 @@ Dual-runtime plugin marketplace (Cursor + Claude Code). Plugins live under `plug
 - `tests/<plugin>/` — monorepo only; not shipped in marketplace installs
 - `pyproject.toml` — dev tooling at repo root only (uv, pytest, ruff, mypy)
 - `scripts/validate_plugin_versions.py` — version alignment check (CI and pre-commit)
+- `scripts/bump_plugins_version.py` — lockstep version bump across pyproject + all plugin manifests
 
 ## Hard rules
 
@@ -31,6 +32,8 @@ uv sync --all-groups
 uv run pytest tests/ -v
 uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
 uv run python scripts/validate_plugin_versions.py
+uv run python scripts/install_claude_local.py
+uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}
 claude plugin validate .
 claude plugin validate ./plugins/context-eng-hero
 ```
