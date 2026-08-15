@@ -28,7 +28,7 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 | `epoch` | integer | 1-based; 1 for single-shot flows |
 | `round` | integer | Clarification iteration counter within a level (informational; no cap) |
 | `prior_outputs` | object | Keyed by phase name; prior structured outputs in chains |
-| `session_state` | object | Accumulated facts, decisions, assumptions from [cascade.md](cascade.md) |
+| `session_state` | object | Accumulated facts, decisions, assumptions, `item_registry`, `frozen_levels` from [cascade.md](cascade.md) |
 
 ### PhaseOutput
 
@@ -98,24 +98,40 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
   "sections_completed": ["overview", "goals", "requirements"],
   "sections_incomplete": [],
   "clarifications_needed": [],
-  "traceability": [{
-    "req_id": "prd-req-1",
-    "traces_to": "brd-obj-2",
-    "goal_ref": "exec-vision"
+  "items": [{
+    "id": "PRD-3.1",
+    "parent": "PRD-3",
+    "kind": "leaf",
+    "spec": "ready",
+    "build": null,
+    "supersedes": null,
+    "superseded_by": null,
+    "priority_method": "moscow",
+    "moscow": "Must",
+    "kano": null,
+    "triad": null,
+    "title": "Guest checkout",
+    "doc": "prd"
   }],
+  "id_remap": {},
   "assumptions_used": ["a-001"]
 }
 ```
 
+Item identity, closed markdown keys, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json).
+
 | Field | Notes |
 |-------|-------|
 | `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd`, `frd` |
-| `doc_content` | Full markdown document per [doc-standards/](doc-standards/) |
+| `doc_content` | Full markdown document per [doc-standards/](doc-standards/) + item-schema templates |
 | `sections_completed` | Required sections with content |
 | `sections_incomplete` | Required sections with gaps |
 | `clarifications_needed` | `ClarificationItem[]` — non-empty blocks `status: ok` |
-| `traceability` | Parent links for requirements/objectives |
+| `items` | Records for this doc; skill merges into `items.json` / `item_registry`. Shape: `{ id, parent, kind, spec, build?, supersedes?, superseded_by?, priority_method, moscow?, kano?, triad?, title, doc }` |
+| `id_remap` | Old id → new id when re-composing a frozen level; empty object otherwise |
 | `assumptions_used` | Assumption ids referenced in doc |
+
+`parent` is the immediate parent id (`null` in JSON / `—` in markdown for ES roots). `build` is omitted or `null` except FRD leaves. `priority_method` is the document type’s method (`moscow` \| `kano` \| `triad`); unranked leaves set the native field to `null`. `triad` is `{ if_present, if_absent, if_wrong, class }` with each axis `{ effect, magnitude }`.
 
 | `status` | When |
 |----------|------|
@@ -184,10 +200,12 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
 
 | Field | Notes |
 |-------|-------|
-| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy |
+| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy — judgment only when `payload.static_validation.status` is `passed` or `failed` |
 | `comparison_tables` | When single-option decisions lack alternatives analysis |
 | `clarifications_needed` | Questions that block severity assessment |
 | `docs_reviewed` | All docs scanned |
+
+Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.py`. If `passed`/`failed`, do not re-check refs. If `skipped`, may flag build-on-non-ready.
 
 | `status` | When |
 |----------|------|

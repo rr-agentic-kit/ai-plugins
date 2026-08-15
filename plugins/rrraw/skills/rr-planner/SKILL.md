@@ -58,7 +58,7 @@ exec-summary (vision / problem / why)
 ```
 
 Level order, inheritance rules, and per-level gates: [refs/cascade.md](refs/cascade.md).
-Doc structure per level: [refs/doc-standards/](refs/doc-standards/).
+Doc structure per level: [refs/doc-standards/](refs/doc-standards/). Shared item contract: [refs/doc-standards/item-schema.md](refs/doc-standards/item-schema.md).
 
 ## Primary action flags
 
@@ -92,14 +92,14 @@ raw input → input-resolution (normalize) → [resume? load checkpoint]
 
 1. Load [refs/cascade.md](refs/cascade.md). If `--resume`, load `session-state.json` from `--output-dir` and continue from checkpoint.
 2. For each cascade level (exec-summary → mrd → brd → prd → frd):
-   - Load matching `refs/doc-standards/<level>.md` for the current level.
+   - Load matching `refs/doc-standards/<level>.md` and [refs/doc-standards/item-schema.md](refs/doc-standards/item-schema.md) for the current level.
    - Run inline discovery for that level (inherit facts from prior levels).
    - On ambiguity → load [refs/goal-anchor.md](refs/goal-anchor.md); surface question (`AskQuestion` or inline per `question_mode`); record decisions/assumptions.
    - On reflect/explore trigger → load [refs/proactivity.md](refs/proactivity.md).
-   - Gate: level completion criteria in cascade.md must pass before next level.
+   - Gate: level completion criteria in cascade.md must pass before next level (static: `python3 scripts/validate_planning.py <output-dir>` from plugin root). Freeze the level on pass.
    - Invoke `compose` agent with `doc_type` = level.
    - While `clarifications_needed[]` non-empty → surface question → merge answers → re-invoke compose.
-   - User may stop anytime → checkpoint `session-state.json` + partial docs; exit cleanly.
+   - User may stop anytime → checkpoint `session-state.json` + `items.json` + partial docs; exit cleanly.
 3. Optional: invoke `research` agent when `--research` flag or user requests market validation.
 4. Apply [refs/success-criteria.md](refs/success-criteria.md) gate before final write.
 5. Checkpoint session state to `--output-dir` (on stop or completion).
@@ -107,9 +107,10 @@ raw input → input-resolution (normalize) → [resume? load checkpoint]
 ### `--challenge` / `--review` chain
 
 1. Load existing docs from `--input` or `--output-dir`.
-2. Load [refs/blind-spots.md](refs/blind-spots.md).
-3. Invoke `challenge` agent.
-4. Surface findings; user may re-run `--discover` with refinements.
+2. Run `python3 scripts/validate_planning.py <output-dir>` from plugin root. Pass the result into the agent as `payload.static_validation` (`passed` / `failed` / `skipped`). Do not ask the challenge agent to re-check refs.
+3. Load [refs/blind-spots.md](refs/blind-spots.md).
+4. Invoke `challenge` agent.
+5. Surface findings; user may re-run `--discover` with refinements.
 
 ### Orchestration gates
 
@@ -119,7 +120,7 @@ raw input → input-resolution (normalize) → [resume? load checkpoint]
 | **Level completion** | Per-level done-when in cascade.md + doc-standards before advancing |
 | **Clarification loop** | Re-invoke compose after each answer until no pending clarifications or user says done |
 | **Stop / resume** | User stop → checkpoint; `--resume` reloads `session-state.json` and continues |
-| **Success criteria** | FRD req → PRD goal → BRD objective → exec vision traceability; zero unresolved ambiguity |
+| **Success criteria** | Static: `validate_planning.py` parent walk + spec/build. Judgment: atomic leaves, rank inflation, triad/AC quality |
 | **Parse retry** | One retry on agent JSON parse failure; second failure → hard-stop |
 
 ## Output
@@ -127,6 +128,7 @@ raw input → input-resolution (normalize) → [resume? load checkpoint]
 | Artifact | Location |
 |----------|----------|
 | Per-doc files | `--output-dir` (default `docs/planning/`) |
+| Item registry | `--output-dir/items.json` (always, both formats) |
 | Session checkpoint | `--output-dir/session-state.json` |
 | Session chat log | `--output-dir/session-log.md` |
 | Format | `--format` md (default) or json — [refs/output-formats.md](refs/output-formats.md) |
@@ -137,6 +139,7 @@ raw input → input-resolution (normalize) → [resume? load checkpoint]
 |-----|------|
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
 | [cascade.md](refs/cascade.md) | Start of any `--discover` run |
+| [doc-standards/item-schema.md](refs/doc-standards/item-schema.md) | Discovering/composing any level (IDs, split, spec/build) |
 | `refs/doc-standards/<level>.md` | Discovering/composing that level only |
 | [proactivity.md](refs/proactivity.md) | Reflect/explore trigger fires |
 | [goal-anchor.md](refs/goal-anchor.md) | Ambiguity/conflict/nuance detected |

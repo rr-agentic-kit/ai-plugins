@@ -29,7 +29,7 @@ Run from the repository root unless noted.
 ```bash
 uv sync --all-groups
 uv run pytest tests/ -v
-uv run ruff check plugins/context-eng-hero/scripts tests/context-eng-hero
+uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
 uv run python scripts/validate_plugin_versions.py
 claude plugin validate .
 claude plugin validate ./plugins/context-eng-hero

@@ -1,40 +1,65 @@
 # success-criteria
 
-**Owner:** Build-precise gate before final write — traceability, testable acceptance criteria, zero unresolved ambiguity.
+**Owner:** Build-precise gate before final write — split **static** (script) vs **judgment** (compose/challenge).
 
-**Load when:** Pre-write gate after compose chain completes.
+**Load when:** Pre-write gate after compose chain completes; also after each level’s Gate 3.
+
+Item identity and DoR: [doc-standards/item-schema.md](doc-standards/item-schema.md).
 
 ## Gate overview
 
-Planning docs are **not ready to write** until all criteria below pass. Fail → return to discovery/compose or surface clarifications.
+Planning docs are **not ready to write** until static checks pass and judgment criteria are accepted. Fail static → do not write (unless user accepts partial). Fail judgment → return to discovery/compose or surface clarifications.
 
-## Criterion 1: Traceability chain
+Run from plugin root:
 
-Every FRD requirement must trace upward:
-
-```
-fr-N → prd-story-N → prd-goal-N → brd-obj-N → exec-metric-N (or exec-vision)
+```bash
+python3 scripts/validate_planning.py <output-dir>
 ```
 
-Validation:
+`--challenge` static pass runs this script. Challenge agent does **not** re-check refs if the script ran. If the script was skipped, challenge may flag build-on-non-ready as judgment.
 
-1. Parse all `traces_to` / `goal_ref` links in composed docs.
-2. Flag orphan requirements (no parent).
-3. Flag broken links (parent id does not exist).
-4. Flag requirements that skip a level (fr → exec without intermediate links).
+## Static (script)
+
+`validate_planning.py` owns:
+
+- Unique IDs; parent / supersede pointers exist; no cycles; no cascade-level skips
+- Numbering density among siblings; max depth 2
+- Kind invariant; `idea` has no children
+- Required closed keys; spec/build legality (DoR-as-code)
+- `spec == ready` ⇒ method fields present; cross-doc parent `ready` (same-doc container exempt)
+- `build != none` ⇒ FRD leaf with `spec == ready`
+- md headers vs `items.json` drift
+
+Schema: [schemas/items.schema.json](schemas/items.schema.json).
+
+Parent walk (no skips):
+
+```
+ES-n → MRD-n.m → BRD-n.m → PRD-n.m → FRD-n.m
+```
 
 | Result | Action |
 |--------|--------|
-| Zero orphans, zero broken links | Pass |
-| Orphans or broken links | Fail → re-compose affected levels |
+| Script exit 0 | Static pass |
+| Script FAIL | Fail → re-compose affected levels or fix `items.json` |
+| Script skipped | Challenge may include ref/status findings; record `STATIC SKIPPED` |
 
-## Criterion 2: Testable acceptance criteria
+## Judgment (compose / challenge)
 
-Every P0 functional requirement in FRD must have:
+AI owns — do not encode as script FAILs:
+
+- Compound leaves (multiple shalls/actors/outcomes in one leaf)
+- MoSCoW inflation; Kano mis-class; weak triad prose (`if_wrong` not a real blast radius)
+- Vague AC ("fast", "user-friendly") without measurable proxy
+- Shall not testable
+
+### Testable acceptance criteria
+
+Every `must-correct` / `must-present` FRD leaf must have:
 
 - At least one Gherkin scenario (Given/When/Then)
-- At least one error/edge path for P0 reqs
-- No vague language ("fast", "user-friendly") without measurable proxy
+- At least one error/edge path
+- No vague language without measurable proxy
 
 | Vague term | Required resolution |
 |------------|---------------------|
@@ -43,22 +68,22 @@ Every P0 functional requirement in FRD must have:
 | "Scalable" | Concrete scale target (users, RPS, data volume) |
 | "Easy to use" | Task-completion metric or usability criterion |
 
-## Criterion 3: Zero unresolved ambiguity
+## Criterion: Zero unresolved ambiguity
 
 - No open `clarifications_needed[]` unless user explicitly accepted gaps.
 - No `assumptions` with `blocking: true` and `validated: false`.
 - No conflicting facts across levels (per cascade inheritance rules).
 - Decision log complete for all user-facing choices.
 
-## Criterion 4: Decision traceability
+## Criterion: Decision traceability
 
 Every recorded decision must:
 
-- Have a `goal_ref` pointing to exec-summary vision or metric.
+- Have a `goal_ref` pointing to an `ES-*` id (vision or metric) when the exec-summary exists.
 - Be `user_confirmed: true` (or explicitly accepted as assumption).
 - Not contradict a later-level fact.
 
-## Criterion 5: Doc-standard compliance
+## Criterion: Doc-standard compliance
 
 Each composed doc passes its doc-standard **done-when** checklist:
 
@@ -76,6 +101,7 @@ Each composed doc passes its doc-standard **done-when** checklist:
 {
   "gate_passed": true,
   "criteria": {
+    "static": { "passed": true, "script": "validate_planning.py", "errors": [] },
     "traceability": { "passed": true, "orphans": [], "broken_links": [] },
     "acceptance_criteria": { "passed": true, "vague_terms": [] },
     "ambiguity": { "passed": true, "open_clarifications": [] },
@@ -85,6 +111,8 @@ Each composed doc passes its doc-standard **done-when** checklist:
   "final_status": "ok"
 }
 ```
+
+`traceability` in this object is the script result (duplicated for the gate record). Judgment findings live under `acceptance_criteria` / `doc_standards`.
 
 | `gate_passed` | `final_status` |
 |---------------|----------------|

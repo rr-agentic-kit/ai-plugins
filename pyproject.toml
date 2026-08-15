@@ -30,14 +30,18 @@ src = ["plugins", "scripts", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 
+[tool.ruff.lint.per-file-ignores]
+"plugins/rrraw/scripts/validate_planning.py" = ["E501"]
+"tests/rrraw/**" = ["E501"]
+
 [tool.black]
 line-length = 88
 target-version = ["py314"]
 
 [tool.mypy]
 python_version = "3.14"
-mypy_path = "plugins/context-eng-hero/scripts"
-files = ["plugins/context-eng-hero/scripts"]
+mypy_path = "plugins/context-eng-hero/scripts:plugins/rrraw/scripts"
+files = ["plugins/context-eng-hero/scripts", "plugins/rrraw/scripts"]
 explicit_package_bases = true
 warn_return_any = true
 warn_unused_ignores = true
@@ -48,7 +52,7 @@ module = "tests.*"
 disallow_untyped_defs = false
 
 [tool.coverage.run]
-source = ["audit_static"]
+source = ["audit_static", "validate_planning"]
 relative_files = true
 
 [tool.coverage.report]

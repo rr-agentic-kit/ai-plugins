@@ -7,6 +7,7 @@ Flag-driven software planning docs: progressive top-down discovery from vision t
 ## Philosophy
 
 - **Progressive cascade** — Exec summary → MRD → BRD → PRD → FRD; each level inherits and narrows the one above.
+- **Item contract** — Hierarchical `{DOC}-{n.m}` ids, immediate parent pointer, atomic leaves; ranking is per layer (MoSCoW / Kano / FRD triad), not P0. Spec vs build are separate axes.
 - **Goal-anchored** — Disambiguate vague input, clarify before assuming, capture nuance; every decision traces to stated goals.
 - **Proactive discovery** — Auto-reflection and lightweight challenge baked into discovery; broad market research deferred to post-composition.
 - **Interactive discovery, non-interactive agents** — Skill owns question loops (`AskQuestion` by default, `--text-mode` for inline); compose/research/challenge agents return `clarifications_needed[]`.
@@ -71,7 +72,8 @@ rr-planner --discover --depth deep
 | `brd.md` | Business requirements |
 | `prd.md` | Product requirements |
 | `frd.md` | Functional requirements with Gherkin acceptance criteria |
-| `session-state.json` | Checkpoint for stop/resume (decisions, facts, current level) |
+| `items.json` | Structured item registry (always written; validator target) |
+| `session-state.json` | Checkpoint for stop/resume (decisions, facts, `item_registry`, current level) |
 | `session-log.md` | Decisions, assumptions, clarification history |
 | `research-report.md` | Cited market findings (when research runs) |
 | `challenge-report.md` | Blind-spot findings (when challenge runs) |
@@ -93,5 +95,6 @@ rr-planner --discover --depth deep
 | Level order and gates | [refs/cascade.md](refs/cascade.md) |
 | Phase schemas | [refs/contracts.md](refs/contracts.md) |
 | Doc structures | [refs/doc-standards/](refs/doc-standards/) |
+| Item identity / rank / status | [refs/doc-standards/item-schema.md](refs/doc-standards/item-schema.md) |
 | Success gate | [refs/success-criteria.md](refs/success-criteria.md) |
 | Output adapters | [refs/output-formats.md](refs/output-formats.md) |

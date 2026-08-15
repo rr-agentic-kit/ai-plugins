@@ -18,6 +18,8 @@ When input is vague (multiple valid interpretations):
 
 Do not proceed to compose until blocking ambiguities are resolved.
 
+Parent-id existence, numbering, spec/build legality, and md/`items.json` drift are **static** — `scripts/validate_planning.py`. This ref owns judgment only (vague input, conflict, nuance). Do not re-check whether a parent id exists.
+
 ## Clarify-before-assume
 
 | Situation | Action |
@@ -37,7 +39,7 @@ Preserve in `decisions[]` or `level_facts`:
 - Scope boundaries ("only enterprise tier", "not mobile")
 - Temporal qualifiers ("by Q3", "after migration")
 - Conditional behavior ("if SSO enabled")
-- Priority signals ("must-have" vs "nice-to-have")
+- Priority signals (MoSCoW / Kano / triad class — never P0/P1/P2)
 - Negative requirements ("must NOT store PII")
 
 Flattening nuance into generic statements is a gate failure.
@@ -46,7 +48,7 @@ Flattening nuance into generic statements is a gate failure.
 
 At each level transition and after major decisions:
 
-1. Restate the user's **primary goal** (from exec-summary vision/problem).
+1. Restate the user's **primary goal** (from exec-summary vision/problem — `ES-*` ids).
 2. Show how the current level's work serves that goal in one sentence.
 3. If current facts drift from goal → surface misalignment via question.
 
@@ -67,8 +69,8 @@ When child level contradicts parent:
   "level": "prd",
   "type": "decision|assumption|conflict_resolution|nuance",
   "text": "Full decision text with qualifiers preserved",
-  "goal_ref": "exec-summary vision statement or objective id",
-  "traces_to": "brd-obj-2",
+  "goal_ref": "ES-1",
+  "parent": "BRD-2",
   "blocking": false,
   "user_confirmed": true,
   "timestamp": "ISO-8601"
@@ -82,7 +84,7 @@ When child level contradicts parent:
   "id": "a-001",
   "level": "mrd",
   "text": "Target market is mid-market SaaS (50-500 employees)",
-  "goal_ref": "exec-summary problem statement",
+  "goal_ref": "ES-2",
   "blocking": false,
   "source": "user_stated|inferred|search_result",
   "validated": false

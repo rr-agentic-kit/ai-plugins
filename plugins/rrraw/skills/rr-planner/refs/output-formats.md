@@ -4,6 +4,8 @@
 
 **Load when:** Write step — persisting artifacts to `--output-dir`.
 
+Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md). Schema: [schemas/items.schema.json](schemas/items.schema.json).
+
 ## File naming
 
 All files written to `payload.output_dir` (default `docs/planning/`):
@@ -15,6 +17,7 @@ All files written to `payload.output_dir` (default `docs/planning/`):
 | brd | `brd.md` |
 | prd | `prd.md` |
 | frd | `frd.md` |
+| item registry | `items.json` |
 | session checkpoint | `session-state.json` |
 | session log | `session-log.md` |
 | decisions export | `decisions.json` |
@@ -22,6 +25,8 @@ All files written to `payload.output_dir` (default `docs/planning/`):
 | challenge report | `challenge-report.md` |
 
 Create `--output-dir` if it does not exist.
+
+**Always write `items.json`** (union of all composed items), including when `--format md`. `--format json` also embeds the same records in `planning-bundle.json`.
 
 ## Markdown doc format
 
@@ -37,7 +42,37 @@ traces_from: [exec-summary.md, mrd.md, brd.md]
 
 # PRD: [Title]
 
-[doc content from compose agent]
+[doc content from compose agent — item headings per item-schema]
+
+## Item index
+
+| ID | Parent | Spec | MoSCoW |
+|----|--------|------|--------|
+| PRD-3 | BRD-2 | draft | — |
+| PRD-3.1 | PRD-3 | ready | Must |
+```
+
+Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Heading + metadata keys are a closed vocabulary — parser is regex, not an LLM.
+
+## `items.json`
+
+Written on every compose (merged registry). Must match markdown headers; drift is a validator FAIL.
+
+```json
+{
+  "items": [
+    {
+      "id": "PRD-3.1",
+      "parent": "PRD-3",
+      "kind": "leaf",
+      "spec": "ready",
+      "priority_method": "moscow",
+      "moscow": "Must",
+      "title": "Guest checkout",
+      "doc": "prd"
+    }
+  ]
+}
 ```
 
 ## Session log format
@@ -55,7 +90,7 @@ traces_from: [exec-summary.md, mrd.md, brd.md]
 
 | ID | Level | Decision | Goal ref |
 |----|-------|----------|----------|
-| d-001 | exec-summary | ... | exec-vision |
+| d-001 | exec-summary | ... | ES-1 |
 
 ## Assumptions
 
@@ -67,6 +102,7 @@ traces_from: [exec-summary.md, mrd.md, brd.md]
 
 ### exec-summary
 - Status: ok
+- Frozen: true
 
 ### mrd
 - Status: in_progress
@@ -107,15 +143,19 @@ Written on **every stop** and after **each level completion**. Required for `--r
   "assumptions": [],
   "level_facts": {},
   "composed_docs": {},
+  "item_registry": {},
+  "frozen_levels": ["exec-summary", "mrd"],
   "pending_agent_output": null
 }
 ```
+
+`item_registry`: id → `{ doc, parent, kind, spec, class? }`. Resume and re-compose remap child `parent:` from this map.
 
 Resume loads this file and continues from `checkpoint.current_level`.
 
 ## JSON format (`--format json`)
 
-Write `planning-bundle.json`:
+Write `planning-bundle.json` **and** `items.json`:
 
 ```json
 {
@@ -130,10 +170,13 @@ Write `planning-bundle.json`:
     "exec-summary": { "content": "...", "status": "ok" },
     "mrd": { "content": "...", "status": "ok" }
   },
+  "items": [],
   "session_state": {
     "decisions": [],
     "assumptions": [],
-    "level_facts": {}
+    "level_facts": {},
+    "item_registry": {},
+    "frozen_levels": []
   },
   "research": null,
   "challenge": null,
@@ -141,13 +184,13 @@ Write `planning-bundle.json`:
 }
 ```
 
-When `format: md` (default), also write individual `.md` files plus `session-log.md`.
+`items` in the bundle is the same array as `items.json`. When `format: md` (default), also write individual `.md` files plus `session-log.md`.
 
 ## Status merge
 
 | Source | `final_status` |
 |--------|----------------|
-| All levels `ok`, success-criteria pass | `ok` |
+| All levels `ok`, success-criteria pass (static script + judgment) | `ok` |
 | User stopped mid-session or accepted partial gaps | `partial` |
 | Input-resolution error or unrecoverable agent failure | `failed` |
 
@@ -156,5 +199,7 @@ When `format: md` (default), also write individual `.md` files plus `session-log
 1. Never overwrite without user confirmation if files exist and `--input` did not imply refresh.
 2. Include `resolution_trace` in json output.
 3. Always write `session-state.json` on stop or level completion for resume.
-4. Chat log is append-friendly — new session creates new log or timestamps section if continuing.
-5. Research and challenge reports are standalone files, not merged into doc files.
+4. Always write `items.json` after compose (md and json formats).
+5. Chat log is append-friendly — new session creates new log or timestamps section if continuing.
+6. Research and challenge reports are standalone files, not merged into doc files.
+7. After write, skill runs `python3 scripts/validate_planning.py <output-dir>` (plugin root). FAIL blocks `final_status: ok`.

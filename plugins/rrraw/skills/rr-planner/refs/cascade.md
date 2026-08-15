@@ -14,6 +14,16 @@ Fixed sequence — never skip a level in `standard`/`deep` depth (shallow depth 
 5. frd           — functional detail
 ```
 
+Item identity, parent walk, freeze/remap, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md).
+
+```mermaid
+flowchart TD
+  ES["ES-n"] --> MRD["MRD-n.m"]
+  MRD --> BRD["BRD-n.m"]
+  BRD --> PRD["PRD-n.m"]
+  PRD --> FRD["FRD-n.m"]
+```
+
 ## Inheritance model
 
 Each level **inherits** all resolved facts from levels above and **narrows** scope:
@@ -29,35 +39,38 @@ Each level **inherits** all resolved facts from levels above and **narrows** sco
 ### Inheritance rules
 
 1. **No contradiction** — child facts must align with parent facts. Conflict → [goal-anchor.md](goal-anchor.md) + question (per `question_mode`).
-2. **No orphan requirements** — every child requirement traces to a parent objective (verified at success-criteria gate).
+2. **No orphan items** — every item’s `parent:` exists (ES roots: `—`). Cross-doc parent is the previous cascade level only. Verified by `validate_planning.py` (Gate 3 + success-criteria static).
 3. **Explicit narrowing** — when a parent fact is too broad for the child level, record the narrowing as a decision in the session decision log.
 4. **Deferred detail** — details not yet known at a level are recorded as `assumptions[]` or `open_questions[]`, not silently invented.
+5. **Priority inheritance** — FRD may default `if_absent` magnitude from parent PRD MoSCoW (Must → high, Should → moderate, Could → low). Won’t PRD items get no FRD children. Do not copy MoSCoW onto FRD.
 
 ## Per-level discovery flow (skill-inline)
 
 For each level in `cascade_levels`:
 
-1. Load `doc-standards/<level>.md` for the current level.
-2. Extract required sections from the standard.
+1. Load `doc-standards/<level>.md` and [doc-standards/item-schema.md](doc-standards/item-schema.md).
+2. Extract required sections from the standard; treat claims as items (prose overviews stay unnumbered).
 3. Run progressive discovery:
    - Present inherited facts summary to user (brief).
    - Ask targeted questions for gaps in required sections.
+   - New items default `spec: idea`; move to `draft` when specifying. Do not auto-promote to `ready`.
    - On vague input → disambiguate per [goal-anchor.md](goal-anchor.md).
    - On reflect trigger → apply [proactivity.md](proactivity.md).
-4. Accumulate `level_facts` object for compose agent.
+4. Accumulate `level_facts` object for compose agent; keep `item_registry` in sync after compose.
 5. Gate check (below).
 6. Invoke compose agent.
 7. While `clarifications_needed[]` non-empty → surface question → merge answer → re-invoke compose. Loop until cleared or user says done.
+8. On Gate pass: **freeze** this level (see Freeze and remap). Run `scripts/validate_planning.py` on `--output-dir` as the static half of Gate 3.
 
 ## Stop and resume
 
 User may stop at any point ("stop", "pause", "done for now", etc.):
 
-1. Write partial composed docs for completed levels.
+1. Write partial composed docs for completed levels plus `items.json`.
 2. Checkpoint full `session-state.json` to `--output-dir` (see [output-formats.md](output-formats.md)).
 3. Set `checkpoint.status: paused` with `current_level` and `pending_clarifications`.
 
-To resume: `rr-planner --resume --output-dir <same-dir>` (or NL "continue planning"). Skill loads checkpoint and picks up at `current_level`.
+To resume: `rr-planner --resume --output-dir <same-dir>` (or NL "continue planning"). Skill loads checkpoint and picks up at `current_level`. Remap uses `item_registry`.
 
 ## Per-level completion gates
 
@@ -70,32 +83,49 @@ Every **required section** in the matching doc-standard has at least one resolve
 ### Gate 2: Goal anchor
 
 - Zero unresolved ambiguities at this level.
-- All decisions recorded in session decision log with `goal_ref`.
+- All decisions recorded in session decision log with `goal_ref` (an `ES-*` id when available).
 - Nuance captured where user provided qualifiers (not flattened).
 
-### Gate 3: Inheritance integrity
+### Gate 3: Inheritance integrity (parent walk)
 
-- No contradictions with parent levels.
-- Every new requirement at this level has a `traces_to` parent objective.
+**Static** (`scripts/validate_planning.py` — do not re-check in the agent):
+
+- Every `parent` / `supersedes` / `superseded_by` id exists (ES roots `—`).
+- No cycles; no cascade-level skips; numbering dense among siblings; max depth 2.
+- Kind invariant (container has children, leaf has none); `idea` has no children.
+- Required keys, spec/build legality, md vs `items.json` drift.
+
+**Judgment** (compose/challenge): compound leaves, inflated MoSCoW, weak triad prose, vague AC.
 
 ### Gate 4: Compose acceptance
 
 - Compose agent returns `status: ok` or user accepted `status: partial` with documented gaps.
 - Written doc passes doc-standard **done-when** checklist.
+- `items[]` emitted; skill merged into `item_registry` and `items.json`.
 
 ### Gate 5: Proactivity (standard/deep depth only)
 
 - At least one reflection pass completed (see [proactivity.md](proactivity.md)).
 - Open risks or assumptions surfaced to user before advancing.
 
+## Freeze and remap
+
+| Event | Rule |
+|-------|------|
+| First compose of a level | Mint dense sibling IDs (`1, 2, 3` / `n.1, n.2`). |
+| Cascade gates pass for that level | Add level to `frozen_levels`. IDs freeze. |
+| Later insert on a frozen level | Append next integer. Do not renumber existing ids. |
+| Explicit re-compose of a frozen level | Allowed. Rewrite parent refs in **child** docs and in `item_registry` / `items.json` so e.g. FRD does not point at a vanished `PRD-3`. |
+| `--resume` | Load `item_registry`; continue minting from max sibling index on frozen levels. |
+
 ## Advancing vs stopping
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass | Advance to next cascade level |
+| All gates pass | Freeze level; advance to next cascade level |
 | Pending clarifications or gate gaps | Surface question → re-discover or re-compose (no round cap) |
 | User says done for level | Accept current state; advance or checkpoint per user intent |
-| User requests stop / pause | Checkpoint `session-state.json`; write partial docs; exit cleanly |
+| User requests stop / pause | Checkpoint `session-state.json`; write partial docs + `items.json`; exit cleanly |
 | `--resume` | Load checkpoint; continue from `current_level` |
 
 ## Fact accumulation schema
@@ -104,8 +134,8 @@ Skill maintains across levels:
 
 ```json
 {
-  "decisions": [{ "id": "d1", "level": "exec-summary", "text": "", "goal_ref": "", "timestamp": "" }],
-  "assumptions": [{ "id": "a1", "level": "mrd", "text": "", "blocking": false, "goal_ref": "" }],
+  "decisions": [{ "id": "d1", "level": "exec-summary", "text": "", "goal_ref": "ES-1", "timestamp": "" }],
+  "assumptions": [{ "id": "a1", "level": "mrd", "text": "", "blocking": false, "goal_ref": "ES-2" }],
   "level_facts": {
     "exec-summary": {},
     "mrd": {},
@@ -120,6 +150,16 @@ Skill maintains across levels:
     "prd": "",
     "frd": ""
   },
+  "item_registry": {
+    "PRD-3": {
+      "doc": "prd",
+      "parent": "BRD-2",
+      "kind": "container",
+      "spec": "draft",
+      "class": null
+    }
+  },
+  "frozen_levels": ["exec-summary", "mrd"],
   "checkpoint": {
     "status": "in_progress|paused|complete",
     "current_level": "brd",
@@ -129,5 +169,7 @@ Skill maintains across levels:
   }
 }
 ```
+
+`item_registry` maps every minted id → `{ doc, parent, kind, spec, class? }` so resume and re-compose can remap child `parent:` values.
 
 Checkpointed to `--output-dir/session-state.json` on stop and after each level completion. Resume loads this file.

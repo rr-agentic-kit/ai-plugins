@@ -16,7 +16,7 @@
 | **Economic** | Hidden costs, revenue model gaps, unit economics |
 | **Temporal** | Sequencing risks, dependency chains, MVP scope creep |
 | **Assumption debt** | Unvalidated assumptions treated as facts |
-| **Traceability breaks** | FRD reqs with no PRD goal parent |
+| **Traceability breaks** | Judgment: compound leaves, inflated MoSCoW, weak triad, untestable shalls. Static parent/id failures come from `validate_planning.py` — do not re-score if the script ran. If skipped, flag `build != none` on non-ready items. |
 | **Negative space** | What is explicitly out of scope and why |
 
 ## Alternatives analysis
@@ -74,11 +74,18 @@ Apply systematically across all loaded docs:
 }
 ```
 
+## Static vs judgment
+
+Skill runs `python3 scripts/validate_planning.py <output-dir>` before this agent. If the script ran, omit ref/status/drift findings — they are already FAILs. If skipped, include `build` on non-ready / broken parent as findings and record `STATIC SKIPPED`.
+
+Judgment only: compound leaves, MoSCoW inflation, weak `if_wrong`, vague AC.
+
 ## Challenge output expectations
 
 Challenge agent must:
 
-1. Scan all docs in scope against full taxonomy.
+1. Scan all docs in scope against full taxonomy (judgment).
 2. Produce at least one finding per doc (or explicit `no_findings` with justification).
 3. Include comparison table when docs recommend a single approach without alternatives.
 4. Never modify docs — findings only; user re-runs `--discover` to apply fixes.
+5. Do not re-check parent pointers, ID density, or spec/build gates when the validator ran.

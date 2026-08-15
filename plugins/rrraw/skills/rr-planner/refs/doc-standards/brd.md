@@ -2,7 +2,8 @@
 
 **Cascade level:** 3  
 **Inherits from:** exec-summary + MRD  
-**Narrows to:** business objectives, stakeholders, and business-level constraints
+**Narrows to:** business objectives, stakeholders, and business-level constraints  
+**Priority method:** MoSCoW on objectives, rules, and dependencies — [item-schema.md](item-schema.md)
 
 ## Purpose
 
@@ -10,28 +11,30 @@ Translate market context into business outcomes the organization must achieve. B
 
 ## Required sections
 
-| Section | Content |
-|---------|---------|
-| **Business objectives** | 3–7 measurable business outcomes (revenue, cost, risk, compliance) |
-| **Stakeholders** | Roles, interests, influence; buyer vs user vs approver |
-| **Business rules** | Policies, compliance, contractual obligations |
-| **Success criteria** | Business-level acceptance criteria per objective |
-| **Dependencies** | Internal teams, systems, approvals required |
-| **Business risks** | Organizational, financial, reputational risks with mitigations |
+| Section | Content | Items |
+|---------|---------|-------|
+| **Business objectives** | 3–7 measurable business outcomes (revenue, cost, risk, compliance) | Ranked leaves |
+| **Stakeholders** | Roles, interests, influence; buyer vs user vs approver | Unranked leaves (`MoSCoW: —`) |
+| **Business rules** | Policies, compliance, contractual obligations | Ranked leaves; compliance/contractual = Must |
+| **Success criteria** | Business-level acceptance criteria per objective | Attach to the objective leaf body (not separate ids) |
+| **Dependencies** | Internal teams, systems, approvals required | Ranked leaves |
+| **Business risks** | Organizational, financial, reputational risks with mitigations | Unranked leaves; impact × likelihood in body |
+
+IDs, parent walk, split, spec/build: [item-schema.md](item-schema.md). Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won’t is how stakeholders cut scope.
 
 ## Extraction method (discovery)
 
 1. For each MRD customer need, ask "what business outcome does solving this produce?"
 2. Map stakeholders to segments from MRD.
 3. Probe for hidden approvers (legal, security, procurement).
-4. Distinguish business rules (must comply) from preferences (nice to have).
-5. Each objective gets a success criterion testable at business level.
+4. Distinguish business rules (Must comply) from preferences (Should/Could).
+5. Each objective gets a success criterion testable at business level, in that leaf’s body.
 
 ## Traceability
 
-- Assign ids: `brd-obj-N`, `brd-stakeholder-N`, `brd-rule-N`, `brd-risk-N`.
-- Each objective traces to `mrd-need-N` and `exec-metric-N`.
-- Stakeholders map to `mrd-segment-N`.
+- Cross-doc `parent:` is an `MRD-*` id (need or segment). Same-doc nest: `BRD-n` → `BRD-n.m`.
+- Each objective walks to an MRD need and onward to an ES metric.
+- Full chain is a parent walk — do not repeat it on every item.
 
 ## Done-when checklist
 
@@ -40,5 +43,7 @@ Translate market context into business outcomes the organization must achieve. B
 - [ ] Business rules documented or explicit "none identified"
 - [ ] Dependencies listed with owners or "TBD" flagged
 - [ ] At least one business risk with mitigation or acceptance
-- [ ] All objectives trace to exec-summary success metrics
+- [ ] Rankable leaves have MoSCoW; compliance rules are Must
+- [ ] Items use `BRD-{n}` / `BRD-{n.m}` per item-schema
+- [ ] All objectives walk to exec-summary success metrics
 - [ ] No contradiction with exec-summary non-goals
