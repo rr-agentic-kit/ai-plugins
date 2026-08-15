@@ -28,7 +28,7 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 | `epoch` | integer | 1-based; 1 for single-shot flows |
 | `round` | integer | Clarification iteration counter within a level (informational; no cap) |
 | `prior_outputs` | object | Keyed by phase name; prior structured outputs in chains |
-| `session_state` | object | Accumulated facts, decisions, assumptions, `item_registry`, `frozen_levels` from [cascade.md](cascade.md) |
+| `session_state` | object | Accumulated facts, decisions, assumptions, `item_registry`, `frozen_levels`, `project_posture`, `note_sessions` from [cascade.md](cascade.md) |
 
 ### PhaseOutput
 
@@ -131,6 +131,12 @@ Item identity, closed markdown/yaml keys, spec/build: [doc-standards/item-schema
 | `id_remap` | Old id → new id when re-composing a frozen level; empty object otherwise |
 | `assumptions_used` | Assumption ids referenced in doc |
 
+Compose **requires** `session_state.project_posture` with `user_confirmed: true`. Missing → `clarifications_needed` (`severity: blocking`), `status: partial` — do not invent a legend.
+
+Compose consumes `session_state.note_sessions[doc_type]` (and the matching `{level}.notes.yaml`) into `level_facts` **for the current `doc_type` only**. Do not mint items from notes belonging to other levels.
+
+PRD release-phasing prose is derived from the posture MoSCoW legend ([project-posture.md](project-posture.md)). Do not assume Must = MVP.
+
 `parent` is the immediate parent id (`null` in JSON / `—` in markdown for ES roots). `build` is omitted or `null` except FRD leaves. `priority_method` is the document type’s method (`moscow` \| `kano` \| `triad`); unranked leaves set the native field to `null`. `triad` is `{ if_present, if_absent, if_wrong, class }` with each axis `{ effect, magnitude }`.
 
 | `status` | When |
@@ -202,7 +208,7 @@ Item identity, closed markdown/yaml keys, spec/build: [doc-standards/item-schema
 
 | Field | Notes |
 |-------|-------|
-| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** — judgment only when `payload.static_validation.status` is `passed` or `failed`. Do not apply per-level `in_scope` (that is skill-inline stage-exit). |
+| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** — judgment only when `payload.static_validation.status` is `passed` or `failed`. Do not apply per-level `in_scope` (that is skill-inline stage-exit). Include posture and off-level-misfile findings (`temporal` / `traceability_breaks`). |
 | `comparison_tables` | When single-option decisions lack alternatives analysis |
 | `clarifications_needed` | Questions that block severity assessment |
 | `docs_reviewed` | All docs scanned (`.md` or `.yaml` per `--format`) |

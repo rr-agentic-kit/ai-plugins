@@ -68,7 +68,7 @@ Declared per level. Native priority method is a property of the **document type*
 
 | Level | Prefix | Method | Rankable leaves | Unranked leaves (`—`) | Prose (unnumbered) |
 |-------|--------|--------|-----------------|----------------------|--------------------|
-| exec-summary | `ES` | MoSCoW | Why now, metrics, constraints, non-goals | Vision, problem | — |
+| exec-summary | `ES` | MoSCoW | Why now, metrics, constraints, non-goals | Vision, problem, posture | — |
 | mrd | `MRD` | Kano | Customer needs | Segments, competitors, trends, risks | Market overview |
 | brd | `BRD` | MoSCoW | Objectives, rules, dependencies | Stakeholders, risks | — |
 | prd | `PRD` | MoSCoW | Goals, stories, features | Personas | Product overview, release phasing |
@@ -80,11 +80,11 @@ Non-goals and PRD out-of-scope are `Won't` by definition. MRD segments state pri
 
 Do not apply one ranking system to the whole cascade. No 1–5. No P0/P1/P2.
 
-- **exec-summary — MoSCoW.** Vision and problem are unranked (they are the anchor). Metrics, constraints, and non-goals are Must/Should/Could/Won’t. Why: few items, board language, no implementation blast radius yet.
+- **exec-summary — MoSCoW.** Posture, vision, and problem are unranked (they are the anchor). Metrics, constraints, and non-goals are Must/Should/Could/Won’t. Why: few items, board language, no implementation blast radius yet.
 - **mrd — Kano on needs** (`basic` / `performance` / `delighter`). Why: market needs are about satisfaction-if-present vs dissatisfaction-if-absent; MoSCoW flattens delighters into Could.
 - **brd — MoSCoW on objectives, rules, and dependencies.** Compliance/contractual rules are Must. Why: business-negotiation language for cutting scope.
-- **prd — MoSCoW on goals, stories, and features.** Must = MVP, Should = v1, Could = later, Won’t = out of scope (aligns with release phasing). Do not add `if_wrong` here — there is no design yet to be wrong.
-- **frd — consequence triad + derived class.** First layer that must tell an implementer *how carefully* to build. Do not copy MoSCoW onto FRD items.
+- **prd — MoSCoW on goals, stories, and features.** Legend is posture-dependent ([project-posture.md](../project-posture.md)): Must is the cut *within this session's horizon*, not a hardcoded "MVP." Should/Could = later-in-horizon; Won't = never. No second rank (`horizon:`) on items. Do not add `if_wrong` here — there is no design yet to be wrong.
+- **frd — consequence triad + derived class.** First layer that must tell an implementer *how carefully* to build. Do not copy MoSCoW onto FRD items. Triad inheritance is unchanged (Must → high absence, Should → moderate, Could → low); only the human PRD legend changes.
 
 ### FRD consequence triad (leaves only)
 

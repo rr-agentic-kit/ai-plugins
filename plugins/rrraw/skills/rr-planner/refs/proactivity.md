@@ -26,7 +26,7 @@ Lightweight devil's-advocate during discovery — not the full `--challenge` age
 |---------|----------------|
 | Single-stakeholder framing | "Who else is affected but not mentioned?" |
 | Solution-before-problem | "Restate the problem without mentioning the solution." |
-| Scope creep signal | "Is [feature X] essential for v1 or a future phase?" |
+| PRD MoSCoW assigned | Run the **cut-pass** once ([project-posture.md](project-posture.md)). Do not ask a generic "v1 or future phase?" |
 | Happy-path only | "What is the primary failure mode?" |
 | Market claim without evidence | "What evidence supports [claim]? (defer to research if unknown)" |
 
@@ -56,6 +56,7 @@ Fire reflection when any of:
 - Level gate 5 (proactivity) not yet satisfied.
 - User says "I think", "probably", "maybe" on a blocking fact.
 - Compose agent returns `clarifications_needed[]` with `severity: high`.
+- PRD MoSCoW just assigned → cut-pass (once per PRD compose; same fatigue cap as Gate 5).
 
 ## Pre-save reflection (write-time)
 

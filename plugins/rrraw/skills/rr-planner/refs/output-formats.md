@@ -17,6 +17,11 @@ All files written to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`)
   brd.md | brd.yaml
   prd.md | prd.yaml
   frd.md | frd.yaml
+  exec-summary.notes.yaml         # off-level sidecar (if any notes)
+  mrd.notes.yaml
+  brd.notes.yaml
+  prd.notes.yaml
+  frd.notes.yaml
   items.json                      # relationship graph only
   session-state.json              # internal checkpoint / agent I/O
   research-report.md | .yaml
@@ -32,15 +37,16 @@ All files written to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`)
 | brd | `brd.md` or `brd.yaml` |
 | prd | `prd.md` or `prd.yaml` |
 | frd | `frd.md` or `frd.yaml` |
+| off-level notes | `{level}.notes.yaml` (always YAML; stub when first note appears) |
 | item graph | `items.json` (always JSON) |
 | session checkpoint | `session-state.json` (always JSON) |
 | Q&A history | `raw-history/{UTC compact ISO-8601}.yaml` |
 | research report | `research-report.md` or `.yaml` |
 | challenge report | `challenge-report.md` or `.yaml` |
 
-Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A.
+Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet.
 
-`--format` selects the human-doc extension (`md` default, `yaml` alternative). `items.json` and `session-state.json` are always written as JSON. `--format json` is `UNSUPPORTED_FORMAT` — JSON is not a plan document format. Do not write `planning-bundle.json` or `session-log.md`. `decisions.json` is not a user artifact; decisions live in `session-state.json`.
+`--format` selects the human-doc extension (`md` default, `yaml` alternative). `items.json` and `session-state.json` are always written as JSON. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `--format json` is `UNSUPPORTED_FORMAT` — JSON is not a plan document format. Do not write `planning-bundle.json` or `session-log.md`. `decisions.json` is not a user artifact; decisions live in `session-state.json`.
 
 ## Markdown doc format
 
@@ -203,6 +209,15 @@ Written on **every stop** and after **each level completion**. Required for `--r
   "composed_docs": {},
   "item_registry": {},
   "frozen_levels": ["exec-summary", "mrd"],
+  "project_posture": {
+    "existence": "greenfield",
+    "commitment": "unsigned",
+    "source": "user_confirmed",
+    "user_confirmed": true,
+    "signed_set": [],
+    "shipped_summary": null
+  },
+  "note_sessions": {},
   "pending_agent_output": null
 }
 ```
@@ -210,6 +225,10 @@ Written on **every stop** and after **each level completion**. Required for `--r
 `raw_history_path` is relative to `output_dir`. Resume loads this file, continues from `checkpoint.current_level`, and appends Q&A to that history file.
 
 `item_registry`: id → `{ doc, parent, kind, spec, class? }`. Resume and re-compose remap child `parent:` from this map.
+
+`project_posture`: confirmed existence × commitment ([project-posture.md](project-posture.md)). Resume skips the posture gate when `user_confirmed` is true and uncontradicted.
+
+`note_sessions`: per-level index of parked notes; body is `{level}.notes.yaml` ([note-sessions.md](note-sessions.md)). Sidecars are not `--format` docs and are not parsed by `validate_planning.py`.
 
 ## Status merge
 
@@ -222,10 +241,11 @@ Written on **every stop** and after **each level completion**. Required for `--r
 ## Adapter rules
 
 1. Never overwrite without user confirmation if files exist and `--input` did not imply refresh.
-2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`).
+2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `note_sessions`).
 3. Always write `items.json` after compose (both `md` and `yaml` formats).
 4. Append a raw-history turn after every Q&A; do not wait for stage-exit.
-5. Research and challenge reports are standalone files, not merged into cascade docs. Extension follows `--format`.
-6. Skill writes human files. Agents return JSON (`doc_content` + `items[]`); when `format: yaml`, skill serializes closed-key YAML from `items[]` + prose.
-7. After write, skill runs `python3 scripts/validate_planning.py <output-dir>` (plugin root). Pass `--format md|yaml` when known; otherwise the script sniffs `.md`/`.yaml`. FAIL blocks `final_status: ok`.
-8. Pause does not run pre-save reflection and does not write unfrozen composed docs.
+5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings.
+6. Research and challenge reports are standalone files, not merged into cascade docs. Extension follows `--format`.
+7. Skill writes human files. Agents return JSON (`doc_content` + `items[]`); when `format: yaml`, skill serializes closed-key YAML from `items[]` + prose.
+8. After write, skill runs `python3 scripts/validate_planning.py <output-dir>` (plugin root). Pass `--format md|yaml` when known; otherwise the script sniffs `.md`/`.yaml`. FAIL blocks `final_status: ok`. Sidecars are not validator input.
+9. Pause does not run pre-save reflection and does not write unfrozen composed docs.

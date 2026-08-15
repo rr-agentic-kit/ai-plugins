@@ -6,12 +6,13 @@ Flag-driven software planning docs: progressive top-down discovery from vision t
 
 ## Philosophy
 
-- **Progressive cascade** — Exec summary → MRD → BRD → PRD → FRD; each level inherits and narrows the one above.
-- **Item contract** — Hierarchical `{DOC}-{n.m}` ids, immediate parent pointer, atomic leaves; ranking is per layer (MoSCoW / Kano / FRD triad), not P0. Spec vs build are separate axes.
+- **Progressive cascade** — Posture gate, then Exec summary → MRD → BRD → PRD → FRD; each level inherits and narrows the one above.
+- **Item contract** — Hierarchical `{DOC}-{n.m}` ids, immediate parent pointer, atomic leaves; ranking is per layer (MoSCoW / Kano / FRD triad), not P0. MoSCoW *legend* follows project posture (Must is not always MVP). Spec vs build are separate axes.
 - **Goal-anchored** — Unclear and ambiguous statements are blocking; clarify before recording facts; every decision traces to stated goals.
+- **Off-level answers** — A feature mentioned during vision parks on the affected doc (`{level}.notes.yaml`), not as an exec-summary assumption.
 - **Proactive discovery** — Stage-exit blind-spots before freeze; write-time pre-save reflection; broad market research deferred to post-composition.
 - **Interactive discovery, non-interactive agents** — Skill owns question loops (`AskQuestion` by default, `--text-mode` for inline); compose/research/challenge agents return `clarifications_needed[]`.
-- **Stop and resume** — Pause anytime; state checkpoints to `session-state.json`; Q&A appends to `raw-history/`; `--resume` continues where you left off.
+- **Stop and resume** — Pause anytime; state checkpoints to `session-state.json`; Q&A appends to `raw-history/`; `--resume` continues where you left off. Confirmed posture is not re-asked.
 
 ## How to run
 
@@ -33,7 +34,7 @@ One primary action flag + optional selectors. Explicit flags win on conflict ([r
 ```
 rr-planner --discover
 ```
-→ Full top-down cascade with interactive discovery; writes all docs to `{PROJECT_ROOT}/docs/plans/`.
+→ Confirm project posture, then full top-down cascade with interactive discovery; writes all docs to `{PROJECT_ROOT}/docs/plans/`.
 
 ```
 rr-planner --prd --input "Build a team analytics dashboard for engineering managers"
@@ -74,18 +75,19 @@ rr-planner --discover --format yaml
 
 | File | Content |
 |------|---------|
-| `exec-summary.md` \| `.yaml` | Vision, problem, why now |
+| `exec-summary.md` \| `.yaml` | Posture, vision, problem, why now |
 | `mrd.md` \| `.yaml` | Market context |
 | `brd.md` \| `.yaml` | Business requirements |
 | `prd.md` \| `.yaml` | Product requirements |
 | `frd.md` \| `.yaml` | Functional requirements with Gherkin acceptance criteria |
+| `{level}.notes.yaml` | Off-level answers parked on the affected doc (always YAML; not validator input) |
 | `items.json` | Item graph / parent-child / spec-build (always written; validator target) |
-| `session-state.json` | Checkpoint for stop/resume (decisions, facts, `item_registry`, `raw_history_path`) |
+| `session-state.json` | Checkpoint for stop/resume (decisions, facts, `project_posture`, `note_sessions`, `item_registry`, `raw_history_path`) |
 | `raw-history/{UTC}.yaml` | Verbatim Q&A turns (append-only; created on first question) |
 | `research-report.md` \| `.yaml` | Cited market findings (when research runs) |
 | `challenge-report.md` \| `.yaml` | Blind-spot findings (when `--challenge` runs) |
 
-`--format` selects the human-doc extension. `items.json` and `session-state.json` are always JSON.
+`--format` selects the human-doc extension. `items.json` and `session-state.json` are always JSON. `{level}.notes.yaml` is always YAML and is not a plan doc.
 
 ## Troubleshooting
 
@@ -104,6 +106,8 @@ rr-planner --discover --format yaml
 | Routing and cascade | [SKILL.md](SKILL.md) |
 | Flag parsing / conflicts | [refs/input-resolution.md](refs/input-resolution.md) |
 | Level order and gates | [refs/cascade.md](refs/cascade.md) |
+| Project posture / MoSCoW legend | [refs/project-posture.md](refs/project-posture.md) |
+| Off-level answers | [refs/note-sessions.md](refs/note-sessions.md) |
 | Phase schemas | [refs/contracts.md](refs/contracts.md) |
 | Doc structures | [refs/doc-standards/](refs/doc-standards/) |
 | Item identity / rank / status | [refs/doc-standards/item-schema.md](refs/doc-standards/item-schema.md) |

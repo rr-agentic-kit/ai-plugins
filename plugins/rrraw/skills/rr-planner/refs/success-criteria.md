@@ -49,9 +49,13 @@ ES-n → MRD-n.m → BRD-n.m → PRD-n.m → FRD-n.m
 AI owns — do not encode as script FAILs:
 
 - Compound leaves (multiple shalls/actors/outcomes in one leaf)
-- MoSCoW inflation; Kano mis-class; weak triad prose (`if_wrong` not a real blast radius)
+- MoSCoW inflation vs the posture legend; Kano mis-class; weak triad prose (`if_wrong` not a real blast radius)
 - Vague AC ("fast", "user-friendly") without measurable proxy
 - Shall not testable
+- Posture unconfirmed or missing ES Posture leaf; Must set disagrees with the legend (`signed_v1` re-cut as MVP, shipped behavior as new Must under `existing`)
+- Frozen level still has leftover `partial` notes the user has not discarded or completed
+
+Do **not** encode posture or note-session checks as `validate_planning.py` FAILs. Sidecars are not script input.
 
 ### Testable acceptance criteria
 
@@ -73,14 +77,15 @@ Every `must-correct` / `must-present` FRD leaf must have:
 - No open `clarifications_needed[]` unless user explicitly accepted gaps.
 - No `assumptions` with `blocking: true` and `validated: false`.
 - No conflicting facts across levels (per cascade inheritance rules).
-- Decision log in `session-state.json` complete for all user-facing choices.
+- Decision log in `session-state.json` complete for all user-facing choices (`project_posture` confirmed; `scope_change` / `note_routed` when those paths ran).
 - Verbatim Q&A for those choices is in `raw-history/` (not a substitute for the decision log).
+- No leftover `partial` notes on frozen levels ([note-sessions.md](note-sessions.md)).
 
 ## Criterion: Decision traceability
 
 Every recorded decision must:
 
-- Have a `goal_ref` pointing to an `ES-*` id (vision or metric) when the exec-summary exists.
+- Have a `goal_ref` pointing to an `ES-*` id (vision, metric, or Posture leaf) when the exec-summary exists. `project_posture` logged before the Posture leaf exists may fill `goal_ref` on the next compose.
 - Be `user_confirmed: true` (or explicitly accepted as assumption).
 - Not contradict a later-level fact.
 
@@ -107,13 +112,15 @@ Each composed doc passes its doc-standard **done-when** checklist:
     "acceptance_criteria": { "passed": true, "vague_terms": [] },
     "ambiguity": { "passed": true, "open_clarifications": [] },
     "decisions": { "passed": true, "unconfirmed": [] },
-    "doc_standards": { "passed": true, "failures": [] }
+    "doc_standards": { "passed": true, "failures": [] },
+    "posture": { "passed": true, "existence": "greenfield", "commitment": "unsigned" },
+    "notes": { "passed": true, "partial_on_frozen": [] }
   },
   "final_status": "ok"
 }
 ```
 
-`traceability` in this object is the script result (duplicated for the gate record). Judgment findings live under `acceptance_criteria` / `doc_standards`.
+`traceability` in this object is the script result (duplicated for the gate record). Judgment findings live under `acceptance_criteria` / `doc_standards` / `posture` / `notes`. `posture` and `notes` are never script FAILs.
 
 | `gate_passed` | `final_status` |
 |---------------|----------------|

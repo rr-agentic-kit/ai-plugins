@@ -42,9 +42,9 @@ One catalog. Category ids are the keys used in the applicability matrix.
 | `operational` | Support burden, monitoring, on-call, migration, deprecation, internal system dependencies |
 | `competitive` | Incumbent alternatives, build-vs-buy, switching costs |
 | `economic` | Hidden costs, revenue model gaps, unit economics, cost of inaction, sizing proxies |
-| `temporal` | Sequencing risks, dependency chains, MVP scope creep, why-now, approval timing |
+| `temporal` | Sequencing risks, dependency chains, why-now, approval timing, posture (existence × commitment), cut-pass vs legend, Must inflation under `signed_v1` |
 | `assumption_debt` | Unvalidated assumptions treated as facts |
-| `traceability_breaks` | Judgment: compound leaves, inflated MoSCoW, weak triad, untestable shalls. Static parent/id failures come from `validate_planning.py` — do not re-score if the script ran. If skipped, flag `build != none` on non-ready items. |
+| `traceability_breaks` | Judgment: compound leaves, inflated MoSCoW, weak triad, untestable shalls, **current-level facts that belong in another doc** (should have been a note session). Static parent/id failures come from `validate_planning.py` — do not re-score if the script ran. If skipped, flag `build != none` on non-ready items. |
 | `negative_space` | What is explicitly out of scope and why |
 
 ## Applicability matrix
@@ -53,10 +53,10 @@ Stage-exit scans **only** `in_scope` + `inherit_check` for the current level. `d
 
 | Level | `in_scope` | `inherit_check` | `defer` |
 |-------|------------|-----------------|---------|
-| **exec-summary** | `negative_space`; `temporal` (why now); `economic` (cost of inaction); `stakeholder_gaps` (who feels the pain); `assumption_debt` | — | Competitive detail → MRD. System failure modes, NFR, operational → FRD |
+| **exec-summary** | `negative_space`; `temporal` (why now **and** posture); `economic` (cost of inaction); `stakeholder_gaps` (who feels the pain); `assumption_debt` | — | Competitive detail → MRD. System failure modes, NFR, operational → FRD |
 | **mrd** | `competitive`; `economic` (sizing proxies); `stakeholder_gaps` (buyer vs user); `temporal` (trends vs why-now); `assumption_debt` | Exec-summary non-goals still hold | Failure modes, NFR, operational → FRD |
 | **brd** | `stakeholder_gaps` (hidden approvers); `economic` (objectives); `operational` (internal dependencies); `temporal` (approvals); `assumption_debt` | Do not re-litigate MRD landscape | Failure modes, NFR, product Won't → PRD/FRD |
-| **prd** | `negative_space` (product Won't); `temporal` (MVP/v1); `stakeholder_gaps` (personas vs BRD); `traceability_breaks` (compound stories); alternatives on major features | Personas/objectives vs BRD | NFR targets, error handling, integrations → FRD |
+| **prd** | `negative_space` (product Won't); `temporal` (cut-pass vs posture legend; Must inflation under `signed_v1`; shipped-as-Must under `existing`); `stakeholder_gaps` (personas vs BRD); `traceability_breaks` (compound stories; facts that belong in another doc); alternatives on major features | Personas/objectives vs BRD | NFR targets, error handling, integrations → FRD |
 | **frd** | `failure_modes`; `non_functional`; `operational` (monitoring/migration); `traceability_breaks`; `assumption_debt` | Competitive/economic only for **contradiction** with upper levels — no new market debate | — |
 
 ## Alternatives analysis
@@ -120,7 +120,7 @@ Apply on `--challenge` across all loaded docs. At stage-exit, apply only when th
 
 Skill runs `python3 scripts/validate_planning.py <output-dir>` before challenge and as the static half of cascade Gate 3. If the script ran, omit ref/status/drift findings — they are already FAILs. If skipped, include `build` on non-ready / broken parent as findings and record `STATIC SKIPPED`.
 
-Judgment only: compound leaves, MoSCoW inflation, weak `if_wrong`, vague AC.
+Judgment only: compound leaves, MoSCoW inflation vs the posture legend, weak `if_wrong`, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
 
 ## Challenge output expectations
 

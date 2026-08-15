@@ -18,11 +18,11 @@ Define what the product will do to achieve business objectives. Feature-level th
 | **Goals** | Product goals mapped to BRD objectives | Ranked leaves |
 | **User personas** | Primary personas with goals, pain points, context | Unranked leaves (`MoSCoW: —`) |
 | **User stories / outcomes** | Outcome-oriented capabilities (not implementation) | Ranked leaves |
-| **Features** | Capabilities that deliver stories | Ranked leaves; Must = MVP, Should = v1, Could = later, Won’t = out of scope |
+| **Features** | Capabilities that deliver stories | Ranked leaves; MoSCoW *legend* from [project-posture.md](../project-posture.md) — not a hardcoded Must=MVP |
 | **Out of scope** | Product-level exclusions (inherits exec non-goals) | Ranked leaves; `Won't` |
-| **Release phasing** | MVP vs v1 vs future (if applicable) | Prose derived from MoSCoW — do not store a second rank |
+| **Release phasing** | Horizon buckets for this session | Prose derived from MoSCoW + posture legend — do not store a second rank; **state which legend was used** |
 
-IDs, parent walk, split, spec/build: [item-schema.md](item-schema.md). Prefix `PRD`. Product scoping, not implementation. Do not add `if_wrong` or P0/P1/P2.
+IDs, parent walk, split, spec/build: [item-schema.md](item-schema.md). Prefix `PRD`. Product scoping, not implementation. Do not add `if_wrong` or P0/P1/P2. No `horizon:` field on items.
 
 PRD “delivered” is derived from Must FRD children (`build: done`). Do not store build status on PRD items.
 
@@ -30,9 +30,10 @@ PRD “delivered” is derived from Must FRD children (`build: done`). Do not st
 
 1. For each BRD objective, ask "what product capability delivers this?"
 2. Write user stories as outcomes: "As [persona], I can [outcome] so that [business value]."
-3. Challenge feature requests against exec-summary non-goals.
-4. Prioritize with MoSCoW — Must/Should/Could/Won’t; force split if a story hides multiple outcomes.
-5. Separate MVP (Must) from v1 (Should) in release-phasing prose.
+3. Challenge feature requests against exec-summary non-goals. Under `existing`, shipped behavior is already a constraint — do not restate it as a Must feature to build.
+4. Prioritize with MoSCoW — Must/Should/Could/Won’t using the **posture legend**; force split if a story hides multiple outcomes.
+5. Run the **cut-pass** once after MoSCoW, before Gate 6 freeze ([project-posture.md](../project-posture.md)). `unsigned`: can the Must slice move an ES metric? `signed_v1`: do not ask "is this MVP?"; new Must → `scope_change` or reject.
+6. Write release-phasing prose from the legend (Should+Could = v1+ when unsigned; Won't = never, not later).
 
 ## Traceability
 
@@ -46,7 +47,8 @@ PRD “delivered” is derived from Must FRD children (`build: done`). Do not st
 - [ ] Every BRD objective has at least one product goal
 - [ ] Personas defined with goals and pain points
 - [ ] User stories are outcome-oriented (no implementation detail)
-- [ ] Goals, stories, and features have MoSCoW; MVP boundary = Must
-- [ ] Out-of-scope items documented as `Won't`
+- [ ] Goals, stories, and features have MoSCoW; ranks match the posture legend (Must is not automatically MVP)
+- [ ] Release-phasing prose states which legend was used
+- [ ] Out-of-scope items documented as `Won't` (never — not "later")
 - [ ] Items use `PRD-{n}` / `PRD-{n.m}` per item-schema; compounds split into container + leaves
 - [ ] No feature contradicts exec-summary non-goals or BRD business rules

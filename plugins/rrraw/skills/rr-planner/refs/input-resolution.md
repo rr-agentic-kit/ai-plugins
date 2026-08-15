@@ -108,6 +108,10 @@ When no primary action flag is detected (default `discover` still applies), map 
 
 If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 
+### Posture hints (not an action)
+
+NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` **seed** the [project-posture.md](project-posture.md) confirm step. They are not a primary action flag and do not change `cascade_levels`. `greenfield` in the table above still maps to `discover` when no other action is present.
+
 ## Conflict matrix
 
 | Dimension | Rule |
