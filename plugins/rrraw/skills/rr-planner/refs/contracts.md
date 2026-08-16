@@ -91,7 +91,7 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
 
 ### compose
 
-Compose **must** persist `{level}.md` or `{level}.yaml` (per `payload.format`) and merge this level into `items.json`, then return a slim receipt. Compose PhaseOutput must never include `doc_content`, `items[]`, or a document body; a fat receipt means the contract failed.
+Compose **must** persist `{level}.md` and merge this level into `items.json`, then return a slim receipt. Compose PhaseOutput must never include `doc_content`, `items[]`, or a document body; a fat receipt means the contract failed.
 
 ```json
 {
@@ -101,33 +101,27 @@ Compose **must** persist `{level}.md` or `{level}.yaml` (per `payload.format`) a
   "sections_incomplete": [],
   "clarifications_needed": [],
   "id_remap": {},
+  "items_removed": [],
   "assumptions_used": ["a-001"]
 }
 ```
 
-Item identity, closed markdown/yaml keys, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json). Records live in `items.json` on disk — not in this receipt. Skill refreshes `item_registry` by reading `items.json`.
+Item identity, closed `_key_:` markdown, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json). Records live in `items.json` on disk — not in this receipt. Skill refreshes `item_registry` by reading `items.json`.
 
 | Field | Notes |
 |-------|-------|
 | `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd`, `frd` |
-| `doc_path` | Path of the file this agent just wrote (`{level}.md` or `{level}.yaml`) |
+| `doc_path` | Path of the file this agent just wrote (`{level}.md`) |
 | `sections_completed` | Required sections with content |
 | `sections_incomplete` | Required sections with gaps |
 | `clarifications_needed` | `ClarificationItem[]` — non-empty blocks `status: ok` |
 | `id_remap` | Old id → new id when re-composing a frozen level; empty object otherwise. Same invocation rewrites child-doc `parent:` and `items.json`. |
+| `items_removed` | Ids dropped from this `doc` in `items.json` this invocation (kill/burial). Empty list otherwise. Skill already wrote `graveyard` / `reserved_ids` before compose, or updates from this list. |
 | `assumptions_used` | Assumption ids referenced in doc |
 
-`artifacts[]` on the envelope lists paths this agent wrote (`doc_path`, `items.json`, rewritten child docs). YAML serialization is compose’s job; the parent does not convert JSON into YAML.
+`artifacts[]` on the envelope lists paths this agent wrote (`doc_path`, `items.json`, rewritten child docs).
 
-Compose **requires** `session_state.project_posture` with `user_confirmed: true`. Missing → `clarifications_needed` (`severity: blocking`), `status: partial` — do not invent a legend. Do not persist.
-
-Compose consumes `session_state.note_sessions[doc_type]` (and the matching `{level}.notes.yaml`) into `level_facts` **for the current `doc_type` only**. Do not mint items from notes belonging to other levels.
-
-PRD release-phasing prose is derived from the posture MoSCoW legend ([project-posture.md](project-posture.md)). Do not assume Must = MVP.
-
-On-disk item records: `parent` is the immediate parent id (`null` in JSON / `—` in markdown for ES roots). `build` is omitted or `null` except FRD leaves. `priority_method` is the document type’s method (`moscow` \| `kano` \| `triad`); unranked leaves set the native field to `null`. `triad` is `{ if_present, if_absent, if_wrong, class }` with each axis `{ effect, magnitude }`.
-
-Do not write `session-state.json`, `raw-history/`, or `{level}.notes.yaml` — skill owns those.
+Execution (posture required, notes ingest, sidecar prune): [project-posture.md](project-posture.md), [note-sessions.md](note-sessions.md). Must≠MVP / MoSCoW legend: [project-posture.md](project-posture.md). `reserved_ids` / ledger read-only: [decision-ledger.md](decision-ledger.md). Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md).
 
 | `status` | When |
 |----------|------|
@@ -140,7 +134,7 @@ Do not write `session-state.json`, `raw-history/`, or `{level}.notes.yaml` — s
 ```json
 {
   "findings": [{
-    "id": "r-001",
+    "id": "rf-001",
     "topic": "Competitive landscape",
     "summary": "",
     "citations": [{ "title": "", "url": "", "accessed": "ISO-8601" }],
@@ -159,15 +153,15 @@ Do not write `session-state.json`, `raw-history/`, or `{level}.notes.yaml` — s
 
 | Field | Notes |
 |-------|-------|
-| `findings` | Cited market/competitor/standards evaluation |
+| `findings` | Cited market/competitor/standards evaluation. Finding ids use `rf-` (not `r-`, which is ledger rationale) |
 | `citations` | Required for each finding — no unsourced claims |
 | `refinement_signals` | Suggested doc updates (skill/user applies via re-discover) |
 | `clarifications_needed` | Blocking gaps that research cannot resolve without user input |
 
 | `status` | When |
 |----------|------|
-| `ok` | Research complete; no blocking clarifications; user confirmed done or no new findings |
-| `partial` | User stopped mid-research or unresolved clarifications remain |
+| `ok` | No new material findings this invocation; no blocking clarifications |
+| `partial` | Unresolved clarifications remain |
 | `failed` | No docs to evaluate or research scope error |
 
 ### challenge
@@ -194,16 +188,16 @@ Do not write `session-state.json`, `raw-history/`, or `{level}.notes.yaml` — s
 }
 ```
 
-`docs_reviewed` uses the actual filenames (`.yaml` when `--format yaml`).
+`docs_reviewed` uses the actual filenames (always `.md`).
 
 | Field | Notes |
 |-------|-------|
-| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** — judgment only when `payload.static_validation.status` is `passed` or `failed`. Do not apply per-level `in_scope` (that is skill-inline stage-exit). Include posture and off-level-misfile findings (`temporal` / `traceability_breaks`). |
+| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** (not per-level `in_scope`). Judgment only when `payload.static_validation.status` is `passed` or `failed`. Ledger scan: [decision-ledger.md](decision-ledger.md) Challenge. |
 | `comparison_tables` | When single-option decisions lack alternatives analysis |
 | `clarifications_needed` | Questions that block severity assessment |
-| `docs_reviewed` | All docs scanned (`.md` or `.yaml` per `--format`) |
+| `docs_reviewed` | All docs scanned (`.md`) |
 
-Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.py`. If `passed`/`failed`, do not re-check refs. If `skipped`, may flag build-on-non-ready.
+Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.py`. Static vs judgment: [success-criteria.md](success-criteria.md).
 
 | `status` | When |
 |----------|------|

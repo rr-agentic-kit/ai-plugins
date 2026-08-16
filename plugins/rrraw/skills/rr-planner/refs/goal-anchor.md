@@ -1,6 +1,6 @@
 # goal-anchor
 
-**Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format.
+**Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format. Reason-graph concerns (evidence, `flips_when`, burial, re-decision queue) live in [decision-ledger.md](decision-ledger.md) — this ref does not own them.
 
 **Load when:** Entire discovery pass at every cascade level (always-on). Not a trigger. Also on parent/child fact conflict, posture confirm, and off-level owner ambiguity.
 
@@ -30,7 +30,7 @@ When input is unclear or ambiguous:
 
 Do not proceed to compose (and do not freeze the level) until blocking clarifications are resolved or explicitly accepted.
 
-Parent-id existence, numbering, spec/build legality, and md|yaml vs `items.json` drift are **static** — `scripts/validate_planning.py`. This ref owns judgment only (vague input, conflict, nuance). Do not re-check whether a parent id exists.
+Static vs judgment: [success-criteria.md](success-criteria.md). This ref owns judgment only (vague input, conflict, nuance).
 
 ## Clarify-before-assume
 
@@ -88,7 +88,7 @@ Stored in `session-state.json` (not raw-history). Verbatim Q&A is YAML history o
 {
   "id": "d-001",
   "level": "prd",
-  "type": "decision|assumption|conflict_resolution|nuance|project_posture|scope_change|note_routed",
+  "type": "decision|assumption|conflict_resolution|nuance|project_posture|scope_change|note_routed|viability_verdict|rationale|re_decision|revival",
   "text": "Full decision text with qualifiers preserved",
   "goal_ref": "ES-1",
   "parent": "BRD-2",
@@ -100,9 +100,15 @@ Stored in `session-state.json` (not raw-history). Verbatim Q&A is YAML history o
 
 | `type` | When |
 |--------|------|
-| `project_posture` | Existence × commitment confirmed |
+| `project_posture` | Existence × commitment confirmed (includes `domain_context`) |
 | `scope_change` | New Must after `signed_v1` (or reject inflation) |
 | `note_routed` | Off-level answer parked, deepened, applied, or discarded |
+| `viability_verdict` | Gate 7 / premise-test verdict recorded (`proceed` … `kill`); `text` names dissenting seats |
+| `rationale` | Ranked-leaf decision minted; `text` cites `r-NNN` — body lives in the ledger |
+| `re_decision` | Queue item drained (keep / postpone / kill / revive) |
+| `revival` | Killed item revived as a **new** id; `text` points at the graveyard snapshot |
+
+Do not copy `flips_when`, evidence claims, or graveyard snapshots into this log. Pointer + type only.
 
 ## Assumption format
 
@@ -135,9 +141,4 @@ Posture confirm: `type: project_posture`, `user_confirmed: true`. New Must after
 
 ## Session completion signals
 
-Treat as level/session done when user says (case-insensitive intent):
-
-- "done", "that's enough", "good to proceed", "move on", "next level"
-- "stop", "pause", "done for now" → checkpoint and exit (not level complete)
-
-Do not advance a level while blocking clarifications remain unless user explicitly accepts gaps.
+Phrase recognition only ("done", "that's enough", "good to proceed", "move on", "next level", "stop", "pause", "done for now"). Advance vs stop is [cascade.md](cascade.md) Advancing vs stopping — one rule. "move on" is not a gate bypass; that table's exceptions (binding `hold`/`kill`, open queue) still apply.

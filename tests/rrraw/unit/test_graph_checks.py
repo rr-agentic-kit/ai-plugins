@@ -18,10 +18,7 @@ def test_broken_parent(tmp_path: Path):
     files = dict(VALID_FILES)
     files["mrd.md"] = """\
 ## MRD-1: SMB buyers
-- **Parent:** ES-99
-- **Kind:** leaf
-- **Spec:** ready
-- **Kano:** —
+_parent_: ES-99 | _kind_: leaf | _spec_: ready | _kano_: —
 """
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -32,14 +29,7 @@ def test_level_skip(tmp_path: Path):
     files = dict(VALID_FILES)
     files["frd.md"] = """\
 ## FRD-1: Guest checkout without account
-- **Parent:** ES-3
-- **Kind:** leaf
-- **Spec:** ready
-- **Build:** none
-- **If present:** high — Unlocks conversion
-- **If absent:** high — PLG blocked
-- **If wrong:** low — Local defect
-- **Class:** must-present
+_parent_: ES-3 | _kind_: leaf | _spec_: ready | _build_: none | _if-present_: high — Unlocks conversion | _if-absent_: high — PLG blocked | _if-wrong_: low — Local defect | _class_: must-present
 """
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -49,16 +39,10 @@ def test_level_skip(tmp_path: Path):
 def test_numbering_gap(tmp_path: Path):
     files = {"exec-summary.md": """\
 ## ES-1: Vision
-- **Parent:** —
-- **Kind:** leaf
-- **Spec:** ready
-- **MoSCoW:** —
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: —
 
 ## ES-3: Metric
-- **Parent:** —
-- **Kind:** leaf
-- **Spec:** ready
-- **MoSCoW:** Must
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
 """}
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -85,16 +69,10 @@ def test_depth_three_rejected():
 def test_leaf_with_children(tmp_path: Path):
     files = {"exec-summary.md": """\
 ## ES-1: Vision
-- **Parent:** —
-- **Kind:** leaf
-- **Spec:** draft
-- **MoSCoW:** —
+_parent_: — | _kind_: leaf | _spec_: draft | _moscow_: —
 
 ### ES-1.1: Nested claim
-- **Parent:** ES-1
-- **Kind:** leaf
-- **Spec:** draft
-- **MoSCoW:** Must
+_parent_: ES-1 | _kind_: leaf | _spec_: draft | _moscow_: Must
 """}
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -104,9 +82,7 @@ def test_leaf_with_children(tmp_path: Path):
 def test_container_without_children(tmp_path: Path):
     files = {"exec-summary.md": """\
 ## ES-1: Vision
-- **Parent:** —
-- **Kind:** container
-- **Spec:** draft
+_parent_: — | _kind_: container | _spec_: draft
 """}
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -116,10 +92,7 @@ def test_container_without_children(tmp_path: Path):
 def test_cycle(tmp_path: Path):
     files = {"prd.md": """\
 ## PRD-1: A
-- **Parent:** PRD-1
-- **Kind:** leaf
-- **Spec:** draft
-- **MoSCoW:** Must
+_parent_: PRD-1 | _kind_: leaf | _spec_: draft | _moscow_: Must
 """}
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -130,15 +103,10 @@ def test_nested_parent_shape(tmp_path: Path):
     files = dict(VALID_FILES)
     files["prd.md"] = """\
 ## PRD-1: Checkout
-- **Parent:** BRD-1
-- **Kind:** container
-- **Spec:** draft
+_parent_: BRD-1 | _kind_: container | _spec_: draft
 
 ### PRD-1.1: Guest checkout
-- **Parent:** BRD-1
-- **Kind:** leaf
-- **Spec:** ready
-- **MoSCoW:** Must
+_parent_: BRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
 """
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -148,16 +116,10 @@ def test_nested_parent_shape(tmp_path: Path):
 def test_duplicate_id(tmp_path: Path):
     files = {"exec-summary.md": """\
 ## ES-1: Vision
-- **Parent:** —
-- **Kind:** leaf
-- **Spec:** idea
-- **MoSCoW:** —
+_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 
 ## ES-1: Again
-- **Parent:** —
-- **Kind:** leaf
-- **Spec:** idea
-- **MoSCoW:** —
+_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 """}
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -168,20 +130,10 @@ def test_supersede_dangling(tmp_path: Path):
     files = dict(VALID_FILES)
     files["frd.md"] = """\
 ## FRD-1: Checkout
-- **Parent:** PRD-1.1
-- **Kind:** container
-- **Spec:** draft
+_parent_: PRD-1.1 | _kind_: container | _spec_: draft
 
 ### FRD-1.1: Guest checkout without account
-- **Parent:** FRD-1
-- **Kind:** leaf
-- **Spec:** deprecated
-- **Build:** none
-- **If present:** high — Unlocks conversion
-- **If absent:** high — PLG blocked
-- **If wrong:** critical — Billing disputes
-- **Class:** must-correct
-- **Superseded-by:** FRD-9
+_parent_: FRD-1 | _kind_: leaf | _spec_: deprecated | _build_: none | _if-present_: high — Unlocks conversion | _if-absent_: high — PLG blocked | _if-wrong_: critical — Billing disputes | _class_: must-correct | _superseded-by_: FRD-9
 """
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)

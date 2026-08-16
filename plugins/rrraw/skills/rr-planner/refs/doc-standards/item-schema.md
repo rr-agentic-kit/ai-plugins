@@ -4,7 +4,7 @@
 
 **Load when:** Discovering, composing, validating, or challenging any cascade doc.
 
-Audience: compose agent + orchestrator. Humans read markdown or YAML per `--format`. Validation target is structured (`items.json`).
+Audience: compose agent + orchestrator. Working surface is markdown. Validation target is structured (`items.json`).
 
 ## Shared fields
 
@@ -17,7 +17,8 @@ Every numbered item has `id`, `parent`, `kind`, `spec`. Priority fields depend o
 | `kind` | all | `container` \| `leaf` |
 | `spec` | all | `idea` \| `draft` \| `ready` \| `deprecated` |
 | `build` | FRD leaves only | `none` \| `in_progress` \| `done` |
-| `supersedes` / `superseded_by` | optional | Replacement pair (both ends or neither) |
+| `rationale` | ranked leaves | `r-\d{3,}` pointer into [decision-ledger.md](../decision-ledger.md). Optional on unranked leaves and containers. |
+| `supersedes` / `superseded-by` | optional | Replacement pair (both ends or neither). JSON field remains `superseded_by`. |
 
 Containers stay unmarked (no MoSCoW / Kano / triad). Index tables show the level’s native field.
 
@@ -27,7 +28,7 @@ Containers stay unmarked (no MoSCoW / Kano / triad). Index tables show the level
 - Continuous among **siblings** (`1, 2, 3` — no gaps at compose). Children of item 3 are `3.1`, `3.2`, … not new top-level numbers.
 - Unique across the cascade because of the prefix (`PRD-3` ≠ `FRD-3`).
 - Max depth **2** inside a document (`n.m`). Deeper means the parent is not a real grouping — split the parent into siblings.
-- **Freeze on level completion.** First compose of a level mints dense IDs and writes the doc immediately (draft until freeze). After the cascade gate passes, later inserts append (next integer). Explicit re-compose of a frozen level: compose rewrites child-doc `parent:` and `items.json` in the same invocation (so FRD does not point at a vanished `PRD-3`). Skill refreshes `item_registry` from `items.json`.
+- **Freeze / remap** (when IDs freeze, append-only inserts, re-compose rewrite): [cascade.md](../cascade.md). This ref owns ID shape, sibling density, and max depth.
 
 Rejected: one global `1…N` across all five docs. Rejected: semantic names (`exec-vision`) — not continuous, do not nest.
 
@@ -68,8 +69,8 @@ Declared per level. Native priority method is a property of the **document type*
 
 | Level | Prefix | Method | Rankable leaves | Unranked leaves (`—`) | Prose (unnumbered) |
 |-------|--------|--------|-----------------|----------------------|--------------------|
-| exec-summary | `ES` | MoSCoW | Why now, metrics, constraints, non-goals | Vision, problem, posture | — |
-| mrd | `MRD` | Kano | Customer needs | Segments, competitors, trends, risks | Market overview |
+| exec-summary | `ES` | MoSCoW | Why now, metrics, constraints, non-goals | Vision, problem, posture, what-must-be-true, viability verdict | — |
+| mrd | `MRD` | Kano | Customer needs | Segments, competitors, trends, risks, TAM/SAM/SOM (or internal cost-of-inaction) | Market overview |
 | brd | `BRD` | MoSCoW | Objectives, rules, dependencies | Stakeholders, risks | — |
 | prd | `PRD` | MoSCoW | Goals, stories, features | Personas | Product overview, release phasing |
 | frd | `FRD` | triad | All leaves | — | System overview |
@@ -80,7 +81,7 @@ Non-goals and PRD out-of-scope are `Won't` by definition. MRD segments state pri
 
 Do not apply one ranking system to the whole cascade. No 1–5. No P0/P1/P2.
 
-- **exec-summary — MoSCoW.** Posture, vision, and problem are unranked (they are the anchor). Metrics, constraints, and non-goals are Must/Should/Could/Won’t. Why: few items, board language, no implementation blast radius yet.
+- **exec-summary — MoSCoW.** Posture, vision, problem, what-must-be-true, and viability verdict are unranked (they are the anchor). Metrics, constraints, and non-goals are Must/Should/Could/Won’t. Why: few items, board language, no implementation blast radius yet.
 - **mrd — Kano on needs** (`basic` / `performance` / `delighter`). Why: market needs are about satisfaction-if-present vs dissatisfaction-if-absent; MoSCoW flattens delighters into Could.
 - **brd — MoSCoW on objectives, rules, and dependencies.** Compliance/contractual rules are Must. Why: business-negotiation language for cutting scope.
 - **prd — MoSCoW on goals, stories, and features.** Legend is posture-dependent ([project-posture.md](../project-posture.md)): Must is the cut *within this session's horizon*, not a hardcoded "MVP." Should/Could = later-in-horizon; Won't = never. No second rank (`horizon:`) on items. Do not add `if_wrong` here — there is no design yet to be wrong.
@@ -159,38 +160,47 @@ Omit `build` on ES/MRD/BRD/PRD and on all containers. PRD “delivered” is **d
 
 ## Canonical item surface (closed vocabulary)
 
-Working surface is markdown **or** YAML per `--format`. Validation target is structured. Compose writes `*.md` or `*.yaml` and merges `items.json`. Item records live on disk, not in the Task return.
+Working surface is markdown. Validation target is structured. Compose writes `{level}.md` and merges `items.json`. Item records live on disk, not in the Task return. Cascade `{stem}.yaml` and list-meta (`- **Key:**`) are stale — `validate_planning.py --rewrite` migrates them.
 
-YAML docs use the same closed keys (`Parent`, `Kind`, `Spec`, …) as mappings under each item id. See [output-formats.md](../output-formats.md).
+Parser is regex, not an LLM. Three-line grammar:
 
-Heading (regex, not an LLM) — markdown:
+1. Heading = id + title
+2. Next non-empty line = closed metadata (`_key_:`)
+3. Following `^> ?` lines = body; anything else before the next heading is prose or `STALE_FORMAT`. Leaf body without `>` is `BODY_NOT_BLOCKQUOTE`. Containers have no `>` body.
+
+Heading:
 
 ```
 ^(#{2,4}) (ES|MRD|BRD|PRD|FRD)-(\d+(?:\.\d+)?): (.+)$
 ```
 
-Metadata lines immediately under the heading, until a blank line:
+Metadata — one line immediately under the heading. Keys are hyphenated (`_if-present_`, `_superseded-by_`), not snake_case, so wrapping `_key_:` renders as one italic span.
 
 ```
-^- \*\*(.+?):\*\* (.+)$
+_parent_: PRD-3 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-014
 ```
 
-| Keys | Who |
-|------|-----|
-| **Required (all items)** | `Parent`, `Kind`, `Spec` |
-| **FRD leaves also** | `Build` |
-| **Leaves, native method** | `MoSCoW` \| `Kano` \| `If present` / `If absent` / `If wrong` / `Class` |
-| **Optional** | `Supersedes`, `Superseded-by` |
+Split segments on `\s+\|\s+(?=_[a-z][a-z0-9-]*_:)` so triad effect text may contain `|`. FAIL if a segment is not `_key_: value` or the key is unknown/duplicate.
 
-Unknown keys or missing required keys → validator FAIL. Body after the blank line (md) or `body:` (yaml) is free prose (AI-judged).
+| Keys (md surface) | Who | Internal / `items.json` |
+|-------------------|-----|-------------------------|
+| **Required (all items)** | `parent`, `kind`, `spec` | same |
+| **Ranked leaves also** | `rationale` (`r-NNN`, minted in the ledger before compose prints it) | `rationale` |
+| **FRD leaves also** | `build` | `build` |
+| **Leaves, native method** | `moscow` \| `kano` \| `if-present` / `if-absent` / `if-wrong` / `class` | `moscow` \| `kano` \| `triad.if_present` / `if_absent` / `if_wrong` / `class` |
+| **Optional** | `supersedes`, `superseded-by`; `rationale` on unranked leaves and containers | `supersedes`, `superseded_by` |
 
-`Parent: —` and native rank `—` mean null / unranked. Triad lines: `<magnitude> — <effect>` (em dash preferred). YAML may use `null` instead of `—`.
+Canonical emit order: `parent, kind, spec, build, moscow, kano, if-present, if-absent, if-wrong, class, rationale, supersedes, superseded-by`. Omit inapplicable keys. Unranked leaves still emit the native key as `—`.
 
-JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph checks: `plugins/rrraw/scripts/validate_planning.py` (sniffs `.md`/`.yaml` or takes `--format`).
+Unknown keys or missing required keys → validator FAIL. Body is the blockquote (AI-judged).
 
-**Code owns:** unique IDs, parent/supersede pointers, numbering density, kind invariant, required keys, status legality, doc/`items.json` drift.
+`_parent_: —` and native rank `—` mean null / unranked. Triad values: `<magnitude> — <effect>` (em dash preferred).
 
-**AI owns:** whether a leaf is actually atomic, whether MoSCoW is inflated, whether `if_wrong` is a real blast radius, whether the shall is testable.
+JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph checks: `scripts/validate_planning.py` (md-only; `--format yaml|json` is `UNSUPPORTED_FORMAT`).
+
+**Code owns:** unique IDs, parent/supersede pointers, numbering density, kind invariant, required keys, status legality, doc/`items.json` drift, rationale id shape and resolution against `decision-ledger.yaml`.
+
+**AI owns:** whether a leaf is actually atomic, whether MoSCoW is inflated, whether `if_wrong` is a real blast radius, whether the shall is testable, whether a `flips_when` condition is well-chosen (never a script FAIL).
 
 ## Templates
 
@@ -198,56 +208,41 @@ JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph che
 
 ```markdown
 ### PRD-3: Checkout
-- **Parent:** BRD-2
-- **Kind:** container
-- **Spec:** draft
+_parent_: BRD-2 | _kind_: container | _spec_: draft
 ```
 
 ### Leaf — MoSCoW (ES / BRD / PRD)
 
 ```markdown
 #### PRD-3.1: Guest checkout
-- **Parent:** PRD-3
-- **Kind:** leaf
-- **Spec:** ready
-- **MoSCoW:** Must
+_parent_: PRD-3 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-014
 
-As a guest, I can complete checkout without an account so that first purchase is not blocked by registration.
+> As a guest, I can complete checkout without an account so that first purchase is not blocked.
 ```
 
 ### Leaf — Kano (MRD needs)
 
 ```markdown
 #### MRD-2.1: Checkout without an account
-- **Parent:** MRD-2
-- **Kind:** leaf
-- **Spec:** ready
-- **Kano:** basic
+_parent_: MRD-2 | _kind_: leaf | _spec_: ready | _kano_: basic | _rationale_: r-002
 ```
 
 ### Leaf — triad (FRD)
 
 ```markdown
 #### FRD-4.1: Guest checkout without account
-- **Parent:** PRD-3.1
-- **Kind:** leaf
-- **Spec:** ready
-- **Build:** in_progress
-- **If present:** high — Unlocks self-serve conversion without an account
-- **If absent:** high — PLG motion blocked (BRD-2); assisted sales stays the path
-- **If wrong:** critical — Bad tax/entitlements → billing disputes
-- **Class:** must-correct
+_parent_: PRD-3.1 | _kind_: leaf | _spec_: ready | _build_: in_progress | _if-present_: high — Unlocks self-serve conversion without an account | _if-absent_: high — PLG motion blocked (BRD-2); assisted sales stays the path | _if-wrong_: critical — Bad tax/entitlements → billing disputes | _class_: must-correct | _rationale_: r-014
 
-The system shall allow checkout without an account.
-
-**Acceptance criteria:**
-- Given [context], When [action], Then [outcome]
-- Given [error context], When [invalid action], Then [error behavior]
+> The system shall allow checkout without an account.
+>
+> **Acceptance criteria:**
+> - Given [context], When [action], Then [outcome]
+> - Given [error context], When [invalid action], Then [error behavior]
 ```
 
 ## Item index
 
-Each composed markdown file (and the yaml `item_index` if present) ends with an index. Column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Containers and unranked leaves show `—`.
+Each composed markdown file ends with an index. Column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Containers and unranked leaves show `—`.
 
 ```markdown
 ## Item index

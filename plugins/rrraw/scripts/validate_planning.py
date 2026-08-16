@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.14
-"""Validate rr-planner md/yaml item headers, graph, status, and items.json drift."""
+"""Validate rr-planner markdown item headers, graph, status, and items.json drift."""
 
 from __future__ import annotations
 
@@ -15,7 +15,40 @@ from typing import Any
 import yaml
 
 DOC_STEMS: tuple[str, ...] = ("exec-summary", "mrd", "brd", "prd", "frd")
-YAML_SKIP_KEYS = frozenset({"title", "body"})
+YAML_SKIP_KEYS = frozenset(
+    {
+        "title",
+        "body",
+        "doc_type",
+        "version",
+        "created",
+        "traces_from",
+        "item_index",
+    }
+)
+CANONICAL_KEY_ORDER: tuple[str, ...] = (
+    "parent",
+    "kind",
+    "spec",
+    "build",
+    "moscow",
+    "kano",
+    "if-present",
+    "if-absent",
+    "if-wrong",
+    "class",
+    "rationale",
+    "supersedes",
+    "superseded-by",
+)
+EM_DASH = "\u2014"
+NATIVE_INDEX_COL: dict[str, str] = {
+    "exec-summary": "MoSCoW",
+    "mrd": "Kano",
+    "brd": "MoSCoW",
+    "prd": "MoSCoW",
+    "frd": "Class",
+}
 
 PREFIX_TO_DOC: dict[str, str] = {
     "ES": "exec-summary",
@@ -36,32 +69,46 @@ DOC_METHOD: dict[str, str] = {
 }
 
 HEADING_RE = re.compile(r"^(#{2,4}) (ES|MRD|BRD|PRD|FRD)-(\d+(?:\.\d+)?): (.+)$")
-META_RE = re.compile(r"^- \*\*(.+?):\*\* (.+)$")
+LIST_META_RE = re.compile(r"^- \*\*(.+?):\*\* (.+)$")
+INLINE_KEY_RE = re.compile(r"^_([a-z][a-z0-9-]*)_:\s*(.*)$")
+META_SPLIT_RE = re.compile(r"\s+\|\s+(?=_[a-z][a-z0-9-]*_:)")
+BODY_QUOTE_RE = re.compile(r"^> ?(.*)$")
+ATX_HEADING_RE = re.compile(r"^#{1,6} ")
 ID_RE = re.compile(r"^(ES|MRD|BRD|PRD|FRD)-(\d+)(?:\.(\d+))?$")
+RATIONALE_RE = re.compile(r"^r-\d{3,}$")
+EVIDENCE_ID_RE = re.compile(r"^e-\d{3,}$")
+LEDGER_NAME = "decision-ledger.yaml"
+FLIP_KINDS = frozenset({"metric", "fact", "event"})
+CONDITION_STRENGTHS = frozenset({"measurable", "observable", "vague"})
+RATIONALE_DECISIONS = frozenset({"accept", "reject", "postpone", "pivot"})
+RATIONALE_STATUSES = frozenset({"live", "invalidated", "superseded"})
+EVIDENCE_STATUSES = frozenset({"supported", "refuted", "unknown", "superseded"})
+METRIC_OPS = frozenset({"<", "<=", ">", ">=", "==", "!="})
+QUEUE_STATUSES = frozenset({"open", "decided", "dismissed"})
 _DASH_CLASS = "\u2014\u2013\u2212-"
 AXIS_RE = re.compile(
     rf"^(critical|high|moderate|low)\s+[{_DASH_CLASS}]\s+(.+)$",
     re.IGNORECASE,
 )
 
-CLOSED_KEYS = frozenset(
-    {
-        "Parent",
-        "Kind",
-        "Spec",
-        "Build",
-        "MoSCoW",
-        "Kano",
-        "If present",
-        "If absent",
-        "If wrong",
-        "Class",
-        "Supersedes",
-        "Superseded-by",
-    }
-)
-REQUIRED_KEYS = frozenset({"Parent", "Kind", "Spec"})
-FRD_LEAF_KEYS = frozenset({"Build", "If present", "If absent", "If wrong", "Class"})
+CLOSED_KEYS = frozenset(CANONICAL_KEY_ORDER)
+REQUIRED_KEYS = frozenset({"parent", "kind", "spec"})
+FRD_LEAF_KEYS = frozenset({"build", "if-present", "if-absent", "if-wrong", "class"})
+YAML_KEY_MAP: dict[str, str] = {
+    "Parent": "parent",
+    "Kind": "kind",
+    "Spec": "spec",
+    "Build": "build",
+    "MoSCoW": "moscow",
+    "Kano": "kano",
+    "If present": "if-present",
+    "If absent": "if-absent",
+    "If wrong": "if-wrong",
+    "Class": "class",
+    "Rationale": "rationale",
+    "Supersedes": "supersedes",
+    "Superseded-by": "superseded-by",
+}
 KIND_VALUES = frozenset({"container", "leaf"})
 SPEC_VALUES = frozenset({"idea", "draft", "ready", "deprecated"})
 BUILD_VALUES = frozenset({"none", "in_progress", "done"})
@@ -72,7 +119,7 @@ CLASS_VALUES = frozenset(
     {"must-correct", "must-present", "protect", "leverage", "optional"}
 )
 HIGH_MAG = frozenset({"critical", "high"})
-NULL_SENTINELS = frozenset({"\u2014", "-", "\u2013", "\u2212", "none", "null", ""})
+NULL_SENTINELS = frozenset({"\u2014", "-", "\u2013", "\u2212", "null", ""})
 JSON_ITEM_KEYS = frozenset(
     {
         "id",
@@ -86,6 +133,7 @@ JSON_ITEM_KEYS = frozenset(
         "moscow",
         "kano",
         "triad",
+        "rationale",
         "title",
         "doc",
     }
@@ -154,8 +202,10 @@ class Item:
     triad: Triad | None = None
     supersedes: str | None = None
     superseded_by: str | None = None
+    rationale: str | None = None
     source_file: str = ""
     raw_keys: set[str] = field(default_factory=set)
+    raw_meta: dict[str, str] = field(default_factory=dict)
 
     @property
     def parts(self) -> tuple[int, ...]:
@@ -184,6 +234,8 @@ class Item:
             record["supersedes"] = self.supersedes
         if self.superseded_by:
             record["superseded_by"] = self.superseded_by
+        if self.rationale:
+            record["rationale"] = self.rationale
         method = DOC_METHOD[self.doc]
         if self.kind == "leaf":
             if method == "moscow":
@@ -209,7 +261,140 @@ def _parse_axis(raw: str) -> Axis | None:
     return Axis(effect=match.group(2).strip(), magnitude=match.group(1).lower())
 
 
-def parse_markdown(text: str, source_file: str) -> tuple[list[Item], list[Issue]]:
+def _surface_key(raw_key: str) -> str | None:
+    if raw_key in CLOSED_KEYS:
+        return raw_key
+    return YAML_KEY_MAP.get(raw_key)
+
+
+def parse_inline_meta_line(line: str) -> tuple[dict[str, str], list[tuple[str, str]]]:
+    errors: list[tuple[str, str]] = []
+    meta: dict[str, str] = {}
+    segments = META_SPLIT_RE.split(line.strip())
+    if not segments or not any(seg.strip() for seg in segments):
+        return meta, [("MALFORMED_META", line)]
+    for raw_seg in segments:
+        seg = raw_seg.strip()
+        match = INLINE_KEY_RE.match(seg)
+        if not match:
+            errors.append(("MALFORMED_META", seg))
+            continue
+        key, value = match.group(1), match.group(2).strip()
+        if key not in CLOSED_KEYS:
+            errors.append(("UNKNOWN_KEY", key))
+        if key in meta:
+            errors.append(("DUPLICATE_KEY", key))
+        meta[key] = value
+    return meta, errors
+
+
+def _record_meta_errors(
+    errors: list[tuple[str, str]], item_id: str, issues: list[Issue]
+) -> None:
+    for code, detail in errors:
+        if code == "MALFORMED_META":
+            issues.append(
+                Issue(
+                    "error",
+                    "MALFORMED_META",
+                    f"expected '_key_: value' under {item_id}, got {detail!r}",
+                    item_id,
+                )
+            )
+        elif code == "UNKNOWN_KEY":
+            issues.append(
+                Issue(
+                    "error",
+                    "UNKNOWN_KEY",
+                    f"unknown metadata key {detail!r}",
+                    item_id,
+                )
+            )
+        elif code == "DUPLICATE_KEY":
+            issues.append(
+                Issue(
+                    "error",
+                    "DUPLICATE_KEY",
+                    f"duplicate metadata key {detail!r}",
+                    item_id,
+                )
+            )
+
+
+def _skip_blanks(lines: list[str], index: int) -> int:
+    while index < len(lines) and not lines[index].strip():
+        index += 1
+    return index
+
+
+def _capture_blockquote(lines: list[str], index: int) -> tuple[str, int]:
+    captured: list[str] = []
+    while index < len(lines):
+        match = BODY_QUOTE_RE.match(lines[index])
+        if not match:
+            break
+        captured.append(match.group(1))
+        index += 1
+    return "\n".join(captured), index
+
+
+def _capture_free_body(lines: list[str], index: int) -> tuple[str, int]:
+    captured: list[str] = []
+    while index < len(lines):
+        line = lines[index]
+        if HEADING_RE.match(line) or ATX_HEADING_RE.match(line):
+            break
+        captured.append(line)
+        index += 1
+    return "\n".join(captured).strip("\n"), index
+
+
+def _consume_list_meta(
+    lines: list[str], index: int, item_id: str, issues: list[Issue]
+) -> tuple[dict[str, str], int]:
+    meta: dict[str, str] = {}
+    while index < len(lines) and lines[index].strip():
+        meta_match = LIST_META_RE.match(lines[index])
+        if not meta_match:
+            issues.append(
+                Issue(
+                    "error",
+                    "MALFORMED_META",
+                    f"expected '- **Key:** value' under {item_id}, got {lines[index]!r}",
+                    item_id,
+                )
+            )
+            index += 1
+            continue
+        raw_key, value = meta_match.group(1), meta_match.group(2).strip()
+        key = _surface_key(raw_key)
+        if key is None:
+            issues.append(
+                Issue(
+                    "error",
+                    "UNKNOWN_KEY",
+                    f"unknown metadata key {raw_key!r}",
+                    item_id,
+                )
+            )
+            key = raw_key
+        if key in meta:
+            issues.append(
+                Issue(
+                    "error",
+                    "DUPLICATE_KEY",
+                    f"duplicate metadata key {key!r}",
+                    item_id,
+                )
+            )
+        meta[key] = value
+        index += 1
+    return meta, index
+
+
+def parse_markdown(
+    text: str, source_file: str, *, migrate: bool = False
+) -> tuple[list[Item], list[Issue]]:
     issues: list[Issue] = []
     items: list[Item] = []
     lines = text.splitlines()
@@ -224,40 +409,77 @@ def parse_markdown(text: str, source_file: str) -> tuple[list[Item], list[Issue]
         title = match.group(4).strip()
         item_id = f"{prefix}-{number}"
         i += 1
+        i = _skip_blanks(lines, i)
         meta: dict[str, str] = {}
-        while i < len(lines) and lines[i].strip():
-            meta_match = META_RE.match(lines[i])
-            if not meta_match:
+        if i >= len(lines):
+            issues.append(
+                Issue(
+                    "error",
+                    "MALFORMED_META",
+                    f"missing metadata line under {item_id}",
+                    item_id,
+                )
+            )
+        elif LIST_META_RE.match(lines[i]):
+            if not migrate:
                 issues.append(
                     Issue(
                         "error",
-                        "MALFORMED_META",
-                        f"expected '- **Key:** value' under {item_id}, got {lines[i]!r}",
+                        "STALE_FORMAT",
+                        "list-meta (- **Key:**) is stale; run validate_planning.py --rewrite",
                         item_id,
                     )
                 )
-                i += 1
-                continue
-            key, value = meta_match.group(1), meta_match.group(2).strip()
-            if key not in CLOSED_KEYS:
-                issues.append(
-                    Issue(
-                        "error", "UNKNOWN_KEY", f"unknown metadata key {key!r}", item_id
+            meta, i = _consume_list_meta(lines, i, item_id, issues)
+            i = _skip_blanks(lines, i)
+            if migrate:
+                _, i = _capture_free_body(lines, i)
+        elif INLINE_KEY_RE.match(lines[i].strip()) or META_SPLIT_RE.search(lines[i]):
+            meta, meta_errors = parse_inline_meta_line(lines[i])
+            _record_meta_errors(meta_errors, item_id, issues)
+            i += 1
+            i = _skip_blanks(lines, i)
+            if i < len(lines) and BODY_QUOTE_RE.match(lines[i]):
+                _, i = _capture_blockquote(lines, i)
+            elif (
+                i < len(lines)
+                and lines[i].strip()
+                and not HEADING_RE.match(lines[i])
+                and not ATX_HEADING_RE.match(lines[i])
+            ):
+                if LIST_META_RE.match(lines[i]):
+                    issues.append(
+                        Issue(
+                            "error",
+                            "STALE_FORMAT",
+                            "list-meta leftover under inline metadata",
+                            item_id,
+                        )
                     )
-                )
-            if key in meta:
-                issues.append(
-                    Issue(
-                        "error",
-                        "DUPLICATE_KEY",
-                        f"duplicate metadata key {key!r}",
-                        item_id,
+                    _, i = _consume_list_meta(lines, i, item_id, issues)
+                elif not migrate:
+                    issues.append(
+                        Issue(
+                            "error",
+                            "BODY_NOT_BLOCKQUOTE",
+                            "leaf body must be a markdown blockquote (>)",
+                            item_id,
+                        )
                     )
+                    _, i = _capture_free_body(lines, i)
+                else:
+                    _, i = _capture_free_body(lines, i)
+        else:
+            issues.append(
+                Issue(
+                    "error",
+                    "MALFORMED_META",
+                    f"expected '_key_: value' under {item_id}, got {lines[i]!r}",
+                    item_id,
                 )
-            meta[key] = value
+            )
             i += 1
         items.append(_item_from_meta(item_id, title, prefix, meta, source_file, issues))
-        i += 1
     return items, issues
 
 
@@ -302,22 +524,24 @@ def parse_yaml_doc(text: str, source_file: str) -> tuple[list[Item], list[Issue]
         for key, value in raw.items():
             if key in YAML_SKIP_KEYS:
                 continue
-            if key not in CLOSED_KEYS:
+            surface = _surface_key(str(key))
+            if surface is None:
                 issues.append(
                     Issue(
                         "error", "UNKNOWN_KEY", f"unknown metadata key {key!r}", item_id
                     )
                 )
-            if key in meta:
+                surface = str(key)
+            if surface in meta:
                 issues.append(
                     Issue(
                         "error",
                         "DUPLICATE_KEY",
-                        f"duplicate metadata key {key!r}",
+                        f"duplicate metadata key {surface!r}",
                         item_id,
                     )
                 )
-            meta[key] = _yaml_scalar(value)
+            meta[surface] = _yaml_scalar(value)
         match = ID_RE.match(item_id)
         prefix = match.group(1) if match else ""
         if not prefix:
@@ -333,41 +557,29 @@ def detect_doc_format(
     planning_dir: Path, requested: str | None = None
 ) -> tuple[str | None, list[Issue]]:
     issues: list[Issue] = []
-    if requested == "json":
+    if requested is not None and requested != "md":
         issues.append(
             Issue(
                 "error",
                 "UNSUPPORTED_FORMAT",
-                "format json is not a plan document format; use md or yaml",
+                f"format {requested!r} is not a plan document format; use md",
             )
         )
         return None, issues
-    if requested is not None and requested not in {"md", "yaml"}:
-        issues.append(
-            Issue(
-                "error",
-                "UNSUPPORTED_FORMAT",
-                f"format {requested!r} is not a plan document format; use md or yaml",
-            )
-        )
-        return None, issues
-    md_stems = [stem for stem in DOC_STEMS if (planning_dir / f"{stem}.md").is_file()]
     yaml_stems = [
         stem for stem in DOC_STEMS if (planning_dir / f"{stem}.yaml").is_file()
     ]
-    if requested in {"md", "yaml"}:
-        return requested, issues
-    if md_stems and yaml_stems:
+    if yaml_stems:
         issues.append(
             Issue(
                 "error",
-                "MIXED_FORMAT",
-                "both .md and .yaml planning docs present; pass --format md|yaml",
+                "STALE_FORMAT",
+                "cascade "
+                + ", ".join(f"{stem}.yaml" for stem in yaml_stems)
+                + " is stale; run validate_planning.py --rewrite",
             )
         )
         return None, issues
-    if yaml_stems:
-        return "yaml", issues
     return "md", issues
 
 
@@ -385,14 +597,14 @@ def _item_from_meta(
             issues.append(
                 Issue("error", "MISSING_KEY", f"missing required key {key}", item_id)
             )
-    kind = meta.get("Kind", "")
-    spec = meta.get("Spec", "")
+    kind = meta.get("kind", "")
+    spec = meta.get("spec", "")
     if kind and kind not in KIND_VALUES:
         issues.append(
             Issue(
                 "error",
                 "INVALID_VALUE",
-                f"Kind must be container|leaf, got {kind!r}",
+                f"kind must be container|leaf, got {kind!r}",
                 item_id,
             )
         )
@@ -401,48 +613,58 @@ def _item_from_meta(
             Issue(
                 "error",
                 "INVALID_VALUE",
-                f"Spec must be idea|draft|ready|deprecated, got {spec!r}",
+                f"spec must be idea|draft|ready|deprecated, got {spec!r}",
                 item_id,
             )
         )
-    parent = _null_or_value(meta["Parent"]) if "Parent" in meta else None
-    build = _null_or_value(meta["Build"]) if "Build" in meta else None
+    parent = _null_or_value(meta["parent"]) if "parent" in meta else None
+    build = _null_or_value(meta["build"]) if "build" in meta else None
     if build is not None and build not in BUILD_VALUES:
         issues.append(
             Issue(
                 "error",
                 "INVALID_VALUE",
-                f"Build must be none|in_progress|done, got {build!r}",
+                f"build must be none|in_progress|done, got {build!r}",
                 item_id,
             )
         )
-    moscow = _null_or_value(meta["MoSCoW"]) if "MoSCoW" in meta else None
+    moscow = _null_or_value(meta["moscow"]) if "moscow" in meta else None
     if moscow is not None and moscow not in MOSCOW_VALUES:
         issues.append(
             Issue(
                 "error",
                 "INVALID_VALUE",
-                f"MoSCoW must be Must|Should|Could|Won't, got {moscow!r}",
+                f"moscow must be Must|Should|Could|Won't, got {moscow!r}",
                 item_id,
             )
         )
-    kano = _null_or_value(meta["Kano"]) if "Kano" in meta else None
+    kano = _null_or_value(meta["kano"]) if "kano" in meta else None
     if kano is not None and kano not in KANO_VALUES:
         issues.append(
             Issue(
                 "error",
                 "INVALID_VALUE",
-                f"Kano must be basic|performance|delighter, got {kano!r}",
+                f"kano must be basic|performance|delighter, got {kano!r}",
                 item_id,
             )
         )
     triad: Triad | None = None
-    if any(k in meta for k in ("If present", "If absent", "If wrong", "Class")):
+    if any(k in meta for k in ("if-present", "if-absent", "if-wrong", "class")):
         triad = _parse_triad(item_id, meta, issues)
-    supersedes = _null_or_value(meta["Supersedes"]) if "Supersedes" in meta else None
+    supersedes = _null_or_value(meta["supersedes"]) if "supersedes" in meta else None
     superseded_by = (
-        _null_or_value(meta["Superseded-by"]) if "Superseded-by" in meta else None
+        _null_or_value(meta["superseded-by"]) if "superseded-by" in meta else None
     )
+    rationale = _null_or_value(meta["rationale"]) if "rationale" in meta else None
+    if rationale is not None and not RATIONALE_RE.match(rationale):
+        issues.append(
+            Issue(
+                "error",
+                "INVALID_VALUE",
+                f"rationale must match r-NNN, got {rationale!r}",
+                item_id,
+            )
+        )
     return Item(
         id=item_id,
         title=title,
@@ -457,8 +679,10 @@ def _item_from_meta(
         triad=triad,
         supersedes=supersedes,
         superseded_by=superseded_by,
+        rationale=rationale,
         source_file=source_file,
         raw_keys=set(meta),
+        raw_meta=dict(meta),
     )
 
 
@@ -467,9 +691,9 @@ def _parse_triad(
 ) -> Triad | None:
     axes: dict[str, Axis | None] = {}
     for field_name, key in (
-        ("if_present", "If present"),
-        ("if_absent", "If absent"),
-        ("if_wrong", "If wrong"),
+        ("if_present", "if-present"),
+        ("if_absent", "if-absent"),
+        ("if_wrong", "if-wrong"),
     ):
         if key not in meta:
             axes[field_name] = None
@@ -494,13 +718,13 @@ def _parse_triad(
                 )
             )
         axes[field_name] = axis
-    class_name = meta.get("Class", "")
+    class_name = meta.get("class", "")
     if class_name and class_name not in CLASS_VALUES:
         issues.append(
             Issue(
                 "error",
                 "INVALID_VALUE",
-                f"Class {class_name!r} is not a known class",
+                f"class {class_name!r} is not a known class",
                 item_id,
             )
         )
@@ -535,19 +759,14 @@ def parse_planning_dir(
     if fmt is None:
         return items, issues
     found = False
-    ext = "yaml" if fmt == "yaml" else "md"
     for doc in DOC_STEMS:
-        filename = f"{doc}.{ext}"
+        filename = f"{doc}.md"
         path = planning_dir / filename
         if not path.is_file():
             continue
         found = True
         text = path.read_text(encoding="utf-8")
-        parsed, parse_issues = (
-            parse_yaml_doc(text, filename)
-            if fmt == "yaml"
-            else parse_markdown(text, filename)
-        )
+        parsed, parse_issues = parse_markdown(text, filename)
         prefix = DOC_TO_PREFIX[doc]
         for item in parsed:
             if item.prefix != prefix:
@@ -563,9 +782,202 @@ def parse_planning_dir(
         issues.extend(parse_issues)
     if not found:
         issues.append(
-            Issue("error", "NO_DOCS", f"no planning {ext} files in {planning_dir}")
+            Issue("error", "NO_DOCS", f"no planning md files in {planning_dir}")
         )
     return items, issues
+
+
+def _display_value(raw: str) -> str:
+    if raw.strip() in NULL_SENTINELS:
+        return EM_DASH
+    return raw.strip()
+
+
+def format_meta_line(meta: dict[str, str]) -> str:
+    parts = [
+        f"_{key}_: {_display_value(meta[key])}"
+        for key in CANONICAL_KEY_ORDER
+        if key in meta
+    ]
+    return " | ".join(parts)
+
+
+def wrap_blockquote(body: str) -> str:
+    stripped = body.strip("\n")
+    if not stripped.strip():
+        return ""
+    return "\n".join(">" if not line else f"> {line}" for line in stripped.splitlines())
+
+
+def _meta_for_emit(item: Item) -> dict[str, str]:
+    meta = dict(item.raw_meta)
+    if "parent" not in meta:
+        meta["parent"] = item.parent or EM_DASH
+    if "kind" not in meta and item.kind:
+        meta["kind"] = item.kind
+    if "spec" not in meta and item.spec:
+        meta["spec"] = item.spec
+    if item.kind == "leaf":
+        method = DOC_METHOD[item.doc]
+        if method == "moscow" and "moscow" not in meta:
+            meta["moscow"] = item.moscow or EM_DASH
+        elif method == "kano" and "kano" not in meta:
+            meta["kano"] = item.kano or EM_DASH
+    return {key: meta[key] for key in CANONICAL_KEY_ORDER if key in meta}
+
+
+def rewrite_markdown(text: str, source_file: str) -> tuple[str, list[Issue]]:
+    issues: list[Issue] = []
+    lines = text.splitlines()
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        match = HEADING_RE.match(lines[i])
+        if not match:
+            out.append(lines[i])
+            i += 1
+            continue
+        heading_line = lines[i]
+        prefix = match.group(2)
+        number = match.group(3)
+        title = match.group(4).strip()
+        item_id = f"{prefix}-{number}"
+        i += 1
+        i = _skip_blanks(lines, i)
+        meta: dict[str, str] = {}
+        body = ""
+        if i < len(lines) and LIST_META_RE.match(lines[i]):
+            meta, i = _consume_list_meta(lines, i, item_id, issues)
+            i = _skip_blanks(lines, i)
+            body, i = _capture_free_body(lines, i)
+        elif i < len(lines) and (
+            INLINE_KEY_RE.match(lines[i].strip()) or META_SPLIT_RE.search(lines[i])
+        ):
+            meta, meta_errors = parse_inline_meta_line(lines[i])
+            _record_meta_errors(meta_errors, item_id, issues)
+            i += 1
+            i = _skip_blanks(lines, i)
+            if i < len(lines) and BODY_QUOTE_RE.match(lines[i]):
+                body, i = _capture_blockquote(lines, i)
+            elif (
+                i < len(lines)
+                and lines[i].strip()
+                and not ATX_HEADING_RE.match(lines[i])
+            ):
+                body, i = _capture_free_body(lines, i)
+        item = _item_from_meta(item_id, title, prefix, meta, source_file, issues)
+        out.append(heading_line)
+        out.append(format_meta_line(_meta_for_emit(item)))
+        if body.strip():
+            out.append("")
+            out.append(wrap_blockquote(body))
+        if i < len(lines) and lines[i].strip():
+            out.append("")
+    rewritten = "\n".join(out)
+    if rewritten and not rewritten.endswith("\n"):
+        rewritten += "\n"
+    elif not rewritten:
+        rewritten = "\n" if text else ""
+    return rewritten, issues
+
+
+def rewrite_yaml_to_md(text: str, source_file: str) -> tuple[str, list[Issue]]:
+    try:
+        data = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        return "", [Issue("error", "INVALID_YAML", f"{source_file}: {exc}")]
+    if data is None:
+        data = {}
+    if not isinstance(data, dict):
+        return "", [Issue("error", "INVALID_YAML", f"{source_file} must be a mapping")]
+    items, issues = parse_yaml_doc(text, source_file)
+    items_map = data.get("items")
+    if not isinstance(items_map, dict):
+        items_map = {key: value for key, value in data.items() if ID_RE.match(str(key))}
+    bodies: dict[str, str] = {}
+    for raw_id, raw in items_map.items():
+        if isinstance(raw, dict) and raw.get("body") is not None:
+            bodies[str(raw_id)] = str(raw["body"]).strip("\n")
+    front = {
+        key: data[key]
+        for key in ("doc_type", "version", "created", "traces_from")
+        if key in data
+    }
+    traces = front.get("traces_from")
+    if isinstance(traces, list):
+        front["traces_from"] = [
+            path.replace(".yaml", ".md") if isinstance(path, str) else path
+            for path in traces
+        ]
+    stem = Path(source_file).stem
+    title = _yaml_scalar(data.get("title", "")) or stem
+    out: list[str] = []
+    if front:
+        dumped = yaml.safe_dump(front, sort_keys=False, allow_unicode=True).rstrip()
+        out.extend(["---", dumped, "---", ""])
+    out.extend([f"# {title}", ""])
+    for item in items:
+        hashes = "####" if len(item.parts) == 2 else "###"
+        out.append(f"{hashes} {item.id}: {item.title}")
+        out.append(format_meta_line(_meta_for_emit(item)))
+        body = bodies.get(item.id, "")
+        if body.strip():
+            out.append("")
+            out.append(wrap_blockquote(body))
+        out.append("")
+    col = NATIVE_INDEX_COL.get(stem, "MoSCoW")
+    out.extend(
+        [
+            "## Item index",
+            "",
+            f"| ID | Parent | Spec | {col} |",
+            "|----|--------|------|--------|",
+        ]
+    )
+    for item in items:
+        parent = item.parent or EM_DASH
+        native = EM_DASH
+        if item.kind == "leaf":
+            if col == "MoSCoW":
+                native = item.moscow or EM_DASH
+            elif col == "Kano":
+                native = item.kano or EM_DASH
+            elif item.triad is not None:
+                native = item.triad.class_name
+        out.append(f"| {item.id} | {parent} | {item.spec} | {native} |")
+    out.append("")
+    return "\n".join(out), issues
+
+
+def rewrite_planning_dir(planning_dir: Path) -> list[Issue]:
+    issues: list[Issue] = []
+    found = False
+    for stem in DOC_STEMS:
+        md_path = planning_dir / f"{stem}.md"
+        yaml_path = planning_dir / f"{stem}.yaml"
+        if md_path.is_file():
+            found = True
+            text = md_path.read_text(encoding="utf-8")
+            new_text, parse_issues = rewrite_markdown(text, md_path.name)
+            issues.extend(parse_issues)
+            md_path.write_text(new_text, encoding="utf-8")
+            if yaml_path.is_file():
+                yaml_path.unlink()
+        elif yaml_path.is_file():
+            found = True
+            text = yaml_path.read_text(encoding="utf-8")
+            new_text, parse_issues = rewrite_yaml_to_md(text, yaml_path.name)
+            issues.extend(parse_issues)
+            if any(
+                issue.severity == "error" and issue.code == "INVALID_YAML"
+                for issue in parse_issues
+            ):
+                continue
+            md_path.write_text(new_text, encoding="utf-8")
+            yaml_path.unlink()
+    if not found:
+        issues.append(Issue("error", "NO_DOCS", f"no planning files in {planning_dir}"))
+    return issues
 
 
 def load_items_json(path: Path) -> tuple[list[dict[str, Any]], list[Issue]]:
@@ -795,10 +1207,13 @@ def _check_supersede(items: list[Item], by_id: dict[str, Item]) -> list[Issue]:
     return issues
 
 
-def check_numbering(items: list[Item]) -> list[Issue]:
+def check_numbering(
+    items: list[Item], reserved_ids: dict[str, Any] | None = None
+) -> list[Issue]:
     issues: list[Issue] = []
     top: dict[str, list[int]] = defaultdict(list)
     nested: dict[tuple[str, str], list[int]] = defaultdict(list)
+    reserved_top, reserved_nested = _reserved_slots(reserved_ids)
     for item in items:
         if len(item.parts) == 1:
             top[item.prefix].append(item.parts[0])
@@ -807,10 +1222,37 @@ def check_numbering(items: list[Item]) -> list[Issue]:
                 item.parts[1]
             )
     for prefix, nums in top.items():
-        issues.extend(_dense(sorted(nums), prefix))
-    for (_prefix, parent), nums in nested.items():
-        issues.extend(_dense(sorted(nums), parent))
+        occupied = sorted(set(nums) | reserved_top.get(prefix, set()))
+        issues.extend(_dense(occupied, prefix))
+    for key, nums in nested.items():
+        occupied = sorted(set(nums) | reserved_nested.get(key, set()))
+        issues.extend(_dense(occupied, key[1]))
     return issues
+
+
+def _reserved_slots(
+    reserved_ids: dict[str, Any] | None,
+) -> tuple[dict[str, set[int]], dict[tuple[str, str], set[int]]]:
+    top: dict[str, set[int]] = defaultdict(set)
+    nested: dict[tuple[str, str], set[int]] = defaultdict(set)
+    if not reserved_ids:
+        return top, nested
+    for stem, values in reserved_ids.items():
+        prefix = DOC_TO_PREFIX.get(str(stem))
+        if not prefix or not isinstance(values, list):
+            continue
+        for raw in values:
+            if isinstance(raw, bool):
+                continue
+            if isinstance(raw, int):
+                top[prefix].add(raw)
+            elif isinstance(raw, str) and raw.isdigit():
+                top[prefix].add(int(raw))
+            elif isinstance(raw, str) and "." in raw:
+                major, _, minor = raw.partition(".")
+                if major.isdigit() and minor.isdigit():
+                    nested[(prefix, f"{prefix}-{major}")].add(int(minor))
+    return top, nested
 
 
 def _dense(nums: list[int], group: str) -> list[Issue]:
@@ -850,16 +1292,16 @@ def check_required_fields(items: list[Item]) -> list[Issue]:
             continue
         if (
             method == "moscow"
-            and "MoSCoW" not in item.raw_keys
+            and "moscow" not in item.raw_keys
             and item.source_file != "items.json"
         ):
-            issues.append(Issue("error", "MISSING_KEY", "leaf missing MoSCoW", item.id))
+            issues.append(Issue("error", "MISSING_KEY", "leaf missing moscow", item.id))
         if (
             method == "kano"
-            and "Kano" not in item.raw_keys
+            and "kano" not in item.raw_keys
             and item.source_file != "items.json"
         ):
-            issues.append(Issue("error", "MISSING_KEY", "leaf missing Kano", item.id))
+            issues.append(Issue("error", "MISSING_KEY", "leaf missing kano", item.id))
         if item.doc == "frd":
             missing = FRD_LEAF_KEYS - item.raw_keys
             if item.source_file != "items.json" and missing:
@@ -871,7 +1313,7 @@ def check_required_fields(items: list[Item]) -> list[Issue]:
                     )
             if item.build is None:
                 issues.append(
-                    Issue("error", "MISSING_KEY", "FRD leaf missing Build", item.id)
+                    Issue("error", "MISSING_KEY", "FRD leaf missing build", item.id)
                 )
             if item.triad is None and item.spec == "ready":
                 issues.append(
@@ -1036,6 +1478,7 @@ def check_drift(md_items: list[Item], json_rows: list[dict[str, Any]]) -> list[I
             "moscow",
             "kano",
             "triad",
+            "rationale",
             "title",
             "doc",
             "priority_method",
@@ -1058,6 +1501,311 @@ def check_drift(md_items: list[Item], json_rows: list[dict[str, Any]]) -> list[I
     return issues
 
 
+def is_ranked_leaf(item: Item) -> bool:
+    if item.kind != "leaf":
+        return False
+    method = DOC_METHOD[item.doc]
+    if method == "moscow":
+        return item.moscow is not None
+    if method == "kano":
+        return item.kano is not None
+    return True
+
+
+def load_ledger(path: Path) -> tuple[dict[str, Any] | None, list[Issue]]:
+    if not path.is_file():
+        return None, [
+            Issue(
+                "warning",
+                "LEDGER_MISSING",
+                f"missing {path.name}; rationale checks skipped",
+            )
+        ]
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return None, [Issue("error", "LEDGER_MALFORMED", f"{path.name}: {exc}")]
+    if not isinstance(data, dict):
+        return None, [
+            Issue("error", "LEDGER_MALFORMED", f"{path.name} must be a mapping")
+        ]
+    issues = _check_ledger_shape(data)
+    if any(issue.severity == "error" for issue in issues):
+        return data, issues
+    return data, issues
+
+
+def _check_ledger_shape(data: dict[str, Any]) -> list[Issue]:
+    issues: list[Issue] = []
+    evidence = data.get("evidence", {})
+    rationales = data.get("rationales", {})
+    if "evidence" in data and not isinstance(evidence, dict):
+        issues.append(Issue("error", "LEDGER_MALFORMED", "evidence must be a mapping"))
+        evidence = {}
+    if not isinstance(rationales, dict):
+        issues.append(
+            Issue("error", "LEDGER_MALFORMED", "rationales must be a mapping")
+        )
+        return issues
+    evidence_ids = {
+        key for key in evidence if isinstance(key, str) and EVIDENCE_ID_RE.match(key)
+    }
+    for raw_id, record in evidence.items():
+        eid = str(raw_id)
+        if not EVIDENCE_ID_RE.match(eid):
+            issues.append(
+                Issue(
+                    "error",
+                    "LEDGER_MALFORMED",
+                    f"malformed evidence id {eid!r}",
+                    eid,
+                )
+            )
+        if not isinstance(record, dict):
+            issues.append(
+                Issue(
+                    "error",
+                    "LEDGER_MALFORMED",
+                    f"{eid} must be a mapping",
+                    eid,
+                )
+            )
+            continue
+        status = record.get("status")
+        if status is not None and status not in EVIDENCE_STATUSES:
+            issues.append(
+                Issue(
+                    "error",
+                    "LEDGER_MALFORMED",
+                    f"evidence status {status!r} is not supported|refuted|unknown|superseded",
+                    eid,
+                )
+            )
+    for raw_id, record in rationales.items():
+        rid = str(raw_id)
+        if not RATIONALE_RE.match(rid):
+            issues.append(
+                Issue(
+                    "error",
+                    "LEDGER_MALFORMED",
+                    f"malformed rationale id {rid!r}",
+                    rid,
+                )
+            )
+        if not isinstance(record, dict):
+            issues.append(
+                Issue(
+                    "error",
+                    "LEDGER_MALFORMED",
+                    f"{rid} must be a mapping",
+                    rid,
+                )
+            )
+            continue
+        issues.extend(_check_rationale_record(rid, record, evidence_ids))
+    graveyard = data.get("graveyard", {})
+    if "graveyard" in data and not isinstance(graveyard, dict):
+        issues.append(Issue("error", "LEDGER_MALFORMED", "graveyard must be a mapping"))
+    reserved = data.get("reserved_ids", {})
+    if "reserved_ids" in data and not isinstance(reserved, dict):
+        issues.append(
+            Issue("error", "LEDGER_MALFORMED", "reserved_ids must be a mapping")
+        )
+    queue = data.get("re_decision_queue", [])
+    if "re_decision_queue" in data and not isinstance(queue, list):
+        issues.append(
+            Issue(
+                "error",
+                "LEDGER_MALFORMED",
+                "re_decision_queue must be a list",
+            )
+        )
+    else:
+        for index, entry in enumerate(queue):
+            if not isinstance(entry, dict):
+                issues.append(
+                    Issue(
+                        "error",
+                        "LEDGER_MALFORMED",
+                        f"re_decision_queue[{index}] must be a mapping",
+                    )
+                )
+                continue
+            status = entry.get("status")
+            if status is not None and status not in QUEUE_STATUSES:
+                issues.append(
+                    Issue(
+                        "error",
+                        "LEDGER_MALFORMED",
+                        f"re_decision_queue[{index}] status {status!r}",
+                    )
+                )
+            pointer = entry.get("rationale")
+            if pointer and pointer not in rationales:
+                issues.append(
+                    Issue(
+                        "error",
+                        "BROKEN_RATIONALE",
+                        f"queue points at unknown rationale {pointer}",
+                    )
+                )
+    return issues
+
+
+def _check_rationale_record(
+    rid: str, record: dict[str, Any], evidence_ids: set[str]
+) -> list[Issue]:
+    issues: list[Issue] = []
+    decision = record.get("decision")
+    if decision not in RATIONALE_DECISIONS:
+        issues.append(
+            Issue(
+                "error",
+                "LEDGER_MALFORMED",
+                f"decision must be accept|reject|postpone|pivot, got {decision!r}",
+                rid,
+            )
+        )
+    status = record.get("status")
+    if status is not None and status not in RATIONALE_STATUSES:
+        issues.append(
+            Issue(
+                "error",
+                "LEDGER_MALFORMED",
+                f"status must be live|invalidated|superseded, got {status!r}",
+                rid,
+            )
+        )
+    strength = record.get("condition_strength")
+    if strength is not None and strength not in CONDITION_STRENGTHS:
+        issues.append(
+            Issue(
+                "error",
+                "LEDGER_MALFORMED",
+                f"condition_strength must be measurable|observable|vague, got {strength!r}",
+                rid,
+            )
+        )
+    flips = record.get("flips_when")
+    if not isinstance(flips, list) or not flips:
+        issues.append(
+            Issue(
+                "error",
+                "LEDGER_MALFORMED",
+                "flips_when must be a non-empty list",
+                rid,
+            )
+        )
+        return issues
+    for index, entry in enumerate(flips):
+        if not isinstance(entry, dict):
+            issues.append(
+                Issue(
+                    "error",
+                    "LEDGER_MALFORMED",
+                    f"flips_when[{index}] must be a mapping",
+                    rid,
+                )
+            )
+            continue
+        kind = entry.get("kind")
+        if kind not in FLIP_KINDS:
+            issues.append(
+                Issue(
+                    "error",
+                    "LEDGER_MALFORMED",
+                    f"flips_when[{index}] kind must be metric|fact|event, got {kind!r}",
+                    rid,
+                )
+            )
+            continue
+        if kind == "metric":
+            if not entry.get("metric") or entry.get("op") not in METRIC_OPS:
+                issues.append(
+                    Issue(
+                        "error",
+                        "LEDGER_MALFORMED",
+                        f"flips_when[{index}] metric requires metric and op in {sorted(METRIC_OPS)}",
+                        rid,
+                    )
+                )
+            if "value" not in entry:
+                issues.append(
+                    Issue(
+                        "error",
+                        "LEDGER_MALFORMED",
+                        f"flips_when[{index}] metric requires value",
+                        rid,
+                    )
+                )
+        elif kind == "fact":
+            pointer = entry.get("evidence")
+            if not isinstance(pointer, str) or not EVIDENCE_ID_RE.match(pointer):
+                issues.append(
+                    Issue(
+                        "error",
+                        "LEDGER_MALFORMED",
+                        f"flips_when[{index}] fact requires evidence e-NNN",
+                        rid,
+                    )
+                )
+            elif pointer not in evidence_ids:
+                issues.append(
+                    Issue(
+                        "error",
+                        "BROKEN_RATIONALE",
+                        f"flips_when[{index}] evidence {pointer} does not exist",
+                        rid,
+                    )
+                )
+        elif kind == "event" and not str(entry.get("text") or "").strip():
+            issues.append(
+                Issue(
+                    "error",
+                    "LEDGER_MALFORMED",
+                    f"flips_when[{index}] event requires text",
+                    rid,
+                )
+            )
+    return issues
+
+
+def check_rationale(items: list[Item], ledger: dict[str, Any] | None) -> list[Issue]:
+    if ledger is None:
+        return []
+    rationales = ledger.get("rationales")
+    if not isinstance(rationales, dict):
+        return []
+    issues: list[Issue] = []
+    for item in items:
+        if item.kind != "leaf":
+            continue
+        ranked = is_ranked_leaf(item)
+        rid = item.rationale
+        if ranked and not rid:
+            issues.append(
+                Issue(
+                    "error",
+                    "MISSING_RATIONALE",
+                    "ranked leaf missing Rationale",
+                    item.id,
+                )
+            )
+            continue
+        if not rid:
+            continue
+        if rid not in rationales:
+            issues.append(
+                Issue(
+                    "error",
+                    "BROKEN_RATIONALE",
+                    f"rationale {rid} does not exist",
+                    item.id,
+                )
+            )
+    return issues
+
+
 def validate_dir(
     planning_dir: Path,
     *,
@@ -1066,16 +1814,24 @@ def validate_dir(
 ) -> list[Issue]:
     del depth  # keys required on leaves at every depth; kept for CLI contract
     md_items, issues = parse_planning_dir(planning_dir, doc_format=doc_format)
-    if any(issue.code in {"UNSUPPORTED_FORMAT", "MIXED_FORMAT"} for issue in issues):
+    if any(issue.code in {"UNSUPPORTED_FORMAT", "STALE_FORMAT"} for issue in issues):
         return issues
+    ledger, ledger_issues = load_ledger(planning_dir / LEDGER_NAME)
+    issues.extend(ledger_issues)
     json_rows, json_issues = load_items_json(planning_dir / "items.json")
     issues.extend(json_issues)
     issues.extend(check_unique_and_ids(md_items))
     issues.extend(check_kind_and_children(md_items))
     issues.extend(check_parents(md_items))
-    issues.extend(check_numbering(md_items))
+    reserved = (
+        ledger.get("reserved_ids")
+        if isinstance(ledger, dict) and isinstance(ledger.get("reserved_ids"), dict)
+        else None
+    )
+    issues.extend(check_numbering(md_items, reserved))
     issues.extend(check_required_fields(md_items))
     issues.extend(check_status(md_items))
+    issues.extend(check_rationale(md_items, ledger))
     registry = _load_registry(planning_dir / "session-state.json")
     issues.extend(check_revive(md_items, registry))
     if json_rows:
@@ -1132,7 +1888,12 @@ def main(argv: list[str] | None = None) -> int:
         choices=("md", "yaml", "json"),
         default=None,
         dest="doc_format",
-        help="Human plan doc extension. json is rejected (UNSUPPORTED_FORMAT).",
+        help="Human plan doc extension. yaml and json are rejected (UNSUPPORTED_FORMAT).",
+    )
+    parser.add_argument(
+        "--rewrite",
+        action="store_true",
+        help="Migrate list-meta and cascade yaml to canonical md.",
     )
     parser.add_argument("--schema", type=Path, default=SCHEMA_PATH)
     args = parser.parse_args(argv)
@@ -1143,6 +1904,17 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if not args.schema.is_file():
         print(f"WARN [SCHEMA_MISSING]: {args.schema} not found", file=sys.stderr)
+    if args.rewrite:
+        rewrite_issues = rewrite_planning_dir(args.planning_dir)
+        for issue in rewrite_issues:
+            stream = sys.stderr if issue.severity == "error" else sys.stdout
+            print(issue.format(), file=stream)
+        if has_errors(rewrite_issues):
+            print(
+                f"{sum(1 for i in rewrite_issues if i.severity == 'error')} error(s)",
+                file=sys.stderr,
+            )
+            return 1
     issues = validate_dir(
         args.planning_dir, depth=args.depth, doc_format=args.doc_format
     )

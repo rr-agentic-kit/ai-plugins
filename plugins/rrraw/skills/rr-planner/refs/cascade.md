@@ -1,6 +1,6 @@
 # cascade
 
-**Owner:** Top-down level order, inheritance/narrowing rules, and per-level completion gates.
+**Owner:** Top-down level order, inheritance/narrowing rules, freeze/remap, and per-level completion gates.
 
 ## Pre-cascade: project posture
 
@@ -8,7 +8,7 @@ Before exec-summary, run [project-posture.md](project-posture.md). Done: that re
 
 ## Level order
 
-Fixed sequence — never skip a level in `standard`/`deep` depth (shallow depth trims per input-resolution):
+Fixed sequence — never skip a level in `standard`/`deep` depth (`shallow` trims per [input-resolution.md](input-resolution.md)):
 
 ```
 1. exec-summary  — posture, vision, problem, why
@@ -18,7 +18,7 @@ Fixed sequence — never skip a level in `standard`/`deep` depth (shallow depth 
 5. frd           — functional detail
 ```
 
-Item identity, parent walk, freeze/remap, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md).
+Item identity, parent walk, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). Freeze/remap: this file.
 
 ```mermaid
 flowchart TD
@@ -43,7 +43,7 @@ Each level **inherits** all resolved facts from levels above and **narrows** sco
 ### Inheritance rules
 
 1. **No contradiction** — child facts must align with parent facts. Conflict → [goal-anchor.md](goal-anchor.md) + question (per `question_mode`).
-2. **No orphan items** — every item’s `parent:` exists (ES roots: `—`). Cross-doc parent is the previous cascade level only. Verified by `validate_planning.py` (Gate 3 + success-criteria static).
+2. **No orphan items** — parent walk and cross-doc previous-level-only: [doc-standards/item-schema.md](doc-standards/item-schema.md). Verified by `validate_planning.py` (Gate 3 + [success-criteria.md](success-criteria.md) static).
 3. **Explicit narrowing** — when a parent fact is too broad for the child level, record the narrowing as a decision in `session-state.json`.
 4. **Unknown vs off-level** — details not yet known *at this level* are `assumptions[]` or `open_questions[]`, not silently invented. Off-level content: [note-sessions.md](note-sessions.md).
 5. **Priority inheritance** — FRD may default `if_absent` magnitude from parent PRD MoSCoW (Must → high, Should → moderate, Could → low). Won’t PRD items get no FRD children. Do not copy MoSCoW onto FRD. Magnitudes are unchanged; only the human MoSCoW *legend* follows [project-posture.md](project-posture.md).
@@ -52,70 +52,41 @@ Each level **inherits** all resolved facts from levels above and **narrows** sco
 
 For each level in `cascade_levels`:
 
-1. Load `doc-standards/<level>.md` and [doc-standards/item-schema.md](doc-standards/item-schema.md).
-2. Extract required sections from the standard; treat claims as items (prose overviews stay unnumbered).
-3. On level entry, incorporate notes per [note-sessions.md](note-sessions.md).
-4. Load [goal-anchor.md](goal-anchor.md) for the **entire** discovery pass.
-5. Run progressive discovery:
-   - Present inherited facts summary to user (brief), including incorporated notes.
-   - Ask targeted questions for gaps in required sections.
-   - New items default `spec: idea`; move to `draft` when specifying. Do not auto-promote to `ready`.
-   - After every Q&A: classify owner per [note-sessions.md](note-sessions.md); append to `raw-history/{UTC}.yaml`.
-   - On reflect trigger → apply [proactivity.md](proactivity.md) (Gate 5; `standard`/`deep` only). PRD after MoSCoW: run the [project-posture.md](project-posture.md) cut-pass once before Gate 6.
-6. Accumulate `level_facts` object for compose agent. Compose consumes notes for this `doc_type` only.
-7. Invoke compose agent (compose writes `{level}.md|yaml` and merges `items.json`). Confirm overwrite **before first compose** if files exist from a prior run; intra-session re-compose overwrites without asking.
-8. Parse slim receipt. While `clarifications_needed[]` non-empty → surface question → append raw-history → merge answer → re-invoke compose (overwrites). Loop until cleared or user says done. Never copy a document body through chat.
-9. Read `items.json` to refresh `item_registry`. Run `scripts/validate_planning.py` on `--output-dir` as the static half of Gate 3.
-10. Gate 6 per [blind-spots.md](blind-spots.md) skill-inline path.
-11. Remaining gates (below). On Gate pass: **freeze** this level (see Freeze and remap) — `frozen_levels` in session-state, not a second write of the doc. Notes on compose/freeze: [note-sessions.md](note-sessions.md).
+1. Load `doc-standards/<level>.md` and [doc-standards/item-schema.md](doc-standards/item-schema.md). Extract required sections; claims are items (prose overviews stay unnumbered).
+2. On level entry: re-decision sweep ([decision-ledger.md](decision-ledger.md) trigger 2); then sidecar load ([note-sessions.md](note-sessions.md)). Do not start new questions until parked notes are addressed or kept as still-unclear.
+3. Load [goal-anchor.md](goal-anchor.md) for the entire discovery pass.
+4. Present inherited facts (brief). **Exec-summary only:** premise test ([expert-panel.md](expert-panel.md)) after posture + `domain_context`.
+5. Ask for gaps in required sections. New items: [doc-standards/item-schema.md](doc-standards/item-schema.md) spec defaults. Mint the ledger rationale when a ranked-leaf decision is made ([decision-ledger.md](decision-ledger.md)).
+6. After every Q&A: [note-sessions.md](note-sessions.md) + append `raw-history/{UTC}.yaml`. After every evidence round: [expert-panel.md](expert-panel.md) evidence loop + sweep (trigger 1). On reflect trigger → [proactivity.md](proactivity.md) (Gate 5; `standard`/`deep` only). PRD after MoSCoW: [project-posture.md](project-posture.md) cut-pass once before Gate 6.
+7. Accumulate `level_facts` (include `Rationale` ids for ranked leaves). Compose consumes notes for this `doc_type` only.
+8. Invoke compose ([contracts.md](contracts.md)). Confirm overwrite **before first compose** if files exist from a prior run; intra-session re-compose overwrites without asking. After persist: prune ([note-sessions.md](note-sessions.md)).
+9. Clarification loop ([contracts.md](contracts.md)). Append raw-history on each answer before re-invoke.
+10. Refresh `item_registry` from `items.json`. Gate 3 static ([success-criteria.md](success-criteria.md)).
+11. Gate 6 then Gate 7 (table below). On Gate pass: **freeze** this level (Freeze and remap) — `frozen_levels` in session-state, not a second write of the doc.
 
 ## Stop and resume
 
 User may stop at any point ("stop", "pause", "done for now", etc.):
 
 1. Leave composed files on disk, including the current unfrozen level (drafts until freeze). Do not rewrite cascade docs. Do not run pre-save reflection.
-2. Checkpoint full `session-state.json` to `--output-dir` (include `raw_history_path`, `project_posture`, `note_sessions`, `composed_docs` paths; see [output-formats.md](output-formats.md)). Do not delete `{level}.notes.yaml` sidecars.
+2. Checkpoint full `session-state.json` to `--output-dir` ([output-formats.md](output-formats.md)). Do not prune sidecars on pause ([note-sessions.md](note-sessions.md) owns prune).
 3. Set `checkpoint.status: paused` with `current_level` and `pending_clarifications`.
 
-To resume: `rr-planner --resume --output-dir <same-dir>` (or NL "continue planning"). Skill loads checkpoint, appends Q&A to `raw_history_path`, and picks up at `current_level`. Remap uses `item_registry`. Output-dir defaults and old-dir fallback: [input-resolution.md](input-resolution.md).
+To resume: `rr-planner --resume --output-dir <same-dir>` (or NL "continue planning"). Load checkpoint; sweep (trigger 3); append Q&A to `raw_history_path`; pick up at `current_level`. Remap uses `item_registry`. Ledger summary: [decision-ledger.md](decision-ledger.md). Output-dir defaults and old-dir fallback: [input-resolution.md](input-resolution.md).
 
 ## Per-level completion gates
 
-A level is **complete** only when all gates pass:
+A level is **complete** only when all gates pass. Freeze/advance: Advancing vs stopping.
 
-### Gate 1: Section coverage
-
-Every **required section** in the matching doc-standard has at least one resolved fact or explicit assumption marked `blocking: false`.
-
-### Gate 2: Goal anchor
-
-- Zero unresolved unclear or ambiguous statements at this level (always-on [goal-anchor.md](goal-anchor.md)).
-- All decisions recorded in `session-state.json` with `goal_ref` (an `ES-*` id when available).
-- Nuance captured where user provided qualifiers (not flattened).
-- Q&A for this level is in raw-history YAML.
-
-### Gate 3: Inheritance integrity (parent walk)
-
-**Static:** run `validate_planning.py`; criteria owned by [success-criteria.md](success-criteria.md). Do not re-check in the agent.
-
-**Judgment:** [success-criteria.md](success-criteria.md) judgment list (compose/challenge).
-
-### Gate 4: Compose acceptance
-
-- Compose agent returns `status: ok` or user accepted `status: partial` with documented gaps.
-- Written doc (already on disk) passes doc-standard **done-when** checklist.
-- Skill merged `item_registry` from `items.json` (compose already wrote/merged that file).
-- Notes merge/freeze rules: [note-sessions.md](note-sessions.md).
-
-### Gate 5: Proactivity (standard/deep depth only)
-
-- At least one discovery-time reflection pass completed (see [proactivity.md](proactivity.md)).
-- Open risks or assumptions surfaced to user before advancing.
-- Write-time pre-save reflection is **not** this gate (runs after freeze + success-criteria, all depths; files already on disk).
-
-### Gate 6: Stage-exit blind-spots (all depths)
-
-Execute the skill-inline path in [blind-spots.md](blind-spots.md). Done when that ref's stage-exit rules pass.
+| Gate | Owner | Done when |
+|------|-------|-----------|
+| 1 Section coverage | this file | Every required section in the matching doc-standard has a resolved fact or explicit assumption `blocking: false` |
+| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | That ref's level-complete conditions; Q&A for this level is in raw-history YAML |
+| 3 Inheritance integrity | [success-criteria.md](success-criteria.md) | Static: `validate_planning.py`. Judgment: that ref's compose/challenge list |
+| 4 Compose acceptance | [contracts.md](contracts.md) + doc-standard | Compose `status: ok` or user-accepted `partial`; written doc passes done-when; `item_registry` refreshed from `items.json` |
+| 5 Proactivity | [proactivity.md](proactivity.md) | `standard`/`deep` only: that ref's discovery-time stop. Pre-save is not this gate |
+| 6 Stage-exit | [blind-spots.md](blind-spots.md) | That ref's skill-inline stage-exit rules. Premise-critical findings escalate into Gate 7 |
+| 7 Viability | [expert-panel.md](expert-panel.md) | That ref's Gate 7 persist |
 
 ## Freeze and remap
 
@@ -131,12 +102,14 @@ Execute the skill-inline path in [blind-spots.md](blind-spots.md). Done when tha
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass (including Gate 6); no leftover `partial` notes | Freeze level; advance to next cascade level |
+| All gates pass (including Gate 6 and Gate 7 `proceed` / `proceed-with-conditions`); no leftover `partial` notes; re-decision queue empty | Freeze level; advance to next cascade level |
 | Pending clarifications or gate gaps | Surface question → re-discover or re-compose (no round cap) |
-| User says done for level | Accept current state; advance or checkpoint per user intent |
+| Gate 7 verdict is `hold` / `pivot` / `kill` | [expert-panel.md](expert-panel.md) verdict ladder (freeze/advance column) |
+| Open re-decision queue | Drain (keep / postpone / kill / revive) before freeze |
+| User says done for level | Accept current state **unless** binding `hold`/`kill` or open queue; else advance or checkpoint per user intent |
 | User requests stop / pause | Checkpoint `session-state.json`; leave files already on disk; skip pre-save; exit cleanly |
-| `--resume` | Load checkpoint; append raw-history; continue from `current_level` |
+| `--resume` | Load checkpoint; sweep; append raw-history; continue from `current_level` |
 
 ## Session state
 
-Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry` (from `items.json` after compose), `frozen_levels`, `project_posture`, `note_sessions`, and `composed_docs` paths across levels. Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started). Compose writes cascade docs and `items.json`; skill does not copy document bodies through chat.
+Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry` (from `items.json` after compose), `frozen_levels`, `project_posture` (including `domain_context`), `viability[]`, `note_sessions`, and `composed_docs` paths across levels. Skill writes `decision-ledger.yaml`. Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started). Compose writes cascade docs and `items.json`.

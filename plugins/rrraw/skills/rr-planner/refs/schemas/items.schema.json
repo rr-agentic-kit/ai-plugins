@@ -76,6 +76,10 @@
           "enum": ["basic", "performance", "delighter", null]
         },
         "triad": { "$ref": "#/$defs/triad" },
+        "rationale": {
+          "type": "string",
+          "pattern": "^r-\\d{3,}$"
+        },
         "title": { "type": "string" },
         "doc": {
           "type": "string",

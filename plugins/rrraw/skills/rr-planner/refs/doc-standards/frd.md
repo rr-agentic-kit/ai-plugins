@@ -4,6 +4,7 @@
 **Inherits from:** exec-summary + MRD + BRD + PRD  
 **Narrows to:** functional behaviors, acceptance criteria, and interfaces  
 **Priority method:** consequence triad + derived class — [item-schema.md](item-schema.md)  
+**Panel seats:** Staff engineer + SRE/QA + domain practitioner (advisory) — [expert-panel.md](../expert-panel.md)  
 **Blind-spots (stage-exit):** Scan only the frd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
@@ -22,7 +23,7 @@ Specify testable functional requirements engineers can implement and QA can veri
 | **Non-functional requirements** | Performance, security, availability targets | Leaves |
 | **Error handling** | Expected failure modes and system behavior | Leaves |
 
-IDs, parent walk, split, spec/build: [item-schema.md](item-schema.md). Prefix `FRD`. Do not copy MoSCoW or P0/P1/P2 onto FRD items. `build` exists on FRD leaves only.
+Prefix `FRD`. Do not copy MoSCoW or P0/P1/P2 onto FRD items. `build` exists on FRD leaves only. Triad: [item-schema.md](item-schema.md).
 
 ## Extraction method (discovery)
 
@@ -35,7 +36,7 @@ IDs, parent walk, split, spec/build: [item-schema.md](item-schema.md). Prefix `F
 
 ## Requirement format
 
-Use the FRD leaf template in [item-schema.md](item-schema.md). Heading + closed metadata, then shall + AC. Do not emit `FR-001`, `Traces to:` chains, or `Priority: P0`.
+Use the FRD leaf template in [item-schema.md](item-schema.md). Heading + one `_key_:` meta line; shall and Gherkin AC stay inside the blockquote body. Do not emit `FR-001`, `Traces to:` chains, or `Priority: P0`.
 
 ## Traceability
 
@@ -47,7 +48,7 @@ Use the FRD leaf template in [item-schema.md](item-schema.md). Heading + closed 
 
 - [ ] Every Must PRD story has at least one functional leaf
 - [ ] Every leaf has Gherkin AC (min 1 happy + 1 error path for `must-correct` / `must-present`)
-- [ ] Every leaf has triad axes + derived `Class`; `build` present (`none` until `spec: ready`)
+- [ ] Every leaf has triad axes + derived `_class_` + `_rationale_`; `_build_` present (`none` until `spec: ready`)
 - [ ] Items use `FRD-{n}` / `FRD-{n.m}` per item-schema; compounds split
 - [ ] Data requirements cover key entities for Must / `must-present` / `must-correct` features
 - [ ] Integration points identified or "standalone" documented

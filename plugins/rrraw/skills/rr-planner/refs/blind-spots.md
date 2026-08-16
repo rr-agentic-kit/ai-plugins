@@ -11,7 +11,7 @@ Do not copy this taxonomy into [doc-standards/](doc-standards/). Those files own
 | Path | Who | Scope | Output |
 |------|-----|-------|--------|
 | Stage-exit | Skill (inline, not `Task`) | `in_scope` + `inherit_check` for the current cascade level | Findings merged via re-compose or recorded as assumptions; **no** per-level `challenge-report` |
-| `--challenge` | Challenge agent | **Union** of every row (full taxonomy) across all loaded docs | `challenge-report.md` \| `.yaml` |
+| `--challenge` | Challenge agent | **Union** of every row (full taxonomy) across all loaded docs | `challenge-report.md` |
 
 Do **not** spawn the challenge agent per level. Alternatives analysis only for major decisions **in scope at that level**.
 
@@ -19,8 +19,9 @@ Do **not** spawn the challenge agent per level. Alternatives analysis only for m
 
 - One pass per level against that row.
 - `critical` / `high` → questioning ([goal-anchor.md](goal-anchor.md)) before freeze.
+- **Premise-critical** (`economic` sizing, obtainable share, "what must be true", unit-economics hurdle on a Must / `must-correct`) → escalate into **Gate 7**, not a medium assumption. Sit the level's roster ([expert-panel.md](expert-panel.md)).
 - `medium` / `low` → assumptions / open questions; do not block unless the user wants them.
-- User may explicitly accept remaining findings.
+- User may explicitly accept remaining findings. User may not silently accept a premise-critical finding — it becomes Gate 7.
 - Findings that belong in the doc merge via re-compose.
 - Skip static ref/id findings when `validate_planning.py` already ran.
 
@@ -34,18 +35,18 @@ Do **not** spawn the challenge agent per level. Alternatives analysis only for m
 
 One catalog. Category ids are the keys used in the applicability matrix.
 
-| Category id | What to look for |
-|-------------|------------------|
-| `stakeholder_gaps` | Missing personas, ignored detractors, internal vs external users, hidden approvers |
-| `failure_modes` | Error paths, rollback, degradation, data loss scenarios |
-| `non_functional` | Security, privacy, compliance, performance, accessibility, i18n |
-| `operational` | Support burden, monitoring, on-call, migration, deprecation, internal system dependencies |
-| `competitive` | Incumbent alternatives, build-vs-buy, switching costs |
-| `economic` | Hidden costs, revenue model gaps, unit economics, cost of inaction, sizing proxies |
-| `temporal` | Sequencing risks, dependency chains, why-now, approval timing, posture (existence × commitment), cut-pass vs legend, Must inflation under `signed_v1` |
-| `assumption_debt` | Unvalidated assumptions treated as facts |
-| `traceability_breaks` | Judgment: compound leaves, inflated MoSCoW, weak triad, untestable shalls, **current-level facts that belong in another doc** (should have been a note session). Static parent/id failures come from `validate_planning.py` — do not re-score if the script ran. If skipped, flag `build != none` on non-ready items. |
-| `negative_space` | What is explicitly out of scope and why |
+| Category id | What to look for | Persona (seat) |
+|-------------|------------------|----------------|
+| `stakeholder_gaps` | Missing personas, ignored detractors, internal vs external users, hidden approvers | domain-practitioner, UX |
+| `failure_modes` | Error paths, rollback, degradation, data loss scenarios | SRE/QA, staff-engineer |
+| `non_functional` | Security, privacy, compliance, performance, accessibility, i18n | SRE/QA, staff-engineer |
+| `operational` | Support burden, monitoring, on-call, migration, deprecation, internal system dependencies | COO, SRE/QA |
+| `competitive` | Incumbent alternatives, build-vs-buy, switching costs | CMO, growth-investor |
+| `economic` | Hidden costs, revenue model gaps, unit economics, cost of inaction, sizing proxies, TAM/SAM/SOM or internal hours×cost | growth-investor, CFO |
+| `temporal` | Sequencing risks, dependency chains, why-now, approval timing, posture (existence × commitment), cut-pass vs legend, Must inflation under `signed_v1` | founder/CEO, seed-investor |
+| `assumption_debt` | Unvalidated assumptions treated as facts | seed-investor, domain-practitioner |
+| `traceability_breaks` | Judgment: compound leaves, inflated MoSCoW, weak triad, untestable shalls, **current-level facts that belong in another doc** (should have been a note session). Static parent/id failures come from `validate_planning.py` — do not re-score if the script ran. If skipped, flag `build != none` on non-ready items. | head-of-product, staff-engineer |
+| `negative_space` | What is explicitly out of scope and why | founder/CEO, head-of-product |
 
 ## Applicability matrix
 
@@ -114,13 +115,11 @@ Apply on `--challenge` across all loaded docs. At stage-exit, apply only when th
 }
 ```
 
-`doc_ref` uses the actual filename extension (`.md` or `.yaml`).
+`doc_ref` uses the `.md` filename.
 
 ## Static vs judgment
 
-Skill runs `python3 scripts/validate_planning.py <output-dir>` before challenge and as the static half of cascade Gate 3. If the script ran, omit ref/status/drift findings — they are already FAILs. If skipped, include `build` on non-ready / broken parent as findings and record `STATIC SKIPPED`.
-
-Judgment only: compound leaves, MoSCoW inflation vs the posture legend, weak `if_wrong`, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
+[success-criteria.md](success-criteria.md). Judgment only: compound leaves, MoSCoW inflation vs the posture legend, weak `if_wrong`, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
 
 ## Challenge output expectations
 

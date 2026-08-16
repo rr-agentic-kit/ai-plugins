@@ -4,6 +4,7 @@
 **Inherits from:** exec-summary + MRD  
 **Narrows to:** business objectives, stakeholders, and business-level constraints  
 **Priority method:** MoSCoW on objectives, rules, and dependencies — [item-schema.md](item-schema.md)  
+**Panel seats:** CFO + COO + domain practitioner (advisory) — [expert-panel.md](../expert-panel.md)  
 **Blind-spots (stage-exit):** Scan only the brd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
@@ -15,13 +16,13 @@ Translate market context into business outcomes the organization must achieve. B
 | Section | Content | Items |
 |---------|---------|-------|
 | **Business objectives** | 3–7 measurable business outcomes (revenue, cost, risk, compliance) | Ranked leaves |
-| **Stakeholders** | Roles, interests, influence; buyer vs user vs approver | Unranked leaves (`MoSCoW: —`) |
+| **Stakeholders** | Roles, interests, influence; buyer vs user vs approver | Unranked leaves (`_moscow_: —`) |
 | **Business rules** | Policies, compliance, contractual obligations | Ranked leaves; compliance/contractual = Must |
 | **Success criteria** | Business-level acceptance criteria per objective | Attach to the objective leaf body (not separate ids) |
 | **Dependencies** | Internal teams, systems, approvals required | Ranked leaves |
 | **Business risks** | Organizational, financial, reputational risks with mitigations | Unranked leaves; impact × likelihood in body |
 
-IDs, parent walk, split, spec/build: [item-schema.md](item-schema.md). Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won’t is how stakeholders cut scope.
+Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won’t is how stakeholders cut scope.
 
 ## Extraction method (discovery)
 
@@ -44,7 +45,7 @@ IDs, parent walk, split, spec/build: [item-schema.md](item-schema.md). Prefix `B
 - [ ] Business rules documented or explicit "none identified"
 - [ ] Dependencies listed with owners or "TBD" flagged
 - [ ] At least one business risk with mitigation or acceptance
-- [ ] Rankable leaves have MoSCoW; compliance rules are Must
+- [ ] Rankable leaves have `_moscow_`; compliance rules are Must; ranked leaves have `_rationale_`
 - [ ] Items use `BRD-{n}` / `BRD-{n.m}` per item-schema
 - [ ] All objectives walk to exec-summary success metrics
 - [ ] No contradiction with exec-summary non-goals

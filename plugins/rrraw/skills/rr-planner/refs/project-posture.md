@@ -1,6 +1,6 @@
 # project-posture
 
-**Owner:** Pre-cascade classification of product existence and commitment, MoSCoW legend, and the PRD cut-pass. Horizon is a session fact; MoSCoW is priority *within* that horizon.
+**Owner:** Pre-cascade classification of product existence and commitment, MoSCoW legend, the PRD cut-pass, and `domain_context` for the panel. Horizon is a session fact; MoSCoW is priority *within* that horizon.
 
 **Load when:** Discover start, before exec-summary. Resume skips confirm if `session_state.project_posture` is already `user_confirmed: true` and the user has not contradicted it.
 
@@ -66,6 +66,17 @@ Surface via `question_mode` (`AskQuestion` / text). Options:
 
 NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` in the prompt **seed** this confirm. They are not a primary action flag — [input-resolution.md](input-resolution.md).
 
+In the same confirm turn (or immediately after), capture `domain_context` — required for the panel ([expert-panel.md](expert-panel.md)):
+
+| Field | Ask | Values |
+|-------|-----|--------|
+| `industry` | What industry does this problem live in? | Free text (e.g. mid-market 3PL) |
+| `buyer_archetype` | Who pays / who is accountable? | Free text (e.g. CFO; platform eng manager) |
+| `regulatory_regime` | Binding regime? | Named regime or `none` |
+| `market_type` | External product or internal platform? | `external` \| `internal` |
+
+Do not invent an industry to fill the shape. Missing `market_type` is blocking — internal work has no TAM and the MRD sizing gate is a different procedure.
+
 ### 3. Follow-ups (one each, only if applicable)
 
 | Posture | Ask | Record as |
@@ -75,7 +86,7 @@ NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` in the prompt **se
 
 ### 4. Persist
 
-1. `session_state.project_posture` (schema below).
+1. `session_state.project_posture` (schema below), including `domain_context`.
 2. Unranked exec-summary **Posture** leaf — docs are source of truth for challenge. Do not rank it.
 3. Decision log: `type: project_posture`, `user_confirmed: true`.
 
@@ -92,7 +103,13 @@ NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` in the prompt **se
   "source": "user_confirmed",
   "user_confirmed": true,
   "signed_set": [],
-  "shipped_summary": null
+  "shipped_summary": null,
+  "domain_context": {
+    "industry": "mid-market 3PL",
+    "buyer_archetype": "CFO",
+    "regulatory_regime": "none",
+    "market_type": "internal"
+  }
 }
 ```
 
@@ -102,6 +119,7 @@ NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` in the prompt **se
 | `source` | `inferred` until confirm, then `user_confirmed` |
 | `signed_set` | Item ids or contract pointers when `signed_v1`; else `[]` |
 | `shipped_summary` | One-line shipped-vs-session when `existing`; else `null` |
+| `domain_context` | Required after confirm. Instantiates the domain-practitioner seat and selects the internal vs external ES premise test and MRD sizing gate ([expert-panel.md](expert-panel.md)). |
 
 ## Cut-pass (PRD, after MoSCoW, before Gate 6)
 

@@ -28,7 +28,8 @@ python3 scripts/validate_planning.py <output-dir>
 - Required closed keys; spec/build legality (DoR-as-code)
 - `spec == ready` ⇒ method fields present; cross-doc parent `ready` (same-doc container exempt)
 - `build != none` ⇒ FRD leaf with `spec == ready`
-- md headers or yaml closed keys vs `items.json` drift
+- md `_key_:` headers vs `items.json` drift
+- Ranked-leaf `Rationale` present and resolving when `decision-ledger.yaml` exists (`LEDGER_MISSING` is a warning and skips these checks)
 
 Schema: [schemas/items.schema.json](schemas/items.schema.json).
 
@@ -54,6 +55,8 @@ AI owns — do not encode as script FAILs:
 - Shall not testable
 - Posture unconfirmed or missing ES Posture leaf; Must set disagrees with the legend (`signed_v1` re-cut as MVP, shipped behavior as new Must under `existing`)
 - Frozen level still has leftover `partial` notes the user has not discarded or completed
+- Must / `must-correct` item rests on a `vague` `flips_when` (fabricated numbers are worse — call those out too)
+- Binding viability `hold`/`kill` unresolved; open re-decision queue
 
 Do **not** encode posture or note-session checks as `validate_planning.py` FAILs. Sidecars are not script input.
 
@@ -71,6 +74,22 @@ Every `must-correct` / `must-present` FRD leaf must have:
 | "Secure" | Specific control or standard reference |
 | "Scalable" | Concrete scale target (users, RPS, data volume) |
 | "Easy to use" | Task-completion metric or usability criterion |
+
+## Criterion: Viability
+
+- Exec-summary has What-must-be-true and Viability-verdict unranked leaves.
+- `session_state.viability[]` has an entry for each frozen level.
+- Binding `hold`/`kill` (ES, MRD) unresolved → not `ok`; docs carry the VIABILITY HOLD banner; `gate_passed: false`.
+- Accepted advisory `hold`/`kill` (BRD/PRD/FRD) does not block `ok` (still record; banner only on binding-level `hold`).
+- `kill` without a revival trigger in the ledger is a failure.
+- Dissent is recorded, not averaged.
+
+## Criterion: Rationale coverage
+
+- Every ranked leaf has `_rationale_: r-NNN` pointing at a live (or explicitly `superseded`) ledger record.
+- Unranked leaves may omit it.
+- Open `re_decision_queue` (`status: open`) is **blocking** — drain before freeze/accept.
+- A Must or `must-correct` resting on `condition_strength: vague` is a judgment finding, never a script FAIL.
 
 ## Criterion: Zero unresolved ambiguity
 
@@ -114,13 +133,15 @@ Each composed doc passes its doc-standard **done-when** checklist:
     "decisions": { "passed": true, "unconfirmed": [] },
     "doc_standards": { "passed": true, "failures": [] },
     "posture": { "passed": true, "existence": "greenfield", "commitment": "unsigned" },
-    "notes": { "passed": true, "partial_on_frozen": [] }
+    "notes": { "passed": true, "partial_on_frozen": [] },
+    "viability": { "passed": true, "verdict": "proceed", "open_queue": [] },
+    "rationale_coverage": { "passed": true, "missing": [] }
   },
   "final_status": "ok"
 }
 ```
 
-`traceability` in this object is the script result (duplicated for the gate record). Judgment findings live under `acceptance_criteria` / `doc_standards` / `posture` / `notes`. `posture` and `notes` are never script FAILs.
+`traceability` in this object is the script result (duplicated for the gate record). Judgment findings live under `acceptance_criteria` / `doc_standards` / `posture` / `notes` / `viability` / `rationale_coverage`. `posture`, `notes`, condition quality, and an open re-decision queue are never script FAILs (queue is a process block). Missing ranked-leaf rationale is a script FAIL when the ledger file exists.
 
 | `gate_passed` | `final_status` |
 |---------------|----------------|
@@ -138,7 +159,11 @@ When `gate_passed: false` but user accepts partial:
 > **Status: PARTIAL** — Success criteria not fully met. See session-state.json assumptions/decisions and raw-history/ for gaps.
 ```
 
-YAML equivalent: `status: PARTIAL` at document root plus the same sentence in `warning`.
+Binding viability `hold` uses this banner instead (do not freeze; do not set `final_status: ok`):
+
+```markdown
+> **Status: VIABILITY HOLD** — Missing evidence is named in session-state.json `viability[]` and decision-ledger.yaml. Do not treat this plan as accepted.
+```
 
 - List failing criteria in `session-state.json` (`checkpoint.pending_clarifications` and unvalidated `assumptions[]`). Do not write `session-log.md`.
 - Set `final_status: partial` in output metadata.
