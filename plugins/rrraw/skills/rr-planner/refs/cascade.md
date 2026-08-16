@@ -62,18 +62,19 @@ For each level in `cascade_levels`:
    - New items default `spec: idea`; move to `draft` when specifying. Do not auto-promote to `ready`.
    - After every Q&A: classify owner per [note-sessions.md](note-sessions.md); append to `raw-history/{UTC}.yaml`.
    - On reflect trigger → apply [proactivity.md](proactivity.md) (Gate 5; `standard`/`deep` only). PRD after MoSCoW: run the [project-posture.md](project-posture.md) cut-pass once before Gate 6.
-6. Accumulate `level_facts` object for compose agent; keep `item_registry` in sync after compose. Compose consumes notes for this `doc_type` only.
-7. Invoke compose agent.
-8. While `clarifications_needed[]` non-empty → surface question → append raw-history → merge answer → re-invoke compose. Loop until cleared or user says done.
-9. Gate 6 per [blind-spots.md](blind-spots.md) skill-inline path.
-10. Remaining gates (below). On Gate pass: **freeze** this level (see Freeze and remap). Run `scripts/validate_planning.py` on `--output-dir` as the static half of Gate 3. Notes on compose/freeze: [note-sessions.md](note-sessions.md).
+6. Accumulate `level_facts` object for compose agent. Compose consumes notes for this `doc_type` only.
+7. Invoke compose agent (compose writes `{level}.md|yaml` and merges `items.json`). Confirm overwrite **before first compose** if files exist from a prior run; intra-session re-compose overwrites without asking.
+8. Parse slim receipt. While `clarifications_needed[]` non-empty → surface question → append raw-history → merge answer → re-invoke compose (overwrites). Loop until cleared or user says done. Never copy a document body through chat.
+9. Read `items.json` to refresh `item_registry`. Run `scripts/validate_planning.py` on `--output-dir` as the static half of Gate 3.
+10. Gate 6 per [blind-spots.md](blind-spots.md) skill-inline path.
+11. Remaining gates (below). On Gate pass: **freeze** this level (see Freeze and remap) — `frozen_levels` in session-state, not a second write of the doc. Notes on compose/freeze: [note-sessions.md](note-sessions.md).
 
 ## Stop and resume
 
 User may stop at any point ("stop", "pause", "done for now", etc.):
 
-1. Write partial composed docs for **frozen** levels plus `items.json`. Do not run pre-save reflection.
-2. Checkpoint full `session-state.json` to `--output-dir` (include `raw_history_path`, `project_posture`, `note_sessions`; see [output-formats.md](output-formats.md)). Do not delete `{level}.notes.yaml` sidecars.
+1. Leave composed files on disk, including the current unfrozen level (drafts until freeze). Do not rewrite cascade docs. Do not run pre-save reflection.
+2. Checkpoint full `session-state.json` to `--output-dir` (include `raw_history_path`, `project_posture`, `note_sessions`, `composed_docs` paths; see [output-formats.md](output-formats.md)). Do not delete `{level}.notes.yaml` sidecars.
 3. Set `checkpoint.status: paused` with `current_level` and `pending_clarifications`.
 
 To resume: `rr-planner --resume --output-dir <same-dir>` (or NL "continue planning"). Skill loads checkpoint, appends Q&A to `raw_history_path`, and picks up at `current_level`. Remap uses `item_registry`. Output-dir defaults and old-dir fallback: [input-resolution.md](input-resolution.md).
@@ -102,15 +103,15 @@ Every **required section** in the matching doc-standard has at least one resolve
 ### Gate 4: Compose acceptance
 
 - Compose agent returns `status: ok` or user accepted `status: partial` with documented gaps.
-- Written doc passes doc-standard **done-when** checklist.
-- `items[]` emitted; skill merged into `item_registry` and `items.json`.
+- Written doc (already on disk) passes doc-standard **done-when** checklist.
+- Skill merged `item_registry` from `items.json` (compose already wrote/merged that file).
 - Notes merge/freeze rules: [note-sessions.md](note-sessions.md).
 
 ### Gate 5: Proactivity (standard/deep depth only)
 
 - At least one discovery-time reflection pass completed (see [proactivity.md](proactivity.md)).
 - Open risks or assumptions surfaced to user before advancing.
-- Write-time pre-save reflection is **not** this gate (runs after freeze + success-criteria, all depths).
+- Write-time pre-save reflection is **not** this gate (runs after freeze + success-criteria, all depths; files already on disk).
 
 ### Gate 6: Stage-exit blind-spots (all depths)
 
@@ -123,7 +124,7 @@ Execute the skill-inline path in [blind-spots.md](blind-spots.md). Done when tha
 | First compose of a level | Mint dense sibling IDs (`1, 2, 3` / `n.1, n.2`). |
 | Cascade gates pass for that level | Add level to `frozen_levels`. IDs freeze. |
 | Later insert on a frozen level | Append next integer. Do not renumber existing ids. |
-| Explicit re-compose of a frozen level | Allowed. Rewrite parent refs in **child** docs and in `item_registry` / `items.json` so e.g. FRD does not point at a vanished `PRD-3`. |
+| Explicit re-compose of a frozen level | Allowed. Compose rewrites child-doc `parent:` and `items.json` in the same invocation so e.g. FRD does not point at a vanished `PRD-3`. Skill refreshes `item_registry` from `items.json`. |
 | `--resume` | Load `item_registry`; continue minting from max sibling index on frozen levels. |
 
 ## Advancing vs stopping
@@ -133,9 +134,9 @@ Execute the skill-inline path in [blind-spots.md](blind-spots.md). Done when tha
 | All gates pass (including Gate 6); no leftover `partial` notes | Freeze level; advance to next cascade level |
 | Pending clarifications or gate gaps | Surface question → re-discover or re-compose (no round cap) |
 | User says done for level | Accept current state; advance or checkpoint per user intent |
-| User requests stop / pause | Checkpoint `session-state.json`; write frozen docs + `items.json` + raw-history; skip pre-save; exit cleanly |
+| User requests stop / pause | Checkpoint `session-state.json`; leave files already on disk; skip pre-save; exit cleanly |
 | `--resume` | Load checkpoint; append raw-history; continue from `current_level` |
 
 ## Session state
 
-Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry`, `frozen_levels`, `project_posture`, and `note_sessions` across levels. Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started).
+Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry` (from `items.json` after compose), `frozen_levels`, `project_posture`, `note_sessions`, and `composed_docs` paths across levels. Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started). Compose writes cascade docs and `items.json`; skill does not copy document bodies through chat.

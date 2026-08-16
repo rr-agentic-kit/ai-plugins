@@ -47,7 +47,7 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 | `status` | `ok` \| `partial` \| `failed` | Completion state |
 | `data` | object | Phase-specific contract (below) |
 | `summary` | string | One-line human summary |
-| `artifacts` | string[] | File paths written by the **skill** (informational). Agents do not write files. |
+| `artifacts` | string[] | Paths **this agent** wrote this invocation. Compose: the cascade doc, `items.json`, rewritten child docs. Research/challenge: empty — skill persists those reports. |
 
 ### PhaseError
 
@@ -91,59 +91,49 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
 
 ### compose
 
+Compose **must** persist `{level}.md` or `{level}.yaml` (per `payload.format`) and merge this level into `items.json`, then return a slim receipt. Compose PhaseOutput must never include `doc_content`, `items[]`, or a document body; a fat receipt means the contract failed.
+
 ```json
 {
   "doc_type": "prd",
-  "doc_content": "# PRD\n...",
+  "doc_path": "prd.md",
   "sections_completed": ["overview", "goals", "requirements"],
   "sections_incomplete": [],
   "clarifications_needed": [],
-  "items": [{
-    "id": "PRD-3.1",
-    "parent": "PRD-3",
-    "kind": "leaf",
-    "spec": "ready",
-    "build": null,
-    "supersedes": null,
-    "superseded_by": null,
-    "priority_method": "moscow",
-    "moscow": "Must",
-    "kano": null,
-    "triad": null,
-    "title": "Guest checkout",
-    "doc": "prd"
-  }],
   "id_remap": {},
   "assumptions_used": ["a-001"]
 }
 ```
 
-Item identity, closed markdown/yaml keys, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json).
+Item identity, closed markdown/yaml keys, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json). Records live in `items.json` on disk — not in this receipt. Skill refreshes `item_registry` by reading `items.json`.
 
 | Field | Notes |
 |-------|-------|
 | `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd`, `frd` |
-| `doc_content` | Full document per `--format`: markdown templates, or closed-key YAML mappings. Skill writes the file; agent does not. |
+| `doc_path` | Path of the file this agent just wrote (`{level}.md` or `{level}.yaml`) |
 | `sections_completed` | Required sections with content |
 | `sections_incomplete` | Required sections with gaps |
 | `clarifications_needed` | `ClarificationItem[]` — non-empty blocks `status: ok` |
-| `items` | Records for this doc; skill merges into `items.json` / `item_registry`. Shape: `{ id, parent, kind, spec, build?, supersedes?, superseded_by?, priority_method, moscow?, kano?, triad?, title, doc }` |
-| `id_remap` | Old id → new id when re-composing a frozen level; empty object otherwise |
+| `id_remap` | Old id → new id when re-composing a frozen level; empty object otherwise. Same invocation rewrites child-doc `parent:` and `items.json`. |
 | `assumptions_used` | Assumption ids referenced in doc |
 
-Compose **requires** `session_state.project_posture` with `user_confirmed: true`. Missing → `clarifications_needed` (`severity: blocking`), `status: partial` — do not invent a legend.
+`artifacts[]` on the envelope lists paths this agent wrote (`doc_path`, `items.json`, rewritten child docs). YAML serialization is compose’s job; the parent does not convert JSON into YAML.
+
+Compose **requires** `session_state.project_posture` with `user_confirmed: true`. Missing → `clarifications_needed` (`severity: blocking`), `status: partial` — do not invent a legend. Do not persist.
 
 Compose consumes `session_state.note_sessions[doc_type]` (and the matching `{level}.notes.yaml`) into `level_facts` **for the current `doc_type` only**. Do not mint items from notes belonging to other levels.
 
 PRD release-phasing prose is derived from the posture MoSCoW legend ([project-posture.md](project-posture.md)). Do not assume Must = MVP.
 
-`parent` is the immediate parent id (`null` in JSON / `—` in markdown for ES roots). `build` is omitted or `null` except FRD leaves. `priority_method` is the document type’s method (`moscow` \| `kano` \| `triad`); unranked leaves set the native field to `null`. `triad` is `{ if_present, if_absent, if_wrong, class }` with each axis `{ effect, magnitude }`.
+On-disk item records: `parent` is the immediate parent id (`null` in JSON / `—` in markdown for ES roots). `build` is omitted or `null` except FRD leaves. `priority_method` is the document type’s method (`moscow` \| `kano` \| `triad`); unranked leaves set the native field to `null`. `triad` is `{ if_present, if_absent, if_wrong, class }` with each axis `{ effect, magnitude }`.
+
+Do not write `session-state.json`, `raw-history/`, or `{level}.notes.yaml` — skill owns those.
 
 | `status` | When |
 |----------|------|
-| `ok` | All required sections complete; `clarifications_needed` empty |
-| `partial` | Doc written but gaps remain or clarifications needed |
-| `failed` | Cannot render doc (e.g. missing parent level facts) |
+| `ok` | All required sections complete; `clarifications_needed` empty; files persisted |
+| `partial` | Doc persisted but gaps remain or clarifications needed |
+| `failed` | Cannot render doc (e.g. missing parent level facts) — do not persist |
 
 ### research
 

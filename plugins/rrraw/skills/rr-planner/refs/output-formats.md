@@ -2,7 +2,7 @@
 
 **Owner:** Doc file naming, md/yaml human adapters, JSON internals (`items.json`, `session-state.json`), and append-only Q&A history.
 
-**Load when:** Write step — persisting artifacts to `--output-dir`. Also first Q&A (create/append `raw-history/`).
+**Load when:** After compose (cascade docs already on disk); skill persist of `session-state.json` / `raw-history/` / notes; first Q&A.
 
 Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md). Schema: [schemas/items.schema.json](schemas/items.schema.json).
 
@@ -76,7 +76,7 @@ Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Head
 
 ## YAML doc format (`--format yaml`)
 
-Same cascade docs, `.yaml` extension. Closed keys match the markdown header vocabulary as mappings under each item id. Skill serializes from compose `items[]` + prose; compose still returns JSON to the skill.
+Same cascade docs, `.yaml` extension. Closed keys match the markdown header vocabulary as mappings under each item id. Compose serializes and writes `{level}.yaml`; the parent does not convert JSON into YAML.
 
 ```yaml
 doc_type: prd
@@ -117,7 +117,7 @@ Do not wrap the human plan in a JSON bundle.
 
 ## `items.json`
 
-Written on every compose (merged registry). Must match md headers or yaml closed keys; drift is a validator FAIL. Graph checks (parent walk, numbering, spec/build) run on this file.
+Compose merges this file on every invocation (read-modify-write: replace only this `doc`’s records; do not clobber other levels). Must match md headers or yaml closed keys; drift is a validator FAIL. Graph checks (parent walk, numbering, spec/build) run on this file. Skill reads it after compose to refresh `item_registry` — never copies item records through chat.
 
 ```json
 {
@@ -206,7 +206,10 @@ Written on **every stop** and after **each level completion**. Required for `--r
   "decisions": [],
   "assumptions": [],
   "level_facts": {},
-  "composed_docs": {},
+  "composed_docs": {
+    "exec-summary": "exec-summary.md",
+    "mrd": "mrd.md"
+  },
   "item_registry": {},
   "frozen_levels": ["exec-summary", "mrd"],
   "project_posture": {
@@ -217,14 +220,15 @@ Written on **every stop** and after **each level completion**. Required for `--r
     "signed_set": [],
     "shipped_summary": null
   },
-  "note_sessions": {},
-  "pending_agent_output": null
+  "note_sessions": {}
 }
 ```
 
 `raw_history_path` is relative to `output_dir`. Resume loads this file, continues from `checkpoint.current_level`, and appends Q&A to that history file.
 
-`item_registry`: id → `{ doc, parent, kind, spec, class? }`. Resume and re-compose remap child `parent:` from this map.
+`composed_docs`: `doc_type` → path relative to `output_dir`. Paths only — never document bodies. Do not stash compose output in session-state; compose writes immediately.
+
+`item_registry`: id → `{ doc, parent, kind, spec, class? }`. Skill refreshes this from `items.json` after compose. Resume uses it for minting. Frozen re-compose remap of child `parent:` is compose’s job in the same invocation.
 
 `project_posture`: confirmed existence × commitment ([project-posture.md](project-posture.md)). Resume skips the posture gate when `user_confirmed` is true and uncontradicted.
 
@@ -240,12 +244,12 @@ Written on **every stop** and after **each level completion**. Required for `--r
 
 ## Adapter rules
 
-1. Never overwrite without user confirmation if files exist and `--input` did not imply refresh.
-2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `note_sessions`).
-3. Always write `items.json` after compose (both `md` and `yaml` formats).
-4. Append a raw-history turn after every Q&A; do not wait for stage-exit.
-5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings.
-6. Research and challenge reports are standalone files, not merged into cascade docs. Extension follows `--format`.
-7. Skill writes human files. Agents return JSON (`doc_content` + `items[]`); when `format: yaml`, skill serializes closed-key YAML from `items[]` + prose.
-8. After write, skill runs `python3 scripts/validate_planning.py <output-dir>` (plugin root). Pass `--format md|yaml` when known; otherwise the script sniffs `.md`/`.yaml`. FAIL blocks `final_status: ok`. Sidecars are not validator input.
-9. Pause does not run pre-save reflection and does not write unfrozen composed docs.
+1. Skill confirms overwrite **before first compose** if cascade files exist from a prior run and `--input` did not imply refresh. Intra-session re-compose overwrites without asking.
+2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `note_sessions`, `composed_docs` paths). Skill is the only writer of this file.
+3. Compose writes/merges `items.json` (both `md` and `yaml` formats). Skill reads it; skill does not write it.
+4. Append a raw-history turn after every Q&A; do not wait for stage-exit. Skill owns `raw-history/`.
+5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars.
+6. Research and challenge reports are standalone files, not merged into cascade docs. Extension follows `--format`. Skill persists those reports from findings JSON.
+7. Compose writes human cascade docs (`{level}.md` or `{level}.yaml`). YAML serialization is compose’s. Document bodies never travel through chat. Research/challenge still return findings JSON.
+8. After compose Task: parse slim receipt → if clarifications, ask and re-invoke → else read `items.json` to refresh `item_registry` → run `python3 scripts/validate_planning.py <output-dir>` (plugin root). Pass `--format md|yaml` when known; otherwise the script sniffs `.md`/`.yaml`. FAIL blocks `final_status: ok`. Sidecars are not validator input.
+9. Pause does not run pre-save reflection. Leave current-level files on disk (drafts until freeze). Freeze is a `frozen_levels` update in `session-state.json`, not a second write of the doc.

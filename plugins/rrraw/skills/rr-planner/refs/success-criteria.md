@@ -1,14 +1,14 @@
 # success-criteria
 
-**Owner:** Build-precise gate before final write — split **static** (script) vs **judgment** (compose/challenge).
+**Owner:** Build-precise gate before freeze/accept — split **static** (script) vs **judgment** (compose/challenge).
 
-**Load when:** Pre-write gate after compose chain completes (before pre-save reflection); also after each level’s Gate 3.
+**Load when:** Pre-freeze/accept gate after compose chain completes (before pre-save reflection); also after each level’s Gate 3.
 
 Item identity and DoR: [doc-standards/item-schema.md](doc-standards/item-schema.md).
 
 ## Gate overview
 
-Planning docs are **not ready to write** until static checks pass and judgment criteria are accepted. Fail static → do not write (unless user accepts partial). Fail judgment → return to discovery/compose or surface clarifications.
+Planning docs are **not ready to freeze/accept** until static checks pass and judgment criteria are accepted. Files on disk are drafts until freeze. Fail static → do not freeze/accept (unless user accepts partial). Fail judgment → return to discovery/compose or surface clarifications.
 
 Run from plugin root:
 
@@ -41,7 +41,7 @@ ES-n → MRD-n.m → BRD-n.m → PRD-n.m → FRD-n.m
 | Result | Action |
 |--------|--------|
 | Script exit 0 | Static pass |
-| Script FAIL | Fail → re-compose affected levels or fix `items.json` |
+| Script FAIL | Fail → re-compose affected levels (compose overwrites the doc + `items.json`) |
 | Script skipped | Challenge may include ref/status findings; record `STATIC SKIPPED` |
 
 ## Judgment (compose / challenge)
@@ -125,14 +125,14 @@ Each composed doc passes its doc-standard **done-when** checklist:
 | `gate_passed` | `final_status` |
 |---------------|----------------|
 | `true` | `ok` |
-| `false`, fixable | `partial` — write docs with warning header |
-| `false`, blocking | Do not write; return to discovery |
+| `false`, fixable | `partial` — keep drafts; prepend warning header |
+| `false`, blocking | Do not freeze/accept; return to discovery |
 
-## Partial write policy
+## Partial accept policy
 
 When `gate_passed: false` but user accepts partial:
 
-- Prepend warning to each doc:
+- Prepend warning to each doc already on disk (skill mutates files; do not restash bodies through chat):
 
 ```markdown
 > **Status: PARTIAL** — Success criteria not fully met. See session-state.json assumptions/decisions and raw-history/ for gaps.

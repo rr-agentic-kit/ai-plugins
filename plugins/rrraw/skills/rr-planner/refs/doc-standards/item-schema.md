@@ -27,7 +27,7 @@ Containers stay unmarked (no MoSCoW / Kano / triad). Index tables show the level
 - Continuous among **siblings** (`1, 2, 3` — no gaps at compose). Children of item 3 are `3.1`, `3.2`, … not new top-level numbers.
 - Unique across the cascade because of the prefix (`PRD-3` ≠ `FRD-3`).
 - Max depth **2** inside a document (`n.m`). Deeper means the parent is not a real grouping — split the parent into siblings.
-- **Freeze on level completion.** First compose of a level mints dense IDs. After the cascade gate passes, later inserts append (next integer). Explicit re-compose of a frozen level rewrites parent refs in child docs via `item_registry` (so FRD does not point at a vanished `PRD-3`).
+- **Freeze on level completion.** First compose of a level mints dense IDs and writes the doc immediately (draft until freeze). After the cascade gate passes, later inserts append (next integer). Explicit re-compose of a frozen level: compose rewrites child-doc `parent:` and `items.json` in the same invocation (so FRD does not point at a vanished `PRD-3`). Skill refreshes `item_registry` from `items.json`.
 
 Rejected: one global `1…N` across all five docs. Rejected: semantic names (`exec-vision`) — not continuous, do not nest.
 
@@ -159,7 +159,7 @@ Omit `build` on ES/MRD/BRD/PRD and on all containers. PRD “delivered” is **d
 
 ## Canonical item surface (closed vocabulary)
 
-Working surface is markdown **or** YAML per `--format`. Validation target is structured. Compose always emits `items[]`; the skill writes `*.md` or `*.yaml` plus `items.json`.
+Working surface is markdown **or** YAML per `--format`. Validation target is structured. Compose writes `*.md` or `*.yaml` and merges `items.json`. Item records live on disk, not in the Task return.
 
 YAML docs use the same closed keys (`Parent`, `Kind`, `Spec`, …) as mappings under each item id. See [output-formats.md](../output-formats.md).
 

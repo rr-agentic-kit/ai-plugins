@@ -11,7 +11,7 @@ Flag-driven software planning docs: progressive top-down discovery from vision t
 - **Goal-anchored** — Unclear and ambiguous statements are blocking; clarify before recording facts; every decision traces to stated goals.
 - **Off-level answers** — A feature mentioned during vision parks on the affected doc (`{level}.notes.yaml`), not as an exec-summary assumption.
 - **Proactive discovery** — Stage-exit blind-spots before freeze; write-time pre-save reflection; broad market research deferred to post-composition.
-- **Interactive discovery, non-interactive agents** — Skill owns question loops (`AskQuestion` by default, `--text-mode` for inline); compose/research/challenge agents return `clarifications_needed[]`.
+- **Interactive discovery, non-interactive agents** — Skill owns question loops (`AskQuestion` by default, `--text-mode` for inline); compose persists `{level}.md|yaml` + `items.json` and returns a slim receipt; research/challenge return findings JSON.
 - **Stop and resume** — Pause anytime; state checkpoints to `session-state.json`; Q&A appends to `raw-history/`; `--resume` continues where you left off. Confirmed posture is not re-asked.
 
 ## How to run
@@ -72,6 +72,8 @@ rr-planner --discover --format yaml
 → Same cascade docs with `.yaml` extension and closed-key mappings.
 
 ## Output artifacts
+
+Compose writes cascade docs and `items.json`. The skill asks clarifications and writes `session-state.json`, `raw-history/`, and `{level}.notes.yaml`.
 
 | File | Content |
 |------|---------|

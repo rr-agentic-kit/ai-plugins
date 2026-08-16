@@ -38,17 +38,17 @@ Branch on `payload.action`. Do not run the sibling primary path.
 
 If `payload.chain` includes `research` and/or `challenge` after a discover write, run step 3 for those phases (docs now exist). Do not start a second discover pass.
 
-2. **discover** — Load [project-posture.md](refs/project-posture.md). Done: that ref's persist condition. Then for each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md). Mark `level-<n>` on entry, `compose` after the compose `Task`, `stage-exit` after Gate 6 freeze. Done: last listed level frozen. Stop/pause: cascade.md.
+2. **discover** — Load [project-posture.md](refs/project-posture.md). Done: that ref's persist condition. Then for each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md). Mark `level-<n>` on entry, `compose` after the compose `Task` (doc already on disk), `stage-exit` after Gate 6 freeze. Done: last listed level frozen. Stop/pause: cascade.md.
 
 3. **research / challenge** — Load [contracts.md](refs/contracts.md). Research also loads [research-method.md](refs/research-method.md); challenge also loads [blind-spots.md](refs/blind-spots.md). `Task` the matching agent. Persist the report per [output-formats.md](refs/output-formats.md); that persist completes `write`. Done: report written. Stop: input-resolution deterministic errors; contracts parsing policy.
 
-4. **write** (discover only, after last freeze) — Apply [success-criteria.md](refs/success-criteria.md), then pre-save reflection ([proactivity.md](refs/proactivity.md)), then persist per [output-formats.md](refs/output-formats.md). Done: artifacts written. Stop: contracts parsing policy.
+4. **write** (discover only, after last freeze) — Apply [success-criteria.md](refs/success-criteria.md), then pre-save reflection ([proactivity.md](refs/proactivity.md)), then persist `session-state.json` per [output-formats.md](refs/output-formats.md). Cascade docs and `items.json` are already on disk from compose. Done: session-state written. Stop: contracts parsing policy.
 
 Load remaining refs on demand from **Shared refs**.
 
 ## Interaction boundary
 
-Discovery runs **inline** (no discover agent) so question loops stay interactive. Compose/research/challenge `Task` agents are non-interactive; this skill asks and re-invokes ([contracts.md](refs/contracts.md)).
+Discovery runs **inline** (no discover agent) so question loops stay interactive. Compose/research/challenge `Task` agents are non-interactive; this skill asks and re-invokes ([contracts.md](refs/contracts.md)). Compose persists `{level}.md|yaml` + `items.json` and returns a slim receipt — never copy a document body through chat. Research/challenge still return findings JSON; this skill writes those reports.
 
 ## Shared refs (load on demand)
 
@@ -61,11 +61,11 @@ Discovery runs **inline** (no discover agent) so question loops stay interactive
 | [doc-standards/item-schema.md](refs/doc-standards/item-schema.md) | Discovering/composing any level (IDs, split, spec/build) |
 | `refs/doc-standards/<level>.md` | Discovering/composing that level only |
 | [goal-anchor.md](refs/goal-anchor.md) | Entire discovery pass (always-on) |
-| [proactivity.md](refs/proactivity.md) | Reflect/explore trigger during discovery; PRD cut-pass after MoSCoW; **and** pre-save reflection before write |
+| [proactivity.md](refs/proactivity.md) | Reflect/explore trigger during discovery; PRD cut-pass after MoSCoW; **and** pre-save reflection after last freeze (files already on disk) |
 | [blind-spots.md](refs/blind-spots.md) | Stage-exit (this level's row) **and** `--challenge` (union) |
 | [research-method.md](refs/research-method.md) | Research phase only |
-| [output-formats.md](refs/output-formats.md) | Write step; also first Q&A (create/append raw-history) |
-| [success-criteria.md](refs/success-criteria.md) | Pre-write gate |
+| [output-formats.md](refs/output-formats.md) | After compose; skill write of session-state / raw-history / notes; first Q&A |
+| [success-criteria.md](refs/success-criteria.md) | Pre-freeze/accept gate |
 | [contracts.md](refs/contracts.md) | Before any subagent `Task` call |
 
 Phase-specific execution steps stay in `agents/planning/*` — skill does not duplicate agent execution steps.
