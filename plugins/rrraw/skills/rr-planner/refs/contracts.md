@@ -209,4 +209,4 @@ Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` 
 
 ## NormalizedPayload reference
 
-Shape and field rules: [input-resolution.md](input-resolution.md). Embedded as `PhaseInput.payload`.
+Shape and field rules: [input-resolution.md](input-resolution.md). Embedded as `PhaseInput.payload`. Includes `route` (`from-0` / `resume` / `continue-discover` / `start-change` / `continue-change` / `continue-next-track` / `ask`) and `--change` selectors `change_section` / `change_target`.

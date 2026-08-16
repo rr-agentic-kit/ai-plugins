@@ -403,6 +403,7 @@ def write_planning(
     session: dict[str, Any] | None = None,
     ledger: str | None = None,
     write_json: bool = True,
+    status: dict[str, Any] | None = None,
 ) -> Path:
     root.mkdir(parents=True, exist_ok=True)
     payload = files if files is not None else VALID_FILES
@@ -431,7 +432,60 @@ def write_planning(
         )
     if ledger is not None:
         (root / "decision-ledger.yaml").write_text(ledger, encoding="utf-8")
+    if status is not None:
+        payload_status = dict(status)
+        if "mint_hash" not in payload_status:
+            payload_status["mint_hash"] = vp.compute_mint_hash(payload_status)
+        vp.write_status_yaml(root / "status.yaml", payload_status)
     return root
+
+
+def planning_items(root: Path) -> list[vp.Item]:
+    items, _ = vp.parse_planning_dir(root)
+    return items
+
+
+def frozen_status(
+    items: list[vp.Item],
+    *,
+    track: str = "0.1",
+    product: str = "0.1.3",
+    docs: str = "0.1.7",
+    next_track: str | None = None,
+    frozen: list[str] | None = None,
+    docs_shipped: bool = True,
+    claude_config_version: int = 1,
+) -> dict[str, Any]:
+    frozen_set = set(frozen if frozen is not None else list(vp.DOC_STEMS))
+    levels: dict[str, Any] = {}
+    for doc in vp.DOC_STEMS:
+        parent = vp.PARENT_DOC.get(doc)
+        if doc in frozen_set:
+            rev: int | str = 1
+            digest: str | None = vp.compute_doc_digest(items, doc)
+        else:
+            rev = "?"
+            digest = None
+        pins: dict[str, Any] = {}
+        if parent and doc in frozen_set and parent in frozen_set:
+            pins[parent] = {
+                "rev": 1,
+                "digest": vp.compute_doc_digest(items, parent),
+            }
+        levels[doc] = {"rev": rev, "digest": digest, "pins": pins}
+    data: dict[str, Any] = {
+        "claude_config_version": claude_config_version,
+        "track": track,
+        "product": product,
+        "docs": docs,
+        "next": next_track,
+        "docs_shipped": docs_shipped,
+        "product_status": "shipped" if docs_shipped else "?",
+        "levels": levels,
+        "next_levels": {},
+    }
+    data["mint_hash"] = vp.compute_mint_hash(data)
+    return data
 
 
 def codes(issues: list[vp.Issue]) -> set[str]:

@@ -1,17 +1,20 @@
 # output-formats
 
-**Owner:** Doc file naming, markdown cascade docs, JSON internals (`items.json`, `session-state.json`), and append-only Q&A history.
+**Owner:** Doc file naming, markdown cascade docs, JSON internals (`items.json`, `session-state.json`), durable `status.yaml` / `agent.plan.md` / `future.md`, and append-only Q&A history.
 
-**Load when:** After compose (cascade docs already on disk); skill persist of `session-state.json` / `raw-history/` / notes; first Q&A.
+**Load when:** After compose (cascade docs already on disk); skill persist of `session-state.json` / `status.yaml` / `raw-history/` / notes; first compose (emit `agent.plan.md`); first Q&A.
 
-Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md). Schema: [schemas/items.schema.json](schemas/items.schema.json).
+Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md). Schema: [schemas/items.schema.json](schemas/items.schema.json). Track/patch/pins: [baselines.md](baselines.md). Injection: [agent-config.md](agent-config.md).
 
 ## Layout
 
-All files written to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`):
+Cascade docs write to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/` for the current track; `{PROJECT_ROOT}/docs/plans/{next}/` once a next major.minor is open). Root **always** keeps `status.yaml`, `agent.plan.md`, `future.md` in `{PROJECT_ROOT}/docs/plans/` — never a second `lines.yaml`.
 
 ```
 {PROJECT_ROOT}/docs/plans/
+  status.yaml                     # durable project knowledge (skill-owned; validator input)
+  agent.plan.md                   # non-patch tripwire + pointer self-heal (skill-owned; not cascade input)
+  future.md                       # unassigned / beyond-next inbox (not validator input)
   exec-summary.md
   mrd.md
   brd.md
@@ -24,11 +27,15 @@ All files written to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`)
   frd.notes.yaml
   items.json                      # relationship graph only
   decision-ledger.yaml            # evidence + rationale graph (skill-owned; validator input)
-  session-state.json              # internal checkpoint / agent I/O
+  session-state.json              # resume checkpoint — not project knowledge
   research-report.md
   challenge-report.md
   raw-history/
     2026-08-15T185203Z.yaml
+  0.2/                            # only once next major.minor opens
+    exec-summary.md
+    …
+    items.json
 ```
 
 | Doc type | Filename |
@@ -38,6 +45,9 @@ All files written to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`)
 | brd | `brd.md` |
 | prd | `prd.md` |
 | frd | `frd.md` |
+| baseline status | `status.yaml` (always YAML; skill-owned; validator input — mechanical codes only) |
+| version tripwire | `agent.plan.md` (skill-owned; **not** validator cascade input; pairing SoT is this skill) |
+| future inbox | `future.md` (**not** validator input; no ids; no SEMVER) |
 | off-level notes | `{level}.notes.yaml` (always YAML; same write/load/delete for every level; exists only while unresolved) |
 | item graph | `items.json` (always JSON) |
 | decision ledger | `decision-ledger.yaml` (always YAML; skill-owned; validator input) |
@@ -46,20 +56,22 @@ All files written to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`)
 | research report | `research-report.md` |
 | challenge report | `challenge-report.md` |
 
-Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet. File exists only while unresolved notes remain; skill deletes it when empty after compose persist.
+Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet. File exists only while unresolved notes remain; skill deletes it when empty after compose persist. Create `docs/plans/{next}/` only when the skill mints `next` after confirm.
 
-`--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` ([input-resolution.md](input-resolution.md)). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` is always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json` or `session-log.md`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
+`--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` ([input-resolution.md](input-resolution.md)). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md` and `agent.plan.md` are **not validator input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
 
 ## Markdown doc format
 
-Each composed doc file:
+Each composed doc file. Frontmatter is `track` + `doc_rev` + `pins` — not stub `version: 1` / `traces_from` ([baselines.md](baselines.md)):
 
 ```markdown
 ---
 doc_type: prd
-version: 1
+track: "0.1"
+doc_rev: 2
+pins:
+  brd: { rev: 2, digest: "sha256:..." }
 created: 2026-06-24T10:00:00Z
-traces_from: [exec-summary.md, mrd.md, brd.md]
 ---
 
 # PRD: [Title]
@@ -74,7 +86,7 @@ traces_from: [exec-summary.md, mrd.md, brd.md]
 | PRD-3.1 | PRD-3 | ready | Must |
 ```
 
-Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Heading + `_key_:` metadata are a closed vocabulary — parser is regex, not an LLM. Item templates: [doc-standards/item-schema.md](doc-standards/item-schema.md).
+ES `pins: {}`. Unfrozen `doc_rev: "?"`. Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Heading + `_key_:` metadata are a closed vocabulary — parser is regex, not an LLM. Item templates: [doc-standards/item-schema.md](doc-standards/item-schema.md).
 
 ## `items.json`
 
@@ -144,9 +156,39 @@ turns:
 
 Append-only: never rewrite prior turns. Create `raw-history/` on first Q&A. If the session file is missing on resume, create a new timestamped file and update `raw_history_path`.
 
+## `status.yaml`
+
+Durable project knowledge. Skill-only writer. Schema and mint rules: [baselines.md](baselines.md). Lives in `{PROJECT_ROOT}/docs/plans/` even when cascade docs fork to `docs/plans/{next}/`.
+
+On first compose: write the file (`track: "0.1"`, `product`/`docs` as `0.1.0?`, `next: null`, all `levels.*.rev: "?"`, `claude_config_version` from [agent-config.md](agent-config.md), `mint_hash` computed). On freeze / lock-target / confirmed major-minor: mint per baselines, recompute `mint_hash`. Compose never writes this file. Scripts never increment `track`.
+
+Validator input for mechanical codes only (`PARENT_UNFROZEN`, `STALE_PIN`, `REV_WHILE_OPEN`, `HAND_BUMP`). Not a human plan doc.
+
+## `agent.plan.md`
+
+Always-on tripwire: refuse non-patch version work and protect the root load line. Pairing policy is this skill ([baselines.md](baselines.md)), not this file. Body template: [agent.plan.md](agent.plan.md) (version + load line: [agent-config.md](agent-config.md)). Skill emits/overwrites on first compose, `--setup`, and when `injection.version` advances. **Not** validator cascade input.
+
+Resolve sync (idempotent): append the locked load line to existing root SoT files (`CLAUDE.md`, `AGENTS.md`, and any new root agent SoT). Restore if stripped. Do not create missing SoT files. Do not rewrite their bodies. Set `status.yaml.claude_config_version`.
+
+```bash
+python3 scripts/validate_planning.py --sync-agent-config --repo-root <PROJECT_ROOT> <plans-root>
+```
+
+## `future.md`
+
+One inbox at `{PROJECT_ROOT}/docs/plans/future.md`. Create on first parked beyond-current note that has **no** owning track yet. **Not validator input.** No item ids. No SEMVER. Meeting residue / no go-nogo.
+
+| Rule | |
+|------|--|
+| Never auto-promote | Opening next **offers** to promote matching sections; user confirms each. |
+| Next track already open | Do **not** duplicate into `future.md`. Notes for that track go to `{level}.notes.yaml` under `docs/plans/{next}/`. |
+| What belongs here | Unassigned, or beyond-next (past the one open next track). |
+
+Rejected: `future/` folder; per-track future files; treating this file as a cascade doc.
+
 ## Session checkpoint (`session-state.json`)
 
-Written on **every stop** and after **each level completion**. Required for `--resume`. Internal only — not a human plan doc.
+Written on **every stop** and after **each level completion**. Required for `--resume`. Internal only — not a human plan doc and **not** project knowledge (`status.yaml` is).
 
 ```json
 {
@@ -214,11 +256,12 @@ Skill owns `decision-ledger.yaml` ([decision-ledger.md](decision-ledger.md)). Co
 ## Adapter rules
 
 1. Overwrite confirm: [cascade.md](cascade.md) per-level discovery step 8. Skip the prompt when `--input` implied refresh.
-2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `viability[]`, `note_sessions`, `composed_docs` paths). Skill is the only writer of this file. Skill is also the only writer of `decision-ledger.yaml`.
-3. Compose writes/merges `items.json`. Skill reads it; skill does not write it. Compose reads `reserved_ids` from the ledger and never re-mints those ids.
+2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `viability[]`, `note_sessions`, `composed_docs` paths). Skill is the only writer of this file. Skill is also the only writer of `decision-ledger.yaml`, `status.yaml`, `agent.plan.md`, and `future.md`.
+3. Compose writes/merges `items.json`. Skill reads it; skill does not write it. Compose reads `reserved_ids` from the ledger and never re-mints those ids. Compose writes frontmatter `track` / `doc_rev` / `pins`; skill mints `status.yaml` after freeze.
 4. Append a raw-history turn after every Q&A; do not wait for stage-exit. Skill owns `raw-history/`.
-5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars; prune: [note-sessions.md](note-sessions.md).
+5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars; prune: [note-sessions.md](note-sessions.md). Next-track notes while `next` is open go to that track's sidecar, not `future.md`.
 6. Research and challenge reports are standalone `.md` files, not merged into cascade docs. Skill persists those reports from findings JSON.
-7. Compose writes human cascade docs (`{level}.md` only). Document bodies never travel through chat. Research/challenge still return findings JSON.
-8. After compose Task: parse slim receipt → if clarifications, ask and re-invoke → else read `items.json` to refresh `item_registry` → Gate 3 static ([success-criteria.md](success-criteria.md)). FAIL blocks `final_status: ok`. Sidecars are not validator input.
-9. Pause skips pre-save ([proactivity.md](proactivity.md)). Freeze is a `frozen_levels` update, not a second write of the doc ([cascade.md](cascade.md)).
+7. Compose writes human cascade docs (`{level}.md` only). Document bodies never travel through chat. Research/challenge still return findings JSON. Compose does not write `status.yaml` / `agent.plan.md` / `future.md`.
+8. After compose Task: parse slim receipt → if clarifications, ask and re-invoke → else read `items.json` to refresh `item_registry` → Gate 3 static ([success-criteria.md](success-criteria.md)). FAIL blocks `final_status: ok`. Sidecars, `future.md`, and `agent.plan.md` are not validator input.
+9. Pause skips pre-save ([proactivity.md](proactivity.md)). Freeze is a `frozen_levels` update plus a docs-patch mint in `status.yaml`, not a second write of the doc ([cascade.md](cascade.md), [baselines.md](baselines.md)).
+10. First compose: write `status.yaml`, emit `agent.plan.md`, sync the one-liner on existing root SoT, set `claude_config_version` ([agent-config.md](agent-config.md)).

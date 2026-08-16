@@ -62,7 +62,7 @@ For each level in `cascade_levels`:
 8. Invoke compose ([contracts.md](contracts.md)). Confirm overwrite **before first compose** if files exist from a prior run; intra-session re-compose overwrites without asking. After persist: prune ([note-sessions.md](note-sessions.md)).
 9. Clarification loop ([contracts.md](contracts.md)). Append raw-history on each answer before re-invoke.
 10. Refresh `item_registry` from `items.json`. Gate 3 static ([success-criteria.md](success-criteria.md)).
-11. Gate 6 then Gate 7 (table below). On Gate pass: **freeze** this level (Freeze and remap) — `frozen_levels` in session-state, not a second write of the doc.
+11. Gate 6 then Gate 7 (table below). On Gate pass: **freeze** this level (Freeze and remap) — `frozen_levels` in session-state **and** a docs-patch mint in `status.yaml` ([baselines.md](baselines.md)). Compose does not increment track/patch/rev.
 
 ## Stop and resume
 
@@ -92,17 +92,22 @@ A level is **complete** only when all gates pass. Freeze/advance: Advancing vs s
 
 | Event | Rule |
 |-------|------|
-| First compose of a level | Mint dense sibling IDs (`1, 2, 3` / `n.1, n.2`). |
-| Cascade gates pass for that level | Add level to `frozen_levels`. IDs freeze. |
+| First compose of a level | Mint dense sibling IDs (`1, 2, 3` / `n.1, n.2`). Frontmatter `doc_rev: "?"`. |
+| Cascade gates pass for that level | Add level to `frozen_levels`. IDs freeze. Skill mints `status.yaml`: `rev` `?` → `1` (or lock-target ++), write digest, docs patch++, product patch unchanged, recompute `mint_hash`. Major/minor (`track` / `next`) **only** after explicit confirm — never on this mint. |
 | Later insert on a frozen level | Append next integer. Do not renumber existing ids. |
-| Explicit re-compose of a frozen level | Allowed. Compose rewrites child-doc `parent:` and `items.json` in the same invocation so e.g. FRD does not point at a vanished `PRD-3`. Skill refreshes `item_registry` from `items.json`. |
+| Explicit re-compose of a frozen level | Allowed. Compose rewrites child-doc `parent:` and `items.json` in the same invocation so e.g. FRD does not point at a vanished `PRD-3`. Skill refreshes `item_registry` from `items.json`. Obligation-preserving → lock-target (stay frozen, refresh child pins). Obligations break → ask to unfreeze; if minor+ and `next` exists → redirect ([baselines.md](baselines.md)). |
 | `--resume` | Load `item_registry`; continue minting from max sibling index on frozen levels. |
+| `--change` | Section + target. Skill classifies patch vs redirect-to-next vs open-next vs unfreeze. Not CI. |
+
+Unlock / patch-only-current are **skill stops** in [baselines.md](baselines.md), not validator FAILs. `agent.plan.md` only refuses non-patch version work and loads this skill. While `next` is open, current accepts patches only.
+
+Opening a next major.minor (after confirm): set `status.yaml.next`, create `docs/plans/{next}/`, keep `status.yaml` / `agent.plan.md` / `future.md` at `docs/plans/`. Offer to promote matching `future.md` sections — never auto-promote. If that folder already exists, new notes for that track go to `{level}.notes.yaml` there, not `future.md`.
 
 ## Advancing vs stopping
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass (including Gate 6 and Gate 7 `proceed` / `proceed-with-conditions`); no leftover `partial` notes; re-decision queue empty | Freeze level; advance to next cascade level |
+| All gates pass (including Gate 6 and Gate 7 `proceed` / `proceed-with-conditions`); no leftover `partial` notes; re-decision queue empty | Freeze level; mint docs patch in `status.yaml`; advance to next cascade level |
 | Pending clarifications or gate gaps | Surface question → re-discover or re-compose (no round cap) |
 | Gate 7 verdict is `hold` / `pivot` / `kill` | [expert-panel.md](expert-panel.md) verdict ladder (freeze/advance column) |
 | Open re-decision queue | Drain (keep / postpone / kill / revive) before freeze |
@@ -112,4 +117,4 @@ A level is **complete** only when all gates pass. Freeze/advance: Advancing vs s
 
 ## Session state
 
-Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry` (from `items.json` after compose), `frozen_levels`, `project_posture` (including `domain_context`), `viability[]`, `note_sessions`, and `composed_docs` paths across levels. Skill writes `decision-ledger.yaml`. Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started). Compose writes cascade docs and `items.json`.
+Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry` (from `items.json` after compose), `frozen_levels`, `project_posture` (including `domain_context`), `viability[]`, `note_sessions`, and `composed_docs` paths across levels. Skill writes `decision-ledger.yaml` and `status.yaml` ([baselines.md](baselines.md)). Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started). Compose writes cascade docs and `items.json`. Compose does not write `status.yaml`.

@@ -1,6 +1,6 @@
 ---
 name: rr-planner
-description: Flag-driven software planning docs — progressive top-down discovery (exec-summary → MRD → BRD → PRD → FRD), compose, research, and challenge. Use when producing exec-summary → FRD planning docs, resuming a checkpoint, or researching/challenging existing ones. Orchestrates phase agents under agents/planning/*; no command files.
+description: Flag-driven software planning docs — progressive top-down discovery (exec-summary → MRD → BRD → PRD → FRD), compose, research, and challenge. Use when producing exec-summary → FRD planning docs, bootstrapping docs/plans (--setup), resuming a checkpoint, or researching/challenging existing ones. Orchestrates phase agents under agents/planning/*; no command files.
 ---
 
 # rr-planner
@@ -13,7 +13,9 @@ Produce cascade planning docs (exec-summary → FRD) from flags and conversation
 
 ## When to use
 
+- Bootstrap or repair the plans directory (`--setup`) — does not start discover
 - Discover a product or plan (`--discover` / `--all`, or a cascade level flag)
+- Change a frozen or shipping track (`--change` with `--section` + `--target`)
 - Resume a paused session (`--resume`)
 - Research or challenge **existing** planning docs
 
@@ -28,24 +30,29 @@ Code/ticket work and artifact-type advice stop at resolve via `OUT_OF_SCOPE` unl
 
 ## Procedure
 
-TodoWrite `merge: false` before step 1 with stable ids `resolve`, `posture`, `premise`, `level-<n>` (one per `payload.cascade_levels` entry), `sweep`, `compose`, `stage-exit`, `verdict`, `write`. Mark `completed` before advancing. Re-add `sweep`, `compose`, `stage-exit`, and `verdict` with `merge: true` when entering the next level. Omit `posture` / `premise` / `level-*` / `sweep` / `compose` / `stage-exit` / `verdict` when `action` is `research` or `challenge`.
+TodoWrite `merge: false` before step 1 with stable ids `resolve`, `posture`, `premise`, `level-<n>` (one per `payload.cascade_levels` entry), `sweep`, `compose`, `stage-exit`, `verdict`, `write`. Mark `completed` before advancing. Re-add `sweep`, `compose`, `stage-exit`, and `verdict` with `merge: true` when entering the next level. Omit `posture` / `premise` / `level-*` / `sweep` / `compose` / `stage-exit` / `verdict` when `action` is `research` or `challenge`. When `action` is `setup`: only `resolve`, `setup`.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Normalize raw flags and NL into `NormalizedPayload`. If `output_dir` (or a cascade `--input` dir) already has cascade docs, run `python3 scripts/validate_planning.py --rewrite <dir>` before any `Task`. Done: payload emitted; stale md/yaml rewritten. Stop: that ref's deterministic errors.
+Phrases: [progress.md](refs/progress.md) on every invocation (`verifying <section>` then `<section> is created` / `is fixed` / `was ok` / `is failed`).
 
-Branch on `payload.action`. Do not run the sibling primary path.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md) (status-first pick from `docs/plans/status.yaml`). Normalize raw flags and NL into `NormalizedPayload`. If `output_dir` (or a cascade `--input` dir) already has cascade docs, print `verifying cascade format` and run `python3 scripts/validate_planning.py --rewrite <dir>` before any `Task` ([setup.md](refs/setup.md) section names). If `status.yaml` or `agent.plan.md` exists in the plans root — or this is first compose — print `verifying agent.plan.md` / `verifying root SoT load line` and sync injection: `python3 scripts/validate_planning.py --sync-agent-config --repo-root <PROJECT_ROOT> <plans-root>` ([agent-config.md](refs/agent-config.md)). Done: payload emitted; stale md/yaml rewritten; load line present on existing root SoT. Stop: that ref's deterministic errors; pairing stops in [baselines.md](refs/baselines.md) (skill classify — not validator FAILs).
+
+Branch on `payload.action`. Do not run the sibling primary path. Bare invoke never silent-rediscovers when plans already exist (`payload.route: ask`). `--setup` never starts discover.
 
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
-| `discover`, `exec-summary`…`frd` | step 2, then step 4 | `posture`, `premise`, `level-*`, `sweep`, `compose`, `stage-exit`, `verdict`, `write` |
-| `research`, `challenge` | step 3 (completes `write`) | `write` only |
+| `setup` | step 2 (completes `write`). Stop. Do not posture. | `setup` |
+| `discover`, `exec-summary`…`frd`, `change` | step 3, then step 5 | `posture`, `premise`, `level-*`, `sweep`, `compose`, `stage-exit`, `verdict`, `write` |
+| `research`, `challenge` | step 4 (completes `write`) | `write` only |
 
-If `payload.chain` includes `research` and/or `challenge`, run step 3 after step 2 (last level frozen; docs on disk) and before step 4. Do not start a second discover pass.
+If `payload.chain` includes `research` and/or `challenge`, run step 4 after step 3 (last level frozen; docs on disk) and before step 5. Do not start a second discover pass.
 
-2. **discover** — Load [project-posture.md](refs/project-posture.md) (includes `domain_context`). Done: that ref's persist condition. Then for each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md). Mark `level-<n>` on entry, `sweep` after the re-decision sweep, `premise` after the exec-summary premise test (skip the id on later levels), `compose` after the compose `Task`, `stage-exit` after Gate 6, `verdict` after Gate 7. Done: last listed level frozen. Stop/pause: cascade.md.
+2. **setup** — Load [setup.md](refs/setup.md). Run `python3 scripts/validate_planning.py --setup --repo-root <PROJECT_ROOT> <plans-dir>`. For each TSV line, print the [progress.md](refs/progress.md) pair. Completes `write`. Done: that ref's done-when. Stop: any section `failed` (script exit non-zero). Do not start discover.
 
-3. **research / challenge** — Load [contracts.md](refs/contracts.md). Research also loads [research-method.md](refs/research-method.md); challenge also loads [blind-spots.md](refs/blind-spots.md) and [decision-ledger.md](refs/decision-ledger.md). `Task` the matching agent. Research: agent returns when its iteration budget is exhausted (`ok`, or `partial` + `clarifications_needed`); skill may re-`Task` or stop when the user confirms done. Persist the report per [output-formats.md](refs/output-formats.md); that persist completes `write`. Done: report written. Stop: input-resolution deterministic errors; contracts parsing policy.
+3. **discover** — Load [project-posture.md](refs/project-posture.md) (includes `domain_context`). Done: that ref's persist condition. Then for each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md). Mark `level-<n>` on entry, `sweep` after the re-decision sweep, `premise` after the exec-summary premise test (skip the id on later levels), `compose` after the compose `Task`, `stage-exit` after Gate 6, `verdict` after Gate 7. Done: last listed level frozen. Stop/pause: cascade.md.
 
-4. **write** (discover only, after last freeze and any `payload.chain` phases) — Apply [success-criteria.md](refs/success-criteria.md), then pre-save reflection ([proactivity.md](refs/proactivity.md)), then persist `session-state.json` per [output-formats.md](refs/output-formats.md). Done: session-state written. Stop: contracts parsing policy.
+4. **research / challenge** — Load [contracts.md](refs/contracts.md). Research also loads [research-method.md](refs/research-method.md); challenge also loads [blind-spots.md](refs/blind-spots.md) and [decision-ledger.md](refs/decision-ledger.md). `Task` the matching agent. Research: agent returns when its iteration budget is exhausted (`ok`, or `partial` + `clarifications_needed`); skill may re-`Task` or stop when the user confirms done. Persist the report per [output-formats.md](refs/output-formats.md); that persist completes `write`. Done: report written. Stop: input-resolution deterministic errors; contracts parsing policy.
+
+5. **write** (discover/change only, after last freeze and any `payload.chain` phases) — Apply [success-criteria.md](refs/success-criteria.md), then pre-save reflection ([proactivity.md](refs/proactivity.md)), then persist `session-state.json` and `status.yaml` per [output-formats.md](refs/output-formats.md) / [baselines.md](refs/baselines.md). Print [progress.md](refs/progress.md) for `status.yaml` / `agent.plan.md` writes and freeze mint. On **first compose** into a repo: write `status.yaml`, write `agent.plan.md`, sync the one-liner into existing root agent SoT files, set `claude_config_version`. Done: session-state + status written. Stop: contracts parsing policy.
 
 Load remaining refs on demand from **Shared refs**.
 
@@ -54,7 +61,11 @@ Load remaining refs on demand from **Shared refs**.
 | Ref | When |
 |-----|------|
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
-| [cascade.md](refs/cascade.md) | Discover-path actions (`discover` or a cascade level flag) |
+| [progress.md](refs/progress.md) | Every invocation |
+| [setup.md](refs/setup.md) | `action: setup`; resolve rewrite/sync (section names) |
+| [baselines.md](refs/baselines.md) | Every resolve; freeze / `--change` / open-next; first compose |
+| [agent-config.md](refs/agent-config.md) | Resolve sync; first compose; `--setup`; `claude_config_version` lag |
+| [cascade.md](refs/cascade.md) | Discover-path actions (`discover`, `--change`, or a cascade level flag) |
 | [project-posture.md](refs/project-posture.md) | Discover start (pre-cascade); resume per that ref; PRD cut-pass after MoSCoW |
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A; on level entry; after compose persist |
 | [doc-standards/item-schema.md](refs/doc-standards/item-schema.md) | Discovering/composing any level |
@@ -65,7 +76,7 @@ Load remaining refs on demand from **Shared refs**.
 | [proactivity.md](refs/proactivity.md) | Reflect/explore trigger during discovery; pre-save after last freeze |
 | [blind-spots.md](refs/blind-spots.md) | Stage-exit (this level's row); `--challenge` (union) |
 | [research-method.md](refs/research-method.md) | Research phase only |
-| [output-formats.md](refs/output-formats.md) | After compose; skill write of session-state / raw-history / notes; first Q&A |
+| [output-formats.md](refs/output-formats.md) | After compose; skill write of session-state / status.yaml / agent.plan.md / future.md / raw-history / notes; first Q&A |
 | [success-criteria.md](refs/success-criteria.md) | Pre-freeze/accept gate |
 | [contracts.md](refs/contracts.md) | Before any subagent `Task` call |
 

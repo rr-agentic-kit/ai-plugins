@@ -14,7 +14,8 @@ Flag-driven software planning docs: progressive top-down discovery from vision t
 - **Off-level answers** — A feature mentioned during vision parks on the affected doc (`{level}.notes.yaml`), not as an exec-summary assumption. The sidecar is transient: gone when that doc's notes are resolved.
 - **Proactive discovery** — Premise test inside exec-summary; stage-exit blind-spots then Gate 7 viability before freeze; claim-class search budgets; write-time pre-save blocks on an open queue or unresolved binding `hold`/`kill`.
 - **Interactive discovery, non-interactive agents** — Skill owns question loops (`AskQuestion` by default, `--text-mode` for inline); compose persists `{level}.md` + `items.json` and returns a slim receipt; research/challenge return findings JSON.
-- **Stop and resume** — Pause anytime; state checkpoints to `session-state.json`; Q&A appends to `raw-history/`; `--resume` sweeps the ledger then continues. Confirmed posture is not re-asked.
+- **Stop and resume** — Pause anytime; state checkpoints to `session-state.json`; Q&A appends to `raw-history/`; `--resume` sweeps the ledger then continues. Confirmed posture is not re-asked. Durable versions live in `status.yaml` (shared track, independent patches) — not in the checkpoint.
+- **Pairing** — One load line on root agent SoT files points at `docs/plans/agent.plan.md`. Major/minor only via this skill after confirm. CI never mints or fails "this looks like a minor."
 
 ## How to run
 
@@ -28,10 +29,18 @@ One primary action flag + optional selectors. Explicit flags win on conflict ([r
 | `--depth` | `shallow`, `standard`, `deep` | `standard` |
 | `--text-mode` | _(flag)_ | off — questions use `AskQuestion` |
 | `--resume` | _(flag)_ | off — load `session-state.json` from output-dir |
+| `--change` | _(flag)_ | off — requires `--section` + `--target` |
+| `--section` | item id / heading / section | required with `--change` |
+| `--target` | level and/or track | required with `--change` |
 
-`PROJECT_ROOT` = git toplevel if available, else workspace root. `--output-dir` always wins. `--format yaml` and `--format json` are rejected (`UNSUPPORTED_FORMAT`). JSON on disk is only `items.json` (item graph) and `session-state.json` (resume / agent I/O).
+`PROJECT_ROOT` = git toplevel if available, else workspace root. `--output-dir` always wins. `--format yaml` and `--format json` are rejected (`UNSUPPORTED_FORMAT`). JSON on disk is only `items.json` (item graph) and `session-state.json` (resume / agent I/O). `status.yaml` is YAML project knowledge.
 
 ## Common flows
+
+```
+rr-planner --setup
+```
+→ Bootstrap or repair `{PROJECT_ROOT}/docs/plans/`, `status.yaml`, `agent.plan.md`, and the root SoT load line. Does not start discover. First compose is the safety net if setup was skipped.
 
 ```
 rr-planner --discover
@@ -64,13 +73,18 @@ rr-planner --resume --output-dir docs/plans/
 → Continue a paused session from checkpoint. Q&A appends to the existing raw-history file.
 
 ```
+rr-planner --change --section checkout --target prd
+```
+→ Classify patch vs redirect-to-next vs open-next vs unfreeze; compose the affected level. While a next track is open, current accepts patches only.
+
+```
 rr-planner --discover --depth deep
 ```
 → Full cascade + mandatory research + challenge pass.
 
 ## Output artifacts
 
-Compose writes cascade docs and `items.json`. The skill asks clarifications and writes `session-state.json`, `decision-ledger.yaml`, `raw-history/`, and `{level}.notes.yaml` (transient; deleted when that level's notes are resolved).
+Compose writes cascade docs and `items.json`. The skill asks clarifications and writes `session-state.json`, `status.yaml`, `agent.plan.md`, `decision-ledger.yaml`, `raw-history/`, and `{level}.notes.yaml` (transient; deleted when that level's notes are resolved). `future.md` is an optional inbox (not validator input).
 
 | File | Content |
 |------|---------|
@@ -79,6 +93,9 @@ Compose writes cascade docs and `items.json`. The skill asks clarifications and 
 | `brd.md` | Business requirements |
 | `prd.md` | Product requirements |
 | `frd.md` | Functional requirements with Gherkin acceptance criteria |
+| `status.yaml` | Shared track, independent product/docs patches, per-doc rev/digest/pins, `claude_config_version` (skill-owned; validator mechanical codes only) |
+| `agent.plan.md` | Non-patch version tripwire + pointer self-heal; pairing SoT is this skill (not cascade input) |
+| `future.md` | Unassigned / beyond-next inbox (no ids; never auto-promote; not validator input) |
 | `{level}.notes.yaml` | Off-level answers parked on the affected doc (always YAML; not validator input; exists only while unresolved) |
 | `items.json` | Item graph / parent-child / spec-build / rationale ids (always written; validator target) |
 | `decision-ledger.yaml` | Evidence, rationales, graveyard, reserved ids, re-decision queue (skill-owned; validator input) |
@@ -87,7 +104,7 @@ Compose writes cascade docs and `items.json`. The skill asks clarifications and 
 | `research-report.md` | Cited market findings (when research runs) |
 | `challenge-report.md` | Blind-spot findings (when `--challenge` runs) |
 
-Cascade docs are `.md` only. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and `{level}.notes.yaml` are always YAML. Only the ledger is validator input. `--format yaml` is `UNSUPPORTED_FORMAT`.
+Cascade docs are `.md` only. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml`, `status.yaml`, and `{level}.notes.yaml` are always YAML. Ledger + `status.yaml` are validator input (`future.md` / `agent.plan.md` are not). `--format yaml` is `UNSUPPORTED_FORMAT`. When a next major.minor opens, cascade docs for that track live under `docs/plans/{next}/`; `status.yaml` / `agent.plan.md` / `future.md` stay at `docs/plans/`.
 
 ## Troubleshooting
 
@@ -100,6 +117,7 @@ Cascade docs are `.md` only. `items.json` and `session-state.json` are always JS
 - **Held session (`VIABILITY HOLD` / `blocked`)** — Binding `hold` names missing evidence in `viability[]` and the ledger. Do not treat the plan as accepted. Resume, satisfy the evidence bar or confirm `kill` with a revival trigger, then re-run pre-save.
 - **Revived item** — A killed id stays in `reserved_ids` / `graveyard`. Revival is a **new** id plus `type: revival` pointing at the snapshot. Compose will not recycle the buried number.
 - **`--format yaml` / `--format json`** — Not a plan format. Use `md` (default). Stale `{level}.yaml` cascade files are rewritten at resolve.
+- **Pairing / `HAND_BUMP`** — Do not edit `track` or frozen revs/pins in `status.yaml` by hand. Major/minor only via this skill after confirm. CI does not classify patch vs minor.
 
 ## Further reading
 
@@ -108,6 +126,10 @@ Cascade docs are `.md` only. `items.json` and `session-state.json` are always JS
 | Quick start | This file |
 | Routing and cascade | [SKILL.md](SKILL.md) |
 | Flag parsing / conflicts | [refs/input-resolution.md](refs/input-resolution.md) |
+| Bootstrap `--setup` | [refs/setup.md](refs/setup.md) |
+| Verifying phrases | [refs/progress.md](refs/progress.md) |
+| Track / patch / pins | [refs/baselines.md](refs/baselines.md) |
+| Root SoT one-liner | [refs/agent-config.md](refs/agent-config.md) |
 | Level order and gates | [refs/cascade.md](refs/cascade.md) |
 | Project posture / MoSCoW legend | [refs/project-posture.md](refs/project-posture.md) |
 | Expert panel / verdicts | [refs/expert-panel.md](refs/expert-panel.md) |

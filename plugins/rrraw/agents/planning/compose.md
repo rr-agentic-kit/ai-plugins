@@ -13,7 +13,7 @@ Function-style executor for rendering one planning doc from accumulated facts. P
 
 - Allowed: read `PhaseInput`; write `{level}.md` and merge `items.json` in `payload.output_dir`; rewrite child docs on frozen remap.
 - MUST NOT prompt the user — return `clarifications_needed[]` instead.
-- MUST NOT write or delete `session-state.json`, `raw-history/`, `{level}.notes.yaml`, or `decision-ledger.yaml`.
+- MUST NOT write or delete `session-state.json`, `raw-history/`, `{level}.notes.yaml`, `decision-ledger.yaml`, `status.yaml`, `agent.plan.md`, or `future.md`.
 - MUST NOT run discovery. One doc per invocation.
 
 ## Stop conditions
@@ -42,7 +42,8 @@ Required context:
 - Load `skills/rr-planner/refs/decision-ledger.md` for `reserved_ids` and the compose-never-writes boundary
 - Load `skills/rr-planner/refs/project-posture.md` for MoSCoW legend and PRD release-phasing
 - Load `skills/rr-planner/refs/contracts.md` § compose for output schema
-- Load `skills/rr-planner/refs/output-formats.md` for filenames, markdown layout, and `items.json` merge
+- Load `skills/rr-planner/refs/output-formats.md` for filenames, markdown layout (`track` / `doc_rev` / `pins` frontmatter), and `items.json` merge
+- Load `skills/rr-planner/refs/baselines.md` for pin/digest/rev; do not mint `status.yaml` (skill owns it)
 
 ## Execution
 
@@ -62,13 +63,13 @@ Required context:
 9. **PRD:** write release-phasing prose from the posture legend; state which 2×2 cell was used. Do not assume Must = MVP. Do not emit a `horizon:` field.
 10. **FRD:** inherit `if_absent` magnitude from parent PRD MoSCoW (Must → high, Should → moderate, Could → low). Do not compose children of Won’t. Fill `if_wrong`; set `Class` from the item-schema partition. Do not copy MoSCoW onto FRD.
 11. **Status:** default new items `spec: idea`. Set `draft` when this compose is specifying them. Never auto-promote to `ready` (user/gate). Never set `build` except FRD leaves (`none` until `spec: ready`). Replacement: new id `draft`/`idea` + `supersedes`; old id `deprecated` + `superseded_by` immediately.
-12. Render the document with closed heading + `_key_:` metadata (item-schema templates). Leaf body is a markdown blockquote (`>`). End with the item index table. Always write markdown — `payload.format` is `md`; do not serialize YAML cascade docs.
+12. Render the document with closed heading + `_key_:` metadata (item-schema templates). Leaf body is a markdown blockquote (`>`). Frontmatter: `doc_type`, `track`, `doc_rev` (`?` until the skill freezes), `pins` (immediate parent `{ rev, digest }` from `status.yaml`, or `{}` for ES), `created`. Do **not** emit stub `version: 1` or `traces_from`. End with the item index table. Always write markdown — `payload.format` is `md`; do not serialize YAML cascade docs.
 13. **Persist** to `payload.output_dir` before returning (`ok` and `partial` only; skip on `failed`):
     - Write `{level}.md` only.
     - Merge this level’s item records into `items.json` (read-modify-write: replace only this `doc`’s records; do not clobber other levels). Create the file if missing.
     - Frozen re-compose with `id_remap`: rewrite child docs + `items.json` as in step 6.
     - Files on disk are drafts until the skill adds this level to `frozen_levels`. Intra-session re-compose overwrites without asking.
-    - Do not write or delete `session-state.json`, `raw-history/`, `{level}.notes.yaml`, or `decision-ledger.yaml`. Skill prunes this level's sidecar after persist (`skills/rr-planner/refs/note-sessions.md`).
+    - Do not write or delete `session-state.json`, `raw-history/`, `{level}.notes.yaml`, `decision-ledger.yaml`, `status.yaml`, `agent.plan.md`, or `future.md`. Skill prunes this level's sidecar after persist (`skills/rr-planner/refs/note-sessions.md`).
 14. For each required section with insufficient facts: do not invent; add `ClarificationItem` (`severity: blocking` or `high`). Persist anyway — drafts may have gaps.
 15. Set `sections_completed` and `sections_incomplete` explicitly.
 

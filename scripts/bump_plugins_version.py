@@ -33,7 +33,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description=(
             "Lift every plugin manifest and pyproject.toml to the PEP 440 max "
             "version, then increment. rc ticks local prerelease for plugin "
-            "managers; other kinds use uv --bump --frozen."
+            "managers; other kinds use uv --bump --frozen. Always ends with "
+            "uv lock so uv.lock records the new project version."
         ),
     )
     parser.add_argument(
@@ -145,6 +146,9 @@ def run_bump(kind: str, repo_root: Path) -> str:
     for manifest in manifest_paths(repo_root):
         write_manifest_version(manifest, new)
         written.append(_rel(repo_root, manifest))
+
+    run_uv(["lock"], cwd=repo_root)
+    written.append("uv.lock")
 
     print(f"{old} => {new}")
     print("wrote:")

@@ -19,6 +19,8 @@ def _install_fake_uv(
 
     def fake_run_uv(args: list[str], *, cwd: Path) -> None:
         calls.append(list(args))
+        if args[0] != "version":
+            return
         version = new_version if "--bump" in args else args[1]
         (cwd / "pyproject.toml").write_text(
             f'[project]\nname = "test"\nversion = "{version}"\n',
@@ -71,29 +73,34 @@ def test_rc_increments_local_prerelease(mini_repo, monkeypatch, capsys):
         plugins={"foo": "0.0.2-beta-4"},
     )
     monkeypatch.setattr(bump, "REPO_ROOT", root)
+    calls: list[list[str]] = []
     monkeypatch.setattr(
-        bump, "run_uv", lambda *a, **k: pytest.fail("rc must not call uv")
+        bump, "run_uv", lambda args, *, cwd: calls.append(list(args))
     )
 
     assert bump.main(["rc"]) == 0
 
+    assert calls == [["lock"]]
     assert vp._read_pyproject_version(root / "pyproject.toml") == "0.0.2-beta-5"
     assert set(_manifest_versions(root).values()) == {"0.0.2-beta-5"}
     out = capsys.readouterr().out
     assert "0.0.2-beta-4 => 0.0.2-beta-5" in out
     assert "0.0.2rc1" not in out
     assert "0.0.2b5" not in out
+    assert "  uv.lock" in out
 
 
 def test_rc_lifts_lagging_then_increments(mini_repo, monkeypatch, capsys):
     root = mini_repo(pyproject_version="0.0.2-beta-4", plugins={"foo": "0.0.1"})
     monkeypatch.setattr(bump, "REPO_ROOT", root)
+    calls: list[list[str]] = []
     monkeypatch.setattr(
-        bump, "run_uv", lambda *a, **k: pytest.fail("rc must not call uv")
+        bump, "run_uv", lambda args, *, cwd: calls.append(list(args))
     )
 
     assert bump.main(["rc"]) == 0
 
+    assert calls == [["lock"]]
     assert set(_manifest_versions(root).values()) == {"0.0.2-beta-5"}
     out = capsys.readouterr().out
     assert "plugins/foo/.cursor-plugin/plugin.json: 0.0.1 -> 0.0.2-beta-5" in out
@@ -117,6 +124,7 @@ def test_lagging_plugin_lifted_to_max_then_bumped(mini_repo, monkeypatch, capsys
     assert calls == [
         ["version", "0.0.2", "--frozen"],
         ["version", "--bump", "patch", "--frozen"],
+        ["lock"],
     ]
     out = capsys.readouterr().out
     assert "normalize: lifted 2 source(s) to 0.0.2" in out
@@ -143,6 +151,7 @@ def test_aligned_success_writes_all_manifests(mini_repo, monkeypatch, capsys):
     assert calls == [
         ["version", "1.0.0", "--frozen"],
         ["version", "--bump", "minor", "--frozen"],
+        ["lock"],
     ]
     out = capsys.readouterr().out
     assert "normalize: already at 1.0.0" in out
@@ -157,6 +166,7 @@ def test_aligned_success_writes_all_manifests(mini_repo, monkeypatch, capsys):
     for rel in versions:
         assert f"  {rel}" in out
     assert "  pyproject.toml" in out
+    assert "  uv.lock" in out
 
 
 def test_invalid_pep440_fails_before_uv(mini_repo, monkeypatch):
@@ -176,4 +186,7 @@ def test_canonicalizes_pep440_spelling(mini_repo, monkeypatch, capsys):
 
     assert bump.main(["patch"]) == 0
     assert calls[0] == ["version", "0.0.2b4", "--frozen"]
-    assert "normalize: canonicalized to 0.0.2b4" in capsys.readouterr().out
+    assert calls[-1] == ["lock"]
+    out = capsys.readouterr().out
+    assert "normalize: canonicalized to 0.0.2b4" in out
+    assert "  uv.lock" in out

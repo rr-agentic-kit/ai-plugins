@@ -30,6 +30,7 @@ python3 scripts/validate_planning.py <output-dir>
 - `build != none` ⇒ FRD leaf with `spec == ready`
 - md `_key_:` headers vs `items.json` drift
 - Ranked-leaf `Rationale` present and resolving when `decision-ledger.yaml` exists (`LEDGER_MISSING` is a warning and skips these checks)
+- When `status.yaml` exists: `PARENT_UNFROZEN`, `STALE_PIN`, `REV_WHILE_OPEN`, `HAND_BUMP` ([baselines.md](baselines.md)). Do **not** FAIL major/minor policy, `NEXT_LOCKED`, or `CURRENT_NOT_PATCH`. Independent product/docs patches are valid. `future.md` and `agent.plan.md` are not script input.
 
 Schema: [schemas/items.schema.json](schemas/items.schema.json).
 
@@ -57,6 +58,7 @@ AI owns — do not encode as script FAILs:
 - Frozen level still has leftover `partial` notes the user has not discarded or completed
 - Must / `must-correct` item rests on a `vague` `flips_when` (fabricated numbers are worse — call those out too)
 - Binding viability `hold`/`kill` unresolved; open re-decision queue
+- Unlock / patch-only-current / "this looks like a minor" (skill classify in [baselines.md](baselines.md) — never script FAILs)
 
 Do **not** encode posture or note-session checks as `validate_planning.py` FAILs. Sidecars are not script input.
 
