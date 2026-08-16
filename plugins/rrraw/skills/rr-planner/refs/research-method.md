@@ -20,7 +20,7 @@ Research is a **distinct, later phase** — after docs are composed:
 | Market sizing / trends | MRD segments, exec-summary "why now" |
 | Standards / regulations | BRD business rules, FRD NFRs |
 | Technology landscape | FRD integration points, architecture assumptions |
-| Customer evidence | PRD personas, MRD customer needs |
+| Customer evidence | PRD personas **section**, MRD customer needs |
 
 ## Iterative research
 

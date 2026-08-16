@@ -20,10 +20,15 @@ def test_parse_valid_headings():
 
 
 def test_parse_unranked_em_dash():
-    items, _ = vp.parse_markdown(VALID_FILES["exec-summary.md"], "exec-summary.md")
-    vision = next(item for item in items if item.id == "ES-1")
-    assert vision.parent is None
-    assert vision.moscow is None
+    text = """\
+## ES-1: Competitive window
+_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
+"""
+    items, _ = vp.parse_markdown(text, "exec-summary.md")
+    leaf = items[0]
+    assert leaf.parent is None
+    assert leaf.moscow is None
+    assert leaf.spec == "idea"
 
 
 def test_parse_triad_axis():

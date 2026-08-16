@@ -84,20 +84,108 @@ def test_rewrite_list_meta_to_inline(tmp_path: Path):
     files = {"exec-summary.md": """\
 # Exec summary
 
-## ES-1: Vision
+## ES-1: Competitive window
 - **Parent:** —
 - **Kind:** leaf
 - **Spec:** ready
-- **MoSCoW:** —
+- **MoSCoW:** Must
 
-Vision text.
+Why now.
 """}
     write_planning(tmp_path, files)
     assert vp.main([str(tmp_path), "--rewrite"]) == 0
     text = (tmp_path / "exec-summary.md").read_text(encoding="utf-8")
     assert "- **Parent:**" not in text
-    assert "_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: —" in text
-    assert "> Vision text." in text
+    assert "_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must" in text
+    assert "> Why now." in text
+    issues = vp.validate_dir(tmp_path)
+    assert "STALE_FORMAT" not in error_codes(issues)
+    assert error_codes(issues) == set(), [i.format() for i in issues]
+
+
+def test_rewrite_does_not_inject_omitted_moscow(tmp_path: Path):
+    files = {"exec-summary.md": """\
+# Exec summary
+
+## ES-1: Competitive window
+_parent_: — | _kind_: leaf | _spec_: idea
+
+> Why now, cut undecided.
+"""}
+    write_planning(tmp_path, files)
+    assert vp.main([str(tmp_path), "--rewrite"]) == 0
+    text = (tmp_path / "exec-summary.md").read_text(encoding="utf-8")
+    assert "_moscow_:" not in text
+    assert "_parent_: — | _kind_: leaf | _spec_: idea" in text
+    issues = vp.validate_dir(tmp_path)
+    assert "MISSING_KEY" not in error_codes(issues)
+    assert "DOR" not in error_codes(issues)
+    assert error_codes(issues) == set(), [i.format() for i in issues]
+
+
+def test_rewrite_preserves_prose_headings(tmp_path: Path):
+    files = {
+        "exec-summary.md": """\
+# Exec summary
+
+## Vision
+
+Guest checkout growth.
+
+## ES-1: Self-serve conversion
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
+
+> Metric.
+""",
+        "mrd.md": """\
+# MRD
+
+## Target segments
+
+**Primary:** SMB buyers.
+
+## MRD-1: Account-free purchase
+_parent_: ES-1 | _kind_: leaf | _spec_: ready | _kano_: basic
+""",
+        "brd.md": """\
+# BRD
+
+## Stakeholders
+
+Buyer vs user vs approver.
+
+## BRD-1: Increase self-serve revenue
+_parent_: MRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
+""",
+        "prd.md": """\
+# PRD
+
+## User personas
+
+Guest shopper.
+
+## PRD-1: Guest checkout
+_parent_: BRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
+
+> As a guest, I can complete checkout without an account.
+""",
+        "frd.md": """\
+# FRD
+
+## FRD-1: Guest checkout without account
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _build_: none | _if-present_: high — Unlocks conversion | _if-absent_: high — PLG blocked | _if-wrong_: low — Local defect | _class_: must-present
+""",
+    }
+    write_planning(tmp_path, files)
+    assert vp.main([str(tmp_path), "--rewrite"]) == 0
+    es = (tmp_path / "exec-summary.md").read_text(encoding="utf-8")
+    mrd = (tmp_path / "mrd.md").read_text(encoding="utf-8")
+    brd = (tmp_path / "brd.md").read_text(encoding="utf-8")
+    prd = (tmp_path / "prd.md").read_text(encoding="utf-8")
+    assert "## Vision" in es
+    assert "## Target segments" in mrd
+    assert "## Stakeholders" in brd
+    assert "## User personas" in prd
     issues = vp.validate_dir(tmp_path)
     assert "STALE_FORMAT" not in error_codes(issues)
     assert error_codes(issues) == set(), [i.format() for i in issues]

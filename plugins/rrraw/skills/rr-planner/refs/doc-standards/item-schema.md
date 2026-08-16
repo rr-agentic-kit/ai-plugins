@@ -17,7 +17,7 @@ Every numbered item has `id`, `parent`, `kind`, `spec`. Priority fields depend o
 | `kind` | all | `container` \| `leaf` |
 | `spec` | all | `idea` \| `draft` \| `ready` \| `deprecated` |
 | `build` | FRD leaves only | `none` \| `in_progress` \| `done` |
-| `rationale` | ranked leaves | `r-\d{3,}` pointer into [decision-ledger.md](../decision-ledger.md). Optional on unranked leaves and containers. |
+| `rationale` | ranked leaves | `r-\d{3,}` pointer into [decision-ledger.md](../decision-ledger.md). Optional on containers. Required once the leaf has a real rank value. Never emit `_rationale_: —`. |
 | `supersedes` / `superseded-by` | optional | Replacement pair (both ends or neither). JSON field remains `superseded_by`. |
 
 Containers stay unmarked (no MoSCoW / Kano / triad). Index tables show the level’s native field.
@@ -25,6 +25,7 @@ Containers stay unmarked (no MoSCoW / Kano / triad). Index tables show the level
 ## Numbering
 
 - ID: `{DOC}-{n}[.{n}]` with prefixes `ES`, `MRD`, `BRD`, `PRD`, `FRD`.
+- **Mint `{DOC}-n` only for what the level ranks** (plus containers that group ranked leaves). Unranked narrative, already-labeled partitions, and context lists stay unnumbered prose. Numbering exists to (1) rank, (2) nest ranked children, (3) parent-walk. If none apply, the heading is prose. Do not invent semantic ids (`exec-vision`, `mrd-primary`, `prd-persona`).
 - Continuous among **siblings** (`1, 2, 3` — no gaps at compose). Children of item 3 are `3.1`, `3.2`, … not new top-level numbers.
 - Unique across the cascade because of the prefix (`PRD-3` ≠ `FRD-3`).
 - Max depth **2** inside a document (`n.m`). Deeper means the parent is not a real grouping — split the parent into siblings.
@@ -52,7 +53,7 @@ Cross-doc parent must be the previous cascade level (no skips). Same-doc parent 
 
 Split when a fact has multiple independent shalls, multiple actors, or a list of distinct outcomes. Example: “5 requirements for checkout” → `PRD-3` container + `PRD-3.1`…`PRD-3.5` leaves.
 
-Prose overviews (product overview paragraph, system context, market overview, release-phasing narrative) stay unnumbered. Everything that is a claim, constraint, objective, need, rule, story, or requirement is an item.
+Prose overviews and unranked context (vision, posture, segments, personas, stakeholders, risks, sizing) stay unnumbered. Ranked claims — constraints, objectives, needs, rules, stories, features, requirements — are items. After compose, **no level has unranked leaves.** `—` is not a rank class. It is a placeholder for a field that belongs on this item but is not decided yet.
 
 | `kind` | Same-doc children | Body |
 |--------|-------------------|------|
@@ -65,23 +66,33 @@ An `idea` item must not have children (promote to `draft` first).
 
 ## Which sections are items
 
-Declared per level. Native priority method is a property of the **document type**. Unranked leaves still emit the native key with value `—` (do not omit the key).
+Declared per level. Native priority method is a property of the **document type**.
 
-| Level | Prefix | Method | Rankable leaves | Unranked leaves (`—`) | Prose (unnumbered) |
-|-------|--------|--------|-----------------|----------------------|--------------------|
-| exec-summary | `ES` | MoSCoW | Why now, metrics, constraints, non-goals | Vision, problem, posture, what-must-be-true, viability verdict | — |
-| mrd | `MRD` | Kano | Customer needs | Segments, competitors, trends, risks, TAM/SAM/SOM (or internal cost-of-inaction) | Market overview |
-| brd | `BRD` | MoSCoW | Objectives, rules, dependencies | Stakeholders, risks | — |
-| prd | `PRD` | MoSCoW | Goals, stories, features | Personas | Product overview, release phasing |
-| frd | `FRD` | triad | All leaves | — | System overview |
+| Level | Prefix | Method | Rankable leaves | Prose (unnumbered) |
+|-------|--------|--------|-----------------|--------------------|
+| exec-summary | `ES` | MoSCoW | Why now, metrics, constraints, non-goals | Posture, vision, problem, what-must-be-true, viability verdict |
+| mrd | `MRD` | Kano | Customer needs | Market overview, TAM/SAM/SOM (or internal cost-of-inaction), target segments (`**Primary:**` / `**Secondary:**`), competitors, trends, risks |
+| brd | `BRD` | MoSCoW | Objectives, rules, dependencies | Stakeholders (buyer / user / approver in the section), business risks (impact × likelihood bullets) |
+| prd | `PRD` | MoSCoW | Goals, stories, features, out-of-scope | Product overview, user personas (named in story bodies), release phasing |
+| frd | `FRD` | triad | All leaves | System overview |
 
-Non-goals and PRD out-of-scope are `Won't` by definition. MRD segments state primary/secondary in the body (not a rank). MRD/BRD risks state impact × likelihood in the body.
+Non-goals and PRD out-of-scope are `Won't` by definition. MRD segments state primary/secondary in the section (not a rank, not an id). MRD/BRD risks state impact × likelihood in the section.
+
+### Emit: omit vs placeholder
+
+Do not write keys that will never apply. Do not write `—` to mean “this field is not a thing.”
+
+- **Omit** — empty by nature / inapplicable: containers have no `_moscow_` / `_kano_` / triad (already `CONTAINER_RANK` if present). Non-FRD has no `_build_`. No `_rationale_` until minted (never `_rationale_: —`). No method key on a heading that is not an item.
+- **Placeholder `—`** — expected on this item, not yet decided: ranked leaf still `idea`/`draft` without a cut → `_moscow_: —` or `_kano_: —`. Drop the key once the real value is written, or replace `—` with Must/basic/etc.
+- **Ready** — real rank required. `spec: ready` + missing method key or `—` is `DOR`, not an unranked item.
+
+`—` = null for an applicable key not yet decided; omit inapplicable keys. `_parent_: —` on ES roots stays (graph null, not a rank).
 
 ### Per-level methods
 
 Do not apply one ranking system to the whole cascade. No 1–5. No P0/P1/P2.
 
-- **exec-summary — MoSCoW.** Posture, vision, problem, what-must-be-true, and viability verdict are unranked (they are the anchor). Metrics, constraints, and non-goals are Must/Should/Could/Won’t. Why: few items, board language, no implementation blast radius yet.
+- **exec-summary — MoSCoW.** Posture, vision, problem, what-must-be-true, and viability verdict are **prose** (the anchor — no `ES-*` id). Metrics, constraints, non-goals, and why-now are Must/Should/Could/Won’t. Why: few items, board language, no implementation blast radius yet.
 - **mrd — Kano on needs** (`basic` / `performance` / `delighter`). Why: market needs are about satisfaction-if-present vs dissatisfaction-if-absent; MoSCoW flattens delighters into Could.
 - **brd — MoSCoW on objectives, rules, and dependencies.** Compliance/contractual rules are Must. Why: business-negotiation language for cutting scope.
 - **prd — MoSCoW on goals, stories, and features.** Legend is posture-dependent ([project-posture.md](../project-posture.md)): Must is the cut *within this session's horizon*, not a hardcoded "MVP." Should/Could = later-in-horizon; Won't = never. No second rank (`horizon:`) on items. Do not add `if_wrong` here — there is no design yet to be wrong.
@@ -147,11 +158,11 @@ Omit `build` on ES/MRD/BRD/PRD and on all containers. PRD “delivered” is **d
 | Rule | Effect |
 |------|--------|
 | `build != none` | `kind == leaf` AND doc is FRD AND `spec == ready` |
-| `spec == ready` | Required keys for that level present. Cross-doc parent must be `ready`. Same-doc container is exempt. |
+| `spec == ready` | Real rank present (`—` does not count). Cross-doc parent must be `ready`. Same-doc container is exempt. |
 | `deprecated` | `build` cannot move to `in_progress`; existing `in_progress`/`done` is a **warning** (code still in tree, spec withdrawn) |
 | Replacement | New item starts `spec: draft` (or `idea`), `build: none`. Old item `spec: deprecated` as soon as the successor exists |
 | `idea` children | FAIL if an `idea` item has children |
-| Depth | `shallow`: method field required on leaves still; one-liners may be assumptions. `standard`/`deep`: blocking if method fields missing on a leaf |
+| Depth | `shallow`: one-liners may be assumptions. `standard`/`deep`: blocking if a **ready** leaf is missing a real rank (`—` does not count) |
 
 ### Example mapping
 
@@ -188,13 +199,13 @@ Split segments on `\s+\|\s+(?=_[a-z][a-z0-9-]*_:)` so triad effect text may cont
 | **Ranked leaves also** | `rationale` (`r-NNN`, minted in the ledger before compose prints it) | `rationale` |
 | **FRD leaves also** | `build` | `build` |
 | **Leaves, native method** | `moscow` \| `kano` \| `if-present` / `if-absent` / `if-wrong` / `class` | `moscow` \| `kano` \| `triad.if_present` / `if_absent` / `if_wrong` / `class` |
-| **Optional** | `supersedes`, `superseded-by`; `rationale` on unranked leaves and containers | `supersedes`, `superseded_by` |
+| **Optional** | `supersedes`, `superseded-by`; `rationale` on containers | `supersedes`, `superseded_by` |
 
-Canonical emit order: `parent, kind, spec, build, moscow, kano, if-present, if-absent, if-wrong, class, rationale, supersedes, superseded-by`. Omit inapplicable keys. Unranked leaves still emit the native key as `—`.
+Canonical emit order: `parent, kind, spec, build, moscow, kano, if-present, if-absent, if-wrong, class, rationale, supersedes, superseded-by`. Omit inapplicable keys. `--rewrite` must not inject method `—` when the source omitted the key. Emit only keys present on the item (plus required `parent`/`kind`/`spec` for a parseable header).
 
-Unknown keys or missing required keys → validator FAIL. Body is the blockquote (AI-judged).
+Unknown keys or missing required keys (`parent`, `kind`, `spec`) → validator FAIL. Body is the blockquote (AI-judged). `idea`/`draft` leaves may omit moscow/kano or emit `—`. `ready` leaves missing a **real** rank (`—` does not count) → `DOR`.
 
-`_parent_: —` and native rank `—` mean null / unranked. Triad values: `<magnitude> — <effect>` (em dash preferred).
+`_parent_: —` means graph null (ES roots). Native rank `—` means “applicable, not yet decided.” Triad values: `<magnitude> — <effect>` (em dash preferred).
 
 JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph checks: `scripts/validate_planning.py` (md-only; `--format yaml|json` is `UNSUPPORTED_FORMAT`).
 
@@ -242,7 +253,7 @@ _parent_: PRD-3.1 | _kind_: leaf | _spec_: ready | _build_: in_progress | _if-pr
 
 ## Item index
 
-Each composed markdown file ends with an index. Column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Containers and unranked leaves show `—`.
+Each composed markdown file ends with an index. Column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Containers show `—` in the method column because they have no rank, not because they are unranked leaves.
 
 ```markdown
 ## Item index

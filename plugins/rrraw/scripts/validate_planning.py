@@ -817,12 +817,8 @@ def _meta_for_emit(item: Item) -> dict[str, str]:
         meta["kind"] = item.kind
     if "spec" not in meta and item.spec:
         meta["spec"] = item.spec
-    if item.kind == "leaf":
-        method = DOC_METHOD[item.doc]
-        if method == "moscow" and "moscow" not in meta:
-            meta["moscow"] = item.moscow or EM_DASH
-        elif method == "kano" and "kano" not in meta:
-            meta["kano"] = item.kano or EM_DASH
+    if "rationale" in meta and _null_or_value(meta["rationale"]) is None:
+        del meta["rationale"]
     return {key: meta[key] for key in CANONICAL_KEY_ORDER if key in meta}
 
 
@@ -1273,7 +1269,6 @@ def _dense(nums: list[int], group: str) -> list[Issue]:
 def check_required_fields(items: list[Item]) -> list[Issue]:
     issues: list[Issue] = []
     for item in items:
-        method = DOC_METHOD[item.doc]
         if item.kind == "container":
             if item.build is not None:
                 issues.append(
@@ -1290,18 +1285,6 @@ def check_required_fields(items: list[Item]) -> list[Issue]:
                     )
                 )
             continue
-        if (
-            method == "moscow"
-            and "moscow" not in item.raw_keys
-            and item.source_file != "items.json"
-        ):
-            issues.append(Issue("error", "MISSING_KEY", "leaf missing moscow", item.id))
-        if (
-            method == "kano"
-            and "kano" not in item.raw_keys
-            and item.source_file != "items.json"
-        ):
-            issues.append(Issue("error", "MISSING_KEY", "leaf missing kano", item.id))
         if item.doc == "frd":
             missing = FRD_LEAF_KEYS - item.raw_keys
             if item.source_file != "items.json" and missing:
@@ -1365,17 +1348,9 @@ def _ready_keys(item: Item, by_id: dict[str, Item]) -> list[Issue]:
     issues: list[Issue] = []
     method = DOC_METHOD[item.doc]
     if item.kind == "leaf":
-        if (
-            method == "moscow"
-            and item.source_file == "items.json"
-            and "moscow" not in item.raw_keys
-        ):
+        if method == "moscow" and item.moscow is None:
             issues.append(Issue("error", "DOR", "ready leaf missing moscow", item.id))
-        if (
-            method == "kano"
-            and item.source_file == "items.json"
-            and "kano" not in item.raw_keys
-        ):
+        if method == "kano" and item.kano is None:
             issues.append(Issue("error", "DOR", "ready leaf missing kano", item.id))
         if method == "triad":
             if item.triad is None:
@@ -1812,7 +1787,7 @@ def validate_dir(
     depth: str = "standard",
     doc_format: str | None = None,
 ) -> list[Issue]:
-    del depth  # keys required on leaves at every depth; kept for CLI contract
+    del depth  # ready leaves need a real rank at every depth; kept for CLI contract
     md_items, issues = parse_planning_dir(planning_dir, doc_format=doc_format)
     if any(issue.code in {"UNSUPPORTED_FORMAT", "STALE_FORMAT"} for issue in issues):
         return issues

@@ -106,11 +106,11 @@ An internal project that reports TAM/SAM/SOM is a protocol failure — the numbe
 During ES discovery, after posture confirm and `domain_context`, before freezing ES:
 
 1. Sit founder/CEO, seed investor, and domain practitioner.
-2. Produce the unranked **What must be true** leaf — the smallest set of premises the rest of the cascade stands on.
+2. Produce the **What must be true** prose section — the smallest set of premises the rest of the cascade stands on. Do not mint an `ES-*` id for it.
 3. Classify each premise (`premise-critical` / `supporting` / `color`) and run the evidence loop.
-4. Record the **Viability verdict** unranked leaf (`proceed` … `kill`). Binding.
+4. Record the **Viability verdict** as prose (`proceed` … `kill`). Binding. Do not mint an `ES-*` id for it.
 
-Done: both leaves present; verdict ≠ `hold` unless the user accepts the banner; rationales minted for any ranked ES leaves that depend on those premises.
+Done: both sections present; verdict ≠ `hold` unless the user accepts the banner; rationales minted for any ranked ES leaves that depend on those premises.
 
 ## Gate 7 (every level)
 

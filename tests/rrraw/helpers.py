@@ -15,15 +15,15 @@ VALID_FILES: dict[str, str] = {
     "exec-summary.md": """\
 # Exec summary
 
-## ES-1: Guest checkout growth
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: —
+## ES-1: Competitive window
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
 
-> Vision.
+> Why now.
 
-## ES-2: Account wall drop-off
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: —
+## ES-2: Regulatory ceiling
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
 
-> Problem.
+> Constraint.
 
 ## ES-3: Self-serve conversion
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
@@ -31,19 +31,14 @@ _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
     "mrd.md": """\
 # MRD
 
-## MRD-1: SMB buyers
-_parent_: ES-2 | _kind_: leaf | _spec_: ready | _kano_: —
-
-> Primary segment.
-
-## MRD-2: Account-free purchase
-_parent_: ES-2 | _kind_: leaf | _spec_: ready | _kano_: basic
+## MRD-1: Account-free purchase
+_parent_: ES-3 | _kind_: leaf | _spec_: ready | _kano_: basic
 """,
     "brd.md": """\
 # BRD
 
 ## BRD-1: Increase self-serve revenue
-_parent_: MRD-2 | _kind_: leaf | _spec_: ready | _moscow_: Must
+_parent_: MRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
 """,
     "prd.md": """\
 # PRD
@@ -75,21 +70,21 @@ doc_type: exec-summary
 title: Exec summary
 items:
   ES-1:
-    title: Guest checkout growth
+    title: Competitive window
     Parent: —
     Kind: leaf
     Spec: ready
-    MoSCoW: —
+    MoSCoW: Must
     body: |
-      Vision.
+      Why now.
   ES-2:
-    title: Account wall drop-off
+    title: Regulatory ceiling
     Parent: —
     Kind: leaf
     Spec: ready
-    MoSCoW: —
+    MoSCoW: Must
     body: |
-      Problem.
+      Constraint.
   ES-3:
     title: Self-serve conversion
     Parent: —
@@ -102,16 +97,8 @@ doc_type: mrd
 title: MRD
 items:
   MRD-1:
-    title: SMB buyers
-    Parent: ES-2
-    Kind: leaf
-    Spec: ready
-    Kano: —
-    body: |
-      Primary segment.
-  MRD-2:
     title: Account-free purchase
-    Parent: ES-2
+    Parent: ES-3
     Kind: leaf
     Spec: ready
     Kano: basic
@@ -122,7 +109,7 @@ title: BRD
 items:
   BRD-1:
     title: Increase self-serve revenue
-    Parent: MRD-2
+    Parent: MRD-1
     Kind: leaf
     Spec: ready
     MoSCoW: Must
@@ -190,9 +177,29 @@ rationales:
       - { kind: fact, evidence: e-001, becomes: refuted }
     condition_strength: observable
     status: live
+  r-006:
+    decision: accept
+    subject: ES-1
+    seat: seed-investor
+    because: "The competitive window is the why-now that justifies this session"
+    depends_on: [e-001]
+    flips_when:
+      - { kind: event, text: "Incumbent ships guest checkout natively" }
+    condition_strength: observable
+    status: live
+  r-007:
+    decision: accept
+    subject: ES-2
+    seat: domain-practitioner
+    because: "Regulatory ceiling is a hard constraint on the metric"
+    depends_on: [e-001]
+    flips_when:
+      - { kind: event, text: "The named regime no longer applies" }
+    condition_strength: observable
+    status: live
   r-002:
     decision: accept
-    subject: MRD-2
+    subject: MRD-1
     seat: growth-investor
     because: "Account-free purchase is a basic need for the SMB segment"
     depends_on: [e-001]
@@ -239,15 +246,15 @@ RATIONALE_FILES: dict[str, str] = {
     "exec-summary.md": """\
 # Exec summary
 
-## ES-1: Guest checkout growth
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: —
+## ES-1: Competitive window
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-006
 
-> Vision.
+> Why now.
 
-## ES-2: Account wall drop-off
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: —
+## ES-2: Regulatory ceiling
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-007
 
-> Problem.
+> Constraint.
 
 ## ES-3: Self-serve conversion
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-001
@@ -255,19 +262,14 @@ _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-0
     "mrd.md": """\
 # MRD
 
-## MRD-1: SMB buyers
-_parent_: ES-2 | _kind_: leaf | _spec_: ready | _kano_: —
-
-> Primary segment.
-
-## MRD-2: Account-free purchase
-_parent_: ES-2 | _kind_: leaf | _spec_: ready | _kano_: basic | _rationale_: r-002
+## MRD-1: Account-free purchase
+_parent_: ES-3 | _kind_: leaf | _spec_: ready | _kano_: basic | _rationale_: r-002
 """,
     "brd.md": """\
 # BRD
 
 ## BRD-1: Increase self-serve revenue
-_parent_: MRD-2 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-003
+_parent_: MRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-003
 """,
     "prd.md": """\
 # PRD
@@ -299,21 +301,23 @@ doc_type: exec-summary
 title: Exec summary
 items:
   ES-1:
-    title: Guest checkout growth
+    title: Competitive window
     Parent: —
     Kind: leaf
     Spec: ready
-    MoSCoW: —
+    MoSCoW: Must
+    Rationale: r-006
     body: |
-      Vision.
+      Why now.
   ES-2:
-    title: Account wall drop-off
+    title: Regulatory ceiling
     Parent: —
     Kind: leaf
     Spec: ready
-    MoSCoW: —
+    MoSCoW: Must
+    Rationale: r-007
     body: |
-      Problem.
+      Constraint.
   ES-3:
     title: Self-serve conversion
     Parent: —
@@ -327,16 +331,8 @@ doc_type: mrd
 title: MRD
 items:
   MRD-1:
-    title: SMB buyers
-    Parent: ES-2
-    Kind: leaf
-    Spec: ready
-    Kano: —
-    body: |
-      Primary segment.
-  MRD-2:
     title: Account-free purchase
-    Parent: ES-2
+    Parent: ES-3
     Kind: leaf
     Spec: ready
     Kano: basic
@@ -348,7 +344,7 @@ title: BRD
 items:
   BRD-1:
     title: Increase self-serve revenue
-    Parent: MRD-2
+    Parent: MRD-1
     Kind: leaf
     Spec: ready
     MoSCoW: Must

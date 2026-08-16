@@ -23,7 +23,7 @@ Two independent axes. Do not collapse into a 3-way enum.
 flowchart TD
   start[Discover start] --> scan[Scan repo + plans]
   scan --> confirm[Confirm existence and commitment]
-  confirm --> persist[Write project_posture + ES Posture leaf]
+  confirm --> persist[Write project_posture + ES Posture section]
   persist --> cascade[Cascade exec-summary through FRD]
   cascade --> cut[PRD cut-pass]
   cut --> freeze[Freeze PRD]
@@ -87,12 +87,12 @@ Do not invent an industry to fill the shape. Missing `market_type` is blocking �
 ### 4. Persist
 
 1. `session_state.project_posture` (schema below), including `domain_context`.
-2. Unranked exec-summary **Posture** leaf — docs are source of truth for challenge. Do not rank it.
+2. Exec-summary **Posture** section — docs are source of truth for challenge. Do not mint an `ES-*` id for it.
 3. Decision log: `type: project_posture`, `user_confirmed: true`.
 
 ### 5. Resume
 
-`--resume`: do not re-ask unless the user contradicts the stored posture. Contradiction → re-confirm, rewrite the Posture leaf, log a new `project_posture` decision.
+`--resume`: do not re-ask unless the user contradicts the stored posture. Contradiction → re-confirm, rewrite the Posture section, log a new `project_posture` decision.
 
 ## Session field
 

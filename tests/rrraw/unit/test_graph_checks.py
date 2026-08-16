@@ -17,8 +17,8 @@ def test_valid_cascade_passes(tmp_path: Path):
 def test_broken_parent(tmp_path: Path):
     files = dict(VALID_FILES)
     files["mrd.md"] = """\
-## MRD-1: SMB buyers
-_parent_: ES-99 | _kind_: leaf | _spec_: ready | _kano_: —
+## MRD-1: Account-free purchase
+_parent_: ES-99 | _kind_: leaf | _spec_: ready | _kano_: basic
 """
     write_planning(tmp_path, files)
     issues = vp.validate_dir(tmp_path)
@@ -38,8 +38,8 @@ _parent_: ES-3 | _kind_: leaf | _spec_: ready | _build_: none | _if-present_: hi
 
 def test_numbering_gap(tmp_path: Path):
     files = {"exec-summary.md": """\
-## ES-1: Vision
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: —
+## ES-1: Competitive window
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
 
 ## ES-3: Metric
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must

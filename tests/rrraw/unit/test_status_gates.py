@@ -60,7 +60,7 @@ def test_ready_cross_doc_parent_must_be_ready(tmp_path: Path):
     files = dict(VALID_FILES)
     files["brd.md"] = """\
 ## BRD-1: Increase self-serve revenue
-_parent_: MRD-2 | _kind_: leaf | _spec_: draft | _moscow_: Must
+_parent_: MRD-1 | _kind_: leaf | _spec_: draft | _moscow_: Must
 """
     files["prd.md"] = """\
 ## PRD-1: Checkout
@@ -80,6 +80,28 @@ def test_same_doc_container_draft_child_ready_ok(tmp_path: Path):
     write_planning(tmp_path)
     issues = vp.validate_dir(tmp_path)
     assert "PARENT_READY" not in error_codes(issues)
+    assert error_codes(issues) == set(), [i.format() for i in issues]
+
+
+def test_ready_placeholder_rank_is_dor(tmp_path: Path):
+    files = {"exec-summary.md": """\
+## ES-1: Competitive window
+_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: —
+"""}
+    write_planning(tmp_path, files)
+    issues = vp.validate_dir(tmp_path)
+    assert "DOR" in error_codes(issues)
+
+
+def test_idea_omitted_moscow_ok(tmp_path: Path):
+    files = {"exec-summary.md": """\
+## ES-1: Competitive window
+_parent_: — | _kind_: leaf | _spec_: idea
+"""}
+    write_planning(tmp_path, files)
+    issues = vp.validate_dir(tmp_path)
+    assert "MISSING_KEY" not in error_codes(issues)
+    assert "DOR" not in error_codes(issues)
     assert error_codes(issues) == set(), [i.format() for i in issues]
 
 

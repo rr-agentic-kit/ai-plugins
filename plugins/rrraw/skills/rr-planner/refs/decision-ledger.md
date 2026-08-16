@@ -63,7 +63,7 @@ Ids: evidence `e-\d{3,}`, rationales `r-\d{3,}`, monotonic, never recycled. `dep
 
 ## Minting
 
-Sequencing: the rationale is minted **during discovery at the moment the decision is made**, the skill writes the ledger, **then** compose references the id. Ranked leaves carry `Rationale: r-014`. Unranked leaves (vision, posture, personas, segments, what-must-be-true, viability verdict) are anchors, not decisions — `Rationale` optional.
+Sequencing: the rationale is minted **during discovery at the moment the decision is made**, the skill writes the ledger, **then** compose references the id. Ranked leaves carry `Rationale: r-014`. Containers may omit it. Prose sections (vision, posture, personas, segments, what-must-be-true, viability verdict) are not items — they do not take `Rationale`.
 
 | Rule | Detail |
 |------|--------|

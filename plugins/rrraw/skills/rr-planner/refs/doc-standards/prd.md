@@ -17,13 +17,13 @@ Define what the product will do to achieve business objectives. Feature-level th
 |---------|---------|-------|
 | **Product overview** | One-paragraph product description tied to vision | Prose (unnumbered) |
 | **Goals** | Product goals mapped to BRD objectives | Ranked leaves |
-| **User personas** | Primary personas with goals, pain points, context | Unranked leaves (`_moscow_: —`) |
+| **User personas** | Primary personas with goals, pain points, context | Prose (unnumbered) |
 | **User stories / outcomes** | Outcome-oriented capabilities (not implementation) | Ranked leaves |
 | **Features** | Capabilities that deliver stories | Ranked leaves; MoSCoW *legend* from [project-posture.md](../project-posture.md) — not a hardcoded Must=MVP |
 | **Out of scope** | Product-level exclusions (inherits exec non-goals) | Ranked leaves; `Won't` |
 | **Release phasing** | Horizon buckets for this session | Prose derived from MoSCoW + posture legend — do not store a second rank; **state which legend was used** |
 
-Prefix `PRD`. Product scoping, not implementation. Do not add `if_wrong` or P0/P1/P2. No `horizon:` field on items. Cut-pass: [project-posture.md](../project-posture.md).
+Prefix `PRD`. Product scoping, not implementation. Do not add `if_wrong` or P0/P1/P2. No `horizon:` field on items. Cut-pass: [project-posture.md](../project-posture.md). Personas stay a section; stories name a persona in the body (`As [persona]`) — they do not parent to a persona id.
 
 PRD “delivered” is derived from Must FRD children (`build: done`). Do not store build status on PRD items.
 
@@ -39,16 +39,16 @@ PRD “delivered” is derived from Must FRD children (`build: done`). Do not st
 ## Traceability
 
 - Cross-doc `parent:` is a `BRD-*` id (usually an objective). Same-doc nest: `PRD-n` → `PRD-n.m`.
-- Each goal walks to a BRD objective. Each story walks to a goal (and names a persona in the body).
+- Each goal walks to a BRD objective. Each story walks to a goal (and names a persona from the User personas section in the body).
 - Full chain is a parent walk — do not repeat it on every item.
 
 ## Done-when checklist
 
 - [ ] Product overview links to exec-summary vision
 - [ ] Every BRD objective has at least one product goal
-- [ ] Personas defined with goals and pain points
+- [ ] Personas section present; personas defined with goals and pain points
 - [ ] User stories are outcome-oriented (no implementation detail)
-- [ ] Goals, stories, and features have `_moscow_` + `_rationale_`; ranks match the posture legend (Must is not automatically MVP)
+- [ ] Goals, stories, features, and out-of-scope have `_moscow_` + `_rationale_`; ranks match the posture legend (Must is not automatically MVP)
 - [ ] Release-phasing prose states which legend was used
 - [ ] Out-of-scope items documented as `Won't` (never — not "later")
 - [ ] Items use `PRD-{n}` / `PRD-{n.m}` per item-schema; compounds split into container + leaves

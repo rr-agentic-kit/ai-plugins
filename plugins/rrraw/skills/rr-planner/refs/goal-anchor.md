@@ -67,7 +67,7 @@ Flattening nuance into generic statements is a gate failure.
 
 At each level transition and after major decisions:
 
-1. Restate the user's **primary goal** (from exec-summary vision/problem — `ES-*` ids).
+1. Restate the user's **primary goal** from exec-summary vision/problem **prose**. Cite a ranked metric as `goal_ref` (`ES-*`).
 2. Show how the current level's work serves that goal in one sentence.
 3. If current facts drift from goal → surface misalignment via question.
 

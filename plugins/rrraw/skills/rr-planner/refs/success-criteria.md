@@ -26,7 +26,7 @@ python3 scripts/validate_planning.py <output-dir>
 - Numbering density among siblings; max depth 2
 - Kind invariant; `idea` has no children
 - Required closed keys; spec/build legality (DoR-as-code)
-- `spec == ready` ⇒ method fields present; cross-doc parent `ready` (same-doc container exempt)
+- `spec == ready` ⇒ real rank present (`—` does not count); cross-doc parent `ready` (same-doc container exempt)
 - `build != none` ⇒ FRD leaf with `spec == ready`
 - md `_key_:` headers vs `items.json` drift
 - Ranked-leaf `Rationale` present and resolving when `decision-ledger.yaml` exists (`LEDGER_MISSING` is a warning and skips these checks)
@@ -53,7 +53,7 @@ AI owns — do not encode as script FAILs:
 - MoSCoW inflation vs the posture legend; Kano mis-class; weak triad prose (`if_wrong` not a real blast radius)
 - Vague AC ("fast", "user-friendly") without measurable proxy
 - Shall not testable
-- Posture unconfirmed or missing ES Posture leaf; Must set disagrees with the legend (`signed_v1` re-cut as MVP, shipped behavior as new Must under `existing`)
+- Posture unconfirmed or missing ES Posture **section**; Must set disagrees with the legend (`signed_v1` re-cut as MVP, shipped behavior as new Must under `existing`)
 - Frozen level still has leftover `partial` notes the user has not discarded or completed
 - Must / `must-correct` item rests on a `vague` `flips_when` (fabricated numbers are worse — call those out too)
 - Binding viability `hold`/`kill` unresolved; open re-decision queue
@@ -77,7 +77,7 @@ Every `must-correct` / `must-present` FRD leaf must have:
 
 ## Criterion: Viability
 
-- Exec-summary has What-must-be-true and Viability-verdict unranked leaves.
+- Exec-summary has What-must-be-true and Viability-verdict **prose sections**. Missing prose is judgment, never a script FAIL.
 - `session_state.viability[]` has an entry for each frozen level.
 - Binding `hold`/`kill` (ES, MRD) unresolved → not `ok`; docs carry the VIABILITY HOLD banner; `gate_passed: false`.
 - Accepted advisory `hold`/`kill` (BRD/PRD/FRD) does not block `ok` (still record; banner only on binding-level `hold`).
@@ -87,7 +87,7 @@ Every `must-correct` / `must-present` FRD leaf must have:
 ## Criterion: Rationale coverage
 
 - Every ranked leaf has `_rationale_: r-NNN` pointing at a live (or explicitly `superseded`) ledger record.
-- Unranked leaves may omit it.
+- Leaves without a real rank and containers may omit it.
 - Open `re_decision_queue` (`status: open`) is **blocking** — drain before freeze/accept.
 - A Must or `must-correct` resting on `condition_strength: vague` is a judgment finding, never a script FAIL.
 
@@ -104,7 +104,7 @@ Every `must-correct` / `must-present` FRD leaf must have:
 
 Every recorded decision must:
 
-- Have a `goal_ref` pointing to an `ES-*` id (vision, metric, or Posture leaf) when the exec-summary exists. `project_posture` logged before the Posture leaf exists may fill `goal_ref` on the next compose.
+- Have a `goal_ref` pointing to a ranked `ES-*` id (usually a metric) when the exec-summary exists. `project_posture` logged before a metric exists may fill `goal_ref` on the next compose once a metric is minted.
 - Be `user_confirmed: true` (or explicitly accepted as assumption).
 - Not contradict a later-level fact.
 

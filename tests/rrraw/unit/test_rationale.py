@@ -23,10 +23,10 @@ def test_valid_rationale_round_trip_md(tmp_path: Path):
     items, _ = vp.parse_planning_dir(tmp_path)
     by_id = {item.id: item for item in items}
     assert by_id["PRD-1.1"].rationale == "r-004"
-    assert by_id["ES-1"].rationale is None
+    assert by_id["ES-1"].rationale == "r-006"
     record = by_id["PRD-1.1"].to_record()
     assert record["rationale"] == "r-004"
-    assert "rationale" not in by_id["ES-1"].to_record()
+    assert "rationale" not in by_id["PRD-1"].to_record()
 
 
 def test_valid_rationale_round_trip_yaml_rewrite(tmp_path: Path):

@@ -15,28 +15,28 @@ Ground the initiative in market reality — segments, competitors, trends — wi
 | Section | Content | Items |
 |---------|---------|-------|
 | **Market overview** | Segment definition aligned to exec-summary problem | Prose (unnumbered) |
-| **TAM / SAM / SOM** | Evidence-backed sizing. `market_type: external`: TAM, SAM, SOM with sources. `market_type: internal`: affected-teams × hours × loaded cost — **no TAM**. Mandatory incumbent **and** do-nothing comparison in either variant | Unranked leaves (`_kano_: —`); numbers cite ledger `evidence` ids |
-| **Target segments** | Primary and secondary segments with sizing estimates or proxies | Unranked leaves (`_kano_: —`); primary/secondary in body |
-| **Competitive landscape** | Key players, positioning, differentiation gaps; incumbent named | Unranked leaves |
-| **Market trends** | 2–4 trends that support "why now" | Unranked leaves |
-| **Customer needs** | Unmet needs mapped to exec-summary problem | Ranked leaves: `basic` / `performance` / `delighter` |
-| **Market risks** | External threats — regulation, commoditization, disruption | Unranked leaves; impact × likelihood in body |
+| **TAM / SAM / SOM** | Evidence-backed sizing. `market_type: external`: TAM, SAM, SOM with sources. `market_type: internal`: affected-teams × hours × loaded cost — **no TAM**. Mandatory incumbent **and** do-nothing comparison in either variant | Prose (unnumbered); numbers cite ledger `evidence` ids |
+| **Target segments** | Primary and secondary segments with sizing estimates or proxies | Prose (unnumbered); `**Primary:**` / `**Secondary:**` in the section |
+| **Competitive landscape** | Key players, positioning, differentiation gaps; incumbent named | Prose (unnumbered) |
+| **Market trends** | 2–4 trends that support "why now" | Prose (unnumbered) |
+| **Customer needs** | Unmet needs mapped to an exec-summary metric | Ranked leaves: `basic` / `performance` / `delighter` |
+| **Market risks** | External threats — regulation, commoditization, disruption | Prose (unnumbered); impact × likelihood in the section |
 
-Prefix `MRD`. Kano is the native model for this layer — do not flatten needs into MoSCoW. Sizing is a required evidence-backed section, not a research-phase deferral (`market_type: internal` skips TAM). Ranked leaves carry `Rationale`. Binding Gate 7 at this level ([expert-panel.md](../expert-panel.md)).
+Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for this layer — do not flatten needs into MoSCoW. Sizing is a required evidence-backed section, not a research-phase deferral (`market_type: internal` skips TAM). Ranked leaves carry `Rationale`. Binding Gate 7 at this level ([expert-panel.md](../expert-panel.md)).
 
 ## Extraction method (discovery)
 
 1. Inherit vision/problem; ask "who buys vs who uses?"
 2. For competitors: accept user-stated list; probe for indirect alternatives. **Name an incumbent** (or the internal status quo) and a do-nothing option.
 3. Size the market **in this level**, evidence-backed. External: TAM/SAM/SOM with ledger evidence. Internal: teams × hours × loaded cost; skip TAM. Do not invent a number to fill the section — `hold` or `vague` is legal; a fabricated TAM is not.
-4. Map each customer need to an `ES-*` parent (problem or vision).
+4. Map each customer need to a ranked `ES-*` parent (usually a metric).
 5. Classify needs as Kano `basic` / `performance` / `delighter` — do not use Must/Should/Could. Mint rationales for ranked needs.
 6. Flag residual gaps beyond the claim-class budget → `research_deferred[]` with a named evidence bar, or Gate 7 `hold`.
 
 ## Traceability
 
-- Cross-doc `parent:` is an `ES-*` id. Same-doc nest: `MRD-n` → `MRD-n.m`.
-- Each segment and need walks to exec-summary (problem or vision).
+- Cross-doc `parent:` is a ranked `ES-*` id (usually a metric). Same-doc nest: `MRD-n` → `MRD-n.m`.
+- Each need walks to an ES metric. Segments stay in the Target segments section — they are not parents.
 - Full chain is a parent walk — do not repeat it on every item.
 
 ## Done-when checklist
@@ -46,9 +46,9 @@ Prefix `MRD`. Kano is the native model for this layer — do not flatten needs i
 - [ ] Incumbent **and** do-nothing compared
 - [ ] At least 2 competitors or alternatives named
 - [ ] Market trends linked to exec-summary "why now"
-- [ ] Customer needs map to exec-summary problem and have Kano class + `_rationale_`
+- [ ] Customer needs map to an ES metric and have Kano class + `_rationale_`
 - [ ] Market risks identified (at least one) with impact × likelihood
 - [ ] Unvalidated claims marked as assumptions or ledger evidence `unknown`
-- [ ] Items use `MRD-{n}` / `MRD-{n.m}` per item-schema
+- [ ] `MRD-{n}` / `MRD-{n.m}` applies to needs only
 - [ ] No contradiction with exec-summary constraints/non-goals
 - [ ] Binding viability verdict recorded
