@@ -1,9 +1,9 @@
 [project]
 name = "ai-plugins-dev"
-version = "0.0.2-beta-9"
+version = "0.0.2-beta-10"
 description = "Development and test tooling for the ai-plugins marketplace repository"
 requires-python = ">=3.14"
-dependencies = ["pyyaml>=6.0"]
+dependencies = ["pyyaml>=6.0.3"]
 
 [dependency-groups]
 dev = [
@@ -21,6 +21,11 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+pythonpath = [
+    "plugins/context-eng-hero/scripts",
+    "plugins/rrraw/scripts",
+    "tests/rrraw",
+]
 
 [tool.ruff]
 target-version = "py314"
@@ -31,7 +36,6 @@ src = ["plugins", "scripts", "tests"]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
-"plugins/rrraw/scripts/validate_planning.py" = ["E501"]
 "tests/rrraw/**" = ["E501"]
 
 [tool.black]
@@ -52,7 +56,7 @@ module = "tests.*"
 disallow_untyped_defs = false
 
 [tool.coverage.run]
-source = ["audit_static", "validate_planning"]
+source = ["audit_static", "validate_planning_script"]
 relative_files = true
 
 [tool.coverage.report]

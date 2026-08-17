@@ -8,7 +8,7 @@ resolution-markers = [
 
 [[package]]
 name = "ai-plugins-dev"
-version = "0.0.2b9"
+version = "0.0.2b10"
 source = { virtual = "." }
 dependencies = [
     { name = "pyyaml" },
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pyyaml", specifier = ">=6.0" }]
+requires-dist = [{ name = "pyyaml", specifier = ">=6.0.3" }]
 
 [package.metadata.requires-dev]
 dev = [

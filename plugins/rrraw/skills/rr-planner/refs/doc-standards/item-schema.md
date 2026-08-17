@@ -171,7 +171,7 @@ Omit `build` on ES/MRD/BRD/PRD and on all containers. PRD “delivered” is **d
 
 ## Canonical item surface (closed vocabulary)
 
-Working surface is markdown. Validation target is structured. Compose writes `{level}.md` and merges `items.json`. Item records live on disk, not in the Task return. Cascade `{stem}.yaml` and list-meta (`- **Key:**`) are stale — `validate_planning.py --rewrite` migrates them.
+Working surface is markdown. Validation target is structured. Compose writes `{level}.md` and merges `items.json`. Item records live on disk, not in the Task return. Cascade `{stem}.yaml` and list-meta (`- **Key:**`) are stale — `validate_planning.sh --rewrite` migrates them.
 
 Parser is regex, not an LLM. Three-line grammar:
 
@@ -207,7 +207,7 @@ Unknown keys or missing required keys (`parent`, `kind`, `spec`) → validator F
 
 `_parent_: —` means graph null (ES roots). Native rank `—` means “applicable, not yet decided.” Triad values: `<magnitude> — <effect>` (em dash preferred).
 
-JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph checks: `scripts/validate_planning.py` (md-only; `--format yaml|json` is `UNSUPPORTED_FORMAT`).
+JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph checks: `scripts/validate_planning.sh` (md-only; `--format yaml|json` is `UNSUPPORTED_FORMAT`).
 
 **Code owns:** unique IDs, parent/supersede pointers, numbering density, kind invariant, required keys, status legality, doc/`items.json` drift, rationale id shape and resolution against `decision-ledger.yaml`.
 

@@ -43,7 +43,7 @@ Each level **inherits** all resolved facts from levels above and **narrows** sco
 ### Inheritance rules
 
 1. **No contradiction** — child facts must align with parent facts. Conflict → [goal-anchor.md](goal-anchor.md) + question (per `question_mode`).
-2. **No orphan items** — parent walk and cross-doc previous-level-only: [doc-standards/item-schema.md](doc-standards/item-schema.md). Verified by `validate_planning.py` (Gate 3 + [success-criteria.md](success-criteria.md) static).
+2. **No orphan items** — parent walk and cross-doc previous-level-only: [doc-standards/item-schema.md](doc-standards/item-schema.md). Verified by `validate_planning.sh` (Gate 3 + [success-criteria.md](success-criteria.md) static).
 3. **Explicit narrowing** — when a parent fact is too broad for the child level, record the narrowing as a decision in `session-state.json`.
 4. **Unknown vs off-level** — details not yet known *at this level* are `assumptions[]` or `open_questions[]`, not silently invented. Off-level content: [note-sessions.md](note-sessions.md).
 5. **Priority inheritance** — FRD may default `if_absent` magnitude from parent PRD MoSCoW (Must → high, Should → moderate, Could → low). Won’t PRD items get no FRD children. Do not copy MoSCoW onto FRD. Magnitudes are unchanged; only the human MoSCoW *legend* follows [project-posture.md](project-posture.md).
@@ -59,7 +59,7 @@ For each level in `cascade_levels`:
 5. Ask for gaps in required sections. New items: [doc-standards/item-schema.md](doc-standards/item-schema.md) spec defaults. Mint the ledger rationale when a ranked-leaf decision is made ([decision-ledger.md](decision-ledger.md)).
 6. After every Q&A: [note-sessions.md](note-sessions.md) + append `raw-history/{UTC}.yaml`. After every evidence round: [expert-panel.md](expert-panel.md) evidence loop + sweep (trigger 1). On reflect trigger → [proactivity.md](proactivity.md) (Gate 5; `standard`/`deep` only). PRD after MoSCoW: [project-posture.md](project-posture.md) cut-pass once before Gate 6.
 7. Accumulate `level_facts` (include `Rationale` ids for ranked leaves). Compose consumes notes for this `doc_type` only.
-8. Invoke compose ([contracts.md](contracts.md)). Confirm overwrite **before first compose** if files exist from a prior run; intra-session re-compose overwrites without asking. After persist: prune ([note-sessions.md](note-sessions.md)).
+8. Invoke compose ([contracts.md](contracts.md)). Confirm overwrite **before first compose** if files exist from a prior run; intra-session re-compose overwrites without asking. After persist: prune ([note-sessions.md](note-sessions.md)). If that doc’s `challenge.status` is `clean` or `dirty-accepted`, skill sets it `dirty` ([baselines.md](baselines.md)). Compose does not write `status.yaml`.
 9. Clarification loop ([contracts.md](contracts.md)). Append raw-history on each answer before re-invoke.
 10. Refresh `item_registry` from `items.json`. Gate 3 static ([success-criteria.md](success-criteria.md)).
 11. Gate 6 then Gate 7 (table below). On Gate pass: **freeze** this level (Freeze and remap) — `frozen_levels` in session-state **and** a docs-patch mint in `status.yaml` ([baselines.md](baselines.md)). Compose does not increment track/patch/rev.
@@ -82,7 +82,7 @@ A level is **complete** only when all gates pass. Freeze/advance: Advancing vs s
 |------|-------|-----------|
 | 1 Section coverage | this file | Every required section in the matching doc-standard has a resolved fact or explicit assumption `blocking: false` |
 | 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | That ref's level-complete conditions; Q&A for this level is in raw-history YAML |
-| 3 Inheritance integrity | [success-criteria.md](success-criteria.md) | Static: `validate_planning.py`. Judgment: that ref's compose/challenge list |
+| 3 Inheritance integrity | [success-criteria.md](success-criteria.md) | Static: `validate_planning.sh`. Judgment: that ref's compose/challenge list |
 | 4 Compose acceptance | [contracts.md](contracts.md) + doc-standard | Compose `status: ok` or user-accepted `partial`; written doc passes done-when; `item_registry` refreshed from `items.json` |
 | 5 Proactivity | [proactivity.md](proactivity.md) | `standard`/`deep` only: that ref's discovery-time stop. Pre-save is not this gate |
 | 6 Stage-exit | [blind-spots.md](blind-spots.md) | That ref's skill-inline stage-exit rules. Premise-critical findings escalate into Gate 7 |
@@ -93,7 +93,7 @@ A level is **complete** only when all gates pass. Freeze/advance: Advancing vs s
 | Event | Rule |
 |-------|------|
 | First compose of a level | Mint dense sibling IDs (`1, 2, 3` / `n.1, n.2`). Frontmatter `doc_rev: "?"`. |
-| Cascade gates pass for that level | Add level to `frozen_levels`. IDs freeze. Skill mints `status.yaml`: `rev` `?` → `1` (or lock-target ++), write digest, docs patch++, product patch unchanged, recompute `mint_hash`. Major/minor (`track` / `next`) **only** after explicit confirm — never on this mint. |
+| Cascade gates pass for that level | Add level to `frozen_levels`. IDs freeze. Skill mints `status.yaml`: `rev` `?` → `1` (or lock-target ++), write digest, docs patch++, product patch unchanged, recompute `mint_hash`. If `levels.<doc>.digest` ≠ `challenge.<doc>.scanned_digest` → `dirty`. Freeze does **not** wait on challenge-clean. Major/minor (`track` / `next`) **only** after explicit confirm — never on this mint. |
 | Later insert on a frozen level | Append next integer. Do not renumber existing ids. |
 | Explicit re-compose of a frozen level | Allowed. Compose rewrites child-doc `parent:` and `items.json` in the same invocation so e.g. FRD does not point at a vanished `PRD-3`. Skill refreshes `item_registry` from `items.json`. Obligation-preserving → lock-target (stay frozen, refresh child pins). Obligations break → ask to unfreeze; if minor+ and `next` exists → redirect ([baselines.md](baselines.md)). |
 | `--resume` | Load `item_registry`; continue minting from max sibling index on frozen levels. |
@@ -107,7 +107,7 @@ Opening a next major.minor (after confirm): set `status.yaml.next`, create `docs
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass (including Gate 6 and Gate 7 `proceed` / `proceed-with-conditions`); no leftover `partial` notes; re-decision queue empty | Freeze level; mint docs patch in `status.yaml`; advance to next cascade level |
+| All gates pass (including Gate 6 and Gate 7 `proceed` / `proceed-with-conditions`); no leftover `partial` notes; re-decision queue empty | Freeze level; mint docs patch in `status.yaml`; dirty challenge attestation if digest moved; advance to next cascade level |
 | Pending clarifications or gate gaps | Surface question → re-discover or re-compose (no round cap) |
 | Gate 7 verdict is `hold` / `pivot` / `kill` | [expert-panel.md](expert-panel.md) verdict ladder (freeze/advance column) |
 | Open re-decision queue | Drain (keep / postpone / kill / revive) before freeze |
@@ -117,4 +117,4 @@ Opening a next major.minor (after confirm): set `status.yaml.next`, create `docs
 
 ## Session state
 
-Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry` (from `items.json` after compose), `frozen_levels`, `project_posture` (including `domain_context`), `viability[]`, `note_sessions`, and `composed_docs` paths across levels. Skill writes `decision-ledger.yaml` and `status.yaml` ([baselines.md](baselines.md)). Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started). Compose writes cascade docs and `items.json`. Compose does not write `status.yaml`.
+Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry` (from `items.json` after compose), `frozen_levels`, `project_posture` (including `domain_context`), `viability[]`, `note_sessions`, and `composed_docs` paths across levels. Skill writes `decision-ledger.yaml` and `status.yaml` ([baselines.md](baselines.md)), including challenge attestation (compose persist dirties; freeze mint dirties on digest mismatch). Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started). Compose writes cascade docs and `items.json`. Compose does not write `status.yaml`.

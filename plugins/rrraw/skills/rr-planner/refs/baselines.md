@@ -58,6 +58,11 @@ levels:
     digest: null
     pins: {}
 next_levels: {}           # populated iff next is set; same per-doc shape
+challenge:                # current track; next_challenge mirrors next_levels
+  prd:
+    status: dirty         # dirty | clean | dirty-accepted
+    scanned_digest: "sha256:..."  # items.json records hash; null if never scanned
+next_challenge: {}
 ```
 
 | Field | Rule |
@@ -67,14 +72,33 @@ next_levels: {}           # populated iff next is set; same per-doc shape
 | `product` / `docs` | Same track prefix + independent patch. Trailing `?` = that line unshipped. |
 | `next` | At most one unshipped next track. `null` if none. |
 | `docs_shipped` | `true` only after current-track docs freeze/ship. Unlock gate reads this. |
-| `product_status` | `"?"` until product ships. Skill refuses ship while docs still `?`. |
-| `mint_hash` | SHA-256 of canonical `track`, `product`, `docs`, `next`, `docs_shipped`, `levels`, `next_levels`. Skill writes it on every mint. |
+| `product_status` | `"?"` until product ships. Skill refuses ship while docs still `?`. Not part of `mint_hash`. |
+| `mint_hash` | SHA-256 of canonical `track`, `product`, `docs`, `next`, `docs_shipped`, `levels`, `next_levels`. Skill writes it on every mint. `claude_config_version`, `product_status`, `challenge`, `next_challenge` are excluded. |
 | `levels` | Current `track`. Child `pins` name the immediate parent stem. |
 | `next_levels` | Next-track revs/pins when `next` is set. Empty object otherwise. |
+| `challenge` / `next_challenge` | Per-doc attestation. `next_challenge` mirrors `next_levels`. Not part of `mint_hash`. Never a validator FAIL. Skill is the only writer. |
 
 Digest = `sha256:` + hex of canonical JSON for that doc’s `items.json` records (`sort_keys`, no whitespace variance). Do not hash markdown (frontmatter would be circular).
 
-Skill writes this file on first compose and on every freeze / lock-target / confirmed major-minor. Compose does not write it.
+Skill writes this file on first compose, freeze / lock-target / confirmed major-minor, and challenge attestation updates. Compose does not write it.
+
+### Challenge attestation
+
+Three-state per stem. Absent row = never scanned = `dirty`. `dirty-accepted` applies to **this digest only**.
+
+| `status` | Meaning |
+|----------|---------|
+| `dirty` | Never scanned, digest moved, or last scan had findings — not accepted |
+| `clean` | Last scan had zero open findings for this doc **and** `scanned_digest == levels.<doc>.digest` |
+| `dirty-accepted` | User explicitly closed this snapshot without a clean scan |
+
+Invalidation (skill, not compose, not the challenge agent):
+
+- After compose persist of a doc: if that doc’s `challenge.status` is `clean` or `dirty-accepted` → set `dirty`.
+- After freeze mint: if `levels.<doc>.digest` ≠ `challenge.<doc>.scanned_digest` → `dirty`.
+- Stamp after challenge persist: `clean` iff no findings for that stem and `scanned_digest` recorded from the live digest.
+
+Do not store `open_ids` in status (per-run `bs-001` is not stable). Challenge is post-freeze attestation — Gates 1–7 do not wait on it.
 
 ## Frontmatter (cascade docs)
 
@@ -139,8 +163,9 @@ Compose does not increment anything. After Gate 6+7 pass for a level:
 4. Child freeze copies parent `{ rev, digest }` into `pins`.
 5. Docs patch++. Product patch unchanged.
 6. Recompute `mint_hash`.
+7. If `levels.<doc>.digest` ≠ `challenge.<doc>.scanned_digest` → set that stem `dirty`.
 
-Major/minor (`track`, `next`) only on confirm — never on this mint.
+Major/minor (`track`, `next`) only on confirm — never on this mint. Challenge attestation is not a freeze gate.
 
 ## Upstream change: three paths
 
@@ -193,7 +218,7 @@ Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one lin
 
 ## CI / validator — mechanical only
 
-`validate_planning.py` may FAIL these. It must not mint versions and must not FAIL "this looks like a minor."
+`validate_planning.sh` may FAIL these. It must not mint versions and must not FAIL "this looks like a minor."
 
 | Code | Condition |
 |------|-----------|
@@ -202,7 +227,7 @@ Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one lin
 | `REV_WHILE_OPEN` | Integer `rev` / `doc_rev` on a level that is still unfrozen (`?` in status, or absent from `frozen_levels`) |
 | `HAND_BUMP` | Frozen rev / pins / `track` (canonical mint payload) changed without a matching `mint_hash` — includes a human editing major.minor in `status.yaml` |
 
-Removed from CI (never emit): `NEXT_LOCKED`, `CURRENT_NOT_PATCH`. Independent patches (`product 0.1.3` / `docs 0.1.7`) are valid. `future.md` and `agent.plan.md` are not cascade input.
+Removed from CI (never emit): `NEXT_LOCKED`, `CURRENT_NOT_PATCH`. Independent patches (`product 0.1.3` / `docs 0.1.7`) are valid. `future.md` and `agent.plan.md` are not cascade input. `challenge` / `next_challenge` are judgment/process only — never a script FAIL.
 
 ## What this ref does not do
 

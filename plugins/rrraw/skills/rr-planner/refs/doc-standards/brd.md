@@ -40,12 +40,10 @@ Prefix `BRD`. This is the business-negotiation layer â€” Must/Should/Could/Wonâ€
 
 ## Done-when checklist
 
-- [ ] At least 3 business objectives with measurable success criteria
-- [ ] Stakeholders section present; buyer and user distinguished (if applicable)
+Per-doc bars only. Gate 1, the script, shared success-criteria, and Gate 6 `in_scope` own the rest.
+
+- [ ] At least 3 business objectives with measurable success criteria (fail: "improve efficiency")
+- [ ] Buyer and user distinguished (if applicable)
 - [ ] Business rules documented or explicit "none identified"
 - [ ] Dependencies listed with owners or "TBD" flagged
-- [ ] Business risks section present; at least one risk with mitigation or acceptance
-- [ ] Ranked leaves have `_moscow_` + `_rationale_`; compliance rules are Must
-- [ ] Items use `BRD-{n}` / `BRD-{n.m}` per item-schema
-- [ ] All objectives walk to exec-summary success metrics
-- [ ] No contradiction with exec-summary non-goals
+- [ ] At least one business risk with mitigation or acceptance

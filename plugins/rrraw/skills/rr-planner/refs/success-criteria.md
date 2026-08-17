@@ -13,14 +13,14 @@ Planning docs are **not ready to freeze/accept** until static checks pass and ju
 Run from plugin root:
 
 ```bash
-python3 scripts/validate_planning.py <output-dir>
+sh scripts/validate_planning.sh <output-dir>
 ```
 
 `--challenge` static pass runs this script. Challenge agent does **not** re-check refs if the script ran. If the script was skipped, challenge may flag build-on-non-ready as judgment.
 
 ## Static (script)
 
-`validate_planning.py` owns:
+`validate_planning.sh` owns:
 
 - Unique IDs; parent / supersede pointers exist; no cycles; no cascade-level skips
 - Numbering density among siblings; max depth 2
@@ -60,15 +60,9 @@ AI owns — do not encode as script FAILs:
 - Binding viability `hold`/`kill` unresolved; open re-decision queue
 - Unlock / patch-only-current / "this looks like a minor" (skill classify in [baselines.md](baselines.md) — never script FAILs)
 
-Do **not** encode posture or note-session checks as `validate_planning.py` FAILs. Sidecars are not script input.
+Do **not** encode posture or note-session checks as `validate_planning.sh` FAILs. Sidecars are not script input.
 
-### Testable acceptance criteria
-
-Every `must-correct` / `must-present` FRD leaf must have:
-
-- At least one Gherkin scenario (Given/When/Then)
-- At least one error/edge path
-- No vague language without measurable proxy
+Vague terms (any level — not an FRD-only tick; do not restate FRD Gherkin done-when here):
 
 | Vague term | Required resolution |
 |------------|---------------------|
@@ -112,7 +106,7 @@ Every recorded decision must:
 
 ## Criterion: Doc-standard compliance
 
-Each composed doc passes its doc-standard **done-when** checklist:
+Each composed doc passes its doc-standard **done-when** checklist. Do not restate those ticks here.
 
 | Doc | Checklist owner |
 |-----|-----------------|
@@ -128,7 +122,7 @@ Each composed doc passes its doc-standard **done-when** checklist:
 {
   "gate_passed": true,
   "criteria": {
-    "static": { "passed": true, "script": "validate_planning.py", "errors": [] },
+    "static": { "passed": true, "script": "validate_planning.sh", "errors": [] },
     "traceability": { "passed": true, "orphans": [], "broken_links": [] },
     "acceptance_criteria": { "passed": true, "vague_terms": [] },
     "ambiguity": { "passed": true, "open_clarifications": [] },

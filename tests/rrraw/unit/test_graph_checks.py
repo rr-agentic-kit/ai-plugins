@@ -1,64 +1,67 @@
-"""Graph, numbering, and parent-walk tests."""
+"""Graph, numbering, and parent-walk tests (in-memory)."""
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import validate_planning as vp
-from helpers import VALID_FILES, error_codes, write_planning
+import validate_planning_script as vp
+from helpers import error_codes, item, triad
 
 
-def test_valid_cascade_passes(tmp_path: Path):
-    write_planning(tmp_path)
-    issues = vp.validate_dir(tmp_path)
-    assert error_codes(issues) == set(), [i.format() for i in issues]
-
-
-def test_broken_parent(tmp_path: Path):
-    files = dict(VALID_FILES)
-    files["mrd.md"] = """\
-## MRD-1: Account-free purchase
-_parent_: ES-99 | _kind_: leaf | _spec_: ready | _kano_: basic
-"""
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_broken_parent():
+    issues = vp.check_parents(
+        [
+            item("ES-1", parent=None, moscow="Must"),
+            item("MRD-1", parent="ES-99", kano="basic"),
+        ]
+    )
     assert "BROKEN_PARENT" in error_codes(issues)
 
 
-def test_level_skip(tmp_path: Path):
-    files = dict(VALID_FILES)
-    files["frd.md"] = """\
-## FRD-1: Guest checkout without account
-_parent_: ES-3 | _kind_: leaf | _spec_: ready | _build_: none | _if-present_: high — Unlocks conversion | _if-absent_: high — PLG blocked | _if-wrong_: low — Local defect | _class_: must-present
-"""
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_level_skip():
+    issues = vp.check_parents(
+        [
+            item("ES-3", parent=None, moscow="Must"),
+            item("FRD-1", parent="ES-3", build="none", triad=triad()),
+        ]
+    )
     assert "LEVEL_SKIP" in error_codes(issues)
 
 
-def test_numbering_gap(tmp_path: Path):
-    files = {"exec-summary.md": """\
-## ES-1: Competitive window
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
-
-## ES-3: Metric
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_numbering_gap():
+    issues = vp.check_numbering(
+        [
+            item("ES-1", parent=None, moscow="Must"),
+            item("ES-3", parent=None, moscow="Must"),
+        ]
+    )
     assert "NUMBERING" in error_codes(issues)
+
+
+def test_reserved_ids_fill_numbering_gap():
+    items = [
+        item("ES-1", parent=None, moscow="Must"),
+        item("ES-3", parent=None, moscow="Must"),
+    ]
+    assert "NUMBERING" in error_codes(vp.check_numbering(items))
+    assert error_codes(vp.check_numbering(items, {"exec-summary": [2]})) == set()
+
+
+def test_reserved_nested_slots():
+    items = [
+        item("PRD-1", parent="BRD-1", kind="container", spec="draft"),
+        item("PRD-1.1", parent="PRD-1", moscow="Must"),
+        item("PRD-1.3", parent="PRD-1", moscow="Must"),
+    ]
+    assert "NUMBERING" in error_codes(vp.check_numbering(items))
+    assert error_codes(vp.check_numbering(items, {"prd": ["1.2"]})) == set()
 
 
 def test_depth_three_rejected():
     issues = vp.check_unique_and_ids(
         [
-            vp.Item(
-                id="PRD-1.2.3",
+            item(
+                "PRD-1.2.3",
                 title="too deep",
-                prefix="PRD",
-                doc="prd",
                 parent="PRD-1.2",
-                kind="leaf",
                 spec="idea",
             )
         ]
@@ -66,84 +69,67 @@ def test_depth_three_rejected():
     assert "INVALID_ID" in error_codes(issues)
 
 
-def test_leaf_with_children(tmp_path: Path):
-    files = {"exec-summary.md": """\
-## ES-1: Vision
-_parent_: — | _kind_: leaf | _spec_: draft | _moscow_: —
-
-### ES-1.1: Nested claim
-_parent_: ES-1 | _kind_: leaf | _spec_: draft | _moscow_: Must
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_leaf_with_children():
+    issues = vp.check_kind_and_children(
+        [
+            item("ES-1", parent=None, spec="draft"),
+            item("ES-1.1", parent="ES-1", spec="draft", moscow="Must"),
+        ]
+    )
     assert "KIND" in error_codes(issues)
 
 
-def test_container_without_children(tmp_path: Path):
-    files = {"exec-summary.md": """\
-## ES-1: Vision
-_parent_: — | _kind_: container | _spec_: draft
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_container_without_children():
+    issues = vp.check_kind_and_children(
+        [item("ES-1", parent=None, kind="container", spec="draft")]
+    )
     assert "KIND" in error_codes(issues)
 
 
-def test_cycle(tmp_path: Path):
-    files = {"prd.md": """\
-## PRD-1: A
-_parent_: PRD-1 | _kind_: leaf | _spec_: draft | _moscow_: Must
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_cycle():
+    issues = vp.check_parents([item("PRD-1", parent="PRD-1", moscow="Must")])
     assert "CYCLE" in error_codes(issues) or "PARENT_SHAPE" in error_codes(issues)
 
 
-def test_nested_parent_shape(tmp_path: Path):
-    files = dict(VALID_FILES)
-    files["prd.md"] = """\
-## PRD-1: Checkout
-_parent_: BRD-1 | _kind_: container | _spec_: draft
-
-### PRD-1.1: Guest checkout
-_parent_: BRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
-"""
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_nested_parent_shape():
+    issues = vp.check_parents(
+        [
+            item("PRD-1", parent="BRD-1", kind="container", spec="draft"),
+            item("PRD-1.1", parent="BRD-1", moscow="Must"),
+        ]
+    )
     assert "PARENT_SHAPE" in error_codes(issues)
 
 
-def test_duplicate_id(tmp_path: Path):
-    files = {"exec-summary.md": """\
-## ES-1: Vision
-_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
-
-## ES-1: Again
-_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_duplicate_id():
+    issues = vp.check_unique_and_ids(
+        [
+            item("ES-1", parent=None, spec="idea"),
+            item("ES-1", parent=None, spec="idea", title="Again"),
+        ]
+    )
     assert "DUPLICATE_ID" in error_codes(issues)
 
 
-def test_supersede_dangling(tmp_path: Path):
-    files = dict(VALID_FILES)
-    files["frd.md"] = """\
-## FRD-1: Checkout
-_parent_: PRD-1.1 | _kind_: container | _spec_: draft
-
-### FRD-1.1: Guest checkout without account
-_parent_: FRD-1 | _kind_: leaf | _spec_: deprecated | _build_: none | _if-present_: high — Unlocks conversion | _if-absent_: high — PLG blocked | _if-wrong_: critical — Billing disputes | _class_: must-correct | _superseded-by_: FRD-9
-"""
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+def test_supersede_dangling():
+    issues = vp.check_parents(
+        [
+            item(
+                "FRD-1.1",
+                parent="FRD-1",
+                spec="deprecated",
+                build="none",
+                triad=triad(),
+                superseded_by="FRD-9",
+            )
+        ]
+    )
     assert "BROKEN_SUPERSEDE" in error_codes(issues)
 
 
-def test_md_json_drift(tmp_path: Path):
-    write_planning(tmp_path)
-    records = (tmp_path / "items.json").read_text(encoding="utf-8")
-    mutated = records.replace('"Must"', '"Could"', 1)
-    (tmp_path / "items.json").write_text(mutated, encoding="utf-8")
-    issues = vp.validate_dir(tmp_path)
+def test_md_json_drift():
+    md = [item("ES-1", parent=None, moscow="Must", title="Competitive window")]
+    row = md[0].to_record()
+    row["moscow"] = "Could"
+    issues = vp.check_drift(md, [row])
     assert "DRIFT" in error_codes(issues)

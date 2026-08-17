@@ -170,6 +170,7 @@ Execution (posture required, notes ingest, sidecar prune): [project-posture.md](
 {
   "findings": [{
     "id": "bs-001",
+    "doc": "frd",
     "category": "failure_modes",
     "severity": "high",
     "doc_ref": "frd.md § 3.2",
@@ -193,11 +194,13 @@ Execution (posture required, notes ingest, sidecar prune): [project-posture.md](
 | Field | Notes |
 |-------|-------|
 | `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** (not per-level `in_scope`). Judgment only when `payload.static_validation.status` is `passed` or `failed`. Ledger scan: [decision-ledger.md](decision-ledger.md) Challenge. |
+| `findings[].doc` | Cascade stem (`exec-summary` … `frd`). Required. Skill stamps per-doc `challenge.status` and routes Address now from this field. |
+| `findings[].doc_ref` | Human locator (`frd.md § 3.2`). Keep even when `doc` is set. |
 | `comparison_tables` | When single-option decisions lack alternatives analysis |
 | `clarifications_needed` | Questions that block severity assessment |
 | `docs_reviewed` | All docs scanned (`.md`) |
 
-Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.py`. Static vs judgment: [success-criteria.md](success-criteria.md).
+Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.sh`. Static vs judgment: [success-criteria.md](success-criteria.md).
 
 | `status` | When |
 |----------|------|

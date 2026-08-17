@@ -44,12 +44,9 @@ PRD “delivered” is derived from Must FRD children (`build: done`). Do not st
 
 ## Done-when checklist
 
+Per-doc bars only. Gate 1, the script, shared success-criteria, and Gate 6 `in_scope` own the rest.
+
 - [ ] Product overview links to exec-summary vision
 - [ ] Every BRD objective has at least one product goal
-- [ ] Personas section present; personas defined with goals and pain points
-- [ ] User stories are outcome-oriented (no implementation detail)
-- [ ] Goals, stories, features, and out-of-scope have `_moscow_` + `_rationale_`; ranks match the posture legend (Must is not automatically MVP)
+- [ ] User stories are outcome-oriented (fail: implementation detail)
 - [ ] Release-phasing prose states which legend was used
-- [ ] Out-of-scope items documented as `Won't` (never — not "later")
-- [ ] Items use `PRD-{n}` / `PRD-{n.m}` per item-schema; compounds split into container + leaves
-- [ ] No feature contradicts exec-summary non-goals or BRD business rules

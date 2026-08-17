@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import validate_planning as vp
+import validate_planning_script as vp
 from helpers import VALID_FILES, write_planning
 
 STUB_ES = """\
@@ -73,6 +73,8 @@ def test_setup_greenfield(tmp_path: Path, capsys: object) -> None:
     assert status["claude_config_version"] == vp.parse_agent_config()[0]
     for doc in vp.DOC_STEMS:
         assert status["levels"][doc]["rev"] == "?"
+    assert status["challenge"] == {}
+    assert status["next_challenge"] == {}
     assert status["mint_hash"] == vp.compute_mint_hash(status)
 
 
@@ -158,3 +160,22 @@ def test_setup_integer_revs_from_existing_status(
     assert reloaded is not None
     assert reloaded["levels"]["exec-summary"]["rev"] == 2
     assert str(reloaded["track"]) == "0.1"
+
+
+def test_setup_fills_challenge_on_legacy_status(tmp_path: Path, capsys: object) -> None:
+    plans = tmp_path / "docs" / "plans"
+    plans.mkdir(parents=True)
+    status = vp.default_unfrozen_status(vp.parse_agent_config()[0])
+    recorded = status["mint_hash"]
+    del status["challenge"]
+    del status["next_challenge"]
+    vp.write_status_yaml(plans / "status.yaml", status)
+    (tmp_path / "CLAUDE.md").write_text("# Project\n", encoding="utf-8")
+    code = vp.main(["--setup", "--repo-root", str(tmp_path), str(plans)])
+    capsys.readouterr()
+    assert code == 0
+    reloaded, _ = vp.load_status(plans / "status.yaml")
+    assert reloaded is not None
+    assert reloaded["challenge"] == {}
+    assert reloaded["next_challenge"] == {}
+    assert reloaded["mint_hash"] == recorded

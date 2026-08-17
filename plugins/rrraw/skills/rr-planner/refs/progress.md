@@ -1,6 +1,6 @@
 # progress
 
-**Owner:** Skill-wide verifying phrases. Mechanical writes stay in `validate_planning.py`.
+**Owner:** Skill-wide verifying phrases. Mechanical writes stay in `validate_planning.sh`.
 
 **Load when:** Every invocation.
 
@@ -24,7 +24,7 @@ Map script TSV `created|fixed|ok|failed` → `is created` / `is fixed` / `was ok
 
 | Path | Sections |
 |------|----------|
-| `--setup` | [setup.md](setup.md) list; TSV from `validate_planning.py --setup` |
+| `--setup` | [setup.md](setup.md) list; TSV from `validate_planning.sh --setup` |
 | Resolve rewrite | `cascade format` |
 | Resolve `--sync-agent-config` | `agent.plan.md`, `root SoT load line` |
 | Freeze mint | `status.yaml` |

@@ -124,7 +124,7 @@ Explicit `--output-dir` skips this fallback.
 After a successful payload, before any `Task` (discover, research, challenge, resume): if `output_dir` already has cascade docs (`{stem}.md` or stale `{stem}.yaml` for `exec-summary`/`mrd`/`brd`/`prd`/`frd`), run:
 
 ```bash
-python3 scripts/validate_planning.py --rewrite <output_dir>
+sh scripts/validate_planning.sh --rewrite <output_dir>
 ```
 
 Same for `--input` when it is a directory of cascade docs and differs from `output_dir`. `--rewrite` converts list-meta (`- **Key:**`) and `{stem}.yaml` to canonical `{stem}.md` (hyphenated `_key_:` line, `>` body) and deletes the yaml sibling. Skip when no cascade files exist (greenfield). Do not treat yaml as a live `--format`.

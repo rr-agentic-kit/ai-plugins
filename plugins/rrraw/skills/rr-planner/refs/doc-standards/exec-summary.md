@@ -46,14 +46,10 @@ Prefix `ES`. Mint `ES-n` only for ranked sections (why now, metrics, constraints
 
 ## Done-when checklist
 
-- [ ] Posture section present; matches confirmed `session_state.project_posture` including `domain_context`
-- [ ] Vision is outcome-focused (not feature list)
-- [ ] Problem names affected users/personas
-- [ ] What-must-be-true names premises with claim class and evidence bar
-- [ ] Viability verdict recorded; binding `hold`/`kill` unresolved → do not freeze
-- [ ] At least one "why now" driver documented
-- [ ] Success metrics are measurable or have defined measurement proxy
-- [ ] At least one constraint and one non-goal stated
-- [ ] Ranked items use `ES-{n}` / `ES-{n.m}` per item-schema; `ready` leaves have a real `_moscow_` (not `—`); ranked leaves have `_rationale_`
-- [ ] Zero unresolved ambiguities at this level
-- [ ] User confirmed accuracy via goal-anchor **or** evidence bar met / risk recorded
+Per-doc bars only. Gate 1, the script, shared success-criteria, Gate 2 / Gate 7, and Gate 6 `in_scope` own the rest.
+
+- [ ] Posture matches confirmed `session_state.project_posture` including `domain_context`
+- [ ] Vision is outcome-focused (fail: a feature list)
+- [ ] What-must-be-true names premises with claim class and evidence bar (fail: a bare slogan)
+- [ ] Success metrics are measurable or have a defined measurement proxy (fail: "fast")
+- [ ] At least one constraint **and** one non-goal stated

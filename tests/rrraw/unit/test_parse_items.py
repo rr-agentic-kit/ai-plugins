@@ -1,11 +1,9 @@
-"""Parser and closed-vocabulary tests."""
+"""Parser and closed-vocabulary tests (string-level)."""
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import validate_planning as vp
-from helpers import VALID_FILES, error_codes, write_planning
+import validate_planning_script as vp
+from helpers import VALID_FILES, error_codes
 
 
 def test_parse_valid_headings():
@@ -53,56 +51,68 @@ _parent_: PRD-1.1 | _kind_: leaf | _spec_: ready | _build_: none | _if-present_:
     assert leaf.triad.if_present.effect == "Unlocks A | B conversion"
 
 
-def test_unknown_metadata_key(tmp_path: Path):
-    files = {"exec-summary.md": """\
+def test_unknown_metadata_key():
+    text = """\
 ## ES-1: Vision
 _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: — | _priority_: P0
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+"""
+    _, issues = vp.parse_markdown(text, "exec-summary.md")
     assert "UNKNOWN_KEY" in error_codes(issues)
 
 
-def test_missing_required_key(tmp_path: Path):
-    files = {"exec-summary.md": """\
+def test_missing_required_key():
+    text = """\
 ## ES-1: Vision
 _kind_: leaf | _spec_: idea | _moscow_: —
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+"""
+    _, issues = vp.parse_markdown(text, "exec-summary.md")
     assert "MISSING_KEY" in error_codes(issues)
 
 
-def test_malformed_meta_line(tmp_path: Path):
-    files = {"exec-summary.md": """\
+def test_malformed_meta_line():
+    text = """\
 ## ES-1: Vision
 Parent: none
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+"""
+    _, issues = vp.parse_markdown(text, "exec-summary.md")
     assert "MALFORMED_META" in error_codes(issues)
 
 
-def test_stale_list_meta(tmp_path: Path):
-    files = {"exec-summary.md": """\
+def test_stale_list_meta():
+    text = """\
 ## ES-1: Vision
 - **Parent:** —
 - **Kind:** leaf
 - **Spec:** idea
 - **MoSCoW:** —
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+"""
+    _, issues = vp.parse_markdown(text, "exec-summary.md")
     assert "STALE_FORMAT" in error_codes(issues)
 
 
-def test_body_not_blockquote(tmp_path: Path):
-    files = {"exec-summary.md": """\
+def test_body_not_blockquote():
+    text = """\
 ## ES-1: Vision
 _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 
 Vision without quotes.
-"""}
-    write_planning(tmp_path, files)
-    issues = vp.validate_dir(tmp_path)
+"""
+    _, issues = vp.parse_markdown(text, "exec-summary.md")
     assert "BODY_NOT_BLOCKQUOTE" in error_codes(issues)
+
+
+def test_invalid_rationale_shape():
+    text = """\
+## PRD-1.1: Guest checkout
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: rationale-4
+"""
+    _, issues = vp.parse_markdown(text, "prd.md")
+    assert "INVALID_VALUE" in error_codes(issues)
+
+
+def test_parse_inline_meta_duplicate_key():
+    meta, errors = vp.parse_inline_meta_line(
+        "_parent_: — | _kind_: leaf | _kind_: container | _spec_: idea"
+    )
+    assert ("DUPLICATE_KEY", "kind") in errors
+    assert meta["kind"] == "container"

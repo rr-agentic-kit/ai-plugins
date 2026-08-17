@@ -4,7 +4,7 @@
 
 **Load when:** Minting a rationale during discovery; every sweep trigger; compose (read `reserved_ids` only); challenge (read-only scan); Gate 7 and pre-save. Skill owns the file. Compose and challenge never write it.
 
-This file is **validator input** — unlike `{level}.notes.yaml`. `validate_planning.py` resolves rationale pointers. Structure only: the id resolves, `flips_when` is non-empty, `kind` is in the enum, `evidence:` pointers resolve. Whether a condition is well-chosen is AI judgment ([success-criteria.md](success-criteria.md)).
+This file is **validator input** — unlike `{level}.notes.yaml`. `validate_planning.sh` resolves rationale pointers. Structure only: the id resolves, `flips_when` is non-empty, `kind` is in the enum, `evidence:` pointers resolve. Whether a condition is well-chosen is AI judgment ([success-criteria.md](success-criteria.md)).
 
 ## Boundary vs goal-anchor
 
@@ -142,7 +142,7 @@ Findings only; do not mutate the ledger.
 
 ## Validator surface
 
-`validate_planning.py`: `LEDGER_MISSING` (warn, skip), `LEDGER_MALFORMED` (structure), `MISSING_RATIONALE` (ranked leaf, ledger present), `BROKEN_RATIONALE` (dangling id or unresolved `evidence:` pointer). Closed key and JSON field: [item-schema.md](doc-standards/item-schema.md).
+`validate_planning.sh`: `LEDGER_MISSING` (warn, skip), `LEDGER_MALFORMED` (structure), `MISSING_RATIONALE` (ranked leaf, ledger present), `BROKEN_RATIONALE` (dangling id or unresolved `evidence:` pointer). Closed key and JSON field: [item-schema.md](doc-standards/item-schema.md).
 
 ## Resume
 

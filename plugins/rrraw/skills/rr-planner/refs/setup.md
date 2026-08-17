@@ -9,7 +9,7 @@
 ## Invoke
 
 ```bash
-python3 scripts/validate_planning.py --setup --repo-root <PROJECT_ROOT> <plans-dir>
+sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT> <plans-dir>
 ```
 
 Default `plans-dir` = `{PROJECT_ROOT}/docs/plans/`. Create the dir if missing. Do **not** invent cascade docs or empty `future.md`. Do **not** create missing root SoT files.

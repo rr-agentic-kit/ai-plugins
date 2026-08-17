@@ -13,8 +13,9 @@ Function-style executor for `--challenge` / `--review` on existing planning docs
 
 - Allowed: read planning docs, `items.json`, sidecars, and `decision-ledger.yaml`; return `PhaseOutput` JSON.
 - MUST NOT prompt the user — return `clarifications_needed[]` instead.
-- MUST NOT modify docs or the ledger — findings only.
+- MUST NOT modify docs, the ledger, or `status.yaml` — findings only.
 - MUST produce at least one finding per doc OR explicit justification for `no_findings`.
+- Each finding MUST include `doc` (cascade stem) and `doc_ref` (human locator).
 - Static vs judgment: `skills/rr-planner/refs/success-criteria.md`.
 
 ## Stop conditions
@@ -51,9 +52,9 @@ Required context:
 3. Scan each doc against the **union** of the blind-spot taxonomy (judgment) — not a per-level `in_scope` slice (that is skill-inline stage-exit only). Follow `skills/rr-planner/refs/blind-spots.md` Challenge union rules.
 4. For major decisions with single option → produce comparison table with alternatives.
 5. Apply devil's-advocate prompts systematically.
-6. Classify each finding by severity: critical | high | medium | low.
+6. Classify each finding by severity: critical | high | medium | low. Set `doc` (stem) and `doc_ref` on every finding.
 7. If severity assessment blocked by ambiguity → `clarifications_needed[]`.
-8. Record `docs_reviewed` list.
+8. Record `docs_reviewed` list. Do not write `status.yaml` or `challenge-report.md` — the skill stamps attestation and overwrites the worklist.
 
 ## Outputs
 

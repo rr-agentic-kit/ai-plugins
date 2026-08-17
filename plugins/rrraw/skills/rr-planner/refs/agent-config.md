@@ -4,7 +4,7 @@
 
 **Load when:** Every resolve (sync); first compose (emit + sync); `--setup`; when `status.yaml.claude_config_version` lags `injection.version`.
 
-Pairing policy lives in [baselines.md](baselines.md). This file locks wording so the skill and `validate_planning.py --sync-agent-config` / `--setup` stay identical.
+Pairing policy lives in [baselines.md](baselines.md). This file locks wording so the skill and `validate_planning.sh --sync-agent-config` / `--setup` stay identical.
 
 ## Injection (machine-readable)
 
@@ -33,7 +33,7 @@ When `injection.version` advances: refresh `agent.plan.md` from [agent.plan.md](
 Skill invokes (plugin root):
 
 ```bash
-python3 scripts/validate_planning.py --sync-agent-config --repo-root <PROJECT_ROOT> <plans-dir>
+sh scripts/validate_planning.sh --sync-agent-config --repo-root <PROJECT_ROOT> <plans-dir>
 ```
 
 `<plans-dir>` is `{PROJECT_ROOT}/docs/plans/` (the directory that holds `status.yaml`), not a next-track subdir. First compose uses the same command after writing `status.yaml`. `--setup` runs the same writes as part of its section list ([setup.md](setup.md)).

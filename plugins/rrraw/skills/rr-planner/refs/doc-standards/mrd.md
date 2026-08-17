@@ -41,14 +41,9 @@ Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for
 
 ## Done-when checklist
 
-- [ ] Primary target segment defined with boundaries
+Per-doc bars only. Gate 1, the script, shared success-criteria, Gate 7, and Gate 6 `in_scope` own the rest.
+
+- [ ] Primary target segment defined with boundaries (fail: "SMBs" with no cutoff)
 - [ ] TAM/SAM/SOM (external) or teams×hours×cost (internal) present with evidence ids or an explicit `hold`
-- [ ] Incumbent **and** do-nothing compared
 - [ ] At least 2 competitors or alternatives named
-- [ ] Market trends linked to exec-summary "why now"
-- [ ] Customer needs map to an ES metric and have Kano class + `_rationale_`
-- [ ] Market risks identified (at least one) with impact × likelihood
-- [ ] Unvalidated claims marked as assumptions or ledger evidence `unknown`
-- [ ] `MRD-{n}` / `MRD-{n.m}` applies to needs only
-- [ ] No contradiction with exec-summary constraints/non-goals
-- [ ] Binding viability verdict recorded
+- [ ] Market trends linked to exec-summary "why now" (fail: a trend list with no timing link)

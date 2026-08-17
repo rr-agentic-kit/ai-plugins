@@ -160,7 +160,7 @@ Append-only: never rewrite prior turns. Create `raw-history/` on first Q&A. If t
 
 Durable project knowledge. Skill-only writer. Schema and mint rules: [baselines.md](baselines.md). Lives in `{PROJECT_ROOT}/docs/plans/` even when cascade docs fork to `docs/plans/{next}/`.
 
-On first compose: write the file (`track: "0.1"`, `product`/`docs` as `0.1.0?`, `next: null`, all `levels.*.rev: "?"`, `claude_config_version` from [agent-config.md](agent-config.md), `mint_hash` computed). On freeze / lock-target / confirmed major-minor: mint per baselines, recompute `mint_hash`. Compose never writes this file. Scripts never increment `track`.
+On first compose: write the file (`track: "0.1"`, `product`/`docs` as `0.1.0?`, `next: null`, all `levels.*.rev: "?"`, `challenge: {}`, `next_challenge: {}`, `claude_config_version` from [agent-config.md](agent-config.md), `mint_hash` computed). On freeze / lock-target / confirmed major-minor: mint per baselines, recompute `mint_hash`. After compose persist: dirty that doc’s `challenge.status` when it was `clean` or `dirty-accepted`. After challenge persist: stamp per-doc `challenge:` from findings. Compose never writes this file. Scripts never increment `track`. `challenge` is not a validator FAIL.
 
 Validator input for mechanical codes only (`PARENT_UNFROZEN`, `STALE_PIN`, `REV_WHILE_OPEN`, `HAND_BUMP`). Not a human plan doc.
 
@@ -171,7 +171,7 @@ Always-on tripwire: refuse non-patch version work and protect the root load line
 Resolve sync (idempotent): append the locked load line to existing root SoT files (`CLAUDE.md`, `AGENTS.md`, and any new root agent SoT). Restore if stripped. Do not create missing SoT files. Do not rewrite their bodies. Set `status.yaml.claude_config_version`.
 
 ```bash
-python3 scripts/validate_planning.py --sync-agent-config --repo-root <PROJECT_ROOT> <plans-root>
+sh scripts/validate_planning.sh --sync-agent-config --repo-root <PROJECT_ROOT> <plans-root>
 ```
 
 ## `future.md`
@@ -185,6 +185,10 @@ One inbox at `{PROJECT_ROOT}/docs/plans/future.md`. Create on first parked beyon
 | What belongs here | Unassigned, or beyond-next (past the one open next track). |
 
 Rejected: `future/` folder; per-track future files; treating this file as a cascade doc.
+
+## Challenge report (worklist)
+
+Overwrite `{output_dir}/challenge-report.md` on each challenge persist. Latest scan replaces the worklist — addressed = absent from this file. Do not keep finding-id history or `open_ids` in `status.yaml` (per-run `bs-001` is not stable). Each finding’s `doc` stem drives per-doc `challenge.status` and Address now routing; keep `doc_ref` for humans. Skill persists this file from findings JSON; the challenge agent does not write it.
 
 ## Session checkpoint (`session-state.json`)
 
@@ -240,7 +244,7 @@ Written on **every stop** and after **each level completion**. Required for `--r
 
 `viability[]`: Gate 7 / premise-test verdicts ([expert-panel.md](expert-panel.md)). Binding at exec-summary and MRD.
 
-`note_sessions`: per-level index of parked notes; body is `{level}.notes.yaml` ([note-sessions.md](note-sessions.md)). Drop the key when that sidecar is deleted. Sidecars are not `--format` docs and are not parsed by `validate_planning.py`.
+`note_sessions`: per-level index of parked notes; body is `{level}.notes.yaml` ([note-sessions.md](note-sessions.md)). Drop the key when that sidecar is deleted. Sidecars are not `--format` docs and are not parsed by `validate_planning.sh`.
 
 Skill owns `decision-ledger.yaml` ([decision-ledger.md](decision-ledger.md)). Compose and challenge never write it. Validator loads it when present.
 
@@ -248,8 +252,8 @@ Skill owns `decision-ledger.yaml` ([decision-ledger.md](decision-ledger.md)). Co
 
 | Source | `final_status` |
 |--------|----------------|
-| All levels `ok`, success-criteria pass (static script + judgment); queue empty; no binding `hold`/`kill` | `ok` |
-| User stopped mid-session or accepted partial gaps | `partial` |
+| All levels `ok`, success-criteria pass (static script + judgment); queue empty; no binding `hold`/`kill`; challenge all `clean` or `dirty-accepted` | `ok` |
+| User stopped mid-session, accepted partial gaps, or leftover challenge `dirty` (not accepted) at chain exit | `partial` |
 | Binding `hold`, unresolved `kill`, or open re-decision queue | `blocked` |
 | Input-resolution error or unrecoverable agent failure | `failed` |
 
@@ -260,8 +264,8 @@ Skill owns `decision-ledger.yaml` ([decision-ledger.md](decision-ledger.md)). Co
 3. Compose writes/merges `items.json`. Skill reads it; skill does not write it. Compose reads `reserved_ids` from the ledger and never re-mints those ids. Compose writes frontmatter `track` / `doc_rev` / `pins`; skill mints `status.yaml` after freeze.
 4. Append a raw-history turn after every Q&A; do not wait for stage-exit. Skill owns `raw-history/`.
 5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars; prune: [note-sessions.md](note-sessions.md). Next-track notes while `next` is open go to that track's sidecar, not `future.md`.
-6. Research and challenge reports are standalone `.md` files, not merged into cascade docs. Skill persists those reports from findings JSON.
-7. Compose writes human cascade docs (`{level}.md` only). Document bodies never travel through chat. Research/challenge still return findings JSON. Compose does not write `status.yaml` / `agent.plan.md` / `future.md`.
+6. Research and challenge reports are standalone `.md` files, not merged into cascade docs. Skill persists those reports from findings JSON. Challenge overwrites `challenge-report.md` (worklist, not history).
+7. Compose writes human cascade docs (`{level}.md` only). Document bodies never travel through chat. Research/challenge still return findings JSON. Compose does not write `status.yaml` / `agent.plan.md` / `future.md`. After compose persist, the skill dirties that doc’s `challenge.status` when it was `clean` or `dirty-accepted`.
 8. After compose Task: parse slim receipt → if clarifications, ask and re-invoke → else read `items.json` to refresh `item_registry` → Gate 3 static ([success-criteria.md](success-criteria.md)). FAIL blocks `final_status: ok`. Sidecars, `future.md`, and `agent.plan.md` are not validator input.
 9. Pause skips pre-save ([proactivity.md](proactivity.md)). Freeze is a `frozen_levels` update plus a docs-patch mint in `status.yaml`, not a second write of the doc ([cascade.md](cascade.md), [baselines.md](baselines.md)).
 10. First compose: write `status.yaml`, emit `agent.plan.md`, sync the one-liner on existing root SoT, set `claude_config_version` ([agent-config.md](agent-config.md)).

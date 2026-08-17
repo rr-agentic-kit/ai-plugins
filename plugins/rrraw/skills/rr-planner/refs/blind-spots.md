@@ -23,12 +23,12 @@ Do **not** spawn the challenge agent per level. Alternatives analysis only for m
 - `medium` / `low` → assumptions / open questions; do not block unless the user wants them.
 - User may explicitly accept remaining findings. User may not silently accept a premise-critical finding — it becomes Gate 7.
 - Findings that belong in the doc merge via re-compose.
-- Skip static ref/id findings when `validate_planning.py` already ran.
+- Skip static ref/id findings when `validate_planning.sh` already ran.
 
 ### Challenge rules
 
 - Scan the union across all loaded docs.
-- Skip static ref/id findings when `validate_planning.py` ran.
+- Skip static ref/id findings when `validate_planning.sh` ran.
 - Write `challenge-report` only on `--challenge` / `--review`.
 
 ## Blind-spot taxonomy
@@ -45,7 +45,7 @@ One catalog. Category ids are the keys used in the applicability matrix.
 | `economic` | Hidden costs, revenue model gaps, unit economics, cost of inaction, sizing proxies, TAM/SAM/SOM or internal hours×cost | growth-investor, CFO |
 | `temporal` | Sequencing risks, dependency chains, why-now, approval timing, posture (existence × commitment), cut-pass vs legend, Must inflation under `signed_v1` | founder/CEO, seed-investor |
 | `assumption_debt` | Unvalidated assumptions treated as facts | seed-investor, domain-practitioner |
-| `traceability_breaks` | Judgment: compound leaves, inflated MoSCoW, weak triad, untestable shalls, **current-level facts that belong in another doc** (should have been a note session). Static parent/id failures come from `validate_planning.py` — do not re-score if the script ran. If skipped, flag `build != none` on non-ready items. | head-of-product, staff-engineer |
+| `traceability_breaks` | Judgment: compound leaves, inflated MoSCoW, weak triad, untestable shalls, **current-level facts that belong in another doc** (should have been a note session). Static parent/id failures come from `validate_planning.sh` — do not re-score if the script ran. If skipped, flag `build != none` on non-ready items. | head-of-product, staff-engineer |
 | `negative_space` | What is explicitly out of scope and why | founder/CEO, head-of-product |
 
 ## Applicability matrix

@@ -46,12 +46,9 @@ Use the FRD leaf template in [item-schema.md](item-schema.md). Heading + one `_k
 
 ## Done-when checklist
 
+Per-doc bars only. Gate 1, the script, shared success-criteria (including compound leaves and the vague-term table), and Gate 6 `in_scope` own the rest.
+
 - [ ] Every Must PRD story has at least one functional leaf
-- [ ] Every leaf has Gherkin AC (min 1 happy + 1 error path for `must-correct` / `must-present`)
-- [ ] Every leaf has triad axes + derived `_class_` + `_rationale_`; `_build_` present (`none` until `spec: ready`)
-- [ ] Items use `FRD-{n}` / `FRD-{n.m}` per item-schema; compounds split
-- [ ] Data requirements cover key entities for Must / `must-present` / `must-correct` features
+- [ ] Every `must-correct` / `must-present` leaf has Gherkin AC (min 1 happy + 1 error path) (fail: "works correctly")
+- [ ] Data requirements cover key entities for Must / `must-present` / `must-correct` features (fail: "the database")
 - [ ] Integration points identified or "standalone" documented
-- [ ] NFRs stated or explicitly deferred with assumption
-- [ ] Error handling defined for `must-correct` / `must-present` flows
-- [ ] Zero unresolved ambiguity in acceptance criteria
