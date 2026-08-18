@@ -63,8 +63,8 @@ DOC_METHOD: dict[str, str] = {
 }
 
 HEADING_RE = re.compile(r"^(#{2,4}) (ES|MRD|BRD|PRD|FRD)-(\d+(?:\.\d+)?): (.+)$")
-LIST_META_RE = re.compile(r"^- \*\*(.+?):\*\* (.+)$")
-INLINE_KEY_RE = re.compile(r"^_([a-z][a-z0-9-]*)_:\s*(.*)$")
+LIST_META_RE = re.compile(r"^- \*\*([^*\n]+):\*\* ([^\n]+)$")
+INLINE_KEY_RE = re.compile(r"^_([a-z][a-z0-9-]*)_:\s*([^\n]*)$")
 META_SPLIT_RE = re.compile(r"\s+\|\s+(?=_[a-z][a-z0-9-]*_:)")
 BODY_QUOTE_RE = re.compile(r"^> ?(.*)$")
 ATX_HEADING_RE = re.compile(r"^#{1,6} ")
@@ -139,9 +139,9 @@ SCHEMA_PATH = (
 )
 AGENT_CONFIG_PATH = PLUGIN_ROOT / "skills" / "rr-planner" / "refs" / "agent-config.md"
 
-AGENT_PLAN_TEMPLATE_PATH = AGENT_CONFIG_PATH.with_name("agent.plan.md")
-STATUS_NAME = "status.yaml"
 AGENT_PLAN_NAME = "agent.plan.md"
+AGENT_PLAN_TEMPLATE_PATH = AGENT_CONFIG_PATH.with_name(AGENT_PLAN_NAME)
+STATUS_NAME = "status.yaml"
 FUTURE_NAME = "future.md"
 CHALLENGE_STATUSES = frozenset({"dirty", "clean", "dirty-accepted"})
 CHALLENGE_KEYS = ("challenge", "next_challenge")
@@ -166,14 +166,27 @@ PARENT_DOC: dict[str, str] = {
 TRACK_DIR_RE = re.compile(r"^\d+\.\d+$")
 FRONTMATTER_RE = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
 INJECTION_FENCE_RE = re.compile(r"```yaml\n(injection:.*?)\n```", re.DOTALL)
-CREATED_TS_RE = re.compile(
-    r"^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:?\d{2})?)?$"
-)
+_CREATED_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_CREATED_TIME_RE = re.compile(r"^[T ]\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:?\d{2})?$")
+
+
+def matches_created_ts(value: str) -> bool:
+    stamp = value.strip()
+    if _CREATED_DATE_RE.fullmatch(stamp):
+        return True
+    if len(stamp) <= 10:
+        return False
+    return _CREATED_DATE_RE.fullmatch(stamp[:10]) is not None and (
+        _CREATED_TIME_RE.fullmatch(stamp[10:]) is not None
+    )
+
+
+CREATED_TS_RE = _CREATED_DATE_RE
 STUB_FRONTMATTER_KEYS = frozenset({"version", "traces_from"})
 SETUP_SECTIONS: tuple[str, ...] = (
     "plans directory",
     "root SoT load line",
-    "agent.plan.md",
+    AGENT_PLAN_NAME,
     "status.yaml",
     "cascade format",
     "cascade versioning",

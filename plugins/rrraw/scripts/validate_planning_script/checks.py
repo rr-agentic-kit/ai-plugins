@@ -59,7 +59,7 @@ def check_unique_and_ids(items: list[Item]) -> list[Issue]:
             issues.append(
                 Issue.error("INVALID_ID", f"malformed id {item.id!r}", item.id)
             )
-        if len(item.parts) > 2:
+        if item.id.count(".") > 1:
             issues.append(Issue.error("DEPTH", "max depth is n.m", item.id))
         if item.id in seen:
             issues.append(Issue.error("DUPLICATE_ID", "id is not unique", item.id))
@@ -91,64 +91,77 @@ def check_kind_and_children(items: list[Item]) -> list[Issue]:
     return issues
 
 
+def _check_nested_parent(item: Item, by_id: dict[str, Item]) -> list[Issue]:
+    issues: list[Issue] = []
+    expected = f"{item.prefix}-{item.parts[0]}"
+    if item.parent != expected:
+        issues.append(
+            Issue.error(
+                "PARENT_SHAPE",
+                f"nested id must parent {expected}, got {item.parent!r}",
+                item.id,
+            )
+        )
+    if item.parent not in by_id:
+        issues.append(
+            Issue.error(
+                "BROKEN_PARENT",
+                f"parent {item.parent} does not exist",
+                item.id,
+            )
+        )
+    return issues
+
+
+def _check_es_parent(item: Item) -> list[Issue]:
+    if item.parent is not None:
+        return [
+            Issue.error(
+                "PARENT_SHAPE",
+                "ES top-level parent must be —",
+                item.id,
+            )
+        ]
+    return []
+
+
+def _check_cross_doc_parent(item: Item, by_id: dict[str, Item]) -> list[Issue]:
+    issues: list[Issue] = []
+    if item.parent is None:
+        return [Issue.error("BROKEN_PARENT", "missing cross-doc parent", item.id)]
+    if item.parent not in by_id:
+        return [
+            Issue.error(
+                "BROKEN_PARENT",
+                f"parent {item.parent} does not exist",
+                item.id,
+            )
+        ]
+    parent = by_id[item.parent]
+    child_lv = PREFIX_LEVEL[item.prefix]
+    parent_lv = PREFIX_LEVEL[parent.prefix]
+    if parent_lv != child_lv - 1:
+        issues.append(
+            Issue.error(
+                "LEVEL_SKIP",
+                f"parent {parent.id} skips cascade level",
+                item.id,
+            )
+        )
+    return issues
+
+
 def check_parents(items: list[Item]) -> list[Issue]:
     issues: list[Issue] = []
     by_id = {item.id: item for item in items}
     for item in items:
-        if len(item.parts) == 2:
-            expected = f"{item.prefix}-{item.parts[0]}"
-            if item.parent != expected:
-                issues.append(
-                    Issue.error(
-                        "PARENT_SHAPE",
-                        f"nested id must parent {expected}, got {item.parent!r}",
-                        item.id,
-                    )
-                )
-            if item.parent not in by_id:
-                issues.append(
-                    Issue.error(
-                        "BROKEN_PARENT",
-                        f"parent {item.parent} does not exist",
-                        item.id,
-                    )
-                )
+        if item.is_nested:
+            issues.extend(_check_nested_parent(item, by_id))
             continue
         if item.prefix == "ES":
-            if item.parent is not None:
-                issues.append(
-                    Issue.error(
-                        "PARENT_SHAPE",
-                        "ES top-level parent must be —",
-                        item.id,
-                    )
-                )
+            issues.extend(_check_es_parent(item))
             continue
-        if item.parent is None:
-            issues.append(
-                Issue.error("BROKEN_PARENT", "missing cross-doc parent", item.id)
-            )
-            continue
-        if item.parent not in by_id:
-            issues.append(
-                Issue.error(
-                    "BROKEN_PARENT",
-                    f"parent {item.parent} does not exist",
-                    item.id,
-                )
-            )
-            continue
-        parent = by_id[item.parent]
-        child_lv = PREFIX_LEVEL[item.prefix]
-        parent_lv = PREFIX_LEVEL[parent.prefix]
-        if parent_lv != child_lv - 1:
-            issues.append(
-                Issue.error(
-                    "LEVEL_SKIP",
-                    f"parent {parent.id} skips cascade level",
-                    item.id,
-                )
-            )
+        issues.extend(_check_cross_doc_parent(item, by_id))
     issues.extend(_check_cycles(items))
     issues.extend(_check_supersede(items, by_id))
     return issues
@@ -180,53 +193,65 @@ def _check_cycles(items: list[Item]) -> list[Issue]:
     return issues
 
 
+def _check_supersedes_link(item: Item, by_id: dict[str, Item]) -> list[Issue]:
+    if not item.supersedes:
+        return []
+    if item.supersedes not in by_id:
+        return [
+            Issue.error(
+                "BROKEN_SUPERSEDE",
+                f"supersedes {item.supersedes} does not exist",
+                item.id,
+            )
+        ]
+    old = by_id[item.supersedes]
+    issues: list[Issue] = []
+    if old.superseded_by != item.id:
+        issues.append(
+            Issue.error(
+                "SUPERSEDE_PAIR",
+                f"{item.supersedes} must set superseded_by {item.id}",
+                item.id,
+            )
+        )
+    if old.spec != "deprecated":
+        issues.append(
+            Issue.error(
+                "SUPERSEDE_PAIR",
+                f"{old.id} must be spec:deprecated when superseded",
+                old.id,
+            )
+        )
+    return issues
+
+
+def _check_superseded_by_link(item: Item, by_id: dict[str, Item]) -> list[Issue]:
+    if not item.superseded_by:
+        return []
+    if item.superseded_by not in by_id:
+        return [
+            Issue.error(
+                "BROKEN_SUPERSEDE",
+                f"superseded_by {item.superseded_by} does not exist",
+                item.id,
+            )
+        ]
+    if by_id[item.superseded_by].supersedes != item.id:
+        return [
+            Issue.error(
+                "SUPERSEDE_PAIR",
+                f"{item.superseded_by} must set supersedes {item.id}",
+                item.id,
+            )
+        ]
+    return []
+
+
 def _check_supersede(items: list[Item], by_id: dict[str, Item]) -> list[Issue]:
     issues: list[Issue] = []
     for item in items:
-        if item.supersedes:
-            if item.supersedes not in by_id:
-                issues.append(
-                    Issue.error(
-                        "BROKEN_SUPERSEDE",
-                        f"supersedes {item.supersedes} does not exist",
-                        item.id,
-                    )
-                )
-            else:
-                old = by_id[item.supersedes]
-                if old.superseded_by != item.id:
-                    issues.append(
-                        Issue.error(
-                            "SUPERSEDE_PAIR",
-                            f"{item.supersedes} must set superseded_by {item.id}",
-                            item.id,
-                        )
-                    )
-                if old.spec != "deprecated":
-                    issues.append(
-                        Issue.error(
-                            "SUPERSEDE_PAIR",
-                            f"{old.id} must be spec:deprecated when superseded",
-                            old.id,
-                        )
-                    )
-        if item.superseded_by:
-            if item.superseded_by not in by_id:
-                issues.append(
-                    Issue.error(
-                        "BROKEN_SUPERSEDE",
-                        f"superseded_by {item.superseded_by} does not exist",
-                        item.id,
-                    )
-                )
-            elif by_id[item.superseded_by].supersedes != item.id:
-                issues.append(
-                    Issue.error(
-                        "SUPERSEDE_PAIR",
-                        f"{item.superseded_by} must set supersedes {item.id}",
-                        item.id,
-                    )
-                )
+        issues.extend(_check_supersedes_link(item, by_id))
+        issues.extend(_check_superseded_by_link(item, by_id))
     return issues
 
 
@@ -238,12 +263,12 @@ def check_numbering(
     nested: dict[tuple[str, str], list[int]] = defaultdict(list)
     reserved_top, reserved_nested = _reserved_slots(reserved_ids)
     for item in items:
-        if len(item.parts) == 1:
-            top[item.prefix].append(item.parts[0])
-        elif len(item.parts) == 2:
+        if item.is_nested:
             nested[(item.prefix, f"{item.prefix}-{item.parts[0]}")].append(
                 item.parts[1]
             )
+        else:
+            top[item.prefix].append(item.parts[0])
     for prefix, nums in top.items():
         occupied = sorted(set(nums) | reserved_top.get(prefix, set()))
         issues.extend(_dense(occupied, prefix))
@@ -251,6 +276,25 @@ def check_numbering(
         occupied = sorted(set(nums) | reserved_nested.get(key, set()))
         issues.extend(_dense(occupied, key[1]))
     return issues
+
+
+def _add_reserved_raw(
+    raw: object,
+    prefix: str,
+    top: dict[str, set[int]],
+    nested: dict[tuple[str, str], set[int]],
+) -> None:
+    match raw:
+        case bool():
+            return
+        case int():
+            top[prefix].add(raw)
+        case str() if raw.isdigit():
+            top[prefix].add(int(raw))
+        case str() if "." in raw:
+            major, _, minor = raw.partition(".")
+            if major.isdigit() and minor.isdigit():
+                nested[(prefix, f"{prefix}-{major}")].add(int(minor))
 
 
 def _reserved_slots(
@@ -265,16 +309,7 @@ def _reserved_slots(
         if not prefix or not isinstance(values, list):
             continue
         for raw in values:
-            if isinstance(raw, bool):
-                continue
-            if isinstance(raw, int):
-                top[prefix].add(raw)
-            elif isinstance(raw, str) and raw.isdigit():
-                top[prefix].add(int(raw))
-            elif isinstance(raw, str) and "." in raw:
-                major, _, minor = raw.partition(".")
-                if major.isdigit() and minor.isdigit():
-                    nested[(prefix, f"{prefix}-{major}")].add(int(minor))
+            _add_reserved_raw(raw, prefix, top, nested)
     return top, nested
 
 
@@ -292,38 +327,42 @@ def _dense(nums: list[int], group: str) -> list[Issue]:
     return []
 
 
+def _check_container_fields(item: Item) -> list[Issue]:
+    issues: list[Issue] = []
+    if item.build is not None:
+        issues.append(Issue.error("BUILD_SCOPE", "build is FRD leaves only", item.id))
+    if item.moscow is not None or item.kano is not None or item.triad is not None:
+        issues.append(
+            Issue.error("CONTAINER_RANK", "containers stay unmarked", item.id)
+        )
+    return issues
+
+
+def _check_frd_leaf_fields(item: Item) -> list[Issue]:
+    issues: list[Issue] = []
+    missing = FRD_LEAF_KEYS - item.raw_keys
+    if item.source_file != "items.json" and missing:
+        for key in sorted(missing):
+            issues.append(
+                Issue.error("MISSING_KEY", f"FRD leaf missing {key}", item.id)
+            )
+    if item.build is None:
+        issues.append(Issue.error("MISSING_KEY", "FRD leaf missing build", item.id))
+    if item.triad is None and item.spec == "ready":
+        issues.append(
+            Issue.error("MISSING_KEY", "ready FRD leaf missing triad", item.id)
+        )
+    return issues
+
+
 def check_required_fields(items: list[Item]) -> list[Issue]:
     issues: list[Issue] = []
     for item in items:
         if item.kind == "container":
-            if item.build is not None:
-                issues.append(
-                    Issue.error("BUILD_SCOPE", "build is FRD leaves only", item.id)
-                )
-            if (
-                item.moscow is not None
-                or item.kano is not None
-                or item.triad is not None
-            ):
-                issues.append(
-                    Issue.error("CONTAINER_RANK", "containers stay unmarked", item.id)
-                )
+            issues.extend(_check_container_fields(item))
             continue
         if item.doc == "frd":
-            missing = FRD_LEAF_KEYS - item.raw_keys
-            if item.source_file != "items.json" and missing:
-                for key in sorted(missing):
-                    issues.append(
-                        Issue.error("MISSING_KEY", f"FRD leaf missing {key}", item.id)
-                    )
-            if item.build is None:
-                issues.append(
-                    Issue.error("MISSING_KEY", "FRD leaf missing build", item.id)
-                )
-            if item.triad is None and item.spec == "ready":
-                issues.append(
-                    Issue.error("MISSING_KEY", "ready FRD leaf missing triad", item.id)
-                )
+            issues.extend(_check_frd_leaf_fields(item))
         elif item.build is not None:
             issues.append(
                 Issue.error("BUILD_SCOPE", "build is FRD leaves only", item.id)
@@ -362,51 +401,58 @@ def check_status(items: list[Item]) -> list[Issue]:
     return issues
 
 
-def _ready_keys(item: Item, by_id: dict[str, Item]) -> list[Issue]:
+def _check_ready_leaf_rank(item: Item) -> list[Issue]:
     issues: list[Issue] = []
     method = DOC_METHOD[item.doc]
+    if method == "moscow" and item.moscow is None:
+        issues.append(Issue.error("DOR", "ready leaf missing moscow", item.id))
+    if method == "kano" and item.kano is None:
+        issues.append(Issue.error("DOR", "ready leaf missing kano", item.id))
+    if method != "triad":
+        return issues
+    if item.triad is None:
+        return [
+            *issues,
+            Issue.error("DOR", "ready FRD leaf missing triad", item.id),
+        ]
+    expected = derived_class(
+        item.triad.if_present.magnitude,
+        item.triad.if_absent.magnitude,
+        item.triad.if_wrong.magnitude,
+    )
+    if expected == item.triad.class_name:
+        return issues
+    return [
+        *issues,
+        Issue.error(
+            "CLASS_MISMATCH",
+            f"Class {item.triad.class_name} does not match derived {expected}",
+            item.id,
+        ),
+    ]
+
+
+def _check_ready_parent(item: Item, by_id: dict[str, Item]) -> list[Issue]:
+    if not item.parent or item.parent not in by_id:
+        return []
+    parent = by_id[item.parent]
+    if parent.prefix == item.prefix or parent.spec == "ready":
+        return []
+    return [
+        Issue.error(
+            "PARENT_READY",
+            "ready item requires cross-doc parent spec:ready "
+            f"(got {parent.spec})",
+            item.id,
+        )
+    ]
+
+
+def _ready_keys(item: Item, by_id: dict[str, Item]) -> list[Issue]:
+    issues: list[Issue] = []
     if item.kind == "leaf":
-        if method == "moscow" and item.moscow is None:
-            issues.append(Issue.error("DOR", "ready leaf missing moscow", item.id))
-        if method == "kano" and item.kano is None:
-            issues.append(Issue.error("DOR", "ready leaf missing kano", item.id))
-        if method == "triad":
-            if item.triad is None:
-                issues.append(
-                    Issue.error("DOR", "ready FRD leaf missing triad", item.id)
-                )
-            elif (
-                derived_class(
-                    item.triad.if_present.magnitude,
-                    item.triad.if_absent.magnitude,
-                    item.triad.if_wrong.magnitude,
-                )
-                != item.triad.class_name
-            ):
-                expected = derived_class(
-                    item.triad.if_present.magnitude,
-                    item.triad.if_absent.magnitude,
-                    item.triad.if_wrong.magnitude,
-                )
-                issues.append(
-                    Issue.error(
-                        "CLASS_MISMATCH",
-                        f"Class {item.triad.class_name} does not match "
-                        f"derived {expected}",
-                        item.id,
-                    )
-                )
-    if item.parent and item.parent in by_id:
-        parent = by_id[item.parent]
-        if parent.prefix != item.prefix and parent.spec != "ready":
-            issues.append(
-                Issue.error(
-                    "PARENT_READY",
-                    "ready item requires cross-doc parent spec:ready "
-                    f"(got {parent.spec})",
-                    item.id,
-                )
-            )
+        issues.extend(_check_ready_leaf_rank(item))
+    issues.extend(_check_ready_parent(item, by_id))
     return issues
 
 
@@ -438,6 +484,45 @@ def _norm(value: Any) -> Any:
     return value
 
 
+_DRIFT_KEYS = (
+    "id",
+    "parent",
+    "kind",
+    "spec",
+    "build",
+    "supersedes",
+    "superseded_by",
+    "moscow",
+    "kano",
+    "triad",
+    "rationale",
+    "title",
+    "doc",
+    "priority_method",
+)
+
+
+def _compare_drift_field(
+    item_id: str,
+    key: str,
+    md_record: dict[str, Any],
+    json_row: dict[str, Any],
+) -> Issue | None:
+    left = _norm(md_record.get(key))
+    right = _norm(json_row.get(key))
+    if key not in md_record and key not in json_row:
+        return None
+    if key not in md_record and json_row.get(key) in (None,):
+        return None
+    if left == right:
+        return None
+    return Issue.error(
+        "DRIFT",
+        f"{key} doc={left!r} json={right!r}",
+        item_id,
+    )
+
+
 def check_drift(md_items: list[Item], json_rows: list[dict[str, Any]]) -> list[Issue]:
     issues: list[Issue] = []
     md_by_id = {item.id: item for item in md_items}
@@ -459,34 +544,8 @@ def check_drift(md_items: list[Item], json_rows: list[dict[str, Any]]) -> list[I
             continue
         md_record = md_by_id[item_id].to_record()
         json_row = json_by_id[item_id]
-        for key in (
-            "id",
-            "parent",
-            "kind",
-            "spec",
-            "build",
-            "supersedes",
-            "superseded_by",
-            "moscow",
-            "kano",
-            "triad",
-            "rationale",
-            "title",
-            "doc",
-            "priority_method",
-        ):
-            left = _norm(md_record.get(key))
-            right = _norm(json_row.get(key))
-            if key not in md_record and key not in json_row:
-                continue
-            if key not in md_record and json_row.get(key) in (None,):
-                continue
-            if left != right:
-                issues.append(
-                    Issue.error(
-                        "DRIFT",
-                        f"{key} doc={left!r} json={right!r}",
-                        item_id,
-                    )
-                )
+        for key in _DRIFT_KEYS:
+            drift = _compare_drift_field(item_id, key, md_record, json_row)
+            if drift is not None:
+                issues.append(drift)
     return issues

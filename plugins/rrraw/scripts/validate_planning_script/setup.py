@@ -27,6 +27,7 @@ from .workspace import (
     find_status_path,
     has_cascade_docs,
     load_status,
+    resolve_within_root,
     write_status_yaml,
 )
 
@@ -58,9 +59,10 @@ def parse_agent_config(text: str | None = None) -> tuple[int, str, str]:
 
 
 def emit_agent_plan(plans_dir: Path, *, body: str | None = None) -> Path:
-    plans_dir.mkdir(parents=True, exist_ok=True)
+    safe_dir = resolve_within_root(plans_dir, find_repo_root(plans_dir))
+    safe_dir.mkdir(parents=True, exist_ok=True)
     text = body if body is not None else parse_agent_config()[2]
-    path = plans_dir / AGENT_PLAN_NAME
+    path = safe_dir / AGENT_PLAN_NAME
     if not text.endswith("\n"):
         text += "\n"
     path.write_text(text, encoding="utf-8")
@@ -121,14 +123,14 @@ def sync_agent_injection(
     return issues
 
 
-def setup_plans_directory(plans_dir: Path) -> tuple[str, str]:
+def setup_plans_directory(plans_dir: Path, repo_root: Path) -> tuple[str, str]:
     if plans_dir.is_file():
         return "failed", f"{plans_dir} is a file"
     if plans_dir.is_dir():
         return "ok", "exists"
     try:
-        plans_dir.mkdir(parents=True, exist_ok=True)
-    except OSError as exc:
+        resolve_within_root(plans_dir, repo_root).mkdir(parents=True, exist_ok=True)
+    except (OSError, ValueError) as exc:
         return "failed", str(exc)
     return "created", "mkdir"
 
@@ -250,8 +252,13 @@ def setup_cascade_versioning(plans_dir: Path) -> tuple[str, str]:
 
 
 def run_setup(plans_dir: Path, repo_root: Path) -> int:
+    try:
+        safe_plans = resolve_within_root(plans_dir, repo_root)
+    except ValueError as exc:
+        print(f"plans directory\tfailed\t{exc}")
+        return 1
     results: list[tuple[str, str, str]] = []
-    results.append(("plans directory", *setup_plans_directory(plans_dir)))
+    results.append(("plans directory", *setup_plans_directory(safe_plans, repo_root)))
     try:
         version, load_line, body = parse_agent_config()
         config_error: str | None = None
@@ -264,10 +271,10 @@ def run_setup(plans_dir: Path, repo_root: Path) -> int:
         results.append(("status.yaml", "failed", config_error))
     else:
         results.append(("root SoT load line", *setup_root_sot(repo_root, load_line)))
-        results.append(("agent.plan.md", *setup_agent_plan(plans_dir, body)))
-        results.append(("status.yaml", *setup_status(plans_dir, version)))
-    results.append(("cascade format", *setup_cascade_format(plans_dir)))
-    results.append(("cascade versioning", *setup_cascade_versioning(plans_dir)))
+        results.append(("agent.plan.md", *setup_agent_plan(safe_plans, body)))
+        results.append(("status.yaml", *setup_status(safe_plans, version)))
+    results.append(("cascade format", *setup_cascade_format(safe_plans)))
+    results.append(("cascade versioning", *setup_cascade_versioning(safe_plans)))
     by_name = {name: (status, message) for name, status, message in results}
     failed = False
     for name in SETUP_SECTIONS:

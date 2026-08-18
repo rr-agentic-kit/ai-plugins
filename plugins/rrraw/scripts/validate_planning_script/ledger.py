@@ -53,16 +53,34 @@ def load_ledger(path: Path) -> tuple[dict[str, Any] | None, list[Issue]]:
     return data, issues
 
 
-def check_ledger_shape(data: dict[str, Any]) -> list[Issue]:
+def _check_evidence_record(eid: str, record: object) -> list[Issue]:
+    if not isinstance(record, dict):
+        return [
+            Issue.error(
+                "LEDGER_MALFORMED",
+                f"{eid} must be a mapping",
+                eid,
+            )
+        ]
+    status = record.get("status")
+    if status is not None and status not in EVIDENCE_STATUSES:
+        return [
+            Issue.error(
+                "LEDGER_MALFORMED",
+                f"evidence status {status!r} is not "
+                "supported|refuted|unknown|superseded",
+                eid,
+            )
+        ]
+    return []
+
+
+def _check_evidence_section(data: dict[str, Any]) -> tuple[set[str], list[Issue]]:
     issues: list[Issue] = []
     evidence = data.get("evidence", {})
-    rationales = data.get("rationales", {})
     if "evidence" in data and not isinstance(evidence, dict):
         issues.append(Issue.error("LEDGER_MALFORMED", "evidence must be a mapping"))
         evidence = {}
-    if not isinstance(rationales, dict):
-        issues.append(Issue.error("LEDGER_MALFORMED", "rationales must be a mapping"))
-        return issues
     evidence_ids = {
         key for key in evidence if isinstance(key, str) and EVIDENCE_ID_RE.match(key)
     }
@@ -76,25 +94,56 @@ def check_ledger_shape(data: dict[str, Any]) -> list[Issue]:
                     eid,
                 )
             )
-        if not isinstance(record, dict):
+        issues.extend(_check_evidence_record(eid, record))
+    return evidence_ids, issues
+
+
+def _check_queue_section(
+    data: dict[str, Any], rationales: dict[str, Any]
+) -> list[Issue]:
+    issues: list[Issue] = []
+    queue = data.get("re_decision_queue", [])
+    if "re_decision_queue" in data and not isinstance(queue, list):
+        return [
+            Issue.error(
+                "LEDGER_MALFORMED",
+                "re_decision_queue must be a list",
+            )
+        ]
+    for index, entry in enumerate(queue):
+        if not isinstance(entry, dict):
             issues.append(
                 Issue.error(
                     "LEDGER_MALFORMED",
-                    f"{eid} must be a mapping",
-                    eid,
+                    f"re_decision_queue[{index}] must be a mapping",
                 )
             )
             continue
-        status = record.get("status")
-        if status is not None and status not in EVIDENCE_STATUSES:
+        status = entry.get("status")
+        if status is not None and status not in QUEUE_STATUSES:
             issues.append(
                 Issue.error(
                     "LEDGER_MALFORMED",
-                    f"evidence status {status!r} is not "
-                    "supported|refuted|unknown|superseded",
-                    eid,
+                    f"re_decision_queue[{index}] status {status!r}",
                 )
             )
+        pointer = entry.get("rationale")
+        if pointer and pointer not in rationales:
+            issues.append(
+                Issue.error(
+                    "BROKEN_RATIONALE",
+                    f"queue points at unknown rationale {pointer}",
+                )
+            )
+    return issues
+
+
+def check_ledger_shape(data: dict[str, Any]) -> list[Issue]:
+    evidence_ids, issues = _check_evidence_section(data)
+    rationales = data.get("rationales", {})
+    if not isinstance(rationales, dict):
+        issues.append(Issue.error("LEDGER_MALFORMED", "rationales must be a mapping"))
+        return issues
     for raw_id, record in rationales.items():
         rid = str(raw_id)
         if not RATIONALE_RE.match(rid):
@@ -121,41 +170,88 @@ def check_ledger_shape(data: dict[str, Any]) -> list[Issue]:
     reserved = data.get("reserved_ids", {})
     if "reserved_ids" in data and not isinstance(reserved, dict):
         issues.append(Issue.error("LEDGER_MALFORMED", "reserved_ids must be a mapping"))
-    queue = data.get("re_decision_queue", [])
-    if "re_decision_queue" in data and not isinstance(queue, list):
+    issues.extend(_check_queue_section(data, rationales))
+    return issues
+
+
+def _check_metric_flip(rid: str, index: int, entry: dict[str, Any]) -> list[Issue]:
+    issues: list[Issue] = []
+    if not entry.get("metric") or entry.get("op") not in METRIC_OPS:
         issues.append(
             Issue.error(
                 "LEDGER_MALFORMED",
-                "re_decision_queue must be a list",
+                f"flips_when[{index}] metric requires metric and op "
+                f"in {sorted(METRIC_OPS)}",
+                rid,
             )
         )
-    else:
-        for index, entry in enumerate(queue):
-            if not isinstance(entry, dict):
-                issues.append(
-                    Issue.error(
-                        "LEDGER_MALFORMED",
-                        f"re_decision_queue[{index}] must be a mapping",
-                    )
-                )
-                continue
-            status = entry.get("status")
-            if status is not None and status not in QUEUE_STATUSES:
-                issues.append(
-                    Issue.error(
-                        "LEDGER_MALFORMED",
-                        f"re_decision_queue[{index}] status {status!r}",
-                    )
-                )
-            pointer = entry.get("rationale")
-            if pointer and pointer not in rationales:
-                issues.append(
-                    Issue.error(
-                        "BROKEN_RATIONALE",
-                        f"queue points at unknown rationale {pointer}",
-                    )
-                )
+    if "value" not in entry:
+        issues.append(
+            Issue.error(
+                "LEDGER_MALFORMED",
+                f"flips_when[{index}] metric requires value",
+                rid,
+            )
+        )
     return issues
+
+
+def _check_fact_flip(
+    rid: str, index: int, entry: dict[str, Any], evidence_ids: set[str]
+) -> list[Issue]:
+    pointer = entry.get("evidence")
+    if not isinstance(pointer, str) or not EVIDENCE_ID_RE.match(pointer):
+        return [
+            Issue.error(
+                "LEDGER_MALFORMED",
+                f"flips_when[{index}] fact requires evidence e-NNN",
+                rid,
+            )
+        ]
+    if pointer in evidence_ids:
+        return []
+    return [
+        Issue.error(
+            "BROKEN_RATIONALE",
+            f"flips_when[{index}] evidence {pointer} does not exist",
+            rid,
+        )
+    ]
+
+
+def _check_flip_entry(
+    rid: str, index: int, entry: object, evidence_ids: set[str]
+) -> list[Issue]:
+    if not isinstance(entry, dict):
+        return [
+            Issue.error(
+                "LEDGER_MALFORMED",
+                f"flips_when[{index}] must be a mapping",
+                rid,
+            )
+        ]
+    kind = entry.get("kind")
+    if kind not in FLIP_KINDS:
+        return [
+            Issue.error(
+                "LEDGER_MALFORMED",
+                f"flips_when[{index}] kind must be metric|fact|event, got {kind!r}",
+                rid,
+            )
+        ]
+    if kind == "metric":
+        return _check_metric_flip(rid, index, entry)
+    if kind == "fact":
+        return _check_fact_flip(rid, index, entry, evidence_ids)
+    if str(entry.get("text") or "").strip():
+        return []
+    return [
+        Issue.error(
+            "LEDGER_MALFORMED",
+            f"flips_when[{index}] event requires text",
+            rid,
+        )
+    ]
 
 
 def _check_rationale_record(
@@ -201,69 +297,7 @@ def _check_rationale_record(
         )
         return issues
     for index, entry in enumerate(flips):
-        if not isinstance(entry, dict):
-            issues.append(
-                Issue.error(
-                    "LEDGER_MALFORMED",
-                    f"flips_when[{index}] must be a mapping",
-                    rid,
-                )
-            )
-            continue
-        kind = entry.get("kind")
-        if kind not in FLIP_KINDS:
-            issues.append(
-                Issue.error(
-                    "LEDGER_MALFORMED",
-                    f"flips_when[{index}] kind must be metric|fact|event, got {kind!r}",
-                    rid,
-                )
-            )
-            continue
-        if kind == "metric":
-            if not entry.get("metric") or entry.get("op") not in METRIC_OPS:
-                issues.append(
-                    Issue.error(
-                        "LEDGER_MALFORMED",
-                        f"flips_when[{index}] metric requires metric and op "
-                        f"in {sorted(METRIC_OPS)}",
-                        rid,
-                    )
-                )
-            if "value" not in entry:
-                issues.append(
-                    Issue.error(
-                        "LEDGER_MALFORMED",
-                        f"flips_when[{index}] metric requires value",
-                        rid,
-                    )
-                )
-        elif kind == "fact":
-            pointer = entry.get("evidence")
-            if not isinstance(pointer, str) or not EVIDENCE_ID_RE.match(pointer):
-                issues.append(
-                    Issue.error(
-                        "LEDGER_MALFORMED",
-                        f"flips_when[{index}] fact requires evidence e-NNN",
-                        rid,
-                    )
-                )
-            elif pointer not in evidence_ids:
-                issues.append(
-                    Issue.error(
-                        "BROKEN_RATIONALE",
-                        f"flips_when[{index}] evidence {pointer} does not exist",
-                        rid,
-                    )
-                )
-        elif kind == "event" and not str(entry.get("text") or "").strip():
-            issues.append(
-                Issue.error(
-                    "LEDGER_MALFORMED",
-                    f"flips_when[{index}] event requires text",
-                    rid,
-                )
-            )
+        issues.extend(_check_flip_entry(rid, index, entry, evidence_ids))
     return issues
 
 

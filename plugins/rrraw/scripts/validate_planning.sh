@@ -14,7 +14,8 @@ _canon() {
 }
 
 _add_cand() {
-  _c=$(_canon "$1") || return 0
+  _arg=$1
+  _c=$(_canon "$_arg") || return 0
   case "$_seen" in
     *"
 ${_c}
@@ -44,7 +45,8 @@ _find_parent_project() {
 }
 
 _probe_ver() {
-  _ver=$("$1" -c "import sys; print('%d.%d' % (sys.version_info[0], sys.version_info[1]))" 2>/dev/null) || {
+  _py=$1
+  _ver=$("$_py" -c "import sys; print('%d.%d' % (sys.version_info[0], sys.version_info[1]))" 2>/dev/null) || {
     _ver=
     return 1
   }
@@ -54,15 +56,21 @@ _probe_ver() {
   if [ "$_major" -gt 3 ] 2>/dev/null; then
     return 0
   fi
-  [ "$_major" -eq 3 ] 2>/dev/null && [ "$_minor" -ge 14 ] 2>/dev/null
+  if [ "$_major" -eq 3 ] 2>/dev/null && [ "$_minor" -ge 14 ] 2>/dev/null; then
+    return 0
+  fi
+  return 1
 }
 
 _probe_yaml() {
-  PYTHONPATH="$HERE" "$1" -c "import yaml, validate_planning_script" >/dev/null 2>&1
+  _py=$1
+  PYTHONPATH="$HERE" "$_py" -c "import yaml, validate_planning_script" >/dev/null 2>&1
+  return $?
 }
 
 _probe_ok() {
   PYTHONPATH="$HERE" "$@" -c "import sys, yaml, validate_planning_script; raise SystemExit(0 if sys.version_info >= (3, 14) else 1)" >/dev/null 2>&1
+  return $?
 }
 
 _seen=

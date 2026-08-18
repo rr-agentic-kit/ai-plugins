@@ -177,6 +177,110 @@ def _consume_list_meta(
     return meta, index
 
 
+def _parse_list_meta_block(
+    lines: list[str],
+    index: int,
+    item_id: str,
+    issues: list[Issue],
+    *,
+    migrate: bool,
+) -> tuple[dict[str, str], int]:
+    meta, index = _consume_list_meta(lines, index, item_id, issues)
+    index = _skip_blanks(lines, index)
+    if migrate:
+        _, index = _capture_free_body(lines, index)
+    return meta, index
+
+
+def _parse_inline_body_block(
+    lines: list[str],
+    index: int,
+    item_id: str,
+    issues: list[Issue],
+    *,
+    migrate: bool,
+) -> int:
+    if index < len(lines) and BODY_QUOTE_RE.match(lines[index]):
+        _, index = _capture_blockquote(lines, index)
+        return index
+    if index >= len(lines) or not lines[index].strip():
+        return index
+    if HEADING_RE.match(lines[index]) or ATX_HEADING_RE.match(lines[index]):
+        return index
+    if LIST_META_RE.match(lines[index]):
+        issues.append(
+            Issue.error(
+                "STALE_FORMAT",
+                "list-meta leftover under inline metadata",
+                item_id,
+            )
+        )
+        _, index = _consume_list_meta(lines, index, item_id, issues)
+        return index
+    if migrate:
+        _, index = _capture_free_body(lines, index)
+        return index
+    issues.append(
+        Issue.error(
+            "BODY_NOT_BLOCKQUOTE",
+            "leaf body must be a markdown blockquote (>)",
+            item_id,
+        )
+    )
+    _, index = _capture_free_body(lines, index)
+    return index
+
+
+def _parse_item_metadata(
+    lines: list[str],
+    index: int,
+    item_id: str,
+    issues: list[Issue],
+    *,
+    migrate: bool,
+) -> tuple[dict[str, str], int]:
+    if index >= len(lines):
+        issues.append(
+            Issue.error(
+                "MALFORMED_META",
+                f"missing metadata line under {item_id}",
+                item_id,
+            )
+        )
+        return {}, index
+    if LIST_META_RE.match(lines[index]):
+        if not migrate:
+            issues.append(
+                Issue.error(
+                    "STALE_FORMAT",
+                    "list-meta (- **Key:**) is stale; "
+                    "run validate_planning.sh --rewrite",
+                    item_id,
+                )
+            )
+        meta, index = _parse_list_meta_block(
+            lines, index, item_id, issues, migrate=migrate
+        )
+        return meta, index
+    if INLINE_KEY_RE.match(lines[index].strip()) or META_SPLIT_RE.search(lines[index]):
+        meta, meta_errors = parse_inline_meta_line(lines[index])
+        _record_meta_errors(meta_errors, item_id, issues)
+        index += 1
+        index = _skip_blanks(lines, index)
+        index = _parse_inline_body_block(
+            lines, index, item_id, issues, migrate=migrate
+        )
+        return meta, index
+    issues.append(
+        Issue.error(
+            "MALFORMED_META",
+            f"expected '_key_: value' under {item_id}, got {lines[index]!r}",
+            item_id,
+        )
+    )
+    return {}, index + 1
+
+
 def parse_markdown(
     text: str, source_file: str, *, migrate: bool = False
 ) -> tuple[list[Item], list[Issue]]:
@@ -195,71 +299,9 @@ def parse_markdown(
         item_id = f"{prefix}-{number}"
         i += 1
         i = _skip_blanks(lines, i)
-        meta: dict[str, str] = {}
-        if i >= len(lines):
-            issues.append(
-                Issue.error(
-                    "MALFORMED_META",
-                    f"missing metadata line under {item_id}",
-                    item_id,
-                )
-            )
-        elif LIST_META_RE.match(lines[i]):
-            if not migrate:
-                issues.append(
-                    Issue.error(
-                        "STALE_FORMAT",
-                        "list-meta (- **Key:**) is stale; "
-                        "run validate_planning.sh --rewrite",
-                        item_id,
-                    )
-                )
-            meta, i = _consume_list_meta(lines, i, item_id, issues)
-            i = _skip_blanks(lines, i)
-            if migrate:
-                _, i = _capture_free_body(lines, i)
-        elif INLINE_KEY_RE.match(lines[i].strip()) or META_SPLIT_RE.search(lines[i]):
-            meta, meta_errors = parse_inline_meta_line(lines[i])
-            _record_meta_errors(meta_errors, item_id, issues)
-            i += 1
-            i = _skip_blanks(lines, i)
-            if i < len(lines) and BODY_QUOTE_RE.match(lines[i]):
-                _, i = _capture_blockquote(lines, i)
-            elif (
-                i < len(lines)
-                and lines[i].strip()
-                and not HEADING_RE.match(lines[i])
-                and not ATX_HEADING_RE.match(lines[i])
-            ):
-                if LIST_META_RE.match(lines[i]):
-                    issues.append(
-                        Issue.error(
-                            "STALE_FORMAT",
-                            "list-meta leftover under inline metadata",
-                            item_id,
-                        )
-                    )
-                    _, i = _consume_list_meta(lines, i, item_id, issues)
-                elif not migrate:
-                    issues.append(
-                        Issue.error(
-                            "BODY_NOT_BLOCKQUOTE",
-                            "leaf body must be a markdown blockquote (>)",
-                            item_id,
-                        )
-                    )
-                    _, i = _capture_free_body(lines, i)
-                else:
-                    _, i = _capture_free_body(lines, i)
-        else:
-            issues.append(
-                Issue.error(
-                    "MALFORMED_META",
-                    f"expected '_key_: value' under {item_id}, got {lines[i]!r}",
-                    item_id,
-                )
-            )
-            i += 1
+        meta, i = _parse_item_metadata(
+            lines, i, item_id, issues, migrate=migrate
+        )
         items.append(_item_from_meta(item_id, title, prefix, meta, source_file, issues))
     return items, issues
 
@@ -270,6 +312,31 @@ def _yaml_scalar(value: Any) -> str:
     if isinstance(value, bool):
         return "true" if value else "false"
     return str(value).strip()
+
+
+def _yaml_meta_from_raw(
+    raw: dict[str, Any], item_id: str, issues: list[Issue]
+) -> dict[str, str]:
+    meta: dict[str, str] = {}
+    for key, value in raw.items():
+        if key in YAML_SKIP_KEYS:
+            continue
+        surface = _surface_key(str(key))
+        if surface is None:
+            issues.append(
+                Issue.error("UNKNOWN_KEY", f"unknown metadata key {key!r}", item_id)
+            )
+            surface = str(key)
+        if surface in meta:
+            issues.append(
+                Issue.error(
+                    "DUPLICATE_KEY",
+                    f"duplicate metadata key {surface!r}",
+                    item_id,
+                )
+            )
+        meta[surface] = _yaml_scalar(value)
+    return meta
 
 
 def parse_yaml_doc(text: str, source_file: str) -> tuple[list[Item], list[Issue]]:
@@ -300,25 +367,7 @@ def parse_yaml_doc(text: str, source_file: str) -> tuple[list[Item], list[Issue]
             )
             continue
         title = _yaml_scalar(raw.get("title", ""))
-        meta: dict[str, str] = {}
-        for key, value in raw.items():
-            if key in YAML_SKIP_KEYS:
-                continue
-            surface = _surface_key(str(key))
-            if surface is None:
-                issues.append(
-                    Issue.error("UNKNOWN_KEY", f"unknown metadata key {key!r}", item_id)
-                )
-                surface = str(key)
-            if surface in meta:
-                issues.append(
-                    Issue.error(
-                        "DUPLICATE_KEY",
-                        f"duplicate metadata key {surface!r}",
-                        item_id,
-                    )
-                )
-            meta[surface] = _yaml_scalar(value)
+        meta = _yaml_meta_from_raw(raw, item_id, issues)
         match = ID_RE.match(item_id)
         prefix = match.group(1) if match else ""
         if not prefix:
@@ -358,20 +407,9 @@ def detect_doc_format(
     return "md", issues
 
 
-def _item_from_meta(
-    item_id: str,
-    title: str,
-    prefix: str,
-    meta: dict[str, str],
-    source_file: str,
-    issues: list[Issue],
-) -> Item:
-    doc = PREFIX_TO_DOC[prefix]
-    for key in REQUIRED_KEYS:
-        if key not in meta:
-            issues.append(
-                Issue.error("MISSING_KEY", f"missing required key {key}", item_id)
-            )
+def _validate_item_enums(
+    item_id: str, meta: dict[str, str], issues: list[Issue]
+) -> None:
     kind = meta.get("kind", "")
     spec = meta.get("spec", "")
     if kind and kind not in KIND_VALUES:
@@ -390,7 +428,6 @@ def _item_from_meta(
                 item_id,
             )
         )
-    parent = _null_or_value(meta["parent"]) if "parent" in meta else None
     build = _null_or_value(meta["build"]) if "build" in meta else None
     if build is not None and build not in BUILD_VALUES:
         issues.append(
@@ -418,6 +455,29 @@ def _item_from_meta(
                 item_id,
             )
         )
+
+
+def _item_from_meta(
+    item_id: str,
+    title: str,
+    prefix: str,
+    meta: dict[str, str],
+    source_file: str,
+    issues: list[Issue],
+) -> Item:
+    doc = PREFIX_TO_DOC[prefix]
+    for key in REQUIRED_KEYS:
+        if key not in meta:
+            issues.append(
+                Issue.error("MISSING_KEY", f"missing required key {key}", item_id)
+            )
+    _validate_item_enums(item_id, meta, issues)
+    kind = meta.get("kind", "")
+    spec = meta.get("spec", "")
+    parent = _null_or_value(meta["parent"]) if "parent" in meta else None
+    build = _null_or_value(meta["build"]) if "build" in meta else None
+    moscow = _null_or_value(meta["moscow"]) if "moscow" in meta else None
+    kano = _null_or_value(meta["kano"]) if "kano" in meta else None
     triad: Triad | None = None
     if any(k in meta for k in ("if-present", "if-absent", "if-wrong", "class")):
         triad = _parse_triad(item_id, meta, issues)

@@ -12,7 +12,6 @@ import yaml
 
 from .constants import (
     CHALLENGE_KEYS,
-    CREATED_TS_RE,
     DOC_STEMS,
     FRONTMATTER_KEYS,
     FRONTMATTER_RE,
@@ -20,8 +19,17 @@ from .constants import (
     STATUS_NAME,
     STUB_FRONTMATTER_KEYS,
     TRACK_DIR_RE,
+    matches_created_ts,
 )
 from .models import Issue, Item
+
+
+def resolve_within_root(path: Path, root: Path) -> Path:
+    resolved = path.resolve()
+    root_resolved = root.resolve()
+    if not resolved.is_relative_to(root_resolved):
+        raise ValueError(f"{path} is outside repo root {root}")
+    return resolved
 
 
 def plans_root(planning_dir: Path) -> Path:
@@ -80,9 +88,40 @@ def _preserve_created(raw: Any) -> str:
     if isinstance(raw, datetime):
         stamp = raw if raw.tzinfo is not None else raw.replace(tzinfo=UTC)
         return stamp.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    if isinstance(raw, str) and CREATED_TS_RE.match(raw.strip()):
+    if isinstance(raw, str) and matches_created_ts(raw):
         return raw.strip()
     return _utc_now_stamp()
+
+
+def _frontmatter_pins(
+    stem: str, levels: dict[str, Any]
+) -> dict[str, Any]:
+    parent = PARENT_DOC.get(stem)
+    if parent is None:
+        return {}
+    raw_row = levels.get(stem)
+    row: dict[str, Any] = raw_row if isinstance(raw_row, dict) else {}
+    raw_pins = row.get("pins")
+    child_pins: dict[str, Any] = raw_pins if isinstance(raw_pins, dict) else {}
+    parent_pin = child_pins.get(parent)
+    raw_parent = levels.get(parent)
+    parent_row: dict[str, Any] = raw_parent if isinstance(raw_parent, dict) else {}
+    parent_rev = parent_row.get("rev")
+    if isinstance(parent_pin, dict) and is_frozen_rev(parent_rev):
+        return {
+            parent: {
+                "rev": parent_pin.get("rev", parent_rev),
+                "digest": parent_pin.get("digest"),
+            }
+        }
+    if is_frozen_rev(parent_rev):
+        return {
+            parent: {
+                "rev": parent_rev,
+                "digest": parent_row.get("digest"),
+            }
+        }
+    return {}
 
 
 def _frontmatter_for_doc(stem: str, status: dict[str, Any] | None) -> dict[str, Any]:
@@ -100,30 +139,7 @@ def _frontmatter_for_doc(stem: str, status: dict[str, Any] | None) -> dict[str, 
         status_rev = row.get("rev")
         if is_frozen_rev(status_rev):
             rev = status_rev
-        parent = PARENT_DOC.get(stem)
-        if parent:
-            raw_pins = row.get("pins")
-            child_pins: dict[str, Any] = raw_pins if isinstance(raw_pins, dict) else {}
-            parent_pin = child_pins.get(parent)
-            raw_parent = levels.get(parent)
-            parent_row: dict[str, Any] = (
-                raw_parent if isinstance(raw_parent, dict) else {}
-            )
-            parent_rev = parent_row.get("rev")
-            if isinstance(parent_pin, dict) and is_frozen_rev(parent_rev):
-                pins = {
-                    parent: {
-                        "rev": parent_pin.get("rev", parent_rev),
-                        "digest": parent_pin.get("digest"),
-                    }
-                }
-            elif is_frozen_rev(parent_rev):
-                pins = {
-                    parent: {
-                        "rev": parent_rev,
-                        "digest": parent_row.get("digest"),
-                    }
-                }
+        pins = _frontmatter_pins(stem, levels)
     return {
         "doc_type": stem,
         "track": track,
@@ -215,12 +231,8 @@ def default_unfrozen_status(injection_version: int) -> dict[str, Any]:
     return data
 
 
-def fill_status_missing(
-    data: dict[str, Any], injection_version: int
-) -> tuple[bool, bool]:
+def _fill_status_payload(data: dict[str, Any], defaults: dict[str, Any]) -> bool:
     payload_changed = False
-    meta_changed = False
-    defaults = default_unfrozen_status(injection_version)
     payload_keys = (
         "track",
         "product",
@@ -233,6 +245,36 @@ def fill_status_missing(
         if key not in data:
             data[key] = defaults[key]
             payload_changed = True
+    return payload_changed
+
+
+def _fill_status_levels(
+    data: dict[str, Any], defaults: dict[str, Any]
+) -> bool:
+    payload_changed = False
+    if "levels" not in data or not isinstance(data["levels"], dict):
+        data["levels"] = defaults["levels"]
+        return True
+    for doc, row in defaults["levels"].items():
+        existing = data["levels"].get(doc)
+        if not isinstance(existing, dict):
+            data["levels"][doc] = dict(row)
+            payload_changed = True
+            continue
+        for field_name, default_val in row.items():
+            if field_name not in existing:
+                existing[field_name] = default_val
+                payload_changed = True
+    return payload_changed
+
+
+def fill_status_missing(
+    data: dict[str, Any], injection_version: int
+) -> tuple[bool, bool]:
+    payload_changed = False
+    meta_changed = False
+    defaults = default_unfrozen_status(injection_version)
+    payload_changed |= _fill_status_payload(data, defaults)
     if "product_status" not in data:
         data["product_status"] = defaults["product_status"]
         meta_changed = True
@@ -240,20 +282,7 @@ def fill_status_missing(
         if key not in data or not isinstance(data.get(key), dict):
             data[key] = {}
             meta_changed = True
-    if "levels" not in data or not isinstance(data["levels"], dict):
-        data["levels"] = defaults["levels"]
-        payload_changed = True
-    else:
-        for doc, row in defaults["levels"].items():
-            existing = data["levels"].get(doc)
-            if not isinstance(existing, dict):
-                data["levels"][doc] = dict(row)
-                payload_changed = True
-                continue
-            for field_name, default_val in row.items():
-                if field_name not in existing:
-                    existing[field_name] = default_val
-                    payload_changed = True
+    payload_changed |= _fill_status_levels(data, defaults)
     if data.get("claude_config_version") != injection_version:
         data["claude_config_version"] = injection_version
         meta_changed = True
@@ -408,14 +437,7 @@ def invalidate_challenge_on_digest_change(
             row["status"] = "dirty"
 
 
-def stamp_challenge_status(
-    status: dict[str, Any],
-    findings: list[Any],
-    docs_reviewed: list[Any] | None = None,
-    *,
-    next_track: bool = False,
-) -> None:
-    challenge = challenge_map(status, next_track=next_track)
+def _collect_dirty_stems(findings: list[Any]) -> set[str]:
     dirty_stems: set[str] = set()
     for finding in findings:
         if not isinstance(finding, dict):
@@ -425,6 +447,12 @@ def stamp_challenge_status(
             stem = challenge_doc_stem(finding.get("doc_ref"))
         if stem is not None:
             dirty_stems.add(stem)
+    return dirty_stems
+
+
+def _collect_scanned_stems(
+    docs_reviewed: list[Any] | None, dirty_stems: set[str]
+) -> set[str]:
     scanned: set[str] = set()
     if docs_reviewed:
         for name in docs_reviewed:
@@ -433,6 +461,19 @@ def stamp_challenge_status(
                 scanned.add(stem)
     if not scanned:
         scanned = set(dirty_stems)
+    return scanned
+
+
+def stamp_challenge_status(
+    status: dict[str, Any],
+    findings: list[Any],
+    docs_reviewed: list[Any] | None = None,
+    *,
+    next_track: bool = False,
+) -> None:
+    challenge = challenge_map(status, next_track=next_track)
+    dirty_stems = _collect_dirty_stems(findings)
+    scanned = _collect_scanned_stems(docs_reviewed, dirty_stems)
     for doc in scanned:
         challenge[doc] = {
             "status": "dirty" if doc in dirty_stems else "clean",
@@ -493,6 +534,65 @@ def _load_frozen_levels(planning_dir: Path) -> list[str] | None:
     return [str(item) for item in frozen]
 
 
+def _check_doc_baseline(
+    doc: str,
+    levels: dict[str, Any],
+    frozen_levels: list[str] | None,
+    frontmatter: dict[str, dict[str, Any]],
+    items: list[Item],
+) -> list[Issue]:
+    issues: list[Issue] = []
+    raw = levels.get(doc)
+    row = raw if isinstance(raw, dict) else {}
+    rev = row.get("rev")
+    if is_frozen_rev(rev) and frozen_levels is not None and doc not in frozen_levels:
+        issues.append(
+            Issue.error(
+                "REV_WHILE_OPEN",
+                f"{doc} has integer rev {rev} but is not in frozen_levels",
+                doc,
+            )
+        )
+    fm_rev = frontmatter.get(doc, {}).get("doc_rev")
+    if is_frozen_rev(fm_rev) and is_open_rev(rev):
+        issues.append(
+            Issue.error(
+                "REV_WHILE_OPEN",
+                f"{doc} frontmatter doc_rev is integer while status "
+                "rev is unfrozen",
+                doc,
+            )
+        )
+    parent = PARENT_DOC.get(doc)
+    if parent is None or not is_frozen_rev(rev):
+        return issues
+    parent_row = levels.get(parent)
+    parent_rev = parent_row.get("rev") if isinstance(parent_row, dict) else None
+    if is_open_rev(parent_rev) or parent_rev is None:
+        issues.append(
+            Issue.error(
+                "PARENT_UNFROZEN",
+                f"frozen {doc} but parent {parent} is still unfrozen",
+                doc,
+            )
+        )
+        return issues
+    live_digest = compute_doc_digest(items, parent)
+    pins = row.get("pins") if isinstance(row.get("pins"), dict) else {}
+    pin = pins.get(parent) if isinstance(pins, dict) else None
+    pin_digest = pin.get("digest") if isinstance(pin, dict) else None
+    pin_rev = pin.get("rev") if isinstance(pin, dict) else None
+    if pin_digest != live_digest or pin_rev != parent_rev:
+        issues.append(
+            Issue.error(
+                "STALE_PIN",
+                f"{doc} pin for {parent} does not match parent rev/digest",
+                doc,
+            )
+        )
+    return issues
+
+
 def check_baselines(planning_dir: Path, items: list[Item]) -> list[Issue]:
     status_path = find_status_path(planning_dir)
     if status_path is None:
@@ -513,56 +613,7 @@ def check_baselines(planning_dir: Path, items: list[Item]) -> list[Issue]:
     frozen_levels = _load_frozen_levels(planning_dir)
     frontmatter = load_doc_frontmatter(planning_dir)
     for doc in DOC_STEMS:
-        raw = levels.get(doc)
-        row = raw if isinstance(raw, dict) else {}
-        rev = row.get("rev")
-        if (
-            is_frozen_rev(rev)
-            and frozen_levels is not None
-            and doc not in frozen_levels
-        ):
-            issues.append(
-                Issue.error(
-                    "REV_WHILE_OPEN",
-                    f"{doc} has integer rev {rev} but is not in frozen_levels",
-                    doc,
-                )
-            )
-        fm_rev = frontmatter.get(doc, {}).get("doc_rev")
-        if is_frozen_rev(fm_rev) and is_open_rev(rev):
-            issues.append(
-                Issue.error(
-                    "REV_WHILE_OPEN",
-                    f"{doc} frontmatter doc_rev is integer while status "
-                    "rev is unfrozen",
-                    doc,
-                )
-            )
-        parent = PARENT_DOC.get(doc)
-        if parent is None or not is_frozen_rev(rev):
-            continue
-        parent_row = levels.get(parent)
-        parent_rev = parent_row.get("rev") if isinstance(parent_row, dict) else None
-        if is_open_rev(parent_rev) or parent_rev is None:
-            issues.append(
-                Issue.error(
-                    "PARENT_UNFROZEN",
-                    f"frozen {doc} but parent {parent} is still unfrozen",
-                    doc,
-                )
-            )
-            continue
-        live_digest = compute_doc_digest(items, parent)
-        pins = row.get("pins") if isinstance(row.get("pins"), dict) else {}
-        pin = pins.get(parent) if isinstance(pins, dict) else None
-        pin_digest = pin.get("digest") if isinstance(pin, dict) else None
-        pin_rev = pin.get("rev") if isinstance(pin, dict) else None
-        if pin_digest != live_digest or pin_rev != parent_rev:
-            issues.append(
-                Issue.error(
-                    "STALE_PIN",
-                    f"{doc} pin for {parent} does not match parent rev/digest",
-                    doc,
-                )
-            )
+        issues.extend(
+            _check_doc_baseline(doc, levels, frozen_levels, frontmatter, items)
+        )
     return issues

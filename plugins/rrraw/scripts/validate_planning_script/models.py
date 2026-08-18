@@ -75,15 +75,18 @@ class Item:
     raw_meta: dict[str, str] = field(default_factory=dict)
 
     @property
-    def parts(self) -> tuple[int, ...]:
+    def parts(self) -> tuple[int, int]:
         match = ID_RE.match(self.id)
         if not match:
-            return ()
+            return (0, 0)
         major = int(match.group(2))
-        minor = match.group(3)
-        if minor is None:
-            return (major,)
-        return (major, int(minor))
+        minor_raw = match.group(3)
+        minor = int(minor_raw) if minor_raw is not None else 0
+        return (major, minor)
+
+    @property
+    def is_nested(self) -> bool:
+        return self.parts[1] > 0
 
     def to_record(self) -> dict[str, Any]:
         record: dict[str, Any] = {
