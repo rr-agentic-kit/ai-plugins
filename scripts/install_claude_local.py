@@ -10,6 +10,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import urlparse
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCOPE = "user"
@@ -134,8 +135,17 @@ def _is_remote_url(url: object) -> bool:
     if not isinstance(url, str) or not url.strip():
         return False
     lowered = url.strip().lower()
-    prefixes = ("http://", "https://", "git@", "ssh://", "git://")
-    return lowered.startswith(prefixes) or "github.com" in lowered
+
+    # SCP-like git syntax, e.g. git@github.com:owner/repo.git
+    if lowered.startswith("git@"):
+        return True
+
+    parsed = urlparse(lowered)
+    if parsed.scheme in {"http", "https", "ssh", "git"}:
+        return True
+
+    host = (parsed.hostname or "").lower()
+    return host == "github.com" or host.endswith(".github.com")
 
 
 def marketplace_kind(entry: dict[str, Any] | None, repo_root: Path) -> MarketplaceKind:
