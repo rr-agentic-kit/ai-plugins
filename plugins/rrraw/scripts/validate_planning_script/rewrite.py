@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import yaml
@@ -35,31 +36,56 @@ from .parse import (
     parse_yaml_doc,
 )
 from .shape_migrate import migrate_planning_shapes
-from .workspace import planning_doc_path, resolve_planning_dir, resolve_within_root
+from .workspace import (
+    find_repo_root,
+    planning_doc_path,
+    resolve_planning_dir,
+    resolve_within_root,
+)
+
+_YAML_SUFFIX = ".yaml"
+_ALLOWED_PLANNING_NAMES = frozenset(
+    {f"{stem}.md" for stem in DOC_STEMS}
+    | {f"{stem}{_YAML_SUFFIX}" for stem in DOC_STEMS}
+)
 
 
 def _planning_basename(stem: str, *, suffix: str = ".md") -> str:
     """Allowlisted filename only — basename sanitizes path-injection taint."""
     if stem not in DOC_STEMS:
         raise ValueError(f"invalid planning doc stem: {stem!r}")
-    if not suffix.startswith(".") or "/" in suffix or "\\" in suffix:
+    if suffix not in {".md", _YAML_SUFFIX}:
         raise ValueError(f"invalid planning doc suffix: {suffix!r}")
-    return f"{stem}{suffix}"
+    name = f"{stem}{suffix}"
+    if name not in _ALLOWED_PLANNING_NAMES:
+        raise ValueError(f"invalid planning doc name: {name!r}")
+    return name
 
 
 def _write_under_dir(root: Path, filename: str, text: str) -> None:
     name = Path(filename).name
-    if name != filename:
-        raise ValueError(f"refusing non-basename planning path: {filename!r}")
-    target = resolve_within_root(root / name, root)
-    target.write_text(text, encoding="utf-8")
+    if name != filename or name not in _ALLOWED_PLANNING_NAMES:
+        raise ValueError(f"refusing non-allowlisted planning path: {filename!r}")
+    repo = find_repo_root(root).resolve()
+    target = (root / name).resolve()
+    repo_s = str(repo)
+    target_s = str(target)
+    if target_s != repo_s and not target_s.startswith(f"{repo_s}{os.sep}"):
+        raise ValueError(f"{target} is outside repo root {repo}")
+    with open(target_s, "w", encoding="utf-8") as handle:
+        handle.write(text)
 
 
 def _unlink_under_dir(root: Path, filename: str) -> None:
     name = Path(filename).name
-    if name != filename:
-        raise ValueError(f"refusing non-basename planning path: {filename!r}")
-    target = resolve_within_root(root / name, root)
+    if name != filename or name not in _ALLOWED_PLANNING_NAMES:
+        raise ValueError(f"refusing non-allowlisted planning path: {filename!r}")
+    repo = find_repo_root(root).resolve()
+    target = (root / name).resolve()
+    repo_s = str(repo)
+    target_s = str(target)
+    if target_s != repo_s and not target_s.startswith(f"{repo_s}{os.sep}"):
+        raise ValueError(f"{target} is outside repo root {repo}")
     if target.is_file():
         target.unlink()
 
@@ -242,7 +268,7 @@ def rewrite_yaml_to_md(text: str, source_file: str) -> tuple[str, list[Issue]]:
 
 def _rewrite_md_file(root: Path, stem: str) -> list[Issue]:
     md_name = _planning_basename(stem)
-    yaml_name = _planning_basename(stem, suffix=".yaml")
+    yaml_name = _planning_basename(stem, suffix=_YAML_SUFFIX)
     md_path = resolve_within_root(root / md_name, root)
     text = md_path.read_text(encoding="utf-8")
     new_text, parse_issues = rewrite_markdown(text, md_name)
@@ -254,7 +280,7 @@ def _rewrite_md_file(root: Path, stem: str) -> list[Issue]:
 
 def _rewrite_yaml_file(root: Path, stem: str) -> list[Issue]:
     md_name = _planning_basename(stem)
-    yaml_name = _planning_basename(stem, suffix=".yaml")
+    yaml_name = _planning_basename(stem, suffix=_YAML_SUFFIX)
     yaml_path = resolve_within_root(root / yaml_name, root)
     text = yaml_path.read_text(encoding="utf-8")
     new_text, parse_issues = rewrite_yaml_to_md(text, yaml_name)

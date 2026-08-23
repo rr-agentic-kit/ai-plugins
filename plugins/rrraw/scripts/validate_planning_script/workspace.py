@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -32,9 +33,12 @@ def find_repo_root(start: Path) -> Path:
 
 
 def resolve_within_root(path: Path, root: Path) -> Path:
+    """Confine path under root using resolve + prefix check (Sonar S2083 sanitizer)."""
     resolved = path.resolve()
     root_resolved = root.resolve()
-    if not resolved.is_relative_to(root_resolved):
+    resolved_s = str(resolved)
+    root_s = str(root_resolved)
+    if resolved_s != root_s and not resolved_s.startswith(f"{root_s}{os.sep}"):
         raise ValueError(f"{path} is outside repo root {root}")
     return resolved
 
