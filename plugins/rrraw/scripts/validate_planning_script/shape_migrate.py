@@ -249,7 +249,6 @@ def migrate_exec_summary_shape(text: str, source_file: str) -> tuple[str, list[I
                 inserted_functional = True
             rebuilt.append(block)
             continue
-        section_key = _normalize_section(block.section or "")
         moscow = block.meta.get("moscow") or block.meta.get("MoSCoW")
         if moscow in {"Should", "Could"}:
             functional_items.append(block)
