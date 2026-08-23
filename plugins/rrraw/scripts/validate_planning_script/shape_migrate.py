@@ -469,9 +469,7 @@ def _flush_challenge_finding(
     if finding_id is None:
         return
     stem = _finding_doc_stem(fields, heading_doc) or "prd"
-    grouped.setdefault(stem, []).append(
-        (finding_id, list(body_lines), dict(fields))
-    )
+    grouped.setdefault(stem, []).append((finding_id, list(body_lines), dict(fields)))
 
 
 def _collect_challenge_findings(
