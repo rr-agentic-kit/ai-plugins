@@ -33,8 +33,8 @@ A turn that only critiques is incomplete. When blocking, the seat owes a path.
 
 1. **Name the standard** being applied (investor hurdle, operational constraint, practitioner lived-experience, SRE error budget).
 2. **Ask** the question that standard requires.
-3. **State the evidence bar** — what would satisfy it. Prefer a measurable bar; an honest qualitative bar beats a fabricated number ([decision-ledger.md](decision-ledger.md) no-fabricated-numbers).
-4. **If blocking: owe an alternative.** Put 2–3 options on the comparison table in [blind-spots.md](blind-spots.md), including do-nothing / buy / pivot-the-premise. Critique without a proposed path is an incomplete turn.
+3. **State the evidence bar** — what would satisfy it. Prefer a measurable bar; an honest qualitative bar beats a fabricated number ([decision-ledger.md](decision-ledger.md) no-fabricated-numbers). For legal/regulatory claims, prefer **real enforcement-in-practice and case statistics** over literal statute reading (T6-1).
+4. **If blocking: owe an alternative.** Put 2–3 options on the comparison table in [blind-spots.md](blind-spots.md), including do-nothing / buy / pivot-the-premise. Critique without a proposed path is an incomplete turn. The option-generation prompt ("Name two paths that still move an ES metric if this premise is wrong") is the **sole `hold` trigger** — a T6-1 legal-risk tier is not itself a block.
 
 Record the turn in raw-history with `source: panel` ([output-formats.md](output-formats.md)). Mint the rationale in the ledger at the moment the decision is made — before compose references the id.
 
@@ -61,7 +61,7 @@ Do not treat a search result as verified fact without writing the evidence recor
 
 Falsification prompt (required on `premise-critical`): "What evidence would make this false?" If the user cannot name any, the condition is `vague` — record that; do not fabricate a threshold.
 
-Option-generation prompt (required when a seat blocks): "Name two paths that still move an ES metric if this premise is wrong." Feed those into the comparison table.
+Option-generation prompt (required when a seat blocks): "Name two paths that still move an ES metric if this premise is wrong." Feed those into the comparison table. A legal-risk tier (`green`/`yellow`/`gray`/`red`) surfaces residual risk but does **not** substitute for this prompt — tier ≠ block.
 
 ## Verdict ladder
 

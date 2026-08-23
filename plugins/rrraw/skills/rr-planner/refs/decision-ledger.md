@@ -140,6 +140,16 @@ Challenge loads this file read-only:
 
 Findings only; do not mutate the ledger.
 
+### User-confirmed scope changes (T2-3)
+
+A user-confirmed `demote` or `scope_change` needs only **one honest `because`** tied to a surfaced challenge finding. The skill never demands more once the finding trail is complete — an incomplete finding trail, not a thin rationale, is the real failure mode.
+
+### Re-litigation guard (T6-5, O4 TTL)
+
+`hold` + dissent on a resolved `r-*` / `a-*` stops re-litigation in the same track. A later challenge finding on the same topic needs **new evidence** or downgrades to `low`.
+
+The guard lapses **only** on an explicit `project_posture` change (existence or commitment axis flip) — not on a new challenge run or elapsed time. Lapsing **re-opens the question** for a fresh look; it does **not** reverse the prior resolution.
+
 ## Validator surface
 
 `validate_planning.sh`: `LEDGER_MISSING` (warn, skip), `LEDGER_MALFORMED` (structure), `MISSING_RATIONALE` (ranked leaf, ledger present), `BROKEN_RATIONALE` (dangling id or unresolved `evidence:` pointer). Closed key and JSON field: [item-schema.md](doc-standards/item-schema.md).

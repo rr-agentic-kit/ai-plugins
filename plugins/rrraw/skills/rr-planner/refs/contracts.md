@@ -171,12 +171,17 @@ Execution (posture required, notes ingest, sidecar prune): [project-posture.md](
   "findings": [{
     "id": "bs-001",
     "doc": "prd",
+    "target_doc": "prd",
     "category": "failure_modes",
     "severity": "high",
     "doc_ref": "prd.md § 3.2",
     "finding": "",
     "evidence": "",
     "recommendation": "",
+    "fix_action": "flag_risk",
+    "fix_level": "prd",
+    "target_artifact": "doc",
+    "paired_finding_id": null,
     "alternatives": []
   }],
   "comparison_tables": [{
@@ -185,28 +190,40 @@ Execution (posture required, notes ingest, sidecar prune): [project-posture.md](
     "recommendation": ""
   }],
   "clarifications_needed": [],
-  "docs_reviewed": ["exec-summary.md", "mrd.md", "brd.md", "prd.md"]
+  "docs_reviewed": ["prd.md"],
+  "self_check_meta": {
+    "dropped": 0,
+    "downgraded": 0
+  }
 }
 ```
 
-`docs_reviewed` uses the actual filenames (always `.md`).
+`docs_reviewed` uses actual filenames (always `.md`). Reflects the **one target doc** scanned this invocation; when dual-stub findings exist, the orchestrator adds the partner doc filename on mirror persist — not a full-cascade array by default.
 
 | Field | Notes |
 |-------|-------|
-| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** (not per-level `in_scope`). Judgment only when `payload.static_validation.status` is `passed` or `failed`. Ledger scan: [decision-ledger.md](decision-ledger.md) Challenge. |
-| `findings[].doc` | Cascade stem (`exec-summary` … `prd`). Required. Skill stamps per-doc `challenge.status` and routes Address now from this field. |
+| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** on the one target doc. Judgment only when `payload.static_validation.status` is `passed` or `failed`. Ledger scan: [decision-ledger.md](decision-ledger.md) Challenge. |
+| `findings[].doc` | Cascade stem where the weak spot **appears** (symptom). Required. |
+| `findings[].target_doc` | Cascade stem where the fix belongs. Same as `doc` when inline. Required. |
 | `findings[].doc_ref` | Human locator (`prd.md § 3.2`). Keep even when `doc` is set. |
+| `findings[].fix_action` | `reword` · `refile` · `demote` · `add_constraint` · `park_notes` · `park_later` · `flag_risk` · `scope_change`. Per-lens × per-level fences in blind-spots.md. `demote`/`scope_change` are recommendations — user confirms before ledger write. |
+| `findings[].fix_level` | Cascade level that should absorb the fix. |
+| `findings[].target_artifact` | `doc` \| `notes` \| `later`. Park actions set this; inline doc edits use `doc`. |
+| `findings[].paired_finding_id` | When fix ≠ symptom doc, id for the orchestrator-mirrored stub in the partner report. |
+| `findings[].legal_risk_tier` | Optional. `green` \| `yellow` \| `gray` \| `red` — T6-1 shape under `assumption_debt`/`economic`. |
+| `findings[].litigation_cost_benefit` | Optional. T6-1 litigation cost/benefit note, independent of legal merit. |
 | `comparison_tables` | When single-option decisions lack alternatives analysis |
 | `clarifications_needed` | Questions that block severity assessment |
-| `docs_reviewed` | All docs scanned (`.md`) |
+| `docs_reviewed` | Target doc scanned this invocation (`.md` filename) |
+| `self_check_meta` | Counts from mandatory pre-return self-check (`grounding` · `level_fit` · `action_fit` · `non_duplicate` · `distance` · `candor`). Failures dropped or downgraded before persist. |
 
-Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.sh`. Static vs judgment: [success-criteria.md](success-criteria.md).
+Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.sh`. `PhaseInput.level` = target cascade stem. Static vs judgment: [success-criteria.md](success-criteria.md).
 
 | `status` | When |
 |----------|------|
-| `ok` | Full taxonomy scan complete |
-| `partial` | Some docs unreadable or clarifications pending |
-| `failed` | No docs found in scope |
+| `ok` | Full taxonomy union scan complete on the one target doc |
+| `partial` | Target doc unreadable or clarifications pending |
+| `failed` | No target doc found in scope or `PhaseInput.level` missing/invalid |
 
 ---
 
