@@ -206,12 +206,16 @@ def test_rewrite_migrates_old_prd_shape_without_rice(tmp_path: Path):
 
 def test_rewrite_splits_monolithic_challenge_report(tmp_path: Path):
     write_planning(tmp_path, VALID_FILES)
-    (tmp_path / "challenge-report.md").write_text(OLD_CHALLENGE_REPORT, encoding="utf-8")
+    (tmp_path / "challenge-report.md").write_text(
+        OLD_CHALLENGE_REPORT, encoding="utf-8"
+    )
     result = vp.main([str(tmp_path), "--rewrite"])
     assert result == 0
     assert not (tmp_path / "challenge-report.md").exists()
     prd_report = (tmp_path / "prd.challenge.report.md").read_text(encoding="utf-8")
-    es_report = (tmp_path / "exec-summary.challenge.report.md").read_text(encoding="utf-8")
+    es_report = (tmp_path / "exec-summary.challenge.report.md").read_text(
+        encoding="utf-8"
+    )
     assert "doc: prd" in prd_report
     assert "## bs-001 (high)" in prd_report
     assert "No rollback strategy" in prd_report

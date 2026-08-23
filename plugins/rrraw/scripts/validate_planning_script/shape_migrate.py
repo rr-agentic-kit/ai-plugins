@@ -171,9 +171,7 @@ def _split_doc_blocks(text: str) -> tuple[str, list[_DocBlock]]:
                 blocks.append(_DocBlock(kind="title", lines=[line]))
             else:
                 current_section = title
-                blocks.append(
-                    _DocBlock(kind="prose", lines=[line], section=title)
-                )
+                blocks.append(_DocBlock(kind="prose", lines=[line], section=title))
             index += 1
             continue
         blocks.append(_DocBlock(kind="text", lines=[line]))
@@ -228,8 +226,10 @@ def migrate_exec_summary_shape(text: str, source_file: str) -> tuple[str, list[I
     rebuilt: list[_DocBlock] = []
     inserted_functional = False
     for block in blocks:
-        if block.kind != "item" or not block.item_id or not block.item_id.startswith(
-            "ES-"
+        if (
+            block.kind != "item"
+            or not block.item_id
+            or not block.item_id.startswith("ES-")
         ):
             if (
                 not inserted_functional
@@ -304,8 +304,10 @@ def migrate_prd_shape(text: str, source_file: str) -> tuple[str, list[Issue]]:
     frontmatter, blocks = _split_doc_blocks(text)
     blocks = _drop_release_phasing_section(blocks)
     for block in blocks:
-        if block.kind != "item" or not block.item_id or not block.item_id.startswith(
-            "PRD-"
+        if (
+            block.kind != "item"
+            or not block.item_id
+            or not block.item_id.startswith("PRD-")
         ):
             continue
         block.meta = _strip_moscow_meta(block.meta)
@@ -375,9 +377,7 @@ def split_challenge_report(planning_dir: Path) -> list[Issue]:
         loaded = yaml.safe_load(match.group(1))
         if isinstance(loaded, dict):
             shared_front = {
-                key: str(value)
-                for key, value in loaded.items()
-                if key != "doc"
+                key: str(value) for key, value in loaded.items() if key != "doc"
             }
         body = text[match.end() :]
     grouped: dict[str, list[tuple[str, list[str], dict[str, str]]]] = {
@@ -458,9 +458,7 @@ def archive_frd_to_tech(planning_dir: Path) -> list[Issue]:
         md_path.unlink()
     if yaml_path.is_file():
         parts.append(
-            "```yaml\n"
-            + yaml_path.read_text(encoding="utf-8").strip("\n")
-            + "\n```"
+            "```yaml\n" + yaml_path.read_text(encoding="utf-8").strip("\n") + "\n```"
         )
         yaml_path.unlink()
     archive = "\n\n".join(part for part in parts if part.strip())

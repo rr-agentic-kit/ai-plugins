@@ -93,9 +93,7 @@ def _preserve_created(raw: Any) -> str:
     return _utc_now_stamp()
 
 
-def _frontmatter_pins(
-    stem: str, levels: dict[str, Any]
-) -> dict[str, Any]:
+def _frontmatter_pins(stem: str, levels: dict[str, Any]) -> dict[str, Any]:
     parent = PARENT_DOC.get(stem)
     if parent is None:
         return {}
@@ -248,9 +246,7 @@ def _fill_status_payload(data: dict[str, Any], defaults: dict[str, Any]) -> bool
     return payload_changed
 
 
-def _fill_status_levels(
-    data: dict[str, Any], defaults: dict[str, Any]
-) -> bool:
+def _fill_status_levels(data: dict[str, Any], defaults: dict[str, Any]) -> bool:
     payload_changed = False
     if "levels" not in data or not isinstance(data["levels"], dict):
         data["levels"] = defaults["levels"]
@@ -558,8 +554,7 @@ def _check_doc_baseline(
         issues.append(
             Issue.error(
                 "REV_WHILE_OPEN",
-                f"{doc} frontmatter doc_rev is integer while status "
-                "rev is unfrozen",
+                f"{doc} frontmatter doc_rev is integer while status " "rev is unfrozen",
                 doc,
             )
         )

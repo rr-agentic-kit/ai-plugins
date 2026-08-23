@@ -259,9 +259,7 @@ def _parse_item_metadata(
         _record_meta_errors(meta_errors, item_id, issues)
         index += 1
         index = _skip_blanks(lines, index)
-        index = _parse_inline_body_block(
-            lines, index, item_id, issues, migrate=migrate
-        )
+        index = _parse_inline_body_block(lines, index, item_id, issues, migrate=migrate)
         return meta, index
     issues.append(
         Issue.error(
@@ -291,9 +289,7 @@ def parse_markdown(
         item_id = f"{prefix}-{number}"
         i += 1
         i = _skip_blanks(lines, i)
-        meta, i = _parse_item_metadata(
-            lines, i, item_id, issues, migrate=migrate
-        )
+        meta, i = _parse_item_metadata(lines, i, item_id, issues, migrate=migrate)
         items.append(_item_from_meta(item_id, title, prefix, meta, source_file, issues))
     return items, issues
 
@@ -438,9 +434,7 @@ def _validate_item_enums(
                 item_id,
             )
         )
-    goal_type = (
-        _null_or_value(meta["goal-type"]) if "goal-type" in meta else None
-    )
+    goal_type = _null_or_value(meta["goal-type"]) if "goal-type" in meta else None
     if goal_type is not None and goal_type not in GOAL_TYPE_VALUES:
         issues.append(
             Issue.error(
@@ -458,9 +452,7 @@ def _validate_item_enums(
                 item_id,
             )
         )
-    confidence = (
-        _null_or_value(meta["confidence"]) if "confidence" in meta else None
-    )
+    confidence = _null_or_value(meta["confidence"]) if "confidence" in meta else None
     if confidence is not None and confidence not in CONFIDENCE_VALUES:
         issues.append(
             Issue.error(
@@ -502,14 +494,10 @@ def _item_from_meta(
     tag = _null_or_value(meta["tag"]) if "tag" in meta else None
     moscow = _null_or_value(meta["moscow"]) if "moscow" in meta else None
     kano = _null_or_value(meta["kano"]) if "kano" in meta else None
-    goal_type = (
-        _null_or_value(meta["goal-type"]) if "goal-type" in meta else None
-    )
+    goal_type = _null_or_value(meta["goal-type"]) if "goal-type" in meta else None
     reach = _null_or_value(meta["reach"]) if "reach" in meta else None
     impact = _null_or_value(meta["impact"]) if "impact" in meta else None
-    confidence = (
-        _null_or_value(meta["confidence"]) if "confidence" in meta else None
-    )
+    confidence = _null_or_value(meta["confidence"]) if "confidence" in meta else None
     effort = _null_or_value(meta["effort"]) if "effort" in meta else None
     supersedes = _null_or_value(meta["supersedes"]) if "supersedes" in meta else None
     superseded_by = (

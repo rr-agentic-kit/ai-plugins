@@ -20,7 +20,14 @@ def test_level_skip():
     issues = vp.check_parents(
         [
             item("ES-3", parent=None, moscow="Must"),
-            item("PRD-1", parent="ES-3", reach="40% of MAU", impact="2", confidence="medium", effort="5"),
+            item(
+                "PRD-1",
+                parent="ES-3",
+                reach="40% of MAU",
+                impact="2",
+                confidence="medium",
+                effort="5",
+            ),
         ]
     )
     assert "LEVEL_SKIP" in error_codes(issues)

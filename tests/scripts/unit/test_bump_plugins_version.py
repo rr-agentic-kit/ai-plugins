@@ -74,9 +74,7 @@ def test_rc_increments_local_prerelease(mini_repo, monkeypatch, capsys):
     )
     monkeypatch.setattr(bump, "REPO_ROOT", root)
     calls: list[list[str]] = []
-    monkeypatch.setattr(
-        bump, "run_uv", lambda args, *, cwd: calls.append(list(args))
-    )
+    monkeypatch.setattr(bump, "run_uv", lambda args, *, cwd: calls.append(list(args)))
 
     assert bump.main(["rc"]) == 0
 
@@ -94,9 +92,7 @@ def test_rc_lifts_lagging_then_increments(mini_repo, monkeypatch, capsys):
     root = mini_repo(pyproject_version="0.0.2-beta-4", plugins={"foo": "0.0.1"})
     monkeypatch.setattr(bump, "REPO_ROOT", root)
     calls: list[list[str]] = []
-    monkeypatch.setattr(
-        bump, "run_uv", lambda args, *, cwd: calls.append(list(args))
-    )
+    monkeypatch.setattr(bump, "run_uv", lambda args, *, cwd: calls.append(list(args)))
 
     assert bump.main(["rc"]) == 0
 

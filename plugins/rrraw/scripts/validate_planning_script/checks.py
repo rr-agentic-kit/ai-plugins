@@ -327,9 +327,7 @@ def _dense(nums: list[int], group: str) -> list[Issue]:
 def _check_container_fields(item: Item) -> list[Issue]:
     issues: list[Issue] = []
     if item.status is not None:
-        issues.append(
-            Issue.error("STATUS_SCOPE", "status is PRD leaves only", item.id)
-        )
+        issues.append(Issue.error("STATUS_SCOPE", "status is PRD leaves only", item.id))
     if item.moscow is not None or item.kano is not None:
         issues.append(
             Issue.error("CONTAINER_RANK", "containers stay unmarked", item.id)
@@ -368,9 +366,7 @@ def _check_ready_leaf_rank(item: Item) -> list[Issue]:
         issues.append(Issue.error("DOR", "ready leaf missing kano", item.id))
     if method == "rice":
         if "goal-type" in item.raw_keys and item.goal_type is None:
-            issues.append(
-                Issue.error("DOR", "ready leaf missing goal-type", item.id)
-            )
+            issues.append(Issue.error("DOR", "ready leaf missing goal-type", item.id))
         rice_keys = ("reach", "impact", "confidence")
         if any(key in item.raw_keys for key in rice_keys):
             for key, value in (
@@ -383,9 +379,7 @@ def _check_ready_leaf_rank(item: Item) -> list[Issue]:
                         Issue.error("DOR", f"ready leaf missing {key}", item.id)
                     )
             if "effort" in item.raw_keys and item.effort is None:
-                issues.append(
-                    Issue.error("DOR", "ready leaf missing effort", item.id)
-                )
+                issues.append(Issue.error("DOR", "ready leaf missing effort", item.id))
     return issues
 
 
@@ -398,8 +392,7 @@ def _check_ready_parent(item: Item, by_id: dict[str, Item]) -> list[Issue]:
     return [
         Issue.error(
             "PARENT_READY",
-            "ready item requires cross-doc parent spec:ready "
-            f"(got {parent.spec})",
+            "ready item requires cross-doc parent spec:ready " f"(got {parent.spec})",
             item.id,
         )
     ]
