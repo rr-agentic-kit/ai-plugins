@@ -9,6 +9,7 @@ Dual-runtime plugin marketplace (Cursor + Claude Code). Plugins live under `plug
 - `tests/<plugin>/` — monorepo only; not shipped in marketplace installs
 - `pyproject.toml` — dev tooling at repo root only (uv, pytest, ruff, mypy)
 - `scripts/validate_plugin_versions.py` — version alignment check (CI and pre-commit)
+- `scripts/bump_plugins_version.py` — lockstep version bump across pyproject + all plugin manifests
 
 ## Hard rules
 
@@ -29,13 +30,22 @@ Run from the repository root unless noted.
 ```bash
 uv sync --all-groups
 uv run pytest tests/ -v
-uv run ruff check plugins/context-eng-hero/scripts tests/context-eng-hero
+uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
 uv run python scripts/validate_plugin_versions.py
+uv run python scripts/install_claude_local.py
+uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}
 claude plugin validate .
 claude plugin validate ./plugins/context-eng-hero
 ```
 
 Full quality matrix (Black, Mypy, Bandit, pip-audit, coverage, Sonar): see `CONTRIBUTING.md`.
+
+## Testing
+
+- Full suite: `uv run pytest tests/ -v`
+- Single plugin: `uv run pytest tests/context-eng-hero/ -v` or `uv run pytest tests/rrraw/ -v`
+- Repo-root scripts: `uv run pytest tests/scripts/ -v`
+- Coverage + CI parity: `CONTRIBUTING.md`
 
 ## Where to look next
 
@@ -60,5 +70,5 @@ For **context-eng-hero** authoring, audit gates, or `audit_static.py`: use `plug
 
 - Skills start with `recipe-` to make it easier to identify
 - Commands sub-divisions:
-    - `-fix` it focus on do ajust a wrong behavior based on previous assessment/review or human input
+    - `-fix` focuses on adjusting wrong behavior based on previous assessment/review or human input
     - `-design|add|create` for start something new

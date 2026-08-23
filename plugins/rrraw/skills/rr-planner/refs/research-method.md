@@ -18,18 +18,15 @@ Research is a **distinct, later phase** — after docs are composed:
 |------|------------------|
 | Competitive landscape | MRD competitors section, PRD differentiation |
 | Market sizing / trends | MRD segments, exec-summary "why now" |
-| Standards / regulations | BRD business rules, FRD NFRs |
-| Technology landscape | FRD integration points, architecture assumptions |
-| Customer evidence | PRD personas, MRD customer needs |
+| Standards / regulations | BRD business rules, PRD NFRs (mechanism → `tech.md`) |
+| Technology landscape | `tech.md` integration points, architecture assumptions |
+| Customer evidence | PRD personas **section**, MRD customer needs |
 
 ## Iterative research
 
-Research runs in iterations until:
+**Agent (one Task invocation):** iterations until no new material findings in an iteration. Each iteration: plan queries → search → synthesize → check gaps. Per iteration: 3–5 queries (not unlimited). No fixed round cap. Then return `ok` or `partial` — do not wait for user confirm.
 
-- No new material findings in an iteration, **and** user confirms done, **or**
-- User says stop / pause → checkpoint and exit
-
-Each iteration: plan queries → search → synthesize → check gaps. No fixed round cap.
+**Skill:** after the agent returns, user confirms done (may re-`Task`) or stop / pause (checkpoint and exit).
 
 Per iteration:
 

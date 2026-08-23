@@ -5,14 +5,18 @@ from __future__ import annotations
 
 import json
 import sys
+import tomllib
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
+_MANIFEST_RELS = (
+    ".cursor-plugin/plugin.json",
+    ".claude-plugin/plugin.json",
+)
+
 
 def _read_pyproject_version(pyproject: Path) -> str:
-    import tomllib
-
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
     version = data.get("project", {}).get("version")
     if not isinstance(version, str) or not version.strip():
@@ -28,32 +32,38 @@ def _read_manifest_version(path: Path) -> str:
     return version
 
 
-def collect_versions(repo_root: Path) -> dict[str, str]:
-    pyproject = repo_root / "pyproject.toml"
+def _plugin_dirs(repo_root: Path) -> list[Path]:
     plugins_dir = repo_root / "plugins"
-    versions: dict[str, str] = {}
-    versions["pyproject.toml [project].version"] = _read_pyproject_version(pyproject)
-
     if not plugins_dir.is_dir():
         raise SystemExit(f"plugins directory not found: {plugins_dir}")
 
-    plugin_dirs = sorted(
+    dirs = sorted(
         p for p in plugins_dir.iterdir() if p.is_dir() and not p.name.startswith(".")
     )
-    if not plugin_dirs:
+    if not dirs:
         raise SystemExit(f"no plugin directories under {plugins_dir}")
+    return dirs
 
-    for plugin_dir in plugin_dirs:
-        name = plugin_dir.name
-        for rel in (
-            ".cursor-plugin/plugin.json",
-            ".claude-plugin/plugin.json",
-        ):
-            manifest = plugin_dir / rel
-            label = f"plugins/{name}/{rel}"
-            if not manifest.is_file():
-                raise SystemExit(f"missing manifest: {label}")
-            versions[label] = _read_manifest_version(manifest)
+
+def manifest_paths(repo_root: Path) -> list[Path]:
+    """Cursor and Claude plugin.json paths for every plugin directory."""
+    return [
+        plugin_dir / rel
+        for plugin_dir in _plugin_dirs(repo_root)
+        for rel in _MANIFEST_RELS
+    ]
+
+
+def collect_versions(repo_root: Path) -> dict[str, str]:
+    pyproject = repo_root / "pyproject.toml"
+    versions: dict[str, str] = {}
+    versions["pyproject.toml [project].version"] = _read_pyproject_version(pyproject)
+
+    for manifest in manifest_paths(repo_root):
+        label = manifest.relative_to(repo_root).as_posix()
+        if not manifest.is_file():
+            raise SystemExit(f"missing manifest: {label}")
+        versions[label] = _read_manifest_version(manifest)
 
     return versions
 

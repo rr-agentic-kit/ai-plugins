@@ -10,7 +10,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  administration: write
   contents: read
   security-events: write
   actions: read

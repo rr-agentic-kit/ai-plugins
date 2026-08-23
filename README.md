@@ -18,7 +18,8 @@ ai-plugins/
 ├── pyproject.toml                    # Dev tooling (Python 3.14+, pytest, ruff, mypy)
 ├── sonar-project.properties          # SonarCloud (CI; set org/key + SONAR_TOKEN)
 ├── tests/
-│   └── context-eng-hero/             # audit_static fixtures, unit, integration
+│   ├── context-eng-hero/             # audit_static fixtures, unit, integration
+│   └── rrraw/                        # validate_planning unit tests
 ├── plugins/
 │   └── context-eng-hero/               # Example plugin (dual runtime)
 └── LICENSE                             # Unlicense

@@ -3,6 +3,8 @@ name: python-quality
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
 
 permissions:
   contents: read
@@ -29,16 +31,16 @@ jobs:
         run: uv run python scripts/validate_plugin_versions.py
 
       - name: Ruff
-        run: uv run ruff check plugins/context-eng-hero/scripts tests/context-eng-hero
+        run: uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
 
       - name: Black
-        run: uv run black --check plugins/context-eng-hero/scripts tests/context-eng-hero
+        run: uv run black --check plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
 
       - name: Mypy
         run: uv run mypy
 
       - name: Bandit
-        run: uv run bandit -r plugins/context-eng-hero/scripts -c pyproject.toml
+        run: uv run bandit -r plugins/context-eng-hero/scripts plugins/rrraw/scripts -c pyproject.toml
 
       - name: Export requirements for pip-audit
         run: uv export --frozen --format requirements.txt -o /tmp/requirements.txt
@@ -50,6 +52,7 @@ jobs:
         run: |
           uv run pytest tests/ -v \
             --cov=plugins/context-eng-hero/scripts/audit_static \
+            --cov=plugins/rrraw/scripts/validate_planning_script \
             --cov-report=term-missing \
             --cov-report=xml
 
@@ -75,6 +78,7 @@ jobs:
         run: |
           uv run pytest tests/ -v \
             --cov=plugins/context-eng-hero/scripts/audit_static \
+            --cov=plugins/rrraw/scripts/validate_planning_script \
             --cov-report=xml
 
       - name: SonarCloud Scan

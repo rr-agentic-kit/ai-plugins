@@ -24,11 +24,11 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 |-------|------|-------------|
 | `payload` | `NormalizedPayload` | From [input-resolution.md](input-resolution.md) |
 | `phase` | string | Current agent phase name |
-| `level` | string | Cascade level (`exec-summary`, `mrd`, `brd`, `prd`, `frd`) or null for research/challenge |
+| `level` | string | Cascade level (`exec-summary`, `mrd`, `brd`, `prd`) or null for research/challenge |
 | `epoch` | integer | 1-based; 1 for single-shot flows |
 | `round` | integer | Clarification iteration counter within a level (informational; no cap) |
 | `prior_outputs` | object | Keyed by phase name; prior structured outputs in chains |
-| `session_state` | object | Accumulated facts, decisions, assumptions from [cascade.md](cascade.md) |
+| `session_state` | object | Accumulated facts, decisions, assumptions, `item_registry`, `frozen_levels`, `project_posture`, `note_sessions` from [cascade.md](cascade.md) |
 
 ### PhaseOutput
 
@@ -47,7 +47,7 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 | `status` | `ok` \| `partial` \| `failed` | Completion state |
 | `data` | object | Phase-specific contract (below) |
 | `summary` | string | One-line human summary |
-| `artifacts` | string[] | File paths written (informational) |
+| `artifacts` | string[] | Paths **this agent** wrote this invocation. Compose: the cascade doc, `items.json`, rewritten child docs. Research/challenge: empty — skill persists those reports. |
 
 ### PhaseError
 
@@ -91,44 +91,50 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
 
 ### compose
 
+Compose **must** persist `{level}.md` and merge this level into `items.json`, then return a slim receipt. Compose PhaseOutput must never include `doc_content`, `items[]`, or a document body; a fat receipt means the contract failed.
+
 ```json
 {
   "doc_type": "prd",
-  "doc_content": "# PRD\n...",
+  "doc_path": "prd.md",
   "sections_completed": ["overview", "goals", "requirements"],
   "sections_incomplete": [],
   "clarifications_needed": [],
-  "traceability": [{
-    "req_id": "prd-req-1",
-    "traces_to": "brd-obj-2",
-    "goal_ref": "exec-vision"
-  }],
+  "id_remap": {},
+  "items_removed": [],
   "assumptions_used": ["a-001"]
 }
 ```
 
+Item identity, closed `_key_:` markdown, spec/status: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json). Records live in `items.json` on disk — not in this receipt. Skill refreshes `item_registry` by reading `items.json`.
+
 | Field | Notes |
 |-------|-------|
-| `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd`, `frd` |
-| `doc_content` | Full markdown document per [doc-standards/](doc-standards/) |
+| `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd` |
+| `doc_path` | Path of the file this agent just wrote (`{level}.md`) |
 | `sections_completed` | Required sections with content |
 | `sections_incomplete` | Required sections with gaps |
 | `clarifications_needed` | `ClarificationItem[]` — non-empty blocks `status: ok` |
-| `traceability` | Parent links for requirements/objectives |
+| `id_remap` | Old id → new id when re-composing a frozen level; empty object otherwise. Same invocation rewrites child-doc `parent:` and `items.json`. |
+| `items_removed` | Ids dropped from this `doc` in `items.json` this invocation (kill/burial). Empty list otherwise. Skill already wrote `graveyard` / `reserved_ids` before compose, or updates from this list. |
 | `assumptions_used` | Assumption ids referenced in doc |
+
+`artifacts[]` on the envelope lists paths this agent wrote (`doc_path`, `items.json`, rewritten child docs).
+
+Execution (posture required, notes ingest, sidecar prune): [project-posture.md](project-posture.md), [note-sessions.md](note-sessions.md). Must≠MVP / MoSCoW legend: [project-posture.md](project-posture.md). `reserved_ids` / ledger read-only: [decision-ledger.md](decision-ledger.md). Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md).
 
 | `status` | When |
 |----------|------|
-| `ok` | All required sections complete; `clarifications_needed` empty |
-| `partial` | Doc written but gaps remain or clarifications needed |
-| `failed` | Cannot render doc (e.g. missing parent level facts) |
+| `ok` | All required sections complete; `clarifications_needed` empty; files persisted |
+| `partial` | Doc persisted but gaps remain or clarifications needed |
+| `failed` | Cannot render doc (e.g. missing parent level facts) — do not persist |
 
 ### research
 
 ```json
 {
   "findings": [{
-    "id": "r-001",
+    "id": "rf-001",
     "topic": "Competitive landscape",
     "summary": "",
     "citations": [{ "title": "", "url": "", "accessed": "ISO-8601" }],
@@ -147,15 +153,15 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
 
 | Field | Notes |
 |-------|-------|
-| `findings` | Cited market/competitor/standards evaluation |
+| `findings` | Cited market/competitor/standards evaluation. Finding ids use `rf-` (not `r-`, which is ledger rationale) |
 | `citations` | Required for each finding — no unsourced claims |
 | `refinement_signals` | Suggested doc updates (skill/user applies via re-discover) |
 | `clarifications_needed` | Blocking gaps that research cannot resolve without user input |
 
 | `status` | When |
 |----------|------|
-| `ok` | Research complete; no blocking clarifications; user confirmed done or no new findings |
-| `partial` | User stopped mid-research or unresolved clarifications remain |
+| `ok` | No new material findings this invocation; no blocking clarifications |
+| `partial` | Unresolved clarifications remain |
 | `failed` | No docs to evaluate or research scope error |
 
 ### challenge
@@ -164,12 +170,18 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
 {
   "findings": [{
     "id": "bs-001",
+    "doc": "prd",
+    "target_doc": "prd",
     "category": "failure_modes",
     "severity": "high",
-    "doc_ref": "frd.md § 3.2",
+    "doc_ref": "prd.md § 3.2",
     "finding": "",
     "evidence": "",
     "recommendation": "",
+    "fix_action": "flag_risk",
+    "fix_level": "prd",
+    "target_artifact": "doc",
+    "paired_finding_id": null,
     "alternatives": []
   }],
   "comparison_tables": [{
@@ -178,42 +190,43 @@ Agents **never** prompt the user directly. They return `clarifications_needed[]`
     "recommendation": ""
   }],
   "clarifications_needed": [],
-  "docs_reviewed": ["exec-summary.md", "mrd.md", "brd.md", "prd.md", "frd.md"]
+  "docs_reviewed": ["prd.md"],
+  "self_check_meta": {
+    "dropped": 0,
+    "downgraded": 0
+  }
 }
 ```
 
+`docs_reviewed` uses actual filenames (always `.md`). Reflects the **one target doc** scanned this invocation; when dual-stub findings exist, the orchestrator adds the partner doc filename on mirror persist — not a full-cascade array by default.
+
 | Field | Notes |
 |-------|-------|
-| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy |
+| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** on the one target doc. Judgment only when `payload.static_validation.status` is `passed` or `failed`. Ledger scan: [decision-ledger.md](decision-ledger.md) Challenge. |
+| `findings[].doc` | Cascade stem where the weak spot **appears** (symptom). Required. |
+| `findings[].target_doc` | Cascade stem where the fix belongs. Same as `doc` when inline. Required. |
+| `findings[].doc_ref` | Human locator (`prd.md § 3.2`). Keep even when `doc` is set. |
+| `findings[].fix_action` | `reword` · `refile` · `demote` · `add_constraint` · `park_notes` · `park_later` · `flag_risk` · `scope_change`. Per-lens × per-level fences in blind-spots.md. `demote`/`scope_change` are recommendations — user confirms before ledger write. |
+| `findings[].fix_level` | Cascade level that should absorb the fix. |
+| `findings[].target_artifact` | `doc` \| `notes` \| `later`. Park actions set this; inline doc edits use `doc`. |
+| `findings[].paired_finding_id` | When fix ≠ symptom doc, id for the orchestrator-mirrored stub in the partner report. |
+| `findings[].legal_risk_tier` | Optional. `green` \| `yellow` \| `gray` \| `red` — T6-1 shape under `assumption_debt`/`economic`. |
+| `findings[].litigation_cost_benefit` | Optional. T6-1 litigation cost/benefit note, independent of legal merit. |
 | `comparison_tables` | When single-option decisions lack alternatives analysis |
 | `clarifications_needed` | Questions that block severity assessment |
-| `docs_reviewed` | All docs scanned |
+| `docs_reviewed` | Target doc scanned this invocation (`.md` filename) |
+| `self_check_meta` | Counts from mandatory pre-return self-check (`grounding` · `level_fit` · `action_fit` · `non_duplicate` · `distance` · `candor`). Failures dropped or downgraded before persist. |
+
+Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` = `{ "status": "passed|failed|skipped", "errors": [] }` from `validate_planning.sh`. `PhaseInput.level` = target cascade stem. Static vs judgment: [success-criteria.md](success-criteria.md).
 
 | `status` | When |
 |----------|------|
-| `ok` | Full taxonomy scan complete |
-| `partial` | Some docs unreadable or clarifications pending |
-| `failed` | No docs found in scope |
+| `ok` | Full taxonomy union scan complete on the one target doc |
+| `partial` | Target doc unreadable or clarifications pending |
+| `failed` | No target doc found in scope or `PhaseInput.level` missing/invalid |
 
 ---
 
 ## NormalizedPayload reference
 
-Emitted by input-resolution; embedded in `PhaseInput.payload`:
-
-```json
-{
-  "action": "discover",
-  "input": null,
-  "output_dir": "docs/planning/",
-  "format": "md",
-  "depth": "standard",
-  "question_mode": "ask",
-  "resume": false,
-  "cascade_levels": ["exec-summary", "mrd", "brd", "prd", "frd"],
-  "chain": ["discover", "compose"],
-  "resolution_trace": {}
-}
-```
-
-Full schema: [input-resolution.md](input-resolution.md).
+Shape and field rules: [input-resolution.md](input-resolution.md). Embedded as `PhaseInput.payload`. Includes `route` (`from-0` / `resume` / `continue-discover` / `start-change` / `continue-change` / `continue-next-track` / `ask`) and `--change` selectors `change_section` / `change_target`.

@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 
 sys.path.insert(0, str(SCRIPTS_DIR))
+import install_claude_local as icl  # noqa: E402
 import validate_plugin_versions as m  # noqa: E402
 
 
@@ -24,6 +25,11 @@ def repo_root() -> Path:
 @pytest.fixture
 def validate_module():
     return m
+
+
+@pytest.fixture
+def install_module():
+    return icl
 
 
 PluginVersions = dict[str, str | dict[str, str]]

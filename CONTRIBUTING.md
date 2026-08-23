@@ -27,10 +27,10 @@ uv run pre-commit run --all-files
 Same commands as [`.github/workflows/python-quality.yml`](.github/workflows/python-quality.yml):
 
 ```bash
-uv run ruff check plugins/context-eng-hero/scripts tests/context-eng-hero
-uv run black --check plugins/context-eng-hero/scripts tests/context-eng-hero
+uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
+uv run black --check plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
 uv run mypy
-uv run bandit -r plugins/context-eng-hero/scripts -c pyproject.toml
+uv run bandit -r plugins/context-eng-hero/scripts plugins/rrraw/scripts -c pyproject.toml
 uv export --frozen --format requirements.txt -o /tmp/requirements.txt
 uv run pip-audit -r /tmp/requirements.txt
 ```
@@ -38,8 +38,8 @@ uv run pip-audit -r /tmp/requirements.txt
 Format/fix locally:
 
 ```bash
-uv run ruff check --fix plugins/context-eng-hero/scripts tests/context-eng-hero
-uv run black plugins/context-eng-hero/scripts tests/context-eng-hero
+uv run ruff check --fix plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
+uv run black plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
 ```
 
 ## Tests
@@ -54,6 +54,7 @@ Single plugin:
 
 ```bash
 uv run pytest tests/context-eng-hero/ -v
+uv run pytest tests/rrraw/ -v
 ```
 
 Coverage (matches CI + SonarCloud):
@@ -61,13 +62,14 @@ Coverage (matches CI + SonarCloud):
 ```bash
 uv run pytest tests/ -v \
   --cov=plugins/context-eng-hero/scripts/audit_static \
+  --cov=plugins/rrraw/scripts/validate_planning_script \
   --cov-report=term-missing \
   --cov-report=xml
 ```
 
 ## CI
 
-[`.github/workflows/python-quality.yml`](.github/workflows/python-quality.yml) runs Ruff, Black, Mypy, Bandit, pip-audit, pytest with `coverage.xml`, and SonarCloud on pull requests and pushes to `main`.
+[`.github/workflows/python-quality.yml`](.github/workflows/python-quality.yml) runs Ruff, Black, Mypy, Bandit, pip-audit, pytest with `coverage.xml`, and SonarCloud on pull requests and pushes to `master`.
 
 ### SonarCloud (one-time setup)
 
@@ -96,6 +98,14 @@ End users and agents inside the **installed plugin** use plugin-only bootstrap �
 ```bash
 uv run python scripts/validate_plugin_versions.py
 ```
+
+Lockstep bump (lifts every plugin to the PEP 440 max, then increments):
+
+```bash
+uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}
+```
+
+`rc` ticks the local prerelease (`0.0.2-beta-4` → `0.0.2-beta-5`) so Claude Code / Cursor cache a new version — required before `install_claude_local` or any plugin-manager update. `stable` graduates a prerelease (`0.0.2-beta-4` → `0.0.2`); `patch` does not (`0.0.2-beta-4` → `0.0.3`). Re-run the validator after a bump.
 
 ## Plugin validation
 
