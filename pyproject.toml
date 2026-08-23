@@ -7,14 +7,14 @@ dependencies = ["pyyaml>=6.0.3"]
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3",
-    "pytest-cov>=6.0",
-    "ruff>=0.9",
-    "black>=25.0",
-    "mypy>=1.14",
-    "bandit[toml]>=1.8",
-    "pip-audit>=2.7",
-    "pre-commit>=4.0",
+    "pytest>=9.1",
+    "pytest-cov>=7.1",
+    "ruff>=0.16",
+    "black>=26.5",
+    "mypy>=2.3",
+    "bandit[toml]>=1.9",
+    "pip-audit>=2.10",
+    "pre-commit>=4.6",
     "types-pyyaml",
 ]
 

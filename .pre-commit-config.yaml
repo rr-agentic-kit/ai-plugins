@@ -1,41 +1,25 @@
+# Mirrors .github/workflows/python-quality.yml plus GitHub config validation.
+# Local hooks use `uv run` so tool versions match uv.lock / CI.
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
-        types: [python]
+        files: \.(py|ya?ml|json)$
       - id: end-of-file-fixer
-        types: [python]
+        files: \.(py|ya?ml|json)$
       - id: check-yaml
         files: \.(ya?ml)$
+      - id: check-json
+        files: ^\.github/
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.14
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
     hooks:
-      - id: ruff-check
-        args: [--fix]
-
-  - repo: https://github.com/psf/black
-    rev: 26.5.1
-    hooks:
-      - id: black
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
-    hooks:
-      - id: mypy
-        pass_filenames: false
-        args: [--config-file=pyproject.toml]
+      - id: actionlint
         additional_dependencies:
-          - types-pyyaml
-          - pyyaml
-
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.9.4
-    hooks:
-      - id: bandit
-        args: [-c, pyproject.toml]
-        types: [python]
+          - github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.11.1
 
   - repo: local
     hooks:
@@ -46,6 +30,54 @@ repos:
         pass_filenames: false
         files: ^(pyproject\.toml|plugins/[^/]+/\.(cursor|claude)-plugin/plugin\.json)$
 
+      - id: ruff
+        name: ruff (CI paths)
+        entry: uv run ruff check
+        language: system
+        pass_filenames: false
+        args:
+          - plugins/context-eng-hero/scripts
+          - plugins/rrraw/scripts
+          - scripts
+          - tests/context-eng-hero
+          - tests/rrraw
+          - tests/scripts
+        files: ^(plugins/|scripts/|tests/|pyproject\.toml)
+
+      - id: black
+        name: black (CI paths)
+        entry: uv run black --check
+        language: system
+        pass_filenames: false
+        args:
+          - plugins/context-eng-hero/scripts
+          - plugins/rrraw/scripts
+          - scripts
+          - tests/context-eng-hero
+          - tests/rrraw
+          - tests/scripts
+        files: ^(plugins/|scripts/|tests/|pyproject\.toml)
+
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        pass_filenames: false
+        files: ^(plugins/.*/scripts/|pyproject\.toml)
+
+      - id: bandit
+        name: bandit (CI paths)
+        entry: uv run bandit
+        language: system
+        pass_filenames: false
+        args:
+          - -r
+          - plugins/context-eng-hero/scripts
+          - plugins/rrraw/scripts
+          - -c
+          - pyproject.toml
+        files: ^plugins/.*/scripts/
+
       - id: pip-audit
         name: pip-audit
         entry: bash -c 'uv export --frozen --format requirements.txt -o /tmp/requirements.txt >/dev/null && uv run pip-audit -r /tmp/requirements.txt'
@@ -54,8 +86,13 @@ repos:
         files: ^(pyproject\.toml|uv\.lock)$
 
       - id: pytest
-        name: pytest (full suite)
-        entry: uv run pytest tests/ -v
+        name: pytest with coverage (CI paths)
+        entry: >-
+          bash -c 'uv run pytest tests/ -v
+          --cov=plugins/context-eng-hero/scripts/audit_static
+          --cov=plugins/rrraw/scripts/validate_planning_script
+          --cov-report=term-missing
+          --cov-report=xml'
         language: system
         pass_filenames: false
         files: ^(plugins/|scripts/|tests/|pyproject\.toml)

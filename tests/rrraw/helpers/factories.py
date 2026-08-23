@@ -127,7 +127,7 @@ PRD_RICE_DEFAULTS = {
 def prd_rice(
     item_id: str,
     *,
-    parent: str | None | object = _UNSET,
+    parent: str | object | None = _UNSET,
     spec: str = "ready",
     **kwargs: Any,
 ) -> vp.Item:
@@ -139,7 +139,7 @@ def item(
     item_id: str,
     *,
     title: str = "x",
-    parent: str | None | object = _UNSET,
+    parent: str | object | None = _UNSET,
     kind: str = "leaf",
     spec: str = "ready",
     status: str | None = None,
