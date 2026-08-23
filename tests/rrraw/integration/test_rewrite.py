@@ -6,6 +6,10 @@ from pathlib import Path
 
 import validate_planning_script as vp
 from helpers import (
+    OLD_CHALLENGE_REPORT,
+    OLD_ES_FILES,
+    OLD_FRD_FILE,
+    OLD_PRD_FILES,
     RATIONALE_YAML_FILES,
     VALID_FILES,
     VALID_LEDGER,
@@ -13,6 +17,7 @@ from helpers import (
     error_codes,
     write_planning,
 )
+from validate_planning_script.rewrite import rewrite_planning_dir
 
 
 def test_rewrite_yaml_to_md(tmp_path: Path):
@@ -163,3 +168,68 @@ def test_valid_rationale_round_trip_yaml_rewrite(tmp_path: Path):
     by_id = {item.id: item for item in items}
     assert by_id["PRD-1.1"].rationale == "r-004"
     assert by_id["PRD-1"].rationale is None
+
+
+def test_rewrite_migrates_old_exec_summary_shape(tmp_path: Path):
+    write_planning(tmp_path, OLD_ES_FILES, write_json=False)
+    issues = rewrite_planning_dir(tmp_path)
+    assert not error_codes(issues)
+    assert any(issue.code == "MIGRATE_ES_SHAPE" for issue in issues)
+    text = (tmp_path / "exec-summary.md").read_text(encoding="utf-8")
+    assert "## Functional deliverables" in text
+    assert "## ES-3: Multi-language support" in text
+    assert "_moscow_: Should" in text
+    assert "## ES-2: Self-serve conversion rate" in text
+    assert "_moscow_:" not in text.split("## ES-2:")[1].split("##")[0]
+    assert "## ES-4: Regulatory ceiling" in text
+    assert "_moscow_:" not in text.split("## ES-4:")[1].split("##")[0]
+    issues = vp.validate_dir(tmp_path)
+    assert "MIGRATE_ES_SHAPE" not in error_codes(issues)
+
+
+def test_rewrite_migrates_old_prd_shape_without_rice(tmp_path: Path):
+    write_planning(tmp_path, OLD_PRD_FILES, write_json=False)
+    issues = rewrite_planning_dir(tmp_path)
+    assert not error_codes(issues)
+    assert any(issue.code == "NEEDS_RICE_RESCORE" for issue in issues)
+    text = (tmp_path / "prd.md").read_text(encoding="utf-8")
+    assert "Release phasing" not in text
+    assert "_moscow_:" not in text
+    assert "_reach_:" not in text
+    assert "_impact_:" not in text
+    assert "_confidence_:" not in text
+    assert "_effort_:" not in text
+    assert "> As a guest shopper, I can pay without creating an account." in text
+    issues = vp.validate_dir(tmp_path)
+    assert "NEEDS_RICE_RESCORE" not in error_codes(issues)
+
+
+def test_rewrite_splits_monolithic_challenge_report(tmp_path: Path):
+    write_planning(tmp_path, VALID_FILES)
+    (tmp_path / "challenge-report.md").write_text(OLD_CHALLENGE_REPORT, encoding="utf-8")
+    result = vp.main([str(tmp_path), "--rewrite"])
+    assert result == 0
+    assert not (tmp_path / "challenge-report.md").exists()
+    prd_report = (tmp_path / "prd.challenge.report.md").read_text(encoding="utf-8")
+    es_report = (tmp_path / "exec-summary.challenge.report.md").read_text(encoding="utf-8")
+    assert "doc: prd" in prd_report
+    assert "## bs-001 (high)" in prd_report
+    assert "No rollback strategy" in prd_report
+    assert "doc: exec-summary" in es_report
+    assert "## bs-002 (medium)" in es_report
+    assert "Language support filed" in es_report
+    assert "depth: deep" in prd_report
+    assert "scanned_digest: sha256:deadbeef" in es_report
+
+
+def test_rewrite_archives_frd_into_tech_md(tmp_path: Path):
+    write_planning(tmp_path, VALID_FILES)
+    (tmp_path / "frd.md").write_text(OLD_FRD_FILE, encoding="utf-8")
+    issues = rewrite_planning_dir(tmp_path)
+    assert not error_codes(issues)
+    assert any(issue.code == "FRD_ARCHIVED" for issue in issues)
+    assert not (tmp_path / "frd.md").exists()
+    tech = (tmp_path / "tech.md").read_text(encoding="utf-8")
+    assert "## Archived from frd.md" in tech
+    assert "Guest checkout API" in tech
+    assert "Payment tokenization" in tech

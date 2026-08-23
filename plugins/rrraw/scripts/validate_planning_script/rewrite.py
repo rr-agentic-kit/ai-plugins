@@ -34,6 +34,7 @@ from .parse import (
     parse_inline_meta_line,
     parse_yaml_doc,
 )
+from .shape_migrate import migrate_planning_shapes
 
 
 def _display_value(raw: str) -> str:
@@ -230,6 +231,7 @@ def _rewrite_yaml_file(md_path: Path, yaml_path: Path) -> list[Issue]:
 
 def rewrite_planning_dir(planning_dir: Path, *, empty_ok: bool = False) -> list[Issue]:
     issues: list[Issue] = []
+    issues.extend(migrate_planning_shapes(planning_dir))
     found = False
     for stem in DOC_STEMS:
         md_path = planning_dir / f"{stem}.md"

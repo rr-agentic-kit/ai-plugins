@@ -65,7 +65,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--rewrite",
         action="store_true",
-        help="Migrate list-meta and cascade yaml to canonical md.",
+        help=(
+            "Migrate legacy shapes (ES/PRD, challenge-report, frd), "
+            "list-meta, and cascade yaml to canonical md."
+        ),
     )
     parser.add_argument(
         "--sync-agent-config",

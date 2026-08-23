@@ -13,6 +13,10 @@ from .factories import (
     write_planning,
 )
 from .samples import (
+    OLD_CHALLENGE_REPORT,
+    OLD_ES_FILES,
+    OLD_FRD_FILE,
+    OLD_PRD_FILES,
     RATIONALE_FILES,
     RATIONALE_YAML_FILES,
     VALID_FILES,
@@ -23,6 +27,10 @@ from .samples import (
 SCRIPTS_DIR = Path(__file__).resolve().parents[3] / "plugins" / "rrraw" / "scripts"
 
 __all__ = [
+    "OLD_CHALLENGE_REPORT",
+    "OLD_ES_FILES",
+    "OLD_FRD_FILE",
+    "OLD_PRD_FILES",
     "RATIONALE_FILES",
     "RATIONALE_YAML_FILES",
     "SCRIPTS_DIR",
