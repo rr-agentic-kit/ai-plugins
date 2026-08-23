@@ -24,7 +24,7 @@ from .constants import (
 )
 from .models import Issue
 from .parse import parse_inline_meta_line
-from .workspace import challenge_doc_stem
+from .workspace import challenge_doc_stem, challenge_report_path
 
 CHALLENGE_REPORT_NAME = "challenge-report.md"
 FRD_STEM = "frd"
@@ -426,9 +426,9 @@ def split_challenge_report(planning_dir: Path) -> list[Issue]:
     issues: list[Issue] = []
     written = 0
     for stem, findings in grouped.items():
-        if not findings:
+        if not findings or stem not in DOC_STEMS:
             continue
-        target = planning_dir / f"{stem}.challenge.report.md"
+        target = challenge_report_path(planning_dir, stem)
         target.write_text(
             _render_per_doc_challenge_report(stem, findings, shared_front),
             encoding="utf-8",

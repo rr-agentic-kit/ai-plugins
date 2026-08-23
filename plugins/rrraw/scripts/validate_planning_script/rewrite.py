@@ -35,6 +35,7 @@ from .parse import (
     parse_yaml_doc,
 )
 from .shape_migrate import migrate_planning_shapes
+from .workspace import planning_doc_path, resolve_planning_dir
 
 
 def _display_value(raw: str) -> str:
@@ -237,11 +238,15 @@ def _rewrite_yaml_file(md_path: Path, yaml_path: Path) -> list[Issue]:
 
 def rewrite_planning_dir(planning_dir: Path, *, empty_ok: bool = False) -> list[Issue]:
     issues: list[Issue] = []
-    issues.extend(migrate_planning_shapes(planning_dir))
+    try:
+        safe_dir = resolve_planning_dir(planning_dir)
+    except ValueError as exc:
+        return [Issue.error("PATH_OUTSIDE_ROOT", str(exc))]
+    issues.extend(migrate_planning_shapes(safe_dir))
     found = False
     for stem in DOC_STEMS:
-        md_path = planning_dir / f"{stem}.md"
-        yaml_path = planning_dir / f"{stem}.yaml"
+        md_path = planning_doc_path(safe_dir, stem)
+        yaml_path = planning_doc_path(safe_dir, stem, suffix=".yaml")
         if md_path.is_file():
             found = True
             issues.extend(_rewrite_md_file(md_path, yaml_path))
@@ -249,5 +254,5 @@ def rewrite_planning_dir(planning_dir: Path, *, empty_ok: bool = False) -> list[
             found = True
             issues.extend(_rewrite_yaml_file(md_path, yaml_path))
     if not found and not empty_ok:
-        issues.append(Issue.error("NO_DOCS", f"no planning files in {planning_dir}"))
+        issues.append(Issue.error("NO_DOCS", f"no planning files in {safe_dir}"))
     return issues

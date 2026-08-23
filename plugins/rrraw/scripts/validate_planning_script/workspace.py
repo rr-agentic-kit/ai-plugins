@@ -24,12 +24,37 @@ from .constants import (
 from .models import Issue, Item
 
 
+def find_repo_root(start: Path) -> Path:
+    for candidate in (start.resolve(), *start.resolve().parents):
+        if (candidate / ".git").exists():
+            return candidate
+    return start.resolve()
+
+
 def resolve_within_root(path: Path, root: Path) -> Path:
     resolved = path.resolve()
     root_resolved = root.resolve()
     if not resolved.is_relative_to(root_resolved):
         raise ValueError(f"{path} is outside repo root {root}")
     return resolved
+
+
+def resolve_planning_dir(planning_dir: Path) -> Path:
+    return resolve_within_root(planning_dir, find_repo_root(planning_dir))
+
+
+def planning_doc_path(planning_dir: Path, stem: str, *, suffix: str = ".md") -> Path:
+    if stem not in DOC_STEMS:
+        raise ValueError(f"invalid planning doc stem: {stem!r}")
+    path = (planning_dir / f"{stem}{suffix}").resolve()
+    root = planning_dir.resolve()
+    if not path.is_relative_to(root):
+        raise ValueError(f"{path} is outside planning dir {root}")
+    return path
+
+
+def challenge_report_path(planning_dir: Path, stem: str) -> Path:
+    return planning_doc_path(planning_dir, stem, suffix=".challenge.report.md")
 
 
 def plans_root(planning_dir: Path) -> Path:

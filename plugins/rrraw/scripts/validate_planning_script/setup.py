@@ -24,6 +24,7 @@ from .workspace import (
     default_unfrozen_status,
     ensure_doc_frontmatter,
     fill_status_missing,
+    find_repo_root,
     find_status_path,
     has_cascade_docs,
     load_status,
@@ -85,13 +86,6 @@ def sync_root_sot(repo_root: Path, load_line: str | None = None) -> list[Path]:
         path.write_text(text + needle + "\n", encoding="utf-8")
         updated.append(path)
     return updated
-
-
-def find_repo_root(start: Path) -> Path:
-    for candidate in (start.resolve(), *start.resolve().parents):
-        if (candidate / ".git").exists():
-            return candidate
-    return start.resolve()
 
 
 def sync_agent_injection(
