@@ -3,6 +3,8 @@ name: python-quality
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
 
 permissions:
   contents: read
