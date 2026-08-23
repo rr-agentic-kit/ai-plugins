@@ -35,7 +35,33 @@ from .parse import (
     parse_yaml_doc,
 )
 from .shape_migrate import migrate_planning_shapes
-from .workspace import planning_doc_path, resolve_planning_dir
+from .workspace import planning_doc_path, resolve_planning_dir, resolve_within_root
+
+
+def _planning_basename(stem: str, *, suffix: str = ".md") -> str:
+    """Allowlisted filename only — basename sanitizes path-injection taint."""
+    if stem not in DOC_STEMS:
+        raise ValueError(f"invalid planning doc stem: {stem!r}")
+    if not suffix.startswith(".") or "/" in suffix or "\\" in suffix:
+        raise ValueError(f"invalid planning doc suffix: {suffix!r}")
+    return f"{stem}{suffix}"
+
+
+def _write_under_dir(root: Path, filename: str, text: str) -> None:
+    name = Path(filename).name
+    if name != filename:
+        raise ValueError(f"refusing non-basename planning path: {filename!r}")
+    target = resolve_within_root(root / name, root)
+    target.write_text(text, encoding="utf-8")
+
+
+def _unlink_under_dir(root: Path, filename: str) -> None:
+    name = Path(filename).name
+    if name != filename:
+        raise ValueError(f"refusing non-basename planning path: {filename!r}")
+    target = resolve_within_root(root / name, root)
+    if target.is_file():
+        target.unlink()
 
 
 def _display_value(raw: str) -> str:
@@ -214,25 +240,30 @@ def rewrite_yaml_to_md(text: str, source_file: str) -> tuple[str, list[Issue]]:
     return "\n".join(out), issues
 
 
-def _rewrite_md_file(md_path: Path, yaml_path: Path) -> list[Issue]:
+def _rewrite_md_file(root: Path, stem: str) -> list[Issue]:
+    md_name = _planning_basename(stem)
+    yaml_name = _planning_basename(stem, suffix=".yaml")
+    md_path = resolve_within_root(root / md_name, root)
     text = md_path.read_text(encoding="utf-8")
-    new_text, parse_issues = rewrite_markdown(text, md_path.name)
+    new_text, parse_issues = rewrite_markdown(text, md_name)
     if new_text != text:
-        md_path.write_text(new_text, encoding="utf-8")
-    if yaml_path.is_file():
-        yaml_path.unlink()
+        _write_under_dir(root, md_name, new_text)
+    _unlink_under_dir(root, yaml_name)
     return parse_issues
 
 
-def _rewrite_yaml_file(md_path: Path, yaml_path: Path) -> list[Issue]:
+def _rewrite_yaml_file(root: Path, stem: str) -> list[Issue]:
+    md_name = _planning_basename(stem)
+    yaml_name = _planning_basename(stem, suffix=".yaml")
+    yaml_path = resolve_within_root(root / yaml_name, root)
     text = yaml_path.read_text(encoding="utf-8")
-    new_text, parse_issues = rewrite_yaml_to_md(text, yaml_path.name)
+    new_text, parse_issues = rewrite_yaml_to_md(text, yaml_name)
     if not any(
         issue.severity == "error" and issue.code == "INVALID_YAML"
         for issue in parse_issues
     ):
-        md_path.write_text(new_text, encoding="utf-8")
-        yaml_path.unlink()
+        _write_under_dir(root, md_name, new_text)
+        _unlink_under_dir(root, yaml_name)
     return parse_issues
 
 
@@ -249,10 +280,10 @@ def rewrite_planning_dir(planning_dir: Path, *, empty_ok: bool = False) -> list[
         yaml_path = planning_doc_path(safe_dir, stem, suffix=".yaml")
         if md_path.is_file():
             found = True
-            issues.extend(_rewrite_md_file(md_path, yaml_path))
+            issues.extend(_rewrite_md_file(safe_dir, stem))
         elif yaml_path.is_file():
             found = True
-            issues.extend(_rewrite_yaml_file(md_path, yaml_path))
+            issues.extend(_rewrite_yaml_file(safe_dir, stem))
     if not found and not empty_ok:
         issues.append(Issue.error("NO_DOCS", f"no planning files in {safe_dir}"))
     return issues
