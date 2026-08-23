@@ -56,7 +56,8 @@ levels:
 next_levels: {}           # populated iff next is set; same per-doc shape
 challenge:                # current track; next_challenge mirrors next_levels
   prd:
-    status: dirty         # dirty | clean | dirty-accepted
+    status: dirty         # dirty | clean-shallow | clean-deep | dirty-accepted
+    depth: deep           # shallow | deep; last scan depth; null if never scanned
     scanned_digest: "sha256:..."  # items.json records hash; null if never scanned
 next_challenge: {}
 ```
@@ -80,21 +81,30 @@ Skill writes this file on first compose, freeze / lock-target / confirmed major-
 
 ### Challenge attestation
 
-Three-state per stem. Absent row = never scanned = `dirty`. `dirty-accepted` applies to **this digest only**.
+Four-state per stem. Absent row = never scanned = `dirty`. `dirty-accepted` applies to **this digest only**. `status.yaml` `challenge:` is the only aggregate — no `challenge-index.yaml`.
 
 | `status` | Meaning |
 |----------|---------|
 | `dirty` | Never scanned, digest moved, or last scan had findings — not accepted |
-| `clean` | Last scan had zero open findings for this doc **and** `scanned_digest == levels.<doc>.digest` |
-| `dirty-accepted` | User explicitly closed this snapshot without a clean scan |
+| `clean-shallow` | Last **shallow** scan had zero open findings for this doc **and** `scanned_digest == levels.<doc>.digest` |
+| `clean-deep` | Last **deep** scan had zero open findings for this doc **and** `scanned_digest == levels.<doc>.digest` |
+| `dirty-accepted` | User explicitly closed this snapshot without a `clean-*` scan |
+
+`clean-*` means "last scan of this digest found nothing open" — not "doc finished." Freeze stays independent of challenge status.
+
+Each row also stores `depth: shallow | deep` from the last scan. Stamp the same `depth` in `{stem}.challenge.report.md` frontmatter.
 
 Invalidation (skill, not compose, not the challenge agent):
 
-- After compose persist of a doc: if that doc’s `challenge.status` is `clean` or `dirty-accepted` → set `dirty`.
+- After compose persist of a doc: if that doc’s `challenge.status` is `clean-shallow`, `clean-deep`, or `dirty-accepted` → set `dirty`. Dirtiness fans out to the edited doc only — dual-stub partners stay `dirty` until their own address pass.
 - After freeze mint: if `levels.<doc>.digest` ≠ `challenge.<doc>.scanned_digest` → `dirty`.
-- Stamp after challenge persist: `clean` iff no findings for that stem and `scanned_digest` recorded from the live digest.
+- Stamp after challenge persist: `clean-shallow` or `clean-deep` iff no findings for that stem, `scanned_digest` recorded from the live digest, and `depth` matches the run.
 
 Do not store `open_ids` in status (per-run `bs-001` is not stable). Challenge is post-freeze attestation — Gates 1–7 do not wait on it.
+
+### `viability_stale` (session-state)
+
+AI field on binding levels (`exec-summary`, `mrd`) in `session-state.json`. Set `true` when compose changes load-bearing ES facts: premises, verdict prose, consent/privacy constraints, named Musts. Orchestrator must not treat a stale `proceed` as current. Gate 7 re-sit clears it. Challenge may `flag_risk` but never rewrites `viability[]`.
 
 ## Frontmatter (cascade docs)
 

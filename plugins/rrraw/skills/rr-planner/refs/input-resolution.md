@@ -51,6 +51,7 @@ Default `output_dir` = `{PROJECT_ROOT}/docs/plans/`. `--output-dir` always wins.
 | `--change` | _(flag, no value)_ | off — discover/resume/research as resolved |
 | `--section` | item id, heading, or section name | null — required with `--change` |
 | `--target` | cascade level (`prd`) and/or track (`0.1`, `next`, `current`) | null — required with `--change`; default track is current |
+| `--questions-per-cycle` | positive integer | `1` — max AskQuestion count per address cycle |
 
 `--format yaml` and `--format json` are not plan-document formats. Do **not** alias either to md. Emit `UNSUPPORTED_FORMAT`.
 
@@ -62,6 +63,17 @@ Allowed JSON on disk (not selected by `--format`): `items.json` (item graph) and
 |------|-----------------|
 | _(default)_ | `ask` — structured `AskQuestion` |
 | `--text-mode` | `text` — questions inline in chat |
+
+### Questions per cycle
+
+Address-loop batch size. Persisted in `session-state.json` `preferences.questions_per_cycle`. Default never silently rises above `1` without explicit opt-in.
+
+| Flag | `preferences.questions_per_cycle` |
+|------|-----------------------------------|
+| _(default)_ | `1` — one question per address cycle |
+| `--questions-per-cycle N` | `N` (integer ≥ 1) |
+
+Confirm-once (same pattern as [project-posture.md](project-posture.md)): on first explicit `--questions-per-cycle N`, persist to `session-state.json`. Resume reads the stored value; do not re-ask unless the user passes a new explicit value.
 
 ### Resume
 

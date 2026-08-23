@@ -103,7 +103,7 @@ Compose writes cascade docs and `items.json`. The skill asks clarifications and 
 | `session-state.json` | Checkpoint for stop/resume (decisions, facts, `project_posture`, `viability`, `note_sessions`, `item_registry`, `raw_history_path`) |
 | `raw-history/{UTC}.yaml` | Verbatim Q&A turns (append-only; created on first question) |
 | `research-report.md` | Cited market findings (when research runs) |
-| `challenge-report.md` | Blind-spot findings (when `--challenge` runs) |
+| `{stem}.challenge.report.md` | Per-doc blind-spot findings worklist (when `--challenge` runs that stem) |
 
 Cascade docs are `.md` only. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml`, `status.yaml`, and `{level}.notes.yaml` are always YAML. Ledger + `status.yaml` are validator input (`future.md` / `agent.plan.md` are not). `--format yaml` is `UNSUPPORTED_FORMAT`. When a next major.minor opens, cascade docs for that track live under `docs/plans/{next}/`; `status.yaml` / `agent.plan.md` / `future.md` stay at `docs/plans/`.
 
