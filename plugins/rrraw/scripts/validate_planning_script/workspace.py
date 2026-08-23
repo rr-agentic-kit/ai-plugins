@@ -570,51 +570,75 @@ def _check_doc_baseline(
     raw = levels.get(doc)
     row = raw if isinstance(raw, dict) else {}
     rev = row.get("rev")
+    issues.extend(_check_frozen_rev_state(doc, rev, frozen_levels))
+    issues.extend(_check_frontmatter_rev(doc, frontmatter, rev))
+    issues.extend(_check_parent_pin(doc, rev, row, levels, items))
+    return issues
+
+
+def _check_frozen_rev_state(
+    doc: str, rev: Any, frozen_levels: list[str] | None
+) -> list[Issue]:
     if is_frozen_rev(rev) and frozen_levels is not None and doc not in frozen_levels:
-        issues.append(
+        return [
             Issue.error(
                 "REV_WHILE_OPEN",
                 f"{doc} has integer rev {rev} but is not in frozen_levels",
                 doc,
             )
-        )
+        ]
+    return []
+
+
+def _check_frontmatter_rev(
+    doc: str, frontmatter: dict[str, dict[str, Any]], rev: Any
+) -> list[Issue]:
     fm_rev = frontmatter.get(doc, {}).get("doc_rev")
     if is_frozen_rev(fm_rev) and is_open_rev(rev):
-        issues.append(
+        return [
             Issue.error(
                 "REV_WHILE_OPEN",
                 f"{doc} frontmatter doc_rev is integer while status " "rev is unfrozen",
                 doc,
             )
-        )
+        ]
+    return []
+
+
+def _check_parent_pin(
+    doc: str,
+    rev: Any,
+    row: dict[str, Any],
+    levels: dict[str, Any],
+    items: list[Item],
+) -> list[Issue]:
     parent = PARENT_DOC.get(doc)
     if parent is None or not is_frozen_rev(rev):
-        return issues
+        return []
     parent_row = levels.get(parent)
     parent_rev = parent_row.get("rev") if isinstance(parent_row, dict) else None
     if is_open_rev(parent_rev) or parent_rev is None:
-        issues.append(
+        return [
             Issue.error(
                 "PARENT_UNFROZEN",
                 f"frozen {doc} but parent {parent} is still unfrozen",
                 doc,
             )
-        )
-        return issues
+        ]
     live_digest = compute_doc_digest(items, parent)
     pins = row.get("pins") if isinstance(row.get("pins"), dict) else {}
     pin = pins.get(parent) if isinstance(pins, dict) else None
     pin_digest = pin.get("digest") if isinstance(pin, dict) else None
     pin_rev = pin.get("rev") if isinstance(pin, dict) else None
     if pin_digest != live_digest or pin_rev != parent_rev:
-        issues.append(
+        return [
             Issue.error(
                 "STALE_PIN",
                 f"{doc} pin for {parent} does not match parent rev/digest",
                 doc,
             )
-        )
-    return issues
+        ]
+    return []
 
 
 def check_baselines(planning_dir: Path, items: list[Item]) -> list[Issue]:

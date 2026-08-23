@@ -88,24 +88,29 @@ class Item:
             record["superseded_by"] = self.superseded_by
         if self.rationale:
             record["rationale"] = self.rationale
-        method = DOC_METHOD[self.doc]
         if self.kind == "leaf":
-            if method == "moscow":
-                record["moscow"] = self.moscow
-            elif method == "kano":
-                record["kano"] = self.kano
-            elif method == "rice":
-                if self.goal_type is not None:
-                    record["goal_type"] = self.goal_type
-                if self.reach is not None:
-                    record["reach"] = self.reach
-                if self.impact is not None:
-                    record["impact"] = self.impact
-                if self.confidence is not None:
-                    record["confidence"] = self.confidence
-                if self.effort is not None:
-                    record["effort"] = self.effort
+            _apply_leaf_priority_fields(record, DOC_METHOD[self.doc], self)
         return record
+
+
+def _apply_leaf_priority_fields(
+    record: dict[str, Any], method: str, item: Item
+) -> None:
+    if method == "moscow":
+        record["moscow"] = item.moscow
+    elif method == "kano":
+        record["kano"] = item.kano
+    elif method == "rice":
+        if item.goal_type is not None:
+            record["goal_type"] = item.goal_type
+        if item.reach is not None:
+            record["reach"] = item.reach
+        if item.impact is not None:
+            record["impact"] = item.impact
+        if item.confidence is not None:
+            record["confidence"] = item.confidence
+        if item.effort is not None:
+            record["effort"] = item.effort
 
 
 def has_errors(issues: list[Issue]) -> bool:

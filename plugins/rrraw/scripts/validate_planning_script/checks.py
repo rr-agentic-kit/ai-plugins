@@ -360,26 +360,41 @@ def check_status(items: list[Item]) -> list[Issue]:
 def _check_ready_leaf_rank(item: Item) -> list[Issue]:
     issues: list[Issue] = []
     method = DOC_METHOD[item.doc]
+    issues.extend(_check_ready_moscow(item, method))
+    issues.extend(_check_ready_kano(item, method))
+    issues.extend(_check_ready_rice(item, method))
+    return issues
+
+
+def _check_ready_moscow(item: Item, method: str) -> list[Issue]:
     if method == "moscow" and "moscow" in item.raw_keys and item.moscow is None:
-        issues.append(Issue.error("DOR", "ready leaf missing moscow", item.id))
+        return [Issue.error("DOR", "ready leaf missing moscow", item.id)]
+    return []
+
+
+def _check_ready_kano(item: Item, method: str) -> list[Issue]:
     if method == "kano" and item.kano is None:
-        issues.append(Issue.error("DOR", "ready leaf missing kano", item.id))
-    if method == "rice":
-        if "goal-type" in item.raw_keys and item.goal_type is None:
-            issues.append(Issue.error("DOR", "ready leaf missing goal-type", item.id))
-        rice_keys = ("reach", "impact", "confidence")
-        if any(key in item.raw_keys for key in rice_keys):
-            for key, value in (
-                ("reach", item.reach),
-                ("impact", item.impact),
-                ("confidence", item.confidence),
-            ):
-                if key in item.raw_keys and value is None:
-                    issues.append(
-                        Issue.error("DOR", f"ready leaf missing {key}", item.id)
-                    )
-            if "effort" in item.raw_keys and item.effort is None:
-                issues.append(Issue.error("DOR", "ready leaf missing effort", item.id))
+        return [Issue.error("DOR", "ready leaf missing kano", item.id)]
+    return []
+
+
+def _check_ready_rice(item: Item, method: str) -> list[Issue]:
+    if method != "rice":
+        return []
+    issues: list[Issue] = []
+    if "goal-type" in item.raw_keys and item.goal_type is None:
+        issues.append(Issue.error("DOR", "ready leaf missing goal-type", item.id))
+    rice_keys = ("reach", "impact", "confidence")
+    if any(key in item.raw_keys for key in rice_keys):
+        for key, value in (
+            ("reach", item.reach),
+            ("impact", item.impact),
+            ("confidence", item.confidence),
+        ):
+            if key in item.raw_keys and value is None:
+                issues.append(Issue.error("DOR", f"ready leaf missing {key}", item.id))
+        if "effort" in item.raw_keys and item.effort is None:
+            issues.append(Issue.error("DOR", "ready leaf missing effort", item.id))
     return issues
 
 

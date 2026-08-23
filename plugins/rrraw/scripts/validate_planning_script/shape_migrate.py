@@ -28,17 +28,37 @@ from .workspace import challenge_doc_stem, challenge_report_path
 
 CHALLENGE_REPORT_NAME = "challenge-report.md"
 FRD_STEM = "frd"
-FINDING_HEADING_RE = re.compile(
-    r"^##\s+(bs-\d+)\s*(?:[—-]\s*([^\s(]+))?(?:\s*\(([^)]+)\))?\s*$",
-    re.IGNORECASE,
-)
+FINDING_HEADING_BASE_RE = re.compile(r"^##\s+(bs-\d+)\s*(.*)$", re.IGNORECASE)
+FINDING_HEADING_DOC_RE = re.compile(r"^[—-]\s*([^\s(]+)")
+FINDING_HEADING_SEVERITY_RE = re.compile(r"\(([^)]+)\)\s*$")
 MOSCOW_SHOULD_COULD_RE = re.compile(r"_moscow_:\s*(Should|Could)\b")
 FUNCTIONAL_DELIVERABLES_HEADING = "## Functional deliverables"
 RELEASE_PHASING_RE = re.compile(
     r"^##\s+Release phasing\s*$",
     re.IGNORECASE | re.MULTILINE,
 )
-FINDING_FIELD_RE = re.compile(r"^-\s+\*\*([^*]+):\*\*\s*(.+)$")
+FINDING_FIELD_RE = re.compile(r"^-\s+\*\*([^*]+):\*\*\s*(.*)$")
+
+
+def _parse_finding_heading(
+    line: str,
+) -> tuple[str, str | None, str | None] | None:
+    base = FINDING_HEADING_BASE_RE.match(line)
+    if not base:
+        return None
+    finding_id = base.group(1)
+    remainder = base.group(2).strip()
+    heading_doc: str | None = None
+    severity: str | None = None
+    if remainder:
+        doc_match = FINDING_HEADING_DOC_RE.match(remainder)
+        if doc_match:
+            heading_doc = doc_match.group(1)
+            remainder = remainder[doc_match.end() :].strip()
+        severity_match = FINDING_HEADING_SEVERITY_RE.search(remainder)
+        if severity_match:
+            severity = severity_match.group(1)
+    return finding_id, heading_doc, severity
 
 
 def _display_value(raw: str) -> str:
@@ -108,6 +128,78 @@ def _parse_meta_line(line: str) -> dict[str, str]:
     return {}
 
 
+def _skip_blank_lines(lines: list[str], index: int) -> int:
+    while index < len(lines) and not lines[index].strip():
+        index += 1
+    return index
+
+
+def _consume_list_meta(lines: list[str], index: int, block: _DocBlock) -> int:
+    while index < len(lines) and LIST_META_RE.match(lines[index]):
+        meta_match = LIST_META_RE.match(lines[index])
+        if meta_match:
+            raw_key = meta_match.group(1).strip()
+            key = YAML_KEY_MAP.get(raw_key, raw_key.lower())
+            block.meta[key] = meta_match.group(2).strip()
+        block.lines.append(lines[index])
+        index += 1
+    return index
+
+
+def _consume_item_meta(lines: list[str], index: int, block: _DocBlock) -> int:
+    if index >= len(lines):
+        return index
+    if LIST_META_RE.match(lines[index]):
+        return _consume_list_meta(lines, index, block)
+    if INLINE_KEY_RE.match(lines[index].strip()) or META_SPLIT_RE.search(lines[index]):
+        block.meta = _parse_meta_line(lines[index])
+        block.lines.append(lines[index])
+        return index + 1
+    return index
+
+
+def _consume_item_body(lines: list[str], index: int) -> tuple[str, int]:
+    body_lines: list[str] = []
+    while index < len(lines):
+        peek = lines[index]
+        if HEADING_RE.match(peek) or (
+            ATX_HEADING_RE.match(peek) and not peek.startswith("###")
+        ):
+            break
+        body_lines.append(peek)
+        index += 1
+    return "\n".join(body_lines).strip("\n"), index
+
+
+def _parse_item_block(
+    lines: list[str], index: int, line: str, current_section: str | None
+) -> tuple[_DocBlock, int]:
+    item_match = HEADING_RE.match(line)
+    if not item_match:
+        raise ValueError("expected item heading")
+    item_id = f"{item_match.group(2)}-{item_match.group(3)}"
+    block = _DocBlock(
+        kind="item",
+        lines=[line],
+        section=current_section,
+        item_id=item_id,
+    )
+    index += 1
+    index = _skip_blank_lines(lines, index)
+    index = _consume_item_meta(lines, index, block)
+    block.body, index = _consume_item_body(lines, index)
+    return block, index
+
+
+def _parse_section_block(
+    line: str,
+) -> tuple[_DocBlock, str | None]:
+    title = line.lstrip("#").strip()
+    if line.startswith("# ") and not line.startswith("## "):
+        return _DocBlock(kind="title", lines=[line]), None
+    return _DocBlock(kind="prose", lines=[line], section=title), title
+
+
 def _split_doc_blocks(text: str) -> tuple[str, list[_DocBlock]]:
     lines = text.splitlines()
     frontmatter = ""
@@ -124,54 +216,15 @@ def _split_doc_blocks(text: str) -> tuple[str, list[_DocBlock]]:
         if not line.strip():
             index += 1
             continue
-        item_match = HEADING_RE.match(line)
-        if item_match:
-            item_id = f"{item_match.group(2)}-{item_match.group(3)}"
-            block = _DocBlock(
-                kind="item",
-                lines=[line],
-                section=current_section,
-                item_id=item_id,
-            )
-            index += 1
-            while index < len(lines) and not lines[index].strip():
-                index += 1
-            if index < len(lines) and LIST_META_RE.match(lines[index]):
-                while index < len(lines) and LIST_META_RE.match(lines[index]):
-                    meta_match = LIST_META_RE.match(lines[index])
-                    if meta_match:
-                        raw_key = meta_match.group(1).strip()
-                        key = YAML_KEY_MAP.get(raw_key, raw_key.lower())
-                        block.meta[key] = meta_match.group(2).strip()
-                    block.lines.append(lines[index])
-                    index += 1
-            elif index < len(lines) and (
-                INLINE_KEY_RE.match(lines[index].strip())
-                or META_SPLIT_RE.search(lines[index])
-            ):
-                block.meta = _parse_meta_line(lines[index])
-                block.lines.append(lines[index])
-                index += 1
-            body_lines: list[str] = []
-            while index < len(lines):
-                peek = lines[index]
-                if HEADING_RE.match(peek) or (
-                    ATX_HEADING_RE.match(peek) and not peek.startswith("###")
-                ):
-                    break
-                body_lines.append(peek)
-                index += 1
-            block.body = "\n".join(body_lines).strip("\n")
+        if HEADING_RE.match(line):
+            block, index = _parse_item_block(lines, index, line, current_section)
             blocks.append(block)
             continue
-        heading_match = ATX_HEADING_RE.match(line)
-        if heading_match:
-            title = line.lstrip("#").strip()
-            if line.startswith("# ") and not line.startswith("## "):
-                blocks.append(_DocBlock(kind="title", lines=[line]))
-            else:
-                current_section = title
-                blocks.append(_DocBlock(kind="prose", lines=[line], section=title))
+        if ATX_HEADING_RE.match(line):
+            block, section = _parse_section_block(line)
+            if section is not None:
+                current_section = section
+            blocks.append(block)
             index += 1
             continue
         blocks.append(_DocBlock(kind="text", lines=[line]))
@@ -218,6 +271,65 @@ def _rebuild_document(frontmatter: str, blocks: list[_DocBlock]) -> str:
     return text
 
 
+def _functional_deliverables_blocks(
+    functional_items: list[_DocBlock],
+) -> list[_DocBlock]:
+    return [
+        _DocBlock(
+            kind="prose",
+            lines=[FUNCTIONAL_DELIVERABLES_HEADING],
+            section="Functional deliverables",
+        ),
+        *functional_items,
+    ]
+
+
+def _is_es_item(block: _DocBlock) -> bool:
+    return (
+        block.kind == "item"
+        and block.item_id is not None
+        and block.item_id.startswith("ES-")
+    )
+
+
+def _should_insert_functional_section(
+    block: _DocBlock,
+    inserted_functional: bool,
+    functional_items: list[_DocBlock],
+) -> bool:
+    return (
+        not inserted_functional
+        and block.kind == "prose"
+        and block.section is not None
+        and _normalize_section(block.section) == "constraints"
+        and bool(functional_items)
+    )
+
+
+def _prepare_es_item(block: _DocBlock) -> _DocBlock | None:
+    moscow = block.meta.get("moscow") or block.meta.get("MoSCoW")
+    if moscow in {"Should", "Could"}:
+        return None
+    block.meta = _strip_moscow_meta(block.meta)
+    block.lines = block.lines[:1]
+    return block
+
+
+def _append_functional_section_if_needed(
+    rebuilt: list[_DocBlock], functional_items: list[_DocBlock]
+) -> None:
+    if not functional_items:
+        return
+    insert_at = len(rebuilt)
+    for idx, block in enumerate(rebuilt):
+        if block.kind == "prose" and block.section:
+            section_key = _normalize_section(block.section)
+            if section_key in {"constraints", "non-goals", "horizons"}:
+                insert_at = idx
+                break
+    rebuilt[insert_at:insert_at] = _functional_deliverables_blocks(functional_items)
+
+
 def migrate_exec_summary_shape(text: str, source_file: str) -> tuple[str, list[Issue]]:
     if not _is_old_es_shape(text):
         return text, []
@@ -226,52 +338,21 @@ def migrate_exec_summary_shape(text: str, source_file: str) -> tuple[str, list[I
     rebuilt: list[_DocBlock] = []
     inserted_functional = False
     for block in blocks:
-        if (
-            block.kind != "item"
-            or not block.item_id
-            or not block.item_id.startswith("ES-")
-        ):
-            if (
-                not inserted_functional
-                and block.kind == "prose"
-                and block.section
-                and _normalize_section(block.section) == "constraints"
-                and functional_items
+        if not _is_es_item(block):
+            if _should_insert_functional_section(
+                block, inserted_functional, functional_items
             ):
-                rebuilt.append(
-                    _DocBlock(
-                        kind="prose",
-                        lines=[FUNCTIONAL_DELIVERABLES_HEADING],
-                        section="Functional deliverables",
-                    )
-                )
-                rebuilt.extend(functional_items)
+                rebuilt.extend(_functional_deliverables_blocks(functional_items))
                 inserted_functional = True
             rebuilt.append(block)
             continue
-        moscow = block.meta.get("moscow") or block.meta.get("MoSCoW")
-        if moscow in {"Should", "Could"}:
+        prepared = _prepare_es_item(block)
+        if prepared is None:
             functional_items.append(block)
             continue
-        block.meta = _strip_moscow_meta(block.meta)
-        block.lines = block.lines[:1]
-        rebuilt.append(block)
+        rebuilt.append(prepared)
     if functional_items and not inserted_functional:
-        insert_at = len(rebuilt)
-        for idx, block in enumerate(rebuilt):
-            if block.kind == "prose" and block.section:
-                section_key = _normalize_section(block.section)
-                if section_key in {"constraints", "non-goals", "horizons"}:
-                    insert_at = idx
-                    break
-        rebuilt[insert_at:insert_at] = [
-            _DocBlock(
-                kind="prose",
-                lines=[FUNCTIONAL_DELIVERABLES_HEADING],
-                section="Functional deliverables",
-            ),
-            *functional_items,
-        ]
+        _append_functional_section_if_needed(rebuilt, functional_items)
     migrated = _rebuild_document(frontmatter, rebuilt)
     return migrated, [
         Issue.warn(
@@ -364,11 +445,7 @@ def _render_per_doc_challenge_report(
     return "\n".join(out).rstrip() + "\n"
 
 
-def split_challenge_report(planning_dir: Path) -> list[Issue]:
-    report_path = planning_dir / CHALLENGE_REPORT_NAME
-    if not report_path.is_file():
-        return []
-    text = report_path.read_text(encoding="utf-8")
+def _load_challenge_shared_front(text: str) -> tuple[dict[str, str], str]:
     shared_front: dict[str, str] = {}
     body = text
     match = FRONTMATTER_RE.match(text)
@@ -379,6 +456,27 @@ def split_challenge_report(planning_dir: Path) -> list[Issue]:
                 key: str(value) for key, value in loaded.items() if key != "doc"
             }
         body = text[match.end() :]
+    return shared_front, body
+
+
+def _flush_challenge_finding(
+    grouped: dict[str, list[tuple[str, list[str], dict[str, str]]]],
+    finding_id: str | None,
+    heading_doc: str | None,
+    body_lines: list[str],
+    fields: dict[str, str],
+) -> None:
+    if finding_id is None:
+        return
+    stem = _finding_doc_stem(fields, heading_doc) or "prd"
+    grouped.setdefault(stem, []).append(
+        (finding_id, list(body_lines), dict(fields))
+    )
+
+
+def _collect_challenge_findings(
+    body: str,
+) -> dict[str, list[tuple[str, list[str], dict[str, str]]]]:
     grouped: dict[str, list[tuple[str, list[str], dict[str, str]]]] = {
         stem: [] for stem in DOC_STEMS
     }
@@ -389,13 +487,12 @@ def split_challenge_report(planning_dir: Path) -> list[Issue]:
 
     def flush() -> None:
         nonlocal current_id, current_heading_doc, current_body, current_fields
-        if current_id is None:
-            return
-        stem = _finding_doc_stem(current_fields, current_heading_doc)
-        if stem is None:
-            stem = "prd"
-        grouped.setdefault(stem, []).append(
-            (current_id, list(current_body), dict(current_fields))
+        _flush_challenge_finding(
+            grouped,
+            current_id,
+            current_heading_doc,
+            current_body,
+            current_fields,
         )
         current_id = None
         current_heading_doc = None
@@ -404,12 +501,10 @@ def split_challenge_report(planning_dir: Path) -> list[Issue]:
 
     for raw_line in body.splitlines():
         line = raw_line.rstrip()
-        finding_match = FINDING_HEADING_RE.match(line)
-        if finding_match:
+        parsed = _parse_finding_heading(line)
+        if parsed is not None:
             flush()
-            current_id = finding_match.group(1)
-            current_heading_doc = finding_match.group(2)
-            severity = finding_match.group(3)
+            current_id, current_heading_doc, severity = parsed
             if severity:
                 current_fields["severity"] = severity
             continue
@@ -422,8 +517,15 @@ def split_challenge_report(planning_dir: Path) -> list[Issue]:
             ).strip()
         current_body.append(line)
     flush()
+    return grouped
 
-    issues: list[Issue] = []
+
+def _write_split_challenge_reports(
+    planning_dir: Path,
+    grouped: dict[str, list[tuple[str, list[str], dict[str, str]]]],
+    shared_front: dict[str, str],
+    report_path: Path,
+) -> list[Issue]:
     written = 0
     for stem, findings in grouped.items():
         if not findings or stem not in DOC_STEMS:
@@ -434,16 +536,28 @@ def split_challenge_report(planning_dir: Path) -> list[Issue]:
             encoding="utf-8",
         )
         written += 1
-    if written:
-        report_path.unlink()
-        issues.append(
-            Issue.warn(
-                "MIGRATE_CHALLENGE_REPORT",
-                f"split {CHALLENGE_REPORT_NAME} into {written} per-doc "
-                f"{{stem}}.challenge.report.md file(s)",
-            )
+    if not written:
+        return []
+    report_path.unlink()
+    return [
+        Issue.warn(
+            "MIGRATE_CHALLENGE_REPORT",
+            f"split {CHALLENGE_REPORT_NAME} into {written} per-doc "
+            f"{{stem}}.challenge.report.md file(s)",
         )
-    return issues
+    ]
+
+
+def split_challenge_report(planning_dir: Path) -> list[Issue]:
+    report_path = planning_dir / CHALLENGE_REPORT_NAME
+    if not report_path.is_file():
+        return []
+    text = report_path.read_text(encoding="utf-8")
+    shared_front, body = _load_challenge_shared_front(text)
+    grouped = _collect_challenge_findings(body)
+    return _write_split_challenge_reports(
+        planning_dir, grouped, shared_front, report_path
+    )
 
 
 def archive_frd_to_tech(planning_dir: Path) -> list[Issue]:

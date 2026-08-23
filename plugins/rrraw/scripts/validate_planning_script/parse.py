@@ -61,7 +61,8 @@ def parse_inline_meta_line(line: str) -> tuple[dict[str, str], list[tuple[str, s
         if not match:
             errors.append(("MALFORMED_META", seg))
             continue
-        key, value = match.group(1), match.group(2).strip()
+        key = match.group(1)
+        value = seg[match.end() :].strip()
         if key not in CLOSED_KEYS:
             errors.append(("UNKNOWN_KEY", key))
         if key in meta:
@@ -395,6 +396,27 @@ def detect_doc_format(
     return "md", issues
 
 
+def _validate_enum_field(
+    item_id: str,
+    meta: dict[str, str],
+    meta_key: str,
+    allowed: frozenset[str],
+    label: str,
+    issues: list[Issue],
+) -> None:
+    if meta_key not in meta:
+        return
+    value = _null_or_value(meta[meta_key])
+    if value is not None and value not in allowed:
+        issues.append(
+            Issue.error(
+                "INVALID_VALUE",
+                f"{label} must be {'|'.join(sorted(allowed))}, got {value!r}",
+                item_id,
+            )
+        )
+
+
 def _validate_item_enums(
     item_id: str, meta: dict[str, str], issues: list[Issue]
 ) -> None:
@@ -416,60 +438,20 @@ def _validate_item_enums(
                 item_id,
             )
         )
-    moscow = _null_or_value(meta["moscow"]) if "moscow" in meta else None
-    if moscow is not None and moscow not in MOSCOW_VALUES:
-        issues.append(
-            Issue.error(
-                "INVALID_VALUE",
-                f"moscow must be Must|Should|Could|Won't, got {moscow!r}",
-                item_id,
-            )
-        )
-    kano = _null_or_value(meta["kano"]) if "kano" in meta else None
-    if kano is not None and kano not in KANO_VALUES:
-        issues.append(
-            Issue.error(
-                "INVALID_VALUE",
-                f"kano must be basic|performance|delighter, got {kano!r}",
-                item_id,
-            )
-        )
-    goal_type = _null_or_value(meta["goal-type"]) if "goal-type" in meta else None
-    if goal_type is not None and goal_type not in GOAL_TYPE_VALUES:
-        issues.append(
-            Issue.error(
-                "INVALID_VALUE",
-                f"goal-type must be primary|support, got {goal_type!r}",
-                item_id,
-            )
-        )
-    impact = _null_or_value(meta["impact"]) if "impact" in meta else None
-    if impact is not None and impact not in IMPACT_VALUES:
-        issues.append(
-            Issue.error(
-                "INVALID_VALUE",
-                f"impact must be 0.25|0.5|1|2|3, got {impact!r}",
-                item_id,
-            )
-        )
-    confidence = _null_or_value(meta["confidence"]) if "confidence" in meta else None
-    if confidence is not None and confidence not in CONFIDENCE_VALUES:
-        issues.append(
-            Issue.error(
-                "INVALID_VALUE",
-                f"confidence must be low|medium|high, got {confidence!r}",
-                item_id,
-            )
-        )
-    effort = _null_or_value(meta["effort"]) if "effort" in meta else None
-    if effort is not None and effort not in EFFORT_VALUES:
-        issues.append(
-            Issue.error(
-                "INVALID_VALUE",
-                f"effort must be Fibonacci 1|2|3|5|8|13, got {effort!r}",
-                item_id,
-            )
-        )
+    _validate_enum_field(item_id, meta, "moscow", MOSCOW_VALUES, "moscow", issues)
+    _validate_enum_field(item_id, meta, "kano", KANO_VALUES, "kano", issues)
+    _validate_enum_field(
+        item_id, meta, "goal-type", GOAL_TYPE_VALUES, "goal-type", issues
+    )
+    _validate_enum_field(item_id, meta, "impact", IMPACT_VALUES, "impact", issues)
+    _validate_enum_field(
+        item_id, meta, "confidence", CONFIDENCE_VALUES, "confidence", issues
+    )
+    _validate_enum_field(item_id, meta, "effort", EFFORT_VALUES, "effort", issues)
+
+
+def _optional_meta_value(meta: dict[str, str], key: str) -> str | None:
+    return _null_or_value(meta[key]) if key in meta else None
 
 
 def _item_from_meta(
@@ -489,21 +471,19 @@ def _item_from_meta(
     _validate_item_enums(item_id, meta, issues)
     kind = meta.get("kind", "")
     spec = meta.get("spec", "")
-    parent = _null_or_value(meta["parent"]) if "parent" in meta else None
-    status = _null_or_value(meta["status"]) if "status" in meta else None
-    tag = _null_or_value(meta["tag"]) if "tag" in meta else None
-    moscow = _null_or_value(meta["moscow"]) if "moscow" in meta else None
-    kano = _null_or_value(meta["kano"]) if "kano" in meta else None
-    goal_type = _null_or_value(meta["goal-type"]) if "goal-type" in meta else None
-    reach = _null_or_value(meta["reach"]) if "reach" in meta else None
-    impact = _null_or_value(meta["impact"]) if "impact" in meta else None
-    confidence = _null_or_value(meta["confidence"]) if "confidence" in meta else None
-    effort = _null_or_value(meta["effort"]) if "effort" in meta else None
-    supersedes = _null_or_value(meta["supersedes"]) if "supersedes" in meta else None
-    superseded_by = (
-        _null_or_value(meta["superseded-by"]) if "superseded-by" in meta else None
-    )
-    rationale = _null_or_value(meta["rationale"]) if "rationale" in meta else None
+    parent = _optional_meta_value(meta, "parent")
+    status = _optional_meta_value(meta, "status")
+    tag = _optional_meta_value(meta, "tag")
+    moscow = _optional_meta_value(meta, "moscow")
+    kano = _optional_meta_value(meta, "kano")
+    goal_type = _optional_meta_value(meta, "goal-type")
+    reach = _optional_meta_value(meta, "reach")
+    impact = _optional_meta_value(meta, "impact")
+    confidence = _optional_meta_value(meta, "confidence")
+    effort = _optional_meta_value(meta, "effort")
+    supersedes = _optional_meta_value(meta, "supersedes")
+    superseded_by = _optional_meta_value(meta, "superseded-by")
+    rationale = _optional_meta_value(meta, "rationale")
     if rationale is not None and not RATIONALE_RE.match(rationale):
         issues.append(
             Issue.error(

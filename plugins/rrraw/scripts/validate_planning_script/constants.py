@@ -63,7 +63,7 @@ DOC_METHOD: dict[str, str] = {
 
 HEADING_RE = re.compile(r"^(#{2,4}) (ES|MRD|BRD|PRD)-(\d+(?:\.\d+)?): (.+)$")
 LIST_META_RE = re.compile(r"^- \*\*([^*\n]+):\*\* ([^\n]+)$")
-INLINE_KEY_RE = re.compile(r"^_([a-z][a-z0-9-]*)_:\s*([^\n]*)$")
+INLINE_KEY_RE = re.compile(r"^_([a-z][a-z0-9-]*)_:\s*")
 META_SPLIT_RE = re.compile(r"\s+\|\s+(?=_[a-z][a-z0-9-]*_:)")
 BODY_QUOTE_RE = re.compile(r"^> ?(.*)$")
 ATX_HEADING_RE = re.compile(r"^#{1,6} ")
