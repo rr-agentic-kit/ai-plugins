@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import validate_planning_script as vp
-from helpers import error_codes, item
+from helpers import error_codes, item, prd_rice
 
 
 def test_broken_parent():
@@ -20,7 +20,7 @@ def test_level_skip():
     issues = vp.check_parents(
         [
             item("ES-3", parent=None, moscow="Must"),
-            item("PRD-1", parent="ES-3", moscow="Must"),
+            item("PRD-1", parent="ES-3", reach="40% of MAU", impact="2", confidence="medium", effort="5"),
         ]
     )
     assert "LEVEL_SKIP" in error_codes(issues)
@@ -48,8 +48,8 @@ def test_reserved_ids_fill_numbering_gap():
 def test_reserved_nested_slots():
     items = [
         item("PRD-1", parent="BRD-1", kind="container", spec="draft"),
-        item("PRD-1.1", parent="PRD-1", moscow="Must"),
-        item("PRD-1.3", parent="PRD-1", moscow="Must"),
+        prd_rice("PRD-1.1", parent="PRD-1"),
+        prd_rice("PRD-1.3", parent="PRD-1"),
     ]
     assert "NUMBERING" in error_codes(vp.check_numbering(items))
     assert error_codes(vp.check_numbering(items, {"prd": ["1.2"]})) == set()
@@ -87,7 +87,7 @@ def test_container_without_children():
 
 
 def test_cycle():
-    issues = vp.check_parents([item("PRD-1", parent="PRD-1", moscow="Must")])
+    issues = vp.check_parents([item("PRD-1", parent="PRD-1", spec="idea")])
     assert "CYCLE" in error_codes(issues) or "PARENT_SHAPE" in error_codes(issues)
 
 
@@ -95,7 +95,7 @@ def test_nested_parent_shape():
     issues = vp.check_parents(
         [
             item("PRD-1", parent="BRD-1", kind="container", spec="draft"),
-            item("PRD-1.1", parent="BRD-1", moscow="Must"),
+            prd_rice("PRD-1.1", parent="BRD-1"),
         ]
     )
     assert "PARENT_SHAPE" in error_codes(issues)
@@ -114,11 +114,10 @@ def test_duplicate_id():
 def test_supersede_dangling():
     issues = vp.check_parents(
         [
-            item(
+            prd_rice(
                 "PRD-1.1",
                 parent="PRD-1",
                 spec="deprecated",
-                moscow="Must",
                 superseded_by="PRD-9",
             )
         ]

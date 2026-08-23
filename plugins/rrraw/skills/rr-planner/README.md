@@ -7,7 +7,7 @@ Flag-driven software planning docs: progressive top-down discovery from vision t
 ## Philosophy
 
 - **Progressive cascade** — Posture gate (including `domain_context`), then Exec summary → MRD → BRD → PRD; each level inherits and narrows the one above.
-- **Item contract** — Hierarchical `{DOC}-{n.m}` ids, immediate parent pointer, atomic leaves; ranking is per layer (MoSCoW / Kano), not P0. MoSCoW *legend* follows project posture (Must is not always MVP). Spec vs PRD `status` are separate concerns. Ranked leaves carry a `_rationale_` pointer. Mechanism detail appends to `tech.md`.
+- **Item contract** — Hierarchical `{DOC}-{n.m}` ids, immediate parent pointer, atomic leaves; ranking is per layer (MoSCoW on ES functional deliverables and BRD; Kano on MRD; RICE/RIC on PRD), not P0. MoSCoW *legend* follows project posture on BRD (Must is not always MVP). Spec vs PRD `status` are separate concerns. Ranked leaves carry a `_rationale_` pointer. Mechanism detail appends to `tech.md`.
 - **Goal-anchored** — Unclear and ambiguous statements are blocking; clarify before recording facts; every decision traces to stated goals. Reason-graph (evidence, `flips_when`, burial) lives in `decision-ledger.yaml`, not the decision log.
 - **Expert panel** — Seats argue both sides; a blocking seat owes an alternative. Verdict is a state (`proceed` … `kill`), not an exit. Binding at exec-summary and MRD; `market_type: internal` skips TAM.
 - **Decision ledger** — Items rest on rationales, rationales rest on evidence. Invalidation raises a re-decision queue; it never auto-flips status. Buried ids are reserved and never recycled.

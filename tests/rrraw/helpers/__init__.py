@@ -10,6 +10,7 @@ from .factories import (
     frozen_status,
     item,
     planning_items,
+    prd_rice,
     write_planning,
 )
 from .samples import (
@@ -42,5 +43,6 @@ __all__ = [
     "frozen_status",
     "item",
     "planning_items",
+    "prd_rice",
     "write_planning",
 ]

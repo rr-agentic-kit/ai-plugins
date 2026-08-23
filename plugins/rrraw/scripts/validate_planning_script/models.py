@@ -39,6 +39,12 @@ class Item:
     kind: str
     spec: str
     status: str | None = None
+    tag: str | None = None
+    goal_type: str | None = None
+    reach: str | None = None
+    impact: str | None = None
+    confidence: str | None = None
+    effort: str | None = None
     moscow: str | None = None
     kano: str | None = None
     supersedes: str | None = None
@@ -74,6 +80,8 @@ class Item:
         }
         if self.status is not None:
             record["status"] = self.status
+        if self.tag is not None:
+            record["tag"] = self.tag
         if self.supersedes:
             record["supersedes"] = self.supersedes
         if self.superseded_by:
@@ -86,6 +94,17 @@ class Item:
                 record["moscow"] = self.moscow
             elif method == "kano":
                 record["kano"] = self.kano
+            elif method == "rice":
+                if self.goal_type is not None:
+                    record["goal_type"] = self.goal_type
+                if self.reach is not None:
+                    record["reach"] = self.reach
+                if self.impact is not None:
+                    record["impact"] = self.impact
+                if self.confidence is not None:
+                    record["confidence"] = self.confidence
+                if self.effort is not None:
+                    record["effort"] = self.effort
         return record
 
 

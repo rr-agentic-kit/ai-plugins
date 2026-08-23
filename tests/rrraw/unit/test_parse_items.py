@@ -13,7 +13,8 @@ def test_parse_valid_headings():
     assert by_id["PRD-1"].kind == "container"
     assert by_id["PRD-1"].parent == "BRD-1"
     assert by_id["PRD-1.1"].kind == "leaf"
-    assert by_id["PRD-1.1"].moscow == "Must"
+    assert by_id["PRD-1.1"].reach == "40% of monthly active users"
+    assert by_id["PRD-1.1"].impact == "2"
     assert by_id["PRD-1.1"].spec == "ready"
 
 
@@ -32,7 +33,7 @@ _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 def test_parse_prd_status():
     text = """\
 ## PRD-1.1: Guest checkout
-_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _status_: delivered
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active users | _impact_: 2 | _confidence_: medium | _effort_: 5 | _status_: delivered
 """
     items, issues = vp.parse_markdown(text, "prd.md")
     assert not error_codes(issues)
@@ -43,7 +44,7 @@ _parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _status_: deli
 def test_pipe_in_meta_value_does_not_split_keys():
     text = """\
 ## PRD-1.1: Guest checkout
-_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _status_: in_progress | shipped
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active users | _impact_: 2 | _confidence_: medium | _effort_: 5 | _status_: in_progress | shipped
 """
     items, issues = vp.parse_markdown(text, "prd.md")
     assert "MALFORMED_META" not in error_codes(issues)
@@ -104,7 +105,7 @@ Vision without quotes.
 def test_invalid_rationale_shape():
     text = """\
 ## PRD-1.1: Guest checkout
-_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: rationale-4
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active users | _impact_: 2 | _confidence_: medium | _effort_: 5 | _rationale_: rationale-4
 """
     _, issues = vp.parse_markdown(text, "prd.md")
     assert "INVALID_VALUE" in error_codes(issues)

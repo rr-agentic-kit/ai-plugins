@@ -29,7 +29,7 @@ def test_rewrite_yaml_to_md(tmp_path: Path):
     items, issues = vp.parse_planning_dir(tmp_path)
     assert not error_codes(issues)
     by_id = {item.id: item for item in items}
-    assert by_id["PRD-1.1"].moscow == "Must"
+    assert by_id["PRD-1.1"].reach == "40% of monthly active users"
     prd = (tmp_path / "prd.md").read_text(encoding="utf-8")
     assert "_parent_: PRD-1" in prd
     assert "> As a guest, I can complete checkout without an account." in prd
@@ -120,7 +120,7 @@ _parent_: MRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
 Guest shopper.
 
 ## PRD-1: Guest checkout
-_parent_: BRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
+_parent_: BRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active users | _impact_: 2 | _confidence_: medium | _effort_: 5
 
 > As a guest, I can complete checkout without an account.
 """,

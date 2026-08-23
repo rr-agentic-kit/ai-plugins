@@ -13,7 +13,8 @@ def test_parse_yaml_valid_headings_migrate_reader():
     assert by_id["PRD-1"].kind == "container"
     assert by_id["PRD-1"].parent == "BRD-1"
     assert by_id["PRD-1.1"].kind == "leaf"
-    assert by_id["PRD-1.1"].moscow == "Must"
+    assert by_id["PRD-1.1"].reach == "40% of monthly active users"
+    assert by_id["PRD-1.1"].impact == "2"
     assert by_id["PRD-1.1"].spec == "ready"
 
 
@@ -27,7 +28,10 @@ items:
     Parent: PRD-1
     Kind: leaf
     Spec: ready
-    MoSCoW: Must
+    Reach: 40% of monthly active users
+    Impact: "2"
+    Confidence: medium
+    Effort: "5"
     Status: delivered
 """
     items, issues = vp.parse_yaml_doc(yaml_text, "prd.yaml")

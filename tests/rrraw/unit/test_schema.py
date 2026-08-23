@@ -17,6 +17,11 @@ def test_schema_enums_match_python():
     assert moscow == set(vp.MOSCOW_VALUES)
     kano = {v for v in item["kano"]["enum"] if v is not None}
     assert kano == set(vp.KANO_VALUES)
+    assert set(item["priority_method"]["enum"]) == set(vp.DOC_METHOD.values())
+    assert set(item["impact"]["enum"]) == set(vp.IMPACT_VALUES)
+    assert set(item["confidence"]["enum"]) == set(vp.CONFIDENCE_VALUES)
+    assert set(item["effort"]["enum"]) == set(vp.EFFORT_VALUES)
+    assert set(item["goal_type"]["enum"]) == set(vp.GOAL_TYPE_VALUES)
     assert set(item["id"]["pattern"].split("(")[1].split(")")[0].split("|")) == set(
         vp.PREFIX_TO_DOC
     )

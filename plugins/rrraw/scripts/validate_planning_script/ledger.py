@@ -18,6 +18,7 @@ from .constants import (
     RATIONALE_DECISIONS,
     RATIONALE_RE,
     RATIONALE_STATUSES,
+    RICE_FACTOR_KEYS,
 )
 from .models import Issue, Item
 
@@ -30,7 +31,16 @@ def is_ranked_leaf(item: Item) -> bool:
         return item.moscow is not None
     if method == "kano":
         return item.kano is not None
-    return True
+    if method == "rice":
+        return (
+            item.goal_type is not None
+            or item.reach is not None
+            or item.impact is not None
+            or item.confidence is not None
+            or item.effort is not None
+            or bool(item.raw_keys & (RICE_FACTOR_KEYS | {"goal-type"}))
+        )
+    return False
 
 
 def load_ledger(path: Path) -> tuple[dict[str, Any] | None, list[Issue]]:

@@ -66,7 +66,7 @@ Load remaining refs on demand from **Shared refs**.
 | [baselines.md](refs/baselines.md) | Every resolve; freeze / `--change` / open-next; first compose; challenge stamp |
 | [agent-config.md](refs/agent-config.md) | Resolve sync; first compose; `--setup`; `claude_config_version` lag |
 | [cascade.md](refs/cascade.md) | Discover-path actions (`discover`, `--change`, or a cascade level flag) |
-| [project-posture.md](refs/project-posture.md) | Discover start (pre-cascade); resume per that ref; PRD cut-pass after MoSCoW |
+| [project-posture.md](refs/project-posture.md) | Discover start (pre-cascade); resume per that ref; PRD-shape reflection before minting structure |
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A; on level entry; after compose persist |
 | [doc-standards/item-schema.md](refs/doc-standards/item-schema.md) | Discovering/composing any level |
 | `refs/doc-standards/<level>.md` | Discovering/composing that level only |

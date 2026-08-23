@@ -7,16 +7,16 @@ VALID_FILES: dict[str, str] = {
 # Exec summary
 
 ## ES-1: Competitive window
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
+_parent_: — | _kind_: leaf | _spec_: ready
 
 > Why now.
 
 ## ES-2: Regulatory ceiling
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
+_parent_: — | _kind_: leaf | _spec_: ready | _tag_: regulatory
 
 > Constraint.
 
-## ES-3: Self-serve conversion
+## ES-3: Guest checkout
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
 """,
     "mrd.md": """\
@@ -38,7 +38,7 @@ _parent_: MRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
 _parent_: BRD-1 | _kind_: container | _spec_: draft
 
 ### PRD-1.1: Guest checkout
-_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active users | _impact_: 2 | _confidence_: medium | _effort_: 5
 
 > As a guest, I can complete checkout without an account.
 """,
@@ -54,7 +54,6 @@ items:
     Parent: —
     Kind: leaf
     Spec: ready
-    MoSCoW: Must
     body: |
       Why now.
   ES-2:
@@ -62,11 +61,11 @@ items:
     Parent: —
     Kind: leaf
     Spec: ready
-    MoSCoW: Must
+    Tag: regulatory
     body: |
       Constraint.
   ES-3:
-    title: Self-serve conversion
+    title: Guest checkout
     Parent: —
     Kind: leaf
     Spec: ready
@@ -108,7 +107,10 @@ items:
     Parent: PRD-1
     Kind: leaf
     Spec: ready
-    MoSCoW: Must
+    Reach: 40% of monthly active users
+    Impact: "2"
+    Confidence: medium
+    Effort: "5"
     body: |
       As a guest, I can complete checkout without an account.
 """,
@@ -129,7 +131,7 @@ rationales:
     decision: accept
     subject: ES-3
     seat: seed-investor
-    because: "Self-serve conversion is the ES metric the rest of the cascade stands on"
+    because: "Guest checkout is the functional deliverable the rest of the cascade stands on"
     depends_on: [e-001]
     flips_when:
       - { kind: fact, evidence: e-001, becomes: refuted }
@@ -195,16 +197,16 @@ RATIONALE_FILES: dict[str, str] = {
 # Exec summary
 
 ## ES-1: Competitive window
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-006
+_parent_: — | _kind_: leaf | _spec_: ready | _rationale_: r-006
 
 > Why now.
 
 ## ES-2: Regulatory ceiling
-_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-007
+_parent_: — | _kind_: leaf | _spec_: ready | _tag_: regulatory | _rationale_: r-007
 
 > Constraint.
 
-## ES-3: Self-serve conversion
+## ES-3: Guest checkout
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-001
 """,
     "mrd.md": """\
@@ -226,7 +228,7 @@ _parent_: MRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r
 _parent_: BRD-1 | _kind_: container | _spec_: draft
 
 ### PRD-1.1: Guest checkout
-_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-004
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active users | _impact_: 2 | _confidence_: medium | _effort_: 5 | _rationale_: r-004
 
 > As a guest, I can complete checkout without an account.
 """,
@@ -242,7 +244,6 @@ items:
     Parent: —
     Kind: leaf
     Spec: ready
-    MoSCoW: Must
     Rationale: r-006
     body: |
       Why now.
@@ -251,12 +252,12 @@ items:
     Parent: —
     Kind: leaf
     Spec: ready
-    MoSCoW: Must
+    Tag: regulatory
     Rationale: r-007
     body: |
       Constraint.
   ES-3:
-    title: Self-serve conversion
+    title: Guest checkout
     Parent: —
     Kind: leaf
     Spec: ready
@@ -301,7 +302,10 @@ items:
     Parent: PRD-1
     Kind: leaf
     Spec: ready
-    MoSCoW: Must
+    Reach: 40% of monthly active users
+    Impact: "2"
+    Confidence: medium
+    Effort: "5"
     Rationale: r-004
     body: |
       As a guest, I can complete checkout without an account.

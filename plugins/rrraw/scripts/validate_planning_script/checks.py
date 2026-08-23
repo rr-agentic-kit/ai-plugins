@@ -362,10 +362,30 @@ def check_status(items: list[Item]) -> list[Issue]:
 def _check_ready_leaf_rank(item: Item) -> list[Issue]:
     issues: list[Issue] = []
     method = DOC_METHOD[item.doc]
-    if method == "moscow" and item.moscow is None:
+    if method == "moscow" and "moscow" in item.raw_keys and item.moscow is None:
         issues.append(Issue.error("DOR", "ready leaf missing moscow", item.id))
     if method == "kano" and item.kano is None:
         issues.append(Issue.error("DOR", "ready leaf missing kano", item.id))
+    if method == "rice":
+        if "goal-type" in item.raw_keys and item.goal_type is None:
+            issues.append(
+                Issue.error("DOR", "ready leaf missing goal-type", item.id)
+            )
+        rice_keys = ("reach", "impact", "confidence")
+        if any(key in item.raw_keys for key in rice_keys):
+            for key, value in (
+                ("reach", item.reach),
+                ("impact", item.impact),
+                ("confidence", item.confidence),
+            ):
+                if key in item.raw_keys and value is None:
+                    issues.append(
+                        Issue.error("DOR", f"ready leaf missing {key}", item.id)
+                    )
+            if "effort" in item.raw_keys and item.effort is None:
+                issues.append(
+                    Issue.error("DOR", "ready leaf missing effort", item.id)
+                )
     return issues
 
 
@@ -427,6 +447,12 @@ _DRIFT_KEYS = (
     "kind",
     "spec",
     "status",
+    "tag",
+    "goal_type",
+    "reach",
+    "impact",
+    "confidence",
+    "effort",
     "supersedes",
     "superseded_by",
     "moscow",

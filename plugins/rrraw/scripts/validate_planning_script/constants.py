@@ -25,6 +25,12 @@ CANONICAL_KEY_ORDER: tuple[str, ...] = (
     "kind",
     "spec",
     "status",
+    "tag",
+    "goal-type",
+    "reach",
+    "impact",
+    "confidence",
+    "effort",
     "moscow",
     "kano",
     "rationale",
@@ -36,7 +42,7 @@ NATIVE_INDEX_COL: dict[str, str] = {
     "exec-summary": "MoSCoW",
     "mrd": "Kano",
     "brd": "MoSCoW",
-    "prd": "MoSCoW",
+    "prd": "RICE",
 }
 
 PREFIX_TO_DOC: dict[str, str] = {
@@ -52,7 +58,7 @@ DOC_METHOD: dict[str, str] = {
     "exec-summary": "moscow",
     "mrd": "kano",
     "brd": "moscow",
-    "prd": "moscow",
+    "prd": "rice",
 }
 
 HEADING_RE = re.compile(r"^(#{2,4}) (ES|MRD|BRD|PRD)-(\d+(?:\.\d+)?): (.+)$")
@@ -80,6 +86,12 @@ YAML_KEY_MAP: dict[str, str] = {
     "Kind": "kind",
     "Spec": "spec",
     "Status": "status",
+    "Tag": "tag",
+    "Goal-type": "goal-type",
+    "Reach": "reach",
+    "Impact": "impact",
+    "Confidence": "confidence",
+    "Effort": "effort",
     "MoSCoW": "moscow",
     "Kano": "kano",
     "Rationale": "rationale",
@@ -90,6 +102,11 @@ KIND_VALUES = frozenset({"container", "leaf"})
 SPEC_VALUES = frozenset({"idea", "draft", "ready", "deprecated"})
 MOSCOW_VALUES = frozenset({"Must", "Should", "Could", "Won't"})
 KANO_VALUES = frozenset({"basic", "performance", "delighter"})
+IMPACT_VALUES = frozenset({"0.25", "0.5", "1", "2", "3"})
+CONFIDENCE_VALUES = frozenset({"low", "medium", "high"})
+EFFORT_VALUES = frozenset({"1", "2", "3", "5", "8", "13"})
+GOAL_TYPE_VALUES = frozenset({"primary", "support"})
+RICE_FACTOR_KEYS = frozenset({"reach", "impact", "confidence", "effort"})
 NULL_SENTINELS = frozenset({"\u2014", "-", "\u2013", "\u2212", "null", ""})
 JSON_ITEM_KEYS = frozenset(
     {
@@ -98,6 +115,12 @@ JSON_ITEM_KEYS = frozenset(
         "kind",
         "spec",
         "status",
+        "tag",
+        "goal_type",
+        "reach",
+        "impact",
+        "confidence",
+        "effort",
         "supersedes",
         "superseded_by",
         "priority_method",

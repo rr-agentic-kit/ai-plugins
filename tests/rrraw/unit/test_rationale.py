@@ -6,7 +6,7 @@ from pathlib import Path
 
 import validate_planning_script as vp
 import yaml
-from helpers import VALID_LEDGER, codes, error_codes, item
+from helpers import VALID_LEDGER, codes, error_codes, item, prd_rice
 from validate_planning_script.ledger import check_ledger_shape
 
 
@@ -20,7 +20,7 @@ def test_missing_rationale_on_ranked_leaf():
     issues = vp.check_rationale(
         [
             item("PRD-1", parent="BRD-1", kind="container", spec="draft"),
-            item("PRD-1.1", parent="PRD-1", moscow="Must"),
+            prd_rice("PRD-1.1", parent="PRD-1"),
         ],
         _ledger(),
     )
@@ -29,7 +29,7 @@ def test_missing_rationale_on_ranked_leaf():
 
 def test_dangling_rationale_id():
     issues = vp.check_rationale(
-        [item("PRD-1.1", parent="PRD-1", moscow="Must", rationale="r-999")],
+        [prd_rice("PRD-1.1", parent="PRD-1", rationale="r-999")],
         _ledger(),
     )
     assert "BROKEN_RATIONALE" in error_codes(issues)
@@ -37,7 +37,7 @@ def test_dangling_rationale_id():
 
 def test_valid_rationale_on_ranked_leaf():
     issues = vp.check_rationale(
-        [item("PRD-1.1", parent="PRD-1", moscow="Must", rationale="r-004")],
+        [prd_rice("PRD-1.1", parent="PRD-1", rationale="r-004")],
         _ledger(),
     )
     assert error_codes(issues) == set()
@@ -86,7 +86,7 @@ def test_missing_ledger_is_warning():
 
 
 def test_rationale_key_drift():
-    md = [item("PRD-1.1", parent="PRD-1", moscow="Must", rationale="r-004")]
+    md = [prd_rice("PRD-1.1", parent="PRD-1", rationale="r-004")]
     row = md[0].to_record()
     row["rationale"] = "r-001"
     issues = vp.check_drift(md, [row])

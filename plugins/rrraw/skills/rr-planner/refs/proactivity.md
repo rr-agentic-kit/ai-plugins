@@ -30,7 +30,7 @@ Lightweight devil's-advocate during discovery — not the full `--challenge` age
 |---------|----------------|
 | Single-stakeholder framing | "Who else is affected but not mentioned?" |
 | Solution-before-problem | "Restate the problem without mentioning the solution." |
-| PRD MoSCoW assigned | Run the **cut-pass** once ([project-posture.md](project-posture.md)). Do not ask a generic "v1 or future phase?" |
+| PRD shape confirmed | Run **PRD-shape reflection** once ([project-posture.md](project-posture.md)). Do not ask a generic "v1 or future phase?" |
 | Happy-path only | "What is the primary failure mode?" |
 | Market / economic claim without evidence | Classify and run the evidence loop ([expert-panel.md](expert-panel.md)). Do not defer TAM/SAM/SOM to research when `premise-critical`. |
 | Seat blocks | Conduct protocol ([expert-panel.md](expert-panel.md)). |
@@ -56,7 +56,7 @@ Fire reflection when any of:
 - Level gate 5 (proactivity) not yet satisfied.
 - User says "I think", "probably", "maybe" on a blocking or `premise-critical` fact.
 - Compose agent returns `clarifications_needed[]` with `severity: high`.
-- PRD MoSCoW just assigned → cut-pass (once per PRD compose; same fatigue cap as Gate 5).
+- PRD shape just confirmed → PRD-shape reflection (once per PRD compose; same fatigue cap as Gate 5).
 - Sweep enqueued an item, or a seat issued `hold` / `pivot` / `kill`.
 - Evidence round just landed (always sweep; reflect if anything invalidated).
 

@@ -11,10 +11,14 @@ from .constants import (
     ATX_HEADING_RE,
     BODY_QUOTE_RE,
     CLOSED_KEYS,
+    CONFIDENCE_VALUES,
     DOC_STEMS,
     DOC_TO_PREFIX,
+    EFFORT_VALUES,
+    GOAL_TYPE_VALUES,
     HEADING_RE,
     ID_RE,
+    IMPACT_VALUES,
     INLINE_KEY_RE,
     KANO_VALUES,
     KIND_VALUES,
@@ -434,6 +438,46 @@ def _validate_item_enums(
                 item_id,
             )
         )
+    goal_type = (
+        _null_or_value(meta["goal-type"]) if "goal-type" in meta else None
+    )
+    if goal_type is not None and goal_type not in GOAL_TYPE_VALUES:
+        issues.append(
+            Issue.error(
+                "INVALID_VALUE",
+                f"goal-type must be primary|support, got {goal_type!r}",
+                item_id,
+            )
+        )
+    impact = _null_or_value(meta["impact"]) if "impact" in meta else None
+    if impact is not None and impact not in IMPACT_VALUES:
+        issues.append(
+            Issue.error(
+                "INVALID_VALUE",
+                f"impact must be 0.25|0.5|1|2|3, got {impact!r}",
+                item_id,
+            )
+        )
+    confidence = (
+        _null_or_value(meta["confidence"]) if "confidence" in meta else None
+    )
+    if confidence is not None and confidence not in CONFIDENCE_VALUES:
+        issues.append(
+            Issue.error(
+                "INVALID_VALUE",
+                f"confidence must be low|medium|high, got {confidence!r}",
+                item_id,
+            )
+        )
+    effort = _null_or_value(meta["effort"]) if "effort" in meta else None
+    if effort is not None and effort not in EFFORT_VALUES:
+        issues.append(
+            Issue.error(
+                "INVALID_VALUE",
+                f"effort must be Fibonacci 1|2|3|5|8|13, got {effort!r}",
+                item_id,
+            )
+        )
 
 
 def _item_from_meta(
@@ -455,8 +499,18 @@ def _item_from_meta(
     spec = meta.get("spec", "")
     parent = _null_or_value(meta["parent"]) if "parent" in meta else None
     status = _null_or_value(meta["status"]) if "status" in meta else None
+    tag = _null_or_value(meta["tag"]) if "tag" in meta else None
     moscow = _null_or_value(meta["moscow"]) if "moscow" in meta else None
     kano = _null_or_value(meta["kano"]) if "kano" in meta else None
+    goal_type = (
+        _null_or_value(meta["goal-type"]) if "goal-type" in meta else None
+    )
+    reach = _null_or_value(meta["reach"]) if "reach" in meta else None
+    impact = _null_or_value(meta["impact"]) if "impact" in meta else None
+    confidence = (
+        _null_or_value(meta["confidence"]) if "confidence" in meta else None
+    )
+    effort = _null_or_value(meta["effort"]) if "effort" in meta else None
     supersedes = _null_or_value(meta["supersedes"]) if "supersedes" in meta else None
     superseded_by = (
         _null_or_value(meta["superseded-by"]) if "superseded-by" in meta else None
@@ -479,6 +533,12 @@ def _item_from_meta(
         kind=kind,
         spec=spec,
         status=status,
+        tag=tag,
+        goal_type=goal_type,
+        reach=reach,
+        impact=impact,
+        confidence=confidence,
+        effort=effort,
         moscow=moscow,
         kano=kano,
         supersedes=supersedes,

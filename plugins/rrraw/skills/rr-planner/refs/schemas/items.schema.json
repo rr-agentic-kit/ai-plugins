@@ -34,11 +34,35 @@
           "type": "string",
           "minLength": 1
         },
+        "tag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "goal_type": {
+          "type": "string",
+          "enum": ["primary", "support"]
+        },
+        "reach": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact": {
+          "type": "string",
+          "enum": ["0.25", "0.5", "1", "2", "3"]
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "effort": {
+          "type": "string",
+          "enum": ["1", "2", "3", "5", "8", "13"]
+        },
         "supersedes": { "type": "string" },
         "superseded_by": { "type": "string" },
         "priority_method": {
           "type": "string",
-          "enum": ["moscow", "kano"]
+          "enum": ["moscow", "kano", "rice"]
         },
         "moscow": {
           "type": ["string", "null"],

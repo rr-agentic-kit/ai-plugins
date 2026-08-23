@@ -141,6 +141,12 @@ def _index_native_value(item: Item, col: str) -> str:
         return item.moscow or EM_DASH
     if col == "Kano":
         return item.kano or EM_DASH
+    if col == "RICE":
+        if item.goal_type:
+            return item.goal_type
+        parts = [item.reach, item.impact, item.confidence, item.effort]
+        scored = [part for part in parts if part]
+        return " / ".join(scored) if scored else EM_DASH
     return EM_DASH
 
 

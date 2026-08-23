@@ -116,6 +116,24 @@ def error_codes(issues: list[vp.Issue]) -> set[str]:
 
 _UNSET = object()
 
+PRD_RICE_DEFAULTS = {
+    "reach": "40% of monthly active users",
+    "impact": "2",
+    "confidence": "medium",
+    "effort": "5",
+}
+
+
+def prd_rice(
+    item_id: str,
+    *,
+    parent: str | None | object = _UNSET,
+    spec: str = "ready",
+    **kwargs: Any,
+) -> vp.Item:
+    rice = {**PRD_RICE_DEFAULTS, **kwargs}
+    return item(item_id, parent=parent, spec=spec, **rice)
+
 
 def item(
     item_id: str,
@@ -125,6 +143,12 @@ def item(
     kind: str = "leaf",
     spec: str = "ready",
     status: str | None = None,
+    tag: str | None = None,
+    goal_type: str | None = None,
+    reach: str | None = None,
+    impact: str | None = None,
+    confidence: str | None = None,
+    effort: str | None = None,
     moscow: str | None = None,
     kano: str | None = None,
     supersedes: str | None = None,
@@ -141,6 +165,18 @@ def item(
     if raw_keys is None:
         if status is not None:
             keys.add("status")
+        if tag is not None:
+            keys.add("tag")
+        if goal_type is not None:
+            keys.add("goal-type")
+        if reach is not None:
+            keys.add("reach")
+        if impact is not None:
+            keys.add("impact")
+        if confidence is not None:
+            keys.add("confidence")
+        if effort is not None:
+            keys.add("effort")
         if moscow is not None:
             keys.add("moscow")
         if kano is not None:
@@ -151,6 +187,7 @@ def item(
             keys.add("supersedes")
         if superseded_by is not None:
             keys.add("superseded-by")
+    meta = dict(raw_meta) if raw_meta is not None else {}
     return vp.Item(
         id=item_id,
         title=title,
@@ -160,6 +197,12 @@ def item(
         kind=kind,
         spec=spec,
         status=status,
+        tag=tag,
+        goal_type=goal_type,
+        reach=reach,
+        impact=impact,
+        confidence=confidence,
+        effort=effort,
         moscow=moscow,
         kano=kano,
         supersedes=supersedes,
@@ -167,5 +210,5 @@ def item(
         rationale=rationale,
         source_file=source_file,
         raw_keys=keys,
-        raw_meta=dict(raw_meta) if raw_meta is not None else {},
+        raw_meta=meta,
     )
