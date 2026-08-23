@@ -24,7 +24,7 @@ flowchart TD
   start[Discover start] --> scan[Scan repo + plans]
   scan --> confirm[Confirm existence and commitment]
   confirm --> persist[Write project_posture + ES Posture section]
-  persist --> cascade[Cascade exec-summary through FRD]
+  persist --> cascade[Cascade exec-summary through PRD]
   cascade --> cut[PRD cut-pass]
   cut --> freeze[Freeze PRD]
 ```

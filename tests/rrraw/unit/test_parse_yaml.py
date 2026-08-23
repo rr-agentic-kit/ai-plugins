@@ -17,14 +17,23 @@ def test_parse_yaml_valid_headings_migrate_reader():
     assert by_id["PRD-1.1"].spec == "ready"
 
 
-def test_parse_yaml_triad_axis_migrate_reader():
-    items, issues = vp.parse_yaml_doc(VALID_YAML_FILES["frd.yaml"], "frd.yaml")
+def test_parse_yaml_prd_status_migrate_reader():
+    yaml_text = """\
+doc_type: prd
+title: PRD
+items:
+  PRD-1.1:
+    title: Guest checkout
+    Parent: PRD-1
+    Kind: leaf
+    Spec: ready
+    MoSCoW: Must
+    Status: delivered
+"""
+    items, issues = vp.parse_yaml_doc(yaml_text, "prd.yaml")
     assert not error_codes(issues)
-    leaf = next(item for item in items if item.id == "FRD-1.1")
-    assert leaf.build == "in_progress"
-    assert leaf.triad is not None
-    assert leaf.triad.if_wrong.magnitude == "critical"
-    assert leaf.triad.class_name == "must-correct"
+    leaf = next(item for item in items if item.id == "PRD-1.1")
+    assert leaf.status == "delivered"
 
 
 def test_parse_yaml_invalid_root():

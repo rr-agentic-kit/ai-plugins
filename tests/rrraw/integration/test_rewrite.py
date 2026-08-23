@@ -25,7 +25,6 @@ def test_rewrite_yaml_to_md(tmp_path: Path):
     assert not error_codes(issues)
     by_id = {item.id: item for item in items}
     assert by_id["PRD-1.1"].moscow == "Must"
-    assert by_id["FRD-1.1"].triad is not None
     prd = (tmp_path / "prd.md").read_text(encoding="utf-8")
     assert "_parent_: PRD-1" in prd
     assert "> As a guest, I can complete checkout without an account." in prd
@@ -120,12 +119,6 @@ _parent_: BRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
 
 > As a guest, I can complete checkout without an account.
 """,
-        "frd.md": """\
-# FRD
-
-## FRD-1: Guest checkout without account
-_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _build_: none | _if-present_: high — Unlocks conversion | _if-absent_: high — PLG blocked | _if-wrong_: low — Local defect | _class_: must-present
-""",
     }
     write_planning(tmp_path, files)
     assert vp.main([str(tmp_path), "--rewrite"]) == 0
@@ -168,5 +161,5 @@ def test_valid_rationale_round_trip_yaml_rewrite(tmp_path: Path):
     assert error_codes(issues) == set(), [i.format() for i in issues]
     items, _ = vp.parse_planning_dir(tmp_path)
     by_id = {item.id: item for item in items}
-    assert by_id["FRD-1.1"].rationale == "r-005"
+    assert by_id["PRD-1.1"].rationale == "r-004"
     assert by_id["PRD-1"].rationale is None

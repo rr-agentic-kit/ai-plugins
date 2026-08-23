@@ -6,8 +6,8 @@ Flag-driven software planning docs: progressive top-down discovery from vision t
 
 ## Philosophy
 
-- **Progressive cascade** — Posture gate (including `domain_context`), then Exec summary → MRD → BRD → PRD → FRD; each level inherits and narrows the one above.
-- **Item contract** — Hierarchical `{DOC}-{n.m}` ids, immediate parent pointer, atomic leaves; ranking is per layer (MoSCoW / Kano / FRD triad), not P0. MoSCoW *legend* follows project posture (Must is not always MVP). Spec vs build are separate axes. Ranked leaves carry a `_rationale_` pointer.
+- **Progressive cascade** — Posture gate (including `domain_context`), then Exec summary → MRD → BRD → PRD; each level inherits and narrows the one above.
+- **Item contract** — Hierarchical `{DOC}-{n.m}` ids, immediate parent pointer, atomic leaves; ranking is per layer (MoSCoW / Kano), not P0. MoSCoW *legend* follows project posture (Must is not always MVP). Spec vs PRD `status` are separate concerns. Ranked leaves carry a `_rationale_` pointer. Mechanism detail appends to `tech.md`.
 - **Goal-anchored** — Unclear and ambiguous statements are blocking; clarify before recording facts; every decision traces to stated goals. Reason-graph (evidence, `flips_when`, burial) lives in `decision-ledger.yaml`, not the decision log.
 - **Expert panel** — Seats argue both sides; a blocking seat owes an alternative. Verdict is a state (`proceed` … `kill`), not an exit. Binding at exec-summary and MRD; `market_type: internal` skips TAM.
 - **Decision ledger** — Items rest on rationales, rationales rest on evidence. Invalidation raises a re-decision queue; it never auto-flips status. Buried ids are reserved and never recycled.
@@ -92,12 +92,13 @@ Compose writes cascade docs and `items.json`. The skill asks clarifications and 
 | `mrd.md` | Market context |
 | `brd.md` | Business requirements |
 | `prd.md` | Product requirements |
-| `frd.md` | Functional requirements with Gherkin acceptance criteria |
+| `tech.md` | Mechanism-level freeform capture (shalls, AC, integrations — not validator input) |
+| `later.md` | Deferred-topic parking lot (not validator input) |
 | `status.yaml` | Shared track, independent product/docs patches, per-doc rev/digest/pins, `claude_config_version` (skill-owned; validator mechanical codes only) |
 | `agent.plan.md` | Non-patch version tripwire + pointer self-heal; pairing SoT is this skill (not cascade input) |
 | `future.md` | Unassigned / beyond-next inbox (no ids; never auto-promote; not validator input) |
 | `{level}.notes.yaml` | Off-level answers parked on the affected doc (always YAML; not validator input; exists only while unresolved) |
-| `items.json` | Item graph / parent-child / spec-build / rationale ids (always written; validator target) |
+| `items.json` | Item graph / parent-child / spec / rationale ids (always written; validator target) |
 | `decision-ledger.yaml` | Evidence, rationales, graveyard, reserved ids, re-decision queue (skill-owned; validator input) |
 | `session-state.json` | Checkpoint for stop/resume (decisions, facts, `project_posture`, `viability`, `note_sessions`, `item_registry`, `raw_history_path`) |
 | `raw-history/{UTC}.yaml` | Verbatim Q&A turns (append-only; created on first question) |
@@ -113,7 +114,7 @@ Cascade docs are `.md` only. `items.json` and `session-state.json` are always JS
 - **Partial docs** — Say "stop" or "pause" to checkpoint; resume with `--resume`. Answer pending clarification questions to advance.
 - **Old `docs/planning/` checkpoint** — Resume uses it once, states the new default `docs/plans/`, and does not copy files. Pass `--output-dir` to keep the old path.
 - **Missing parent docs for challenge/research** — Run `--discover` first or point `--input` at existing docs.
-- **Traceability failures** — Re-run focused level (e.g. `--frd`) after fixing parent docs.
+- **Traceability failures** — Re-run focused level (e.g. `--prd`) after fixing parent docs.
 - **Held session (`VIABILITY HOLD` / `blocked`)** — Binding `hold` names missing evidence in `viability[]` and the ledger. Do not treat the plan as accepted. Resume, satisfy the evidence bar or confirm `kill` with a revival trigger, then re-run pre-save.
 - **Revived item** — A killed id stays in `reserved_ids` / `graveyard`. Revival is a **new** id plus `type: revival` pointing at the snapshot. Compose will not recycle the buried number.
 - **`--format yaml` / `--format json`** — Not a plan format. Use `md` (default). Stale `{level}.yaml` cascade files are rewritten at resolve.

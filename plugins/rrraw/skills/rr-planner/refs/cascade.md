@@ -15,17 +15,15 @@ Fixed sequence — never skip a level in `standard`/`deep` depth (`shallow` trim
 2. mrd           — market context
 3. brd           — business requirements
 4. prd           — product requirements
-5. frd           — functional detail
 ```
 
-Item identity, parent walk, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). Freeze/remap: this file.
+Item identity, parent walk, spec/status: [doc-standards/item-schema.md](doc-standards/item-schema.md). Freeze/remap: this file. Mechanism-level detail (shalls, AC, integration points, NFR mechanism, error-handling specifics, requirement-explosion overflow) appends to `{PROJECT_ROOT}/docs/plans/tech.md` — not a cascade doc ([output-formats.md](output-formats.md)).
 
 ```mermaid
 flowchart TD
   ES["ES-n"] --> MRD["MRD-n.m"]
   MRD --> BRD["BRD-n.m"]
   BRD --> PRD["PRD-n.m"]
-  PRD --> FRD["FRD-n.m"]
 ```
 
 ## Inheritance model
@@ -38,15 +36,13 @@ Each level **inherits** all resolved facts from levels above and **narrows** sco
 | mrd | exec-summary | market segments, competitors, trends relevant to vision |
 | brd | exec-summary + mrd | business objectives, stakeholders, constraints |
 | prd | exec-summary + mrd + brd | product capabilities, user outcomes, priorities |
-| frd | all above | functional behaviors, acceptance criteria, interfaces |
 
 ### Inheritance rules
 
 1. **No contradiction** — child facts must align with parent facts. Conflict → [goal-anchor.md](goal-anchor.md) + question (per `question_mode`).
 2. **No orphan items** — parent walk and cross-doc previous-level-only: [doc-standards/item-schema.md](doc-standards/item-schema.md). Verified by `validate_planning.sh` (Gate 3 + [success-criteria.md](success-criteria.md) static).
 3. **Explicit narrowing** — when a parent fact is too broad for the child level, record the narrowing as a decision in `session-state.json`.
-4. **Unknown vs off-level** — details not yet known *at this level* are `assumptions[]` or `open_questions[]`, not silently invented. Off-level content: [note-sessions.md](note-sessions.md).
-5. **Priority inheritance** — FRD may default `if_absent` magnitude from parent PRD MoSCoW (Must → high, Should → moderate, Could → low). Won’t PRD items get no FRD children. Do not copy MoSCoW onto FRD. Magnitudes are unchanged; only the human MoSCoW *legend* follows [project-posture.md](project-posture.md).
+4. **Unknown vs off-level** — details not yet known *at this level* are `assumptions[]` or `open_questions[]`, not silently invented. Off-level content: [note-sessions.md](note-sessions.md). Mechanism-level detail that surfaces during PRD (or any level) appends to `tech.md`; deferred topics the user wants to revisit append to `later.md` ([output-formats.md](output-formats.md)).
 
 ## Per-level discovery flow (skill-inline)
 
@@ -95,7 +91,7 @@ A level is **complete** only when all gates pass. Freeze/advance: Advancing vs s
 | First compose of a level | Mint dense sibling IDs (`1, 2, 3` / `n.1, n.2`). Frontmatter `doc_rev: "?"`. |
 | Cascade gates pass for that level | Add level to `frozen_levels`. IDs freeze. Skill mints `status.yaml`: `rev` `?` → `1` (or lock-target ++), write digest, docs patch++, product patch unchanged, recompute `mint_hash`. If `levels.<doc>.digest` ≠ `challenge.<doc>.scanned_digest` → `dirty`. Freeze does **not** wait on challenge-clean. Major/minor (`track` / `next`) **only** after explicit confirm — never on this mint. |
 | Later insert on a frozen level | Append next integer. Do not renumber existing ids. |
-| Explicit re-compose of a frozen level | Allowed. Compose rewrites child-doc `parent:` and `items.json` in the same invocation so e.g. FRD does not point at a vanished `PRD-3`. Skill refreshes `item_registry` from `items.json`. Obligation-preserving → lock-target (stay frozen, refresh child pins). Obligations break → ask to unfreeze; if minor+ and `next` exists → redirect ([baselines.md](baselines.md)). |
+| Explicit re-compose of a frozen level | Allowed. Compose rewrites child-doc `parent:` and `items.json` in the same invocation so downstream items do not point at vanished parents. Skill refreshes `item_registry` from `items.json`. Obligation-preserving → lock-target (stay frozen, refresh child pins). Obligations break → ask to unfreeze; if minor+ and `next` exists → redirect ([baselines.md](baselines.md)). |
 | `--resume` | Load `item_registry`; continue minting from max sibling index on frozen levels. |
 | `--change` | Section + target. Skill classifies patch vs redirect-to-next vs open-next vs unfreeze. Not CI. |
 

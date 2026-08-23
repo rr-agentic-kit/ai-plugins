@@ -4,7 +4,7 @@
 
 **Load when:** Every resolve (status-first pick); freeze / `--change` / open-next; compose frontmatter (`track`, `doc_rev`, `pins`).
 
-Item identity, spec, and build stay in [doc-standards/item-schema.md](doc-standards/item-schema.md). This ref does not change them. Tickets and technical docs stay out — they target `track` + item id.
+Item identity, spec, and PRD `status` stay in [doc-standards/item-schema.md](doc-standards/item-schema.md). This ref does not change them. Tickets and technical docs stay out — they target `track` + item id.
 
 ## Version model
 
@@ -50,10 +50,6 @@ levels:
     digest: null
     pins: {}
   prd:
-    rev: "?"
-    digest: null
-    pins: {}
-  frd:
     rev: "?"
     digest: null
     pins: {}
@@ -119,13 +115,15 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
 
 ## Layout / directory fork
 
-`docs/plans/` holds current-track cascade docs until a next major.minor opens, then `docs/plans/{next}/` (e.g. `docs/plans/0.2/`). Root **always** keeps `status.yaml`, `agent.plan.md`, `future.md`.
+`docs/plans/` holds current-track cascade docs until a next major.minor opens, then `docs/plans/{next}/` (e.g. `docs/plans/0.2/`). Root **always** keeps `status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md`.
 
 ```
 {PROJECT_ROOT}/docs/plans/
   status.yaml
   agent.plan.md
   future.md
+  tech.md
+  later.md
   exec-summary.md          # current track
   …
   0.2/                     # only once next is open
@@ -201,6 +199,24 @@ One `{PROJECT_ROOT}/docs/plans/future.md`. Not validator input. No item ids, no 
 | What belongs here | Unassigned, or beyond-next. |
 
 Rejected: `future/` folder; per-track future files.
+
+## `tech.md` — mechanism capture
+
+One `{PROJECT_ROOT}/docs/plans/tech.md`. Same tier as `later.md` / `future.md`. **Not validator input.** No item ids, no gates, never composed into ES/MRD/BRD/PRD.
+
+| Rule | |
+|------|--|
+| Passive | Skill appends freely when mechanism-level detail surfaces (shalls, AC, integration points, NFR mechanism, error-handling specifics, requirement-explosion overflow). No periodic maintenance; rr-planner does not re-read it on later passes. |
+| Not a cascade doc | Never mint item ids; never run Gates 1–7 against this file. |
+
+## `later.md` — deferred-topic parking lot
+
+One global `{PROJECT_ROOT}/docs/plans/later.md`. **Not validator input.** No item ids.
+
+| Rule | |
+|------|--|
+| Passive | Skill writes freely when the user defers a topic ("discuss later"). No periodic maintenance; no auto-incorporate. |
+| Distinct from notes | `{level}.notes.yaml` is active/addressed-then-deleted for off-level answers on a specific doc. `later.md` is a global parking lot. |
 
 ## `agent.plan.md` contract
 

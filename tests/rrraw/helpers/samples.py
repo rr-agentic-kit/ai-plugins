@@ -42,17 +42,6 @@ _parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must
 
 > As a guest, I can complete checkout without an account.
 """,
-    "frd.md": """\
-# FRD
-
-## FRD-1: Checkout
-_parent_: PRD-1.1 | _kind_: container | _spec_: draft
-
-### FRD-1.1: Guest checkout without account
-_parent_: FRD-1 | _kind_: leaf | _spec_: ready | _build_: in_progress | _if-present_: high — Unlocks self-serve conversion without an account | _if-absent_: high — PLG blocked | _if-wrong_: critical — Bad tax/entitlements | _class_: must-correct
-
-> The system shall allow checkout without an account.
-""",
 }
 
 VALID_YAML_FILES: dict[str, str] = {
@@ -122,28 +111,6 @@ items:
     MoSCoW: Must
     body: |
       As a guest, I can complete checkout without an account.
-""",
-    "frd.yaml": """\
-doc_type: frd
-title: FRD
-items:
-  FRD-1:
-    title: Checkout
-    Parent: PRD-1.1
-    Kind: container
-    Spec: draft
-  FRD-1.1:
-    title: Guest checkout without account
-    Parent: FRD-1
-    Kind: leaf
-    Spec: ready
-    Build: in_progress
-    "If present": high — Unlocks self-serve conversion without an account
-    "If absent": high — PLG blocked
-    "If wrong": critical — Bad tax/entitlements
-    Class: must-correct
-    body: |
-      The system shall allow checkout without an account.
 """,
 }
 
@@ -218,16 +185,6 @@ rationales:
       - { kind: fact, evidence: e-001, becomes: refuted }
     condition_strength: observable
     status: live
-  r-005:
-    decision: accept
-    subject: FRD-1.1
-    seat: staff-engineer
-    because: "Shall is the implementable form of PRD-1.1"
-    depends_on: [e-001]
-    flips_when:
-      - { kind: event, text: "Tax/entitlement engine cannot run without an account" }
-    condition_strength: observable
-    status: live
 graveyard: {}
 reserved_ids: {}
 re_decision_queue: []
@@ -272,17 +229,6 @@ _parent_: BRD-1 | _kind_: container | _spec_: draft
 _parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-004
 
 > As a guest, I can complete checkout without an account.
-""",
-    "frd.md": """\
-# FRD
-
-## FRD-1: Checkout
-_parent_: PRD-1.1 | _kind_: container | _spec_: draft
-
-### FRD-1.1: Guest checkout without account
-_parent_: FRD-1 | _kind_: leaf | _spec_: ready | _build_: in_progress | _if-present_: high — Unlocks self-serve conversion without an account | _if-absent_: high — PLG blocked | _if-wrong_: critical — Bad tax/entitlements | _class_: must-correct | _rationale_: r-005
-
-> The system shall allow checkout without an account.
 """,
 }
 
@@ -359,28 +305,5 @@ items:
     Rationale: r-004
     body: |
       As a guest, I can complete checkout without an account.
-""",
-    "frd.yaml": """\
-doc_type: frd
-title: FRD
-items:
-  FRD-1:
-    title: Checkout
-    Parent: PRD-1.1
-    Kind: container
-    Spec: draft
-  FRD-1.1:
-    title: Guest checkout without account
-    Parent: FRD-1
-    Kind: leaf
-    Spec: ready
-    Build: in_progress
-    "If present": high — Unlocks self-serve conversion without an account
-    "If absent": high — PLG blocked
-    "If wrong": critical — Bad tax/entitlements
-    Class: must-correct
-    Rationale: r-005
-    body: |
-      The system shall allow checkout without an account.
 """,
 }

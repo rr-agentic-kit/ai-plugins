@@ -22,7 +22,6 @@ Every level seats the **domain practitioner** who lives the problem, instantiate
 | mrd | CMO + growth investor + domain practitioner | Binding |
 | brd | CFO + COO + domain practitioner | Advisory |
 | prd | Head of product + UX + domain practitioner | Advisory |
-| frd | Staff engineer + SRE/QA + domain practitioner | Advisory |
 
 Binding: a `hold` / `kill` / `pivot` blocks freeze and advance. Advisory: record the verdict and dissent; user may accept and proceed (still write the ledger). Dissent between seats is recorded, **never averaged** — the disagreement is the signal.
 
@@ -78,7 +77,7 @@ Non-terminal. Recorded in `session_state.viability[]` and, for ranked-leaf decis
 
 `hold` names the missing evidence. `pivot` carries the concrete reframing — not "think harder". `kill` without a revival trigger is a protocol failure.
 
-Binding at exec-summary and MRD. Advisory at BRD/PRD/FRD — still record; user may accept advisory `hold`/`kill` and proceed (banner still applied on binding-level `hold` only).
+Binding at exec-summary and MRD. Advisory at BRD/PRD — still record; user may accept advisory `hold`/`kill` and proceed (banner still applied on binding-level `hold` only).
 
 ## Dissent
 

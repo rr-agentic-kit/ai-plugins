@@ -13,13 +13,10 @@ def test_schema_enums_match_python():
     item = defs["item"]["properties"]
     assert set(item["kind"]["enum"]) == set(vp.KIND_VALUES)
     assert set(item["spec"]["enum"]) == set(vp.SPEC_VALUES)
-    assert set(item["build"]["enum"]) == set(vp.BUILD_VALUES)
     moscow = {v for v in item["moscow"]["enum"] if v is not None}
     assert moscow == set(vp.MOSCOW_VALUES)
     kano = {v for v in item["kano"]["enum"] if v is not None}
     assert kano == set(vp.KANO_VALUES)
-    assert set(defs["magnitude"]["enum"]) == set(vp.MAGNITUDE_VALUES)
-    assert set(defs["triad"]["properties"]["class"]["enum"]) == set(vp.CLASS_VALUES)
     assert set(item["id"]["pattern"].split("(")[1].split(")")[0].split("|")) == set(
         vp.PREFIX_TO_DOC
     )

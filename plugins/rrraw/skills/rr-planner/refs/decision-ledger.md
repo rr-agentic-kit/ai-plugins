@@ -55,7 +55,7 @@ reserved_ids:
 re_decision_queue:
   - rationale: r-014
     trigger: "e-001 refuted"
-    affected: [PRD-4, FRD-9]
+    affected: [PRD-4, PRD-9]
     status: open             # open | decided | dismissed
 ```
 

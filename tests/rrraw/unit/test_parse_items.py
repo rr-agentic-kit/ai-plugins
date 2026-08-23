@@ -29,26 +29,26 @@ _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
     assert leaf.spec == "idea"
 
 
-def test_parse_triad_axis():
-    items, issues = vp.parse_markdown(VALID_FILES["frd.md"], "frd.md")
-    assert not error_codes(issues)
-    leaf = next(item for item in items if item.id == "FRD-1.1")
-    assert leaf.build == "in_progress"
-    assert leaf.triad is not None
-    assert leaf.triad.if_wrong.magnitude == "critical"
-    assert leaf.triad.class_name == "must-correct"
-
-
-def test_pipe_in_triad_effect_does_not_split_keys():
+def test_parse_prd_status():
     text = """\
-## FRD-1: Checkout
-_parent_: PRD-1.1 | _kind_: leaf | _spec_: ready | _build_: none | _if-present_: high — Unlocks A | B conversion | _if-absent_: high — PLG blocked | _if-wrong_: low — Local defect | _class_: must-present
+## PRD-1.1: Guest checkout
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _status_: delivered
 """
-    items, issues = vp.parse_markdown(text, "frd.md")
+    items, issues = vp.parse_markdown(text, "prd.md")
+    assert not error_codes(issues)
+    leaf = items[0]
+    assert leaf.status == "delivered"
+
+
+def test_pipe_in_meta_value_does_not_split_keys():
+    text = """\
+## PRD-1.1: Guest checkout
+_parent_: PRD-1 | _kind_: leaf | _spec_: ready | _moscow_: Must | _status_: in_progress | shipped
+"""
+    items, issues = vp.parse_markdown(text, "prd.md")
     assert "MALFORMED_META" not in error_codes(issues)
     leaf = items[0]
-    assert leaf.triad is not None
-    assert leaf.triad.if_present.effect == "Unlocks A | B conversion"
+    assert leaf.status == "in_progress | shipped"
 
 
 def test_unknown_metadata_key():

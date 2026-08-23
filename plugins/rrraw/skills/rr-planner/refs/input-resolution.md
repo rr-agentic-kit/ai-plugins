@@ -21,7 +21,6 @@
 | `--mrd` | `mrd` |
 | `--brd` | `brd` |
 | `--prd` | `prd` |
-| `--frd` | `frd` |
 | `--change` | `change` |
 | `--research` | `research` |
 | `--challenge` | `challenge` |
@@ -37,7 +36,7 @@ When no primary flag is present, do not emit a payload yet. Run **NL intent fall
 1. `git rev-parse --show-toplevel` if the working tree is a git repo.
 2. Else workspace / current working directory root.
 
-Default `output_dir` = `{PROJECT_ROOT}/docs/plans/`. `--output-dir` always wins. When `status.yaml.next` is set and the route is `continue-next-track` (or `--target` names that track), set `output_dir` to `{PROJECT_ROOT}/docs/plans/{next}/` unless `--output-dir` was explicit. `status.yaml`, `agent.plan.md`, and `future.md` stay in `{PROJECT_ROOT}/docs/plans/` ([baselines.md](baselines.md)).
+Default `output_dir` = `{PROJECT_ROOT}/docs/plans/`. `--output-dir` always wins. When `status.yaml.next` is set and the route is `continue-next-track` (or `--target` names that track), set `output_dir` to `{PROJECT_ROOT}/docs/plans/{next}/` unless `--output-dir` was explicit. `status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md` stay in `{PROJECT_ROOT}/docs/plans/` ([baselines.md](baselines.md)).
 
 ## Shared selectors
 
@@ -80,7 +79,7 @@ Allowed JSON on disk (not selected by `--format`): `items.json` (item graph) and
 | Selector | Meaning |
 |----------|---------|
 | `--section` | What to change: item id (`PRD-3.1`), heading, or doc-standard section name |
-| `--target` | Where: cascade level (`exec-summary`…`frd`) and/or track (`0.1`, `0.2`, `current`, `next`) |
+| `--target` | Where: cascade level (`exec-summary`…`prd`) and/or track (`0.1`, `0.2`, `current`, `next`) |
 
 `--discover` overrides status-first (force discover path). `--change` does not combine with `--discover` / level flags / `--research` / `--challenge`.
 
@@ -109,19 +108,19 @@ Explicit `--output-dir` skips this fallback.
 
 | Value | Discovery behavior |
 |-------|-------------------|
-| `shallow` | Exec-summary + PRD only; skip MRD/BRD/FRD unless explicitly flagged |
+| `shallow` | Exec-summary + PRD only; skip MRD/BRD unless explicitly flagged |
 | `standard` | Full cascade with standard gates |
 | `deep` | Full cascade + mandatory research phase + challenge pass |
 
 ### Input normalization
 
-1. If `--input` is a directory, scan for existing planning docs (`exec-summary`, `mrd`, `brd`, `prd`, `frd` with `.md`). Cascade `{stem}.yaml` in that dir is stale — rewrite (below), not live yaml mode.
+1. If `--input` is a directory, scan for existing planning docs (`exec-summary`, `mrd`, `brd`, `prd` with `.md`). Cascade `{stem}.yaml` in that dir is stale — rewrite (below), not live yaml mode.
 2. If `--input` is a file, treat as seed context for discovery.
 3. Reject non-existent paths.
 
 ### Stale cascade rewrite
 
-After a successful payload, before any `Task` (discover, research, challenge, resume): if `output_dir` already has cascade docs (`{stem}.md` or stale `{stem}.yaml` for `exec-summary`/`mrd`/`brd`/`prd`/`frd`), run:
+After a successful payload, before any `Task` (discover, research, challenge, resume): if `output_dir` already has cascade docs (`{stem}.md` or stale `{stem}.yaml` for `exec-summary`/`mrd`/`brd`/`prd`), run:
 
 ```bash
 sh scripts/validate_planning.sh --rewrite <output_dir>
@@ -141,7 +140,6 @@ When no primary action flag is detected, map phrases (case-insensitive, first ma
 | market, MRD, competitive landscape | `mrd` |
 | business requirements, BRD, stakeholders | `brd` |
 | product requirements, PRD, features | `prd` |
-| functional, FRD, technical requirements | `frd` |
 | research, market research, competitors | `research` |
 | challenge, review, critique, devil's advocate | `challenge` |
 | resume, continue planning, pick up where we left off | `discover` + `resume: true` |
@@ -173,7 +171,7 @@ NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` **seed** the [proj
 | Dimension | Rule |
 |-----------|------|
 | Action | Exactly one primary action per invocation |
-| Cascade focus | `--exec-summary` through `--frd` are mutually exclusive with `--discover`/`--all` and with `--change` |
+| Cascade focus | `--exec-summary` through `--prd` are mutually exclusive with `--discover`/`--all` and with `--change` |
 | `--change` | Primary only. Requires `--section` and `--target` (flags or NL). Combining with `--discover`/`--all`/level flags/`--research`/`--challenge` → `CONFLICTING_FLAGS`. Missing selectors → `CHANGE_MISSING_SELECTORS`. |
 | `--research` | Primary only. Requires existing docs (`--input` or `--output-dir`). Combining with another primary (e.g. `--discover --research`) → `CONFLICTING_FLAGS`. Research+challenge append is `depth: deep` only (`chain` += `research`, `challenge`) — not a second primary. |
 | `--challenge` / `--review` | Primary only. Requires existing docs (`--input` or `--output-dir`). Combining with another primary (e.g. `--discover --challenge`) → `CONFLICTING_FLAGS`. Same `depth: deep` append as `--research` — not a second primary. |
@@ -220,7 +218,7 @@ Classify patch vs redirect-to-next vs open-next vs unfreeze per `--change` above
   "route": "from-0",
   "change_section": null,
   "change_target": null,
-  "cascade_levels": ["exec-summary", "mrd", "brd", "prd", "frd"],
+  "cascade_levels": ["exec-summary", "mrd", "brd", "prd"],
   "chain": ["discover", "compose"],
   "resolution_trace": {
     "source": "flags",
@@ -235,12 +233,11 @@ Classify patch vs redirect-to-next vs open-next vs unfreeze per `--change` above
 
 | `action` | `cascade_levels` |
 |----------|------------------|
-| `discover` | All five levels (trimmed by `depth`) |
+| `discover` | All four levels (trimmed by `depth`) |
 | `exec-summary` | `["exec-summary"]` |
 | `mrd` | `["exec-summary", "mrd"]` |
 | `brd` | `["exec-summary", "mrd", "brd"]` |
 | `prd` | `["exec-summary", "mrd", "brd", "prd"]` |
-| `frd` | `["exec-summary", "mrd", "brd", "prd", "frd"]` |
 | `change` | Ancestors through `--target` level (same expansion as that level flag). Track from `--target` / `route`. |
 | `research` | `[]` (reads existing docs) |
 | `challenge` | `[]` (reads existing docs) |
@@ -251,8 +248,8 @@ Classify patch vs redirect-to-next vs open-next vs unfreeze per `--change` above
 | `depth` | Effective `cascade_levels` for `discover` |
 |---------|-------------------------------------------|
 | `shallow` | `["exec-summary", "prd"]` |
-| `standard` | all five |
-| `deep` | all five; `chain` appends `research`, `challenge` |
+| `standard` | all four |
+| `deep` | all four; `chain` appends `research`, `challenge` |
 
 ### `chain` expansion
 

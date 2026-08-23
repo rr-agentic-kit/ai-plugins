@@ -117,26 +117,6 @@ def error_codes(issues: list[vp.Issue]) -> set[str]:
 _UNSET = object()
 
 
-def triad(
-    *,
-    present: str = "high",
-    absent: str = "high",
-    wrong: str = "critical",
-    class_name: str | None = None,
-    present_effect: str = "present",
-    absent_effect: str = "absent",
-    wrong_effect: str = "wrong",
-) -> vp.Triad:
-    if class_name is None:
-        class_name = vp.derived_class(present, absent, wrong)
-    return vp.Triad(
-        if_present=vp.Axis(present_effect, present),
-        if_absent=vp.Axis(absent_effect, absent),
-        if_wrong=vp.Axis(wrong_effect, wrong),
-        class_name=class_name,
-    )
-
-
 def item(
     item_id: str,
     *,
@@ -144,10 +124,9 @@ def item(
     parent: str | None | object = _UNSET,
     kind: str = "leaf",
     spec: str = "ready",
-    build: str | None = None,
+    status: str | None = None,
     moscow: str | None = None,
     kano: str | None = None,
-    triad: vp.Triad | None = None,
     supersedes: str | None = None,
     superseded_by: str | None = None,
     rationale: str | None = None,
@@ -160,14 +139,12 @@ def item(
     resolved_parent = None if parent is _UNSET else parent
     keys = set(raw_keys) if raw_keys is not None else {"parent", "kind", "spec"}
     if raw_keys is None:
-        if build is not None:
-            keys.add("build")
+        if status is not None:
+            keys.add("status")
         if moscow is not None:
             keys.add("moscow")
         if kano is not None:
             keys.add("kano")
-        if triad is not None:
-            keys.update({"build", "if-present", "if-absent", "if-wrong", "class"})
         if rationale is not None:
             keys.add("rationale")
         if supersedes is not None:
@@ -182,10 +159,9 @@ def item(
         parent=resolved_parent,  # type: ignore[arg-type]
         kind=kind,
         spec=spec,
-        build=build,
+        status=status,
         moscow=moscow,
         kano=kano,
-        triad=triad,
         supersedes=supersedes,
         superseded_by=superseded_by,
         rationale=rationale,

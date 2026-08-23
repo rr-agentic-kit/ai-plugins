@@ -8,23 +8,23 @@ Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md). Sche
 
 ## Layout
 
-Cascade docs write to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/` for the current track; `{PROJECT_ROOT}/docs/plans/{next}/` once a next major.minor is open). Root **always** keeps `status.yaml`, `agent.plan.md`, `future.md` in `{PROJECT_ROOT}/docs/plans/` — never a second `lines.yaml`.
+Cascade docs write to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/` for the current track; `{PROJECT_ROOT}/docs/plans/{next}/` once a next major.minor is open). Root **always** keeps `status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md` in `{PROJECT_ROOT}/docs/plans/` — never a second `lines.yaml`.
 
 ```
 {PROJECT_ROOT}/docs/plans/
   status.yaml                     # durable project knowledge (skill-owned; validator input)
   agent.plan.md                   # non-patch tripwire + pointer self-heal (skill-owned; not cascade input)
   future.md                       # unassigned / beyond-next inbox (not validator input)
+  tech.md                         # mechanism-level freeform capture (not validator input)
+  later.md                        # deferred-topic parking lot (not validator input)
   exec-summary.md
   mrd.md
   brd.md
   prd.md
-  frd.md
   exec-summary.notes.yaml         # same write/load/delete as every {level}.notes.yaml; only while unresolved
   mrd.notes.yaml
   brd.notes.yaml
   prd.notes.yaml
-  frd.notes.yaml
   items.json                      # relationship graph only
   decision-ledger.yaml            # evidence + rationale graph (skill-owned; validator input)
   session-state.json              # resume checkpoint — not project knowledge
@@ -44,10 +44,11 @@ Cascade docs write to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`
 | mrd | `mrd.md` |
 | brd | `brd.md` |
 | prd | `prd.md` |
-| frd | `frd.md` |
 | baseline status | `status.yaml` (always YAML; skill-owned; validator input — mechanical codes only) |
 | version tripwire | `agent.plan.md` (skill-owned; **not** validator cascade input; pairing SoT is this skill) |
 | future inbox | `future.md` (**not** validator input; no ids; no SEMVER) |
+| tech capture | `tech.md` (**not** validator input; no ids; no gates; passive append-only) |
+| later parking lot | `later.md` (**not** validator input; no ids; passive; distinct from `{level}.notes.yaml`) |
 | off-level notes | `{level}.notes.yaml` (always YAML; same write/load/delete for every level; exists only while unresolved) |
 | item graph | `items.json` (always JSON) |
 | decision ledger | `decision-ledger.yaml` (always YAML; skill-owned; validator input) |
@@ -58,7 +59,7 @@ Cascade docs write to `payload.output_dir` (default `{PROJECT_ROOT}/docs/plans/`
 
 Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet. File exists only while unresolved notes remain; skill deletes it when empty after compose persist. Create `docs/plans/{next}/` only when the skill mints `next` after confirm.
 
-`--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` ([input-resolution.md](input-resolution.md)). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md` and `agent.plan.md` are **not validator input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
+`--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` ([input-resolution.md](input-resolution.md)). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md`, `agent.plan.md`, `tech.md`, and `later.md` are **not validator input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
 
 ## Markdown doc format
 
@@ -90,7 +91,7 @@ ES `pins: {}`. Unfrozen `doc_rev: "?"`. Index column 4 is the level’s native f
 
 ## `items.json`
 
-Compose merges this file on every invocation (read-modify-write: replace only this `doc`’s records; do not clobber other levels). Must match md `_key_:` headers; drift is a validator FAIL. Graph checks (parent walk, numbering, spec/build) run on this file. Skill reads it after compose to refresh `item_registry` — never copies item records through chat.
+Compose merges this file on every invocation (read-modify-write: replace only this `doc`’s records; do not clobber other levels). Must match md `_key_:` headers; drift is a validator FAIL. Graph checks (parent walk, numbering, spec/status) run on this file. Skill reads it after compose to refresh `item_registry` — never copies item records through chat.
 
 ```json
 {
@@ -185,6 +186,24 @@ One inbox at `{PROJECT_ROOT}/docs/plans/future.md`. Create on first parked beyon
 | What belongs here | Unassigned, or beyond-next (past the one open next track). |
 
 Rejected: `future/` folder; per-track future files; treating this file as a cascade doc.
+
+## `tech.md`
+
+One file at `{PROJECT_ROOT}/docs/plans/tech.md`. Same tier as `later.md` / `future.md`. Create on first mechanism-level append. **Not validator input.** No item ids, no gates, never composed into cascade docs.
+
+| Rule | |
+|------|--|
+| Passive | Skill appends freely when mechanism-level detail surfaces (shalls, AC, integration points, NFR mechanism, error-handling specifics, requirement-explosion overflow). No periodic maintenance; rr-planner does not re-read it on later passes. |
+| Not cascade | Never mint item ids; never run Gates 1–7 against this file. |
+
+## `later.md`
+
+One global file at `{PROJECT_ROOT}/docs/plans/later.md`. Create on first user-deferred topic. **Not validator input.** No item ids.
+
+| Rule | |
+|------|--|
+| Passive | Skill writes freely when the user defers a topic ("discuss later"). No periodic maintenance; no auto-incorporate. |
+| Distinct from notes | `{level}.notes.yaml` is active/addressed-then-deleted for off-level answers on a specific doc. `later.md` is a global parking lot. |
 
 ## Challenge report (worklist)
 

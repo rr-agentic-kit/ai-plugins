@@ -64,7 +64,7 @@ Fire reflection when any of:
 
 Runs **after** stage-exit blind-spots (Gate 6), Gate 7 viability, and [success-criteria.md](success-criteria.md), **after compose files exist**, **before** the skill's `session-state.json` persist. All depths. Pause / stop does **not** trigger this.
 
-**Block** when [decision-ledger.md](decision-ledger.md) open-queue / binding `hold`/`kill` rule fires (do not write `final_status: ok`; do not freeze leftover drafts as accepted). Advisory `hold` at BRD/PRD/FRD does not block if the user accepted it.
+**Block** when [decision-ledger.md](decision-ledger.md) open-queue / binding `hold`/`kill` rule fires (do not write `final_status: ok`; do not freeze leftover drafts as accepted). Advisory `hold` at BRD/PRD does not block if the user accepted it.
 
 This is thinner than discovery-time Gate 5 and does **not** re-run the blind-spot taxonomy:
 
@@ -74,7 +74,7 @@ This is thinner than discovery-time Gate 5 and does **not** re-run the blind-spo
 4. **Max one fix cycle** — re-compose affected levels once if the user supplies fixes (compose overwrites files). Do not loop.
 5. Then skill writes `session-state.json` only.
 
-Do not invent FRD-level detail during pre-save of an earlier level. Do not spawn the challenge agent.
+Do not invent mechanism-level detail during pre-save of an earlier level — park it in `tech.md`. Do not spawn the challenge agent.
 
 ## Output to session state
 

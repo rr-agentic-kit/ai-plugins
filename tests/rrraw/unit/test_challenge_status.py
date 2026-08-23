@@ -8,7 +8,7 @@ import validate_planning_script as vp
 def _status_with_digests() -> dict:
     status = vp.default_unfrozen_status(1)
     status["levels"]["prd"]["digest"] = "sha256:prd"
-    status["levels"]["frd"]["digest"] = "sha256:frd"
+    status["levels"]["brd"]["digest"] = "sha256:brd"
     status["levels"]["mrd"]["digest"] = "sha256:mrd"
     return status
 
@@ -55,15 +55,15 @@ def test_stamp_clean_and_dirty_from_doc_stem() -> None:
     vp.stamp_challenge_status(
         status,
         [{"id": "bs-001", "doc": "prd", "doc_ref": "prd.md § goals"}],
-        ["prd.md", "frd.md", "mrd.md"],
+        ["prd.md", "brd.md", "mrd.md"],
     )
     assert status["challenge"]["prd"] == {
         "status": "dirty",
         "scanned_digest": "sha256:prd",
     }
-    assert status["challenge"]["frd"] == {
+    assert status["challenge"]["brd"] == {
         "status": "clean",
-        "scanned_digest": "sha256:frd",
+        "scanned_digest": "sha256:brd",
     }
     assert status["challenge"]["mrd"] == {
         "status": "clean",
@@ -74,9 +74,9 @@ def test_stamp_clean_and_dirty_from_doc_stem() -> None:
 
 def test_stamp_zero_findings_all_reviewed_clean() -> None:
     status = _status_with_digests()
-    vp.stamp_challenge_status(status, [], ["prd.md", "frd.md"])
+    vp.stamp_challenge_status(status, [], ["prd.md", "brd.md"])
     assert status["challenge"]["prd"]["status"] == "clean"
-    assert status["challenge"]["frd"]["status"] == "clean"
+    assert status["challenge"]["brd"]["status"] == "clean"
     assert status["challenge"]["prd"]["scanned_digest"] == "sha256:prd"
 
 
@@ -84,25 +84,25 @@ def test_stamp_falls_back_to_doc_ref_stem() -> None:
     status = _status_with_digests()
     vp.stamp_challenge_status(
         status,
-        [{"id": "bs-002", "doc_ref": "frd.md § 3.2"}],
-        ["frd.md"],
+        [{"id": "bs-002", "doc_ref": "brd.md § 3.2"}],
+        ["brd.md"],
     )
-    assert status["challenge"]["frd"]["status"] == "dirty"
+    assert status["challenge"]["brd"]["status"] == "dirty"
 
 
 def test_invalidate_compose_dirties_clean_and_accepted() -> None:
     status = _status_with_digests()
     status["challenge"] = {
         "prd": {"status": "clean", "scanned_digest": "sha256:prd"},
-        "frd": {"status": "dirty-accepted", "scanned_digest": "sha256:frd"},
+        "brd": {"status": "dirty-accepted", "scanned_digest": "sha256:brd"},
         "mrd": {"status": "dirty", "scanned_digest": "sha256:mrd"},
     }
     vp.invalidate_challenge_on_compose(status, "prd")
-    vp.invalidate_challenge_on_compose(status, "frd")
+    vp.invalidate_challenge_on_compose(status, "brd")
     vp.invalidate_challenge_on_compose(status, "mrd")
     vp.invalidate_challenge_on_compose(status, "exec-summary")
     assert status["challenge"]["prd"]["status"] == "dirty"
-    assert status["challenge"]["frd"]["status"] == "dirty"
+    assert status["challenge"]["brd"]["status"] == "dirty"
     assert status["challenge"]["mrd"]["status"] == "dirty"
     assert "exec-summary" not in status["challenge"]
 

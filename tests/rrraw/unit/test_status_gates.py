@@ -1,48 +1,23 @@
-"""Spec/build DoR gates, class derivation, deprecate/supersede (in-memory)."""
+"""Spec/status DoR gates, PRD status scope, deprecate/supersede (in-memory)."""
 
 from __future__ import annotations
 
 import validate_planning_script as vp
-from helpers import codes, error_codes, item, triad
+from helpers import error_codes, item
 
 
-def test_derived_class_partition():
-    assert vp.derived_class("high", "high", "critical") == "must-correct"
-    assert vp.derived_class("low", "high", "low") == "must-present"
-    assert vp.derived_class("low", "low", "high") == "protect"
-    assert vp.derived_class("high", "low", "low") == "leverage"
-    assert vp.derived_class("low", "low", "low") == "optional"
-    assert vp.derived_class("high", "moderate", "low") == "optional"
-
-
-def test_class_mismatch():
-    leaf = item(
-        "FRD-1.1",
-        parent="FRD-1",
-        build="none",
-        triad=triad(class_name="optional"),
-    )
-    issues = vp.check_status([leaf])
-    assert "CLASS_MISMATCH" in error_codes(issues)
-
-
-def test_build_on_draft_fails():
-    leaf = item(
-        "FRD-1.1",
-        parent="FRD-1",
-        spec="draft",
-        build="in_progress",
-        triad=triad(wrong="low", class_name="must-present"),
-    )
-    issues = vp.check_status([leaf])
-    assert "BUILD_GATE" in error_codes(issues)
-
-
-def test_build_on_prd_fails():
+def test_status_on_non_prd_fails():
     issues = vp.check_required_fields(
-        [item("PRD-1", parent="BRD-1", moscow="Must", build="done")]
+        [item("ES-1", parent=None, moscow="Must", status="delivered")]
     )
-    assert "BUILD_SCOPE" in error_codes(issues)
+    assert "STATUS_SCOPE" in error_codes(issues)
+
+
+def test_status_on_prd_leaf_ok():
+    issues = vp.check_required_fields(
+        [item("PRD-1.1", parent="PRD-1", moscow="Must", status="delivered")]
+    )
+    assert error_codes(issues) == set()
 
 
 def test_ready_cross_doc_parent_must_be_ready():
@@ -89,38 +64,22 @@ def test_idea_with_children_fails():
     assert "IDEA_CHILDREN" in error_codes(issues)
 
 
-def test_deprecated_in_progress_warns():
-    leaf = item(
-        "FRD-1.1",
-        parent="FRD-1",
-        spec="deprecated",
-        build="in_progress",
-        triad=triad(),
-    )
-    issues = vp.check_status([leaf])
-    assert "DEPRECATED_BUILD" in codes(issues)
-    assert "DEPRECATED_BUILD" not in error_codes(issues)
-    assert "BUILD_GATE" in error_codes(issues)
-
-
 def test_supersede_pair():
     issues = vp.check_parents(
         [
             item(
-                "FRD-1.1",
-                parent="FRD-1",
+                "PRD-1.1",
+                parent="PRD-1",
                 spec="deprecated",
-                build="none",
-                triad=triad(),
-                superseded_by="FRD-2",
+                moscow="Must",
+                superseded_by="PRD-2",
             ),
             item(
-                "FRD-2",
-                parent="PRD-1.1",
+                "PRD-2",
+                parent="BRD-1",
                 spec="draft",
-                build="none",
-                triad=triad(),
-                supersedes="FRD-1.1",
+                moscow="Must",
+                supersedes="PRD-1.1",
             ),
         ]
     )

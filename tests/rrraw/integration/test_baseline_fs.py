@@ -125,7 +125,7 @@ def test_stale_pin_fails(tmp_path: Path):
 def test_parent_unfrozen_fails(tmp_path: Path):
     write_planning(tmp_path)
     items = planning_items(tmp_path)
-    status = frozen_status(items, frozen=["mrd", "brd", "prd", "frd"])
+    status = frozen_status(items, frozen=["mrd", "brd", "prd"])
     write_planning(tmp_path, status=status)
     issues = vp.validate_dir(tmp_path)
     assert "PARENT_UNFROZEN" in error_codes(issues)

@@ -12,33 +12,6 @@
     }
   },
   "$defs": {
-    "magnitude": {
-      "type": "string",
-      "enum": ["critical", "high", "moderate", "low"]
-    },
-    "axis": {
-      "type": "object",
-      "required": ["effect", "magnitude"],
-      "additionalProperties": false,
-      "properties": {
-        "effect": { "type": "string", "minLength": 1 },
-        "magnitude": { "$ref": "#/$defs/magnitude" }
-      }
-    },
-    "triad": {
-      "type": "object",
-      "required": ["if_present", "if_absent", "if_wrong", "class"],
-      "additionalProperties": false,
-      "properties": {
-        "if_present": { "$ref": "#/$defs/axis" },
-        "if_absent": { "$ref": "#/$defs/axis" },
-        "if_wrong": { "$ref": "#/$defs/axis" },
-        "class": {
-          "type": "string",
-          "enum": ["must-correct", "must-present", "protect", "leverage", "optional"]
-        }
-      }
-    },
     "item": {
       "type": "object",
       "required": ["id", "parent", "kind", "spec", "priority_method"],
@@ -46,26 +19,26 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^(ES|MRD|BRD|PRD|FRD)-\\d+(\\.\\d+)?$"
+          "pattern": "^(ES|MRD|BRD|PRD)-\\d+(\\.\\d+)?$"
         },
         "parent": {
           "type": ["string", "null"],
-          "pattern": "^(ES|MRD|BRD|PRD|FRD)-\\d+(\\.\\d+)?$"
+          "pattern": "^(ES|MRD|BRD|PRD)-\\d+(\\.\\d+)?$"
         },
         "kind": { "type": "string", "enum": ["container", "leaf"] },
         "spec": {
           "type": "string",
           "enum": ["idea", "draft", "ready", "deprecated"]
         },
-        "build": {
+        "status": {
           "type": "string",
-          "enum": ["none", "in_progress", "done"]
+          "minLength": 1
         },
         "supersedes": { "type": "string" },
         "superseded_by": { "type": "string" },
         "priority_method": {
           "type": "string",
-          "enum": ["moscow", "kano", "triad"]
+          "enum": ["moscow", "kano"]
         },
         "moscow": {
           "type": ["string", "null"],
@@ -75,7 +48,6 @@
           "type": ["string", "null"],
           "enum": ["basic", "performance", "delighter", null]
         },
-        "triad": { "$ref": "#/$defs/triad" },
         "rationale": {
           "type": "string",
           "pattern": "^r-\\d{3,}$"
@@ -83,7 +55,7 @@
         "title": { "type": "string" },
         "doc": {
           "type": "string",
-          "enum": ["exec-summary", "mrd", "brd", "prd", "frd"]
+          "enum": ["exec-summary", "mrd", "brd", "prd"]
         }
       }
     }

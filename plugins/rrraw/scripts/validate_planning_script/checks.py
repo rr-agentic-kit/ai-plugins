@@ -8,16 +8,13 @@ from pathlib import Path
 from typing import Any
 
 from .constants import (
-    BUILD_VALUES,
     DOC_METHOD,
     DOC_TO_PREFIX,
-    FRD_LEAF_KEYS,
     ID_RE,
     JSON_ITEM_KEYS,
     PREFIX_LEVEL,
 )
 from .models import Issue, Item
-from .parse import derived_class
 
 
 def load_items_json(path: Path) -> tuple[list[dict[str, Any]], list[Issue]]:
@@ -329,28 +326,13 @@ def _dense(nums: list[int], group: str) -> list[Issue]:
 
 def _check_container_fields(item: Item) -> list[Issue]:
     issues: list[Issue] = []
-    if item.build is not None:
-        issues.append(Issue.error("BUILD_SCOPE", "build is FRD leaves only", item.id))
-    if item.moscow is not None or item.kano is not None or item.triad is not None:
+    if item.status is not None:
+        issues.append(
+            Issue.error("STATUS_SCOPE", "status is PRD leaves only", item.id)
+        )
+    if item.moscow is not None or item.kano is not None:
         issues.append(
             Issue.error("CONTAINER_RANK", "containers stay unmarked", item.id)
-        )
-    return issues
-
-
-def _check_frd_leaf_fields(item: Item) -> list[Issue]:
-    issues: list[Issue] = []
-    missing = FRD_LEAF_KEYS - item.raw_keys
-    if item.source_file != "items.json" and missing:
-        for key in sorted(missing):
-            issues.append(
-                Issue.error("MISSING_KEY", f"FRD leaf missing {key}", item.id)
-            )
-    if item.build is None:
-        issues.append(Issue.error("MISSING_KEY", "FRD leaf missing build", item.id))
-    if item.triad is None and item.spec == "ready":
-        issues.append(
-            Issue.error("MISSING_KEY", "ready FRD leaf missing triad", item.id)
         )
     return issues
 
@@ -361,11 +343,9 @@ def check_required_fields(items: list[Item]) -> list[Issue]:
         if item.kind == "container":
             issues.extend(_check_container_fields(item))
             continue
-        if item.doc == "frd":
-            issues.extend(_check_frd_leaf_fields(item))
-        elif item.build is not None:
+        if item.doc != "prd" and item.status is not None:
             issues.append(
-                Issue.error("BUILD_SCOPE", "build is FRD leaves only", item.id)
+                Issue.error("STATUS_SCOPE", "status is PRD leaves only", item.id)
             )
     return issues
 
@@ -374,28 +354,6 @@ def check_status(items: list[Item]) -> list[Issue]:
     issues: list[Issue] = []
     by_id = {item.id: item for item in items}
     for item in items:
-        if item.build and item.build not in BUILD_VALUES and item.build is not None:
-            continue
-        if (
-            item.build is not None
-            and item.build != "none"
-            and (item.kind != "leaf" or item.doc != "frd" or item.spec != "ready")
-        ):
-            issues.append(
-                Issue.error(
-                    "BUILD_GATE",
-                    "build != none requires FRD leaf with spec:ready",
-                    item.id,
-                )
-            )
-        if item.spec == "deprecated" and item.build == "in_progress":
-            issues.append(
-                Issue.warn(
-                    "DEPRECATED_BUILD",
-                    "deprecated item still build:in_progress",
-                    item.id,
-                )
-            )
         if item.spec == "ready":
             issues.extend(_ready_keys(item, by_id))
     return issues
@@ -408,28 +366,7 @@ def _check_ready_leaf_rank(item: Item) -> list[Issue]:
         issues.append(Issue.error("DOR", "ready leaf missing moscow", item.id))
     if method == "kano" and item.kano is None:
         issues.append(Issue.error("DOR", "ready leaf missing kano", item.id))
-    if method != "triad":
-        return issues
-    if item.triad is None:
-        return [
-            *issues,
-            Issue.error("DOR", "ready FRD leaf missing triad", item.id),
-        ]
-    expected = derived_class(
-        item.triad.if_present.magnitude,
-        item.triad.if_absent.magnitude,
-        item.triad.if_wrong.magnitude,
-    )
-    if expected == item.triad.class_name:
-        return issues
-    return [
-        *issues,
-        Issue.error(
-            "CLASS_MISMATCH",
-            f"Class {item.triad.class_name} does not match derived {expected}",
-            item.id,
-        ),
-    ]
+    return issues
 
 
 def _check_ready_parent(item: Item, by_id: dict[str, Item]) -> list[Issue]:
@@ -489,12 +426,11 @@ _DRIFT_KEYS = (
     "parent",
     "kind",
     "spec",
-    "build",
+    "status",
     "supersedes",
     "superseded_by",
     "moscow",
     "kano",
-    "triad",
     "rationale",
     "title",
     "doc",

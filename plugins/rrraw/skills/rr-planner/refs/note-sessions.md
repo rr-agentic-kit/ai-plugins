@@ -32,7 +32,7 @@ flowchart TD
 
 ## Where notes live
 
-Owned by the **affected** document, not a global inbox. Same write / load / unload for every cascade level (`exec-summary` … `frd`). `{level}` is the only variable — no ES/PRD/FRD special case.
+Owned by the **affected** document, not a global inbox. Same write / load / unload for every cascade level (`exec-summary` … `prd`). `{level}` is the only variable — no ES/PRD special case.
 
 | Event | Same rule for every `{level}.notes.yaml` |
 |-------|------------------------------------------|
@@ -61,7 +61,7 @@ notes:
 
 | Field | Notes |
 |-------|-------|
-| `doc_type` | Cascade level that owns the note (`exec-summary` … `frd`) |
+| `doc_type` | Cascade level that owns the note (`exec-summary` … `prd`) |
 | `status` | Sidecar: `parked` only. No `incorporated` tombstone — delete resolved notes instead. |
 | `notes[].id` | `n-NNN` within that sidecar |
 | `captured_during` | `current_level` when captured |
@@ -93,7 +93,7 @@ Decision when routed: `type: note_routed`, `level` = owning doc, `goal_ref` as u
 |--------|----------------|-------------|
 | **Park for later** | Write/append the note; stay on `current_level`. | Default. User is mid-vision and mentioned a feature. |
 | **Ask remaining questions now** | Load the **target** doc-standard extraction method for *this change only* (not the whole level). Ask until the note is `ready_to_incorporate` or the user stops. Still do **not** compose/freeze a later level. Then park. | User wants the other doc's change fully specified so later incorporation is not a game of telephone. |
-| **Apply to the other doc now** | Allowed only if that doc already exists (composed or frozen). Re-compose that level; remap children if frozen. If the target is a **later** unstarted level → refuse apply, fall through to deepen+park. | User is on FRD and changes ES vision; or PRD exists and they want the edit now. |
+| **Apply to the other doc now** | Allowed only if that doc already exists (composed or frozen). Re-compose that level; remap children if frozen. If the target is a **later** unstarted level → refuse apply, fall through to deepen+park. | User is on PRD and changes ES vision; or BRD exists and they want the edit now. |
 
 Do not skip cascade: parent pointers still require the parent level to exist at compose time.
 
@@ -151,8 +151,8 @@ Freeze: a level cannot freeze while leftover `partial` notes exist unless discar
 
 ## Failure modes this blocks
 
-- FRD shalls recorded as exec-summary facts
+- Mechanism detail recorded as exec-summary facts instead of `tech.md`
 - Losing a feature the user mentioned at the wrong time
-- Composing PRD/FRD before parents exist because the user volunteered a story
+- Composing PRD before parents exist because the user volunteered a story
 - Re-asking the same content when the cascade finally reaches that level
 - Leftover `{level}.notes.yaml` after compose so the next session re-asks or double-ingests parked prose

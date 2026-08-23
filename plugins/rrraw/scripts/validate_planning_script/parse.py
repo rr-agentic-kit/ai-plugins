@@ -1,4 +1,4 @@
-"""Markdown/YAML ingest and triad derivation."""
+"""Markdown/YAML ingest."""
 
 from __future__ import annotations
 
@@ -9,21 +9,16 @@ import yaml
 
 from .constants import (
     ATX_HEADING_RE,
-    AXIS_RE,
     BODY_QUOTE_RE,
-    BUILD_VALUES,
-    CLASS_VALUES,
     CLOSED_KEYS,
     DOC_STEMS,
     DOC_TO_PREFIX,
     HEADING_RE,
-    HIGH_MAG,
     ID_RE,
     INLINE_KEY_RE,
     KANO_VALUES,
     KIND_VALUES,
     LIST_META_RE,
-    MAGNITUDE_VALUES,
     META_SPLIT_RE,
     MOSCOW_VALUES,
     NULL_SENTINELS,
@@ -34,7 +29,7 @@ from .constants import (
     YAML_KEY_MAP,
     YAML_SKIP_KEYS,
 )
-from .models import Axis, Issue, Item, Triad
+from .models import Issue, Item
 
 
 def _null_or_value(raw: str) -> str | None:
@@ -42,13 +37,6 @@ def _null_or_value(raw: str) -> str | None:
     if text in NULL_SENTINELS:
         return None
     return text
-
-
-def _parse_axis(raw: str) -> Axis | None:
-    match = AXIS_RE.match(raw.strip())
-    if not match:
-        return None
-    return Axis(effect=match.group(2).strip(), magnitude=match.group(1).lower())
 
 
 def _surface_key(raw_key: str) -> str | None:
@@ -428,15 +416,6 @@ def _validate_item_enums(
                 item_id,
             )
         )
-    build = _null_or_value(meta["build"]) if "build" in meta else None
-    if build is not None and build not in BUILD_VALUES:
-        issues.append(
-            Issue.error(
-                "INVALID_VALUE",
-                f"build must be none|in_progress|done, got {build!r}",
-                item_id,
-            )
-        )
     moscow = _null_or_value(meta["moscow"]) if "moscow" in meta else None
     if moscow is not None and moscow not in MOSCOW_VALUES:
         issues.append(
@@ -475,12 +454,9 @@ def _item_from_meta(
     kind = meta.get("kind", "")
     spec = meta.get("spec", "")
     parent = _null_or_value(meta["parent"]) if "parent" in meta else None
-    build = _null_or_value(meta["build"]) if "build" in meta else None
+    status = _null_or_value(meta["status"]) if "status" in meta else None
     moscow = _null_or_value(meta["moscow"]) if "moscow" in meta else None
     kano = _null_or_value(meta["kano"]) if "kano" in meta else None
-    triad: Triad | None = None
-    if any(k in meta for k in ("if-present", "if-absent", "if-wrong", "class")):
-        triad = _parse_triad(item_id, meta, issues)
     supersedes = _null_or_value(meta["supersedes"]) if "supersedes" in meta else None
     superseded_by = (
         _null_or_value(meta["superseded-by"]) if "superseded-by" in meta else None
@@ -502,10 +478,9 @@ def _item_from_meta(
         parent=parent,
         kind=kind,
         spec=spec,
-        build=build,
+        status=status,
         moscow=moscow,
         kano=kano,
-        triad=triad,
         supersedes=supersedes,
         superseded_by=superseded_by,
         rationale=rationale,
@@ -513,68 +488,6 @@ def _item_from_meta(
         raw_keys=set(meta),
         raw_meta=dict(meta),
     )
-
-
-def _parse_triad(
-    item_id: str, meta: dict[str, str], issues: list[Issue]
-) -> Triad | None:
-    axes: dict[str, Axis | None] = {}
-    for field_name, key in (
-        ("if_present", "if-present"),
-        ("if_absent", "if-absent"),
-        ("if_wrong", "if-wrong"),
-    ):
-        if key not in meta:
-            axes[field_name] = None
-            continue
-        axis = _parse_axis(meta[key])
-        if axis is None:
-            issues.append(
-                Issue.error(
-                    "INVALID_VALUE",
-                    f"{key} must be '<magnitude> — <effect>'",
-                    item_id,
-                )
-            )
-        elif axis.magnitude not in MAGNITUDE_VALUES:
-            issues.append(
-                Issue.error(
-                    "INVALID_VALUE",
-                    f"{key} magnitude {axis.magnitude!r}",
-                    item_id,
-                )
-            )
-        axes[field_name] = axis
-    class_name = meta.get("class", "")
-    if class_name and class_name not in CLASS_VALUES:
-        issues.append(
-            Issue.error(
-                "INVALID_VALUE",
-                f"class {class_name!r} is not a known class",
-                item_id,
-            )
-        )
-    present, absent, wrong = axes["if_present"], axes["if_absent"], axes["if_wrong"]
-    if present is None or absent is None or wrong is None or not class_name:
-        return None
-    return Triad(
-        if_present=present, if_absent=absent, if_wrong=wrong, class_name=class_name
-    )
-
-
-def derived_class(present: str, absent: str, wrong: str) -> str:
-    hi_a = absent in HIGH_MAG
-    hi_w = wrong in HIGH_MAG
-    hi_p = present in HIGH_MAG
-    if hi_a and hi_w:
-        return "must-correct"
-    if hi_a:
-        return "must-present"
-    if hi_w:
-        return "protect"
-    if hi_p and absent == "low" and wrong == "low":
-        return "leverage"
-    return "optional"
 
 
 def parse_planning_dir(

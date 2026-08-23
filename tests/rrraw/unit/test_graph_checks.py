@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import validate_planning_script as vp
-from helpers import error_codes, item, triad
+from helpers import error_codes, item
 
 
 def test_broken_parent():
@@ -20,7 +20,7 @@ def test_level_skip():
     issues = vp.check_parents(
         [
             item("ES-3", parent=None, moscow="Must"),
-            item("FRD-1", parent="ES-3", build="none", triad=triad()),
+            item("PRD-1", parent="ES-3", moscow="Must"),
         ]
     )
     assert "LEVEL_SKIP" in error_codes(issues)
@@ -115,12 +115,11 @@ def test_supersede_dangling():
     issues = vp.check_parents(
         [
             item(
-                "FRD-1.1",
-                parent="FRD-1",
+                "PRD-1.1",
+                parent="PRD-1",
                 spec="deprecated",
-                build="none",
-                triad=triad(),
-                superseded_by="FRD-9",
+                moscow="Must",
+                superseded_by="PRD-9",
             )
         ]
     )

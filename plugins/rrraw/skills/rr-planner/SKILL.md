@@ -1,6 +1,6 @@
 ---
 name: rr-planner
-description: Flag-driven software planning docs — progressive top-down discovery (exec-summary → MRD → BRD → PRD → FRD), compose, research, and challenge. Use when producing exec-summary → FRD planning docs, bootstrapping docs/plans (--setup), resuming a checkpoint, or researching/challenging existing ones. Orchestrates phase agents under agents/planning/*; no command files.
+description: Flag-driven software planning docs — progressive top-down discovery (exec-summary → MRD → BRD → PRD), compose, research, and challenge. Use when producing exec-summary → PRD planning docs, bootstrapping docs/plans (--setup), resuming a checkpoint, or researching/challenging existing ones. Orchestrates phase agents under agents/planning/*; no command files.
 ---
 
 # rr-planner
@@ -9,7 +9,7 @@ description: Flag-driven software planning docs — progressive top-down discove
 
 ## Purpose
 
-Produce cascade planning docs (exec-summary → FRD) from flags and conversation. This skill owns question loops and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`.
+Produce cascade planning docs (exec-summary → PRD) from flags and conversation. This skill owns question loops and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`.
 
 ## When to use
 
@@ -41,7 +41,7 @@ Branch on `payload.action`. Do not run the sibling primary path. Bare invoke nev
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
 | `setup` | step 2 (completes `write`). Stop. Do not posture. | `setup` |
-| `discover`, `exec-summary`…`frd`, `change` | step 3, then step 5 | `posture`, `premise`, `level-*`, `sweep`, `compose`, `stage-exit`, `verdict`, `write` |
+| `discover`, `exec-summary`…`prd`, `change` | step 3, then step 5 | `posture`, `premise`, `level-*`, `sweep`, `compose`, `stage-exit`, `verdict`, `write` |
 | `research`, `challenge` | step 4 (completes `write`) | `write` only |
 
 If `payload.chain` includes `research` and/or `challenge`, run step 4 after step 3 (last level frozen; docs on disk) and before step 5. Do not start a second discover pass.
@@ -76,7 +76,7 @@ Load remaining refs on demand from **Shared refs**.
 | [proactivity.md](refs/proactivity.md) | Reflect/explore trigger during discovery; pre-save after last freeze |
 | [blind-spots.md](refs/blind-spots.md) | Stage-exit (this level's row); `--challenge` (union) |
 | [research-method.md](refs/research-method.md) | Research phase only |
-| [output-formats.md](refs/output-formats.md) | After compose; skill write of session-state / status.yaml / agent.plan.md / future.md / raw-history / notes; first Q&A |
+| [output-formats.md](refs/output-formats.md) | After compose; skill write of session-state / status.yaml / agent.plan.md / future.md / tech.md / later.md / raw-history / notes; first Q&A |
 | [success-criteria.md](refs/success-criteria.md) | Pre-freeze/accept gate |
 | [contracts.md](refs/contracts.md) | Before any subagent `Task` call |
 

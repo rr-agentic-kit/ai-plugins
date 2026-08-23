@@ -32,7 +32,7 @@ Function-style executor for `--challenge` / `--review` on existing planning docs
 Required context:
 
 - `payload.input` or `payload.output_dir` — location of existing docs
-- All available planning docs (exec-summary through frd, `.md`) plus `items.json` if present
+- All available planning docs (exec-summary through prd, `.md`) plus `items.json` if present
 - `session_state` if available (`project_posture`, `note_sessions`, decisions, assumptions, `item_registry`, `viability`)
 - `{level}.notes.yaml` sidecars if present (parked off-level answers — not validator input)
 - `decision-ledger.yaml` if present (read-only)

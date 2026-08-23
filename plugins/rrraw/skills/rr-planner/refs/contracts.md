@@ -24,7 +24,7 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 |-------|------|-------------|
 | `payload` | `NormalizedPayload` | From [input-resolution.md](input-resolution.md) |
 | `phase` | string | Current agent phase name |
-| `level` | string | Cascade level (`exec-summary`, `mrd`, `brd`, `prd`, `frd`) or null for research/challenge |
+| `level` | string | Cascade level (`exec-summary`, `mrd`, `brd`, `prd`) or null for research/challenge |
 | `epoch` | integer | 1-based; 1 for single-shot flows |
 | `round` | integer | Clarification iteration counter within a level (informational; no cap) |
 | `prior_outputs` | object | Keyed by phase name; prior structured outputs in chains |
@@ -106,11 +106,11 @@ Compose **must** persist `{level}.md` and merge this level into `items.json`, th
 }
 ```
 
-Item identity, closed `_key_:` markdown, spec/build: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json). Records live in `items.json` on disk — not in this receipt. Skill refreshes `item_registry` by reading `items.json`.
+Item identity, closed `_key_:` markdown, spec/status: [doc-standards/item-schema.md](doc-standards/item-schema.md). JSON Schema: [schemas/items.schema.json](schemas/items.schema.json). Records live in `items.json` on disk — not in this receipt. Skill refreshes `item_registry` by reading `items.json`.
 
 | Field | Notes |
 |-------|-------|
-| `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd`, `frd` |
+| `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd` |
 | `doc_path` | Path of the file this agent just wrote (`{level}.md`) |
 | `sections_completed` | Required sections with content |
 | `sections_incomplete` | Required sections with gaps |
@@ -170,10 +170,10 @@ Execution (posture required, notes ingest, sidecar prune): [project-posture.md](
 {
   "findings": [{
     "id": "bs-001",
-    "doc": "frd",
+    "doc": "prd",
     "category": "failure_modes",
     "severity": "high",
-    "doc_ref": "frd.md § 3.2",
+    "doc_ref": "prd.md § 3.2",
     "finding": "",
     "evidence": "",
     "recommendation": "",
@@ -185,7 +185,7 @@ Execution (posture required, notes ingest, sidecar prune): [project-posture.md](
     "recommendation": ""
   }],
   "clarifications_needed": [],
-  "docs_reviewed": ["exec-summary.md", "mrd.md", "brd.md", "prd.md", "frd.md"]
+  "docs_reviewed": ["exec-summary.md", "mrd.md", "brd.md", "prd.md"]
 }
 ```
 
@@ -194,8 +194,8 @@ Execution (posture required, notes ingest, sidecar prune): [project-posture.md](
 | Field | Notes |
 |-------|-------|
 | `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** (not per-level `in_scope`). Judgment only when `payload.static_validation.status` is `passed` or `failed`. Ledger scan: [decision-ledger.md](decision-ledger.md) Challenge. |
-| `findings[].doc` | Cascade stem (`exec-summary` … `frd`). Required. Skill stamps per-doc `challenge.status` and routes Address now from this field. |
-| `findings[].doc_ref` | Human locator (`frd.md § 3.2`). Keep even when `doc` is set. |
+| `findings[].doc` | Cascade stem (`exec-summary` … `prd`). Required. Skill stamps per-doc `challenge.status` and routes Address now from this field. |
+| `findings[].doc_ref` | Human locator (`prd.md § 3.2`). Keep even when `doc` is set. |
 | `comparison_tables` | When single-option decisions lack alternatives analysis |
 | `clarifications_needed` | Questions that block severity assessment |
 | `docs_reviewed` | All docs scanned (`.md`) |

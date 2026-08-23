@@ -25,7 +25,7 @@ Define what the product will do to achieve business objectives. Feature-level th
 
 Prefix `PRD`. Product scoping, not implementation. Do not add `if_wrong` or P0/P1/P2. No `horizon:` field on items. Cut-pass: [project-posture.md](../project-posture.md). Personas stay a section; stories name a persona in the body (`As [persona]`) — they do not parent to a persona id.
 
-PRD “delivered” is derived from Must FRD children (`build: done`). Do not store build status on PRD items.
+PRD “delivered” is the manual `_status_:` field on PRD leaves (e.g. `delivered`) — set directly by user/dev workflow; not derived from children.
 
 ## Extraction method (discovery)
 

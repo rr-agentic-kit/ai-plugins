@@ -140,8 +140,6 @@ def _index_native_value(item: Item, col: str) -> str:
         return item.moscow or EM_DASH
     if col == "Kano":
         return item.kano or EM_DASH
-    if item.triad is not None:
-        return item.triad.class_name
     return EM_DASH
 
 

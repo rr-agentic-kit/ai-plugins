@@ -45,20 +45,19 @@ One catalog. Category ids are the keys used in the applicability matrix.
 | `economic` | Hidden costs, revenue model gaps, unit economics, cost of inaction, sizing proxies, TAM/SAM/SOM or internal hours×cost | growth-investor, CFO |
 | `temporal` | Sequencing risks, dependency chains, why-now, approval timing, posture (existence × commitment), cut-pass vs legend, Must inflation under `signed_v1` | founder/CEO, seed-investor |
 | `assumption_debt` | Unvalidated assumptions treated as facts | seed-investor, domain-practitioner |
-| `traceability_breaks` | Judgment: compound leaves, inflated MoSCoW, weak triad, untestable shalls, **current-level facts that belong in another doc** (should have been a note session). Static parent/id failures come from `validate_planning.sh` — do not re-score if the script ran. If skipped, flag `build != none` on non-ready items. | head-of-product, staff-engineer |
+| `traceability_breaks` | Judgment: compound leaves, inflated MoSCoW, untestable shalls, **current-level facts that belong in another doc** (should have been a note session). Static parent/id failures come from `validate_planning.sh` — do not re-score if the script ran. Requirement-explosion overflow routes to `tech.md`. | head-of-product, staff-engineer |
 | `negative_space` | What is explicitly out of scope and why | founder/CEO, head-of-product |
 
 ## Applicability matrix
 
-Stage-exit scans **only** `in_scope` + `inherit_check` for the current level. `defer` lenses must not fire at this stage (no premature FRD detail at exec-summary; no "N/A" skip of an in-scope lens). `--challenge` ignores this restriction and uses the union.
+Stage-exit scans **only** `in_scope` + `inherit_check` for the current level. `defer` lenses must not fire at this stage (no premature PRD detail at exec-summary; no "N/A" skip of an in-scope lens). `--challenge` ignores this restriction and uses the union.
 
 | Level | `in_scope` | `inherit_check` | `defer` |
 |-------|------------|-----------------|---------|
-| **exec-summary** | `negative_space`; `temporal` (why now **and** posture); `economic` (cost of inaction); `stakeholder_gaps` (who feels the pain); `assumption_debt` | — | Competitive detail → MRD. System failure modes, NFR, operational → FRD |
-| **mrd** | `competitive`; `economic` (sizing proxies); `stakeholder_gaps` (buyer vs user); `temporal` (trends vs why-now); `assumption_debt` | Exec-summary non-goals still hold | Failure modes, NFR, operational → FRD |
-| **brd** | `stakeholder_gaps` (hidden approvers); `economic` (objectives); `operational` (internal dependencies); `temporal` (approvals); `assumption_debt` | Do not re-litigate MRD landscape | Failure modes, NFR, product Won't → PRD/FRD |
-| **prd** | `negative_space` (product Won't); `temporal` (cut-pass vs posture legend; Must inflation under `signed_v1`; shipped-as-Must under `existing`); `stakeholder_gaps` (personas vs BRD); `traceability_breaks` (compound stories; facts that belong in another doc); alternatives on major features | Personas/objectives vs BRD | NFR targets, error handling, integrations → FRD |
-| **frd** | `failure_modes`; `non_functional`; `operational` (monitoring/migration); `traceability_breaks`; `assumption_debt` | Competitive/economic only for **contradiction** with upper levels — no new market debate | — |
+| **exec-summary** | `negative_space`; `temporal` (why now **and** posture); `economic` (cost of inaction); `stakeholder_gaps` (who feels the pain); `assumption_debt` | — | Competitive detail → MRD. System failure modes, NFR, operational → PRD when in-scope-as-product-commitment, else `tech.md` |
+| **mrd** | `competitive`; `economic` (sizing proxies); `stakeholder_gaps` (buyer vs user); `temporal` (trends vs why-now); `assumption_debt` | Exec-summary non-goals still hold | Failure modes, NFR, operational → PRD when in-scope-as-product-commitment, else `tech.md` |
+| **brd** | `stakeholder_gaps` (hidden approvers); `economic` (objectives); `operational` (internal dependencies); `temporal` (approvals); `assumption_debt` | Do not re-litigate MRD landscape | Failure modes, NFR, product Won't → PRD when in-scope-as-product-commitment, else `tech.md` |
+| **prd** | `failure_modes`; `non_functional`; `operational` (monitoring/migration); `negative_space` (product Won't); `temporal` (cut-pass vs posture legend; Must inflation under `signed_v1`; shipped-as-Must under `existing`); `stakeholder_gaps` (personas vs BRD); `traceability_breaks` (compound stories; facts that belong in another doc; requirement-explosion → `tech.md`); alternatives on major features | Personas/objectives vs BRD; competitive/economic only for **contradiction** with upper levels — no new market debate | Mechanism-level detail (integration points, error-handling specifics, AC overflow) → `tech.md` |
 
 ## Alternatives analysis
 
@@ -107,9 +106,9 @@ Apply on `--challenge` across all loaded docs. At stage-exit, apply only when th
   "id": "bs-001",
   "category": "failure_modes",
   "severity": "high",
-  "doc_ref": "frd.md § 3.2",
+  "doc_ref": "prd.md § 3.2",
   "finding": "No rollback strategy for failed migration",
-  "evidence": "FRD describes migration but no failure/revert path",
+  "evidence": "PRD describes migration but no failure/revert path",
   "recommendation": "Add rollback acceptance criteria or defer migration to v2",
   "alternatives": []
 }
@@ -119,7 +118,7 @@ Apply on `--challenge` across all loaded docs. At stage-exit, apply only when th
 
 ## Static vs judgment
 
-[success-criteria.md](success-criteria.md). Judgment only: compound leaves, MoSCoW inflation vs the posture legend, weak `if_wrong`, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
+[success-criteria.md](success-criteria.md). Judgment only: compound leaves, MoSCoW inflation vs the posture legend, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
 
 ## Challenge output expectations
 
@@ -129,4 +128,4 @@ Challenge agent must:
 2. Produce at least one finding per doc (or explicit `no_findings` with justification).
 3. Include comparison table when docs recommend a single approach without alternatives.
 4. Never modify docs — findings only; user re-runs `--discover` to apply fixes.
-5. Do not re-check parent pointers, ID density, or spec/build gates when the validator ran.
+5. Do not re-check parent pointers, ID density, or spec gates when the validator ran.

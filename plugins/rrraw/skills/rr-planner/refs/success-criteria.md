@@ -16,7 +16,7 @@ Run from plugin root:
 sh scripts/validate_planning.sh <output-dir>
 ```
 
-`--challenge` static pass runs this script. Challenge agent does **not** re-check refs if the script ran. If the script was skipped, challenge may flag build-on-non-ready as judgment.
+`--challenge` static pass runs this script. Challenge agent does **not** re-check refs if the script ran.
 
 ## Static (script)
 
@@ -25,9 +25,8 @@ sh scripts/validate_planning.sh <output-dir>
 - Unique IDs; parent / supersede pointers exist; no cycles; no cascade-level skips
 - Numbering density among siblings; max depth 2
 - Kind invariant; `idea` has no children
-- Required closed keys; spec/build legality (DoR-as-code)
+- Required closed keys; spec legality (DoR-as-code)
 - `spec == ready` ⇒ real rank present (`—` does not count); cross-doc parent `ready` (same-doc container exempt)
-- `build != none` ⇒ FRD leaf with `spec == ready`
 - md `_key_:` headers vs `items.json` drift
 - Ranked-leaf `Rationale` present and resolving when `decision-ledger.yaml` exists (`LEDGER_MISSING` is a warning and skips these checks)
 - When `status.yaml` exists: `PARENT_UNFROZEN`, `STALE_PIN`, `REV_WHILE_OPEN`, `HAND_BUMP` ([baselines.md](baselines.md)). Do **not** FAIL major/minor policy, `NEXT_LOCKED`, or `CURRENT_NOT_PATCH`. Independent product/docs patches are valid. `future.md` and `agent.plan.md` are not script input.
@@ -37,7 +36,7 @@ Schema: [schemas/items.schema.json](schemas/items.schema.json).
 Parent walk (no skips):
 
 ```
-ES-n → MRD-n.m → BRD-n.m → PRD-n.m → FRD-n.m
+ES-n → MRD-n.m → BRD-n.m → PRD-n.m
 ```
 
 | Result | Action |
@@ -51,7 +50,7 @@ ES-n → MRD-n.m → BRD-n.m → PRD-n.m → FRD-n.m
 AI owns — do not encode as script FAILs:
 
 - Compound leaves (multiple shalls/actors/outcomes in one leaf)
-- MoSCoW inflation vs the posture legend; Kano mis-class; weak triad prose (`if_wrong` not a real blast radius)
+- MoSCoW inflation vs the posture legend; Kano mis-class
 - Vague AC ("fast", "user-friendly") without measurable proxy
 - Shall not testable
 - Posture unconfirmed or missing ES Posture **section**; Must set disagrees with the legend (`signed_v1` re-cut as MVP, shipped behavior as new Must under `existing`)
@@ -62,7 +61,7 @@ AI owns — do not encode as script FAILs:
 
 Do **not** encode posture or note-session checks as `validate_planning.sh` FAILs. Sidecars are not script input.
 
-Vague terms (any level — not an FRD-only tick; do not restate FRD Gherkin done-when here):
+Vague terms (any level — do not restate per-level Gherkin done-when here):
 
 | Vague term | Required resolution |
 |------------|---------------------|
@@ -76,7 +75,7 @@ Vague terms (any level — not an FRD-only tick; do not restate FRD Gherkin done
 - Exec-summary has What-must-be-true and Viability-verdict **prose sections**. Missing prose is judgment, never a script FAIL.
 - `session_state.viability[]` has an entry for each frozen level.
 - Binding `hold`/`kill` (ES, MRD) unresolved → not `ok`; docs carry the VIABILITY HOLD banner; `gate_passed: false`.
-- Accepted advisory `hold`/`kill` (BRD/PRD/FRD) does not block `ok` (still record; banner only on binding-level `hold`).
+- Accepted advisory `hold`/`kill` (BRD/PRD) does not block `ok` (still record; banner only on binding-level `hold`).
 - `kill` without a revival trigger in the ledger is a failure.
 - Dissent is recorded, not averaged.
 
@@ -114,7 +113,6 @@ Each composed doc passes its doc-standard **done-when** checklist. Do not restat
 | mrd | [doc-standards/mrd.md](doc-standards/mrd.md) |
 | brd | [doc-standards/brd.md](doc-standards/brd.md) |
 | prd | [doc-standards/prd.md](doc-standards/prd.md) |
-| frd | [doc-standards/frd.md](doc-standards/frd.md) |
 
 ## Gate output
 

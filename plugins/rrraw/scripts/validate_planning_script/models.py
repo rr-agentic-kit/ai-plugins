@@ -1,4 +1,4 @@
-"""Issue, Axis, Triad, Item."""
+"""Issue and Item."""
 
 from __future__ import annotations
 
@@ -30,31 +30,6 @@ class Issue:
 
 
 @dataclass
-class Axis:
-    effect: str
-    magnitude: str
-
-    def to_record(self) -> dict[str, str]:
-        return {"effect": self.effect, "magnitude": self.magnitude}
-
-
-@dataclass
-class Triad:
-    if_present: Axis
-    if_absent: Axis
-    if_wrong: Axis
-    class_name: str
-
-    def to_record(self) -> dict[str, Any]:
-        return {
-            "if_present": self.if_present.to_record(),
-            "if_absent": self.if_absent.to_record(),
-            "if_wrong": self.if_wrong.to_record(),
-            "class": self.class_name,
-        }
-
-
-@dataclass
 class Item:
     id: str
     title: str
@@ -63,10 +38,9 @@ class Item:
     parent: str | None
     kind: str
     spec: str
-    build: str | None = None
+    status: str | None = None
     moscow: str | None = None
     kano: str | None = None
-    triad: Triad | None = None
     supersedes: str | None = None
     superseded_by: str | None = None
     rationale: str | None = None
@@ -98,8 +72,8 @@ class Item:
             "title": self.title,
             "doc": self.doc,
         }
-        if self.build is not None:
-            record["build"] = self.build
+        if self.status is not None:
+            record["status"] = self.status
         if self.supersedes:
             record["supersedes"] = self.supersedes
         if self.superseded_by:
@@ -112,8 +86,6 @@ class Item:
                 record["moscow"] = self.moscow
             elif method == "kano":
                 record["kano"] = self.kano
-            elif self.triad is not None:
-                record["triad"] = self.triad.to_record()
         return record
 
 

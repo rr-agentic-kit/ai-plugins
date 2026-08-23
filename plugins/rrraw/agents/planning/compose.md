@@ -30,7 +30,7 @@ Function-style executor for rendering one planning doc from accumulated facts. P
 Required context:
 
 - `payload.output_dir`, `payload.format`, `payload.depth`
-- `level` / `doc_type`: one of `exec-summary`, `mrd`, `brd`, `prd`, `frd`
+- `level` / `doc_type`: one of `exec-summary`, `mrd`, `brd`, `prd`
 - `session_state.project_posture` — required; `user_confirmed: true`
 - `session_state.note_sessions` for the current `doc_type` only (skill may also pass sidecar contents)
 - `session_state.level_facts` for current and parent levels
@@ -61,8 +61,8 @@ Required context:
 7. Set `parent:` to the immediate parent only (same-doc container or previous-level item). ES roots: `—`. Do not print the full chain.
 8. Fill the **level’s** priority method on ranked leaves (MoSCoW / Kano / triad) using the posture legend for PRD/ES MoSCoW. Do not mint unranked leaves. Required **prose** sections stay unnumbered: ES Posture, Vision, Problem, What-must-be-true, Viability; MRD overview / sizing / segments / competitors / trends / risks; BRD Stakeholders, Business risks; PRD overview, User personas, release phasing. Containers: unmarked (no method key). Ranked `idea`/`draft` without a cut may emit `_moscow_: —` / `_kano_: —`; `ready` must have a real value. Never emit `_rationale_: —`. Ranked leaves: write `_rationale_: r-NNN` from `level_facts`. If a ranked leaf has no rationale id → `clarifications_needed` (`severity: blocking`); do not invent an `r-*`.
 9. **PRD:** write release-phasing prose from the posture legend; state which 2×2 cell was used. Do not assume Must = MVP. Do not emit a `horizon:` field.
-10. **FRD:** inherit `if_absent` magnitude from parent PRD MoSCoW (Must → high, Should → moderate, Could → low). Do not compose children of Won’t. Fill `if_wrong`; set `Class` from the item-schema partition. Do not copy MoSCoW onto FRD.
-11. **Status:** default new items `spec: idea`. Set `draft` when this compose is specifying them. Never auto-promote to `ready` (user/gate). Never set `build` except FRD leaves (`none` until `spec: ready`). Replacement: new id `draft`/`idea` + `supersedes`; old id `deprecated` + `superseded_by` immediately.
+10. **Mechanism overflow:** route shalls, AC, integration points, NFR mechanism, and error-handling specifics to `tech.md` ([output-formats.md](../../skills/rr-planner/refs/output-formats.md)) — not cascade item ids.
+11. **Status:** default new items `spec: idea`. Set `draft` when this compose is specifying them. Never auto-promote to `ready` (user/gate). PRD leaves may carry optional `_status_:` (e.g. `delivered`) — manual, not derived. Replacement: new id `draft`/`idea` + `supersedes`; old id `deprecated` + `superseded_by` immediately.
 12. Render the document with closed heading + `_key_:` metadata (item-schema templates). Leaf body is a markdown blockquote (`>`). Frontmatter: `doc_type`, `track`, `doc_rev` (`?` until the skill freezes), `pins` (immediate parent `{ rev, digest }` from `status.yaml`, or `{}` for ES), `created`. Do **not** emit stub `version: 1` or `traces_from`. End with the item index table. Always write markdown — `payload.format` is `md`; do not serialize YAML cascade docs.
 13. **Persist** to `payload.output_dir` before returning (`ok` and `partial` only; skip on `failed`):
     - Write `{level}.md` only.
