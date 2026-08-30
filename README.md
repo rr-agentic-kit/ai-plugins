@@ -19,9 +19,12 @@ ai-plugins/
 ├── sonar-project.properties          # SonarCloud (CI; set org/key + SONAR_TOKEN)
 ├── tests/
 │   ├── context-eng-hero/             # audit_static fixtures, unit, integration
-│   └── rrraw/                        # validate_planning unit tests
+│   ├── rrraw/                        # validate_planning / rr-test unit tests
+│   └── scripts/                      # monorepo script unit/integration tests
 ├── plugins/
-│   └── context-eng-hero/               # Example plugin (dual runtime)
+│   ├── context-eng-hero/             # Context engineering (dual runtime)
+│   ├── rrraw/                        # Test excellence + planning (dual runtime)
+│   └── jobseeker/                    # Resume / cover-letter coaching (dual runtime)
 └── LICENSE                             # Unlicense
 ```
 
@@ -29,19 +32,7 @@ Root catalogs list plugins under `plugins/<name>/`. Each plugin ships its own `.
 
 ## Install
 
-### Cursor
-
-1. Add this repository as a marketplace source (Git URL or local path), e.g. via [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish) or your team’s documented flow for custom marketplaces.
-2. Install **context-eng-hero** from the **ai-plugins** marketplace in Cursor settings.
-
-**Local dev**: point the marketplace at this repo’s root so `source: plugins/context-eng-hero` resolves.
-
-### Claude Code
-
-1. Add the marketplace: `/plugin marketplace add <git-url-or-path-to-this-repo-root>`
-2. Install the plugin: `/plugin install context-eng-hero@ai-plugins`
-
-**Local dev**: `claude --plugin-dir ./plugins/context-eng-hero` from a checkout (run from repo root and adjust path if needed).
+End-user and agent install steps live in **[INSTALL.md](INSTALL.md)** (human) and **[INSTALL-AI.md](INSTALL-AI.md)** (agent runbook). Summary: Claude Code uses `/plugin marketplace add rr-agentic-kit/ai-plugins` then `/plugin install <name>@ai-plugins`; Cursor copies plugins into `~/.cursor/plugins/local/` (see INSTALL.md). Monorepo Claude shortcut: `uv run python scripts/install_claude_local.py`.
 
 ## Usage (quick)
 
@@ -50,7 +41,7 @@ Root catalogs list plugins under `plugins/<name>/`. Each plugin ships its own `.
 | Cursor | `/context-engineer` (after installing **context-eng-hero**) |
 | Claude Code | `/context-eng-hero:context-engineer` |
 
-See `plugins/context-eng-hero/README.md` for component details.
+See each plugin’s `README.md` under `plugins/` for component details.
 
 ## Contributing
 
