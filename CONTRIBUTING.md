@@ -27,8 +27,8 @@ uv run pre-commit run --all-files
 Same commands as [`.github/workflows/python-quality.yml`](.github/workflows/python-quality.yml):
 
 ```bash
-uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
-uv run black --check plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
+uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
+uv run black --check plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
 uv run mypy
 uv run bandit -r plugins/context-eng-hero/scripts plugins/rrraw/scripts -c pyproject.toml
 uv export --frozen --format requirements.txt -o /tmp/requirements.txt
@@ -38,8 +38,8 @@ uv run pip-audit -r /tmp/requirements.txt
 Format/fix locally:
 
 ```bash
-uv run ruff check --fix plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
-uv run black plugins/context-eng-hero/scripts plugins/rrraw/scripts tests/context-eng-hero tests/rrraw
+uv run ruff check --fix plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
+uv run black plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
 ```
 
 ## Tests
@@ -63,6 +63,7 @@ Coverage (matches CI + SonarCloud):
 uv run pytest tests/ -v \
   --cov=plugins/context-eng-hero/scripts/audit_static \
   --cov=plugins/rrraw/scripts/validate_planning_script \
+  --cov=scripts \
   --cov-report=term-missing \
   --cov-report=xml
 ```
