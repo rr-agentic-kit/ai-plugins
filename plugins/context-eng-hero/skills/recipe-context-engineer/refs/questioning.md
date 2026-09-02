@@ -34,8 +34,18 @@ When action needs type (create, audit rubric) and type is unclear:
 - **AskQuestion**
   - **question:** "What kind of context artifact is this?"
   - **header:** "Type"
-  - **options:** Skill | Command | Agent | Rule | Workflow
-- Pick narrowest fit per SKILL **Classify** table; if still ambiguous, one follow-up with two candidates only.
+  - **options:** Skill | Skill+Ref | Ref file | Command | Agent | Rule | Workflow
+- Pick narrowest fit per `classify.md`; if still ambiguous, one follow-up with two candidates only.
+
+## Missing invoke mode (skills — create/fix/design)
+
+When authoring a skill and mode is unclear:
+
+- **AskQuestion**
+  - **question:** "How should this skill be invoked?"
+  - **header:** "Invoke mode"
+  - **options:** Auto-invoke (ambient match) | Slash-or-parent (self-invoke) | Background (agent auto-pull, hide / on Claude)
+- Route per `skill-invocation.md`; draft `description` and flags only after selection.
 
 ## Missing failure source (fix)
 

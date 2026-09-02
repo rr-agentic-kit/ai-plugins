@@ -7,7 +7,7 @@ Fill static rows from `scripts/audit_static.py`. Evaluate **Judgment** rows from
 
 ## Target
 - Path: `<relative-path>`
-- Type: skill | command | agent | rule | workflow
+- Type: skill | Skill+Ref | ref file | command | agent | rule | workflow
 
 ## Summary
 - Verdict: PASS | FAIL
@@ -23,8 +23,8 @@ Fill static rows from `scripts/audit_static.py`. Evaluate **Judgment** rows from
 - …
 
 ## Recommended next step (user)
-- PASS: ship or run `/context-engineer-test` if behavior unverified
-- FAIL: `/context-engineer-fix <path>` with this report; fix must address **every** FAIL
+- PASS: ship or run behavior test if unverified
+- FAIL: fix every FAIL in this report
 ```
 
-**Verdict:** **PASS** only if **all** static and judgment checks pass. Any FAIL → verdict **FAIL**.
+**Verdict:** **PASS** only if **all** static and judgment checks pass. STATIC SKIPPED → verdict **FAIL** unless audit-only with no ship intent. Any judgment FAIL → verdict **FAIL**.

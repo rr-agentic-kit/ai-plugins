@@ -28,7 +28,7 @@ from .workspace import challenge_doc_stem, challenge_report_path
 
 CHALLENGE_REPORT_NAME = "challenge-report.md"
 FRD_STEM = "frd"
-FINDING_HEADING_BASE_RE = re.compile(r"^##\s+(bs-\d+)\s*(.*)$", re.IGNORECASE)
+FINDING_HEADING_BASE_RE = re.compile(r"^##\s+(bs-\d+)(?:\s+(.*))?$", re.IGNORECASE)
 FINDING_HEADING_DOC_RE = re.compile(r"^[—-]\s*([^\s(]+)")
 FINDING_HEADING_SEVERITY_RE = re.compile(r"\(([^)]+)\)\s*$")
 MOSCOW_SHOULD_COULD_RE = re.compile(r"_moscow_:\s*(Should|Could)\b")
@@ -37,7 +37,7 @@ RELEASE_PHASING_RE = re.compile(
     r"^##\s+Release phasing\s*$",
     re.IGNORECASE | re.MULTILINE,
 )
-FINDING_FIELD_RE = re.compile(r"^-\s+\*\*([^*]+):\*\*\s*(.*)$")
+FINDING_FIELD_RE = re.compile(r"^-\s+\*\*([^*]+):\*\*\s*([^\n]*)$")
 
 
 def _parse_finding_heading(
@@ -47,7 +47,7 @@ def _parse_finding_heading(
     if not base:
         return None
     finding_id = base.group(1)
-    remainder = base.group(2).strip()
+    remainder = (base.group(2) or "").strip()
     heading_doc: str | None = None
     severity: str | None = None
     if remainder:

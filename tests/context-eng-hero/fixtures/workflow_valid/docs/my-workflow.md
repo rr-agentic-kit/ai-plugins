@@ -8,7 +8,7 @@ World changes.
 
 | Step | todo_id | Owner | Output |
 |------|---------|-------|--------|
-| 1 | wf-1 | skill | done |
+| 1 | `wf-1` | skill | done |
 
 ## Delegation
 

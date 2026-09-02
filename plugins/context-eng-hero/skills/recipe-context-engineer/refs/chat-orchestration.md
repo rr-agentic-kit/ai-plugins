@@ -2,18 +2,16 @@
 
 **Audience A:** Agent running **recipe-context-engineer**. **Audience B:** Humans authoring artifacts that embed tool guidance.
 
-**Platform fact — commands cannot chain:** Cursor plugin [commands are markdown prompts](https://cursor.com/docs/reference/plugins) injected when the **user** picks a slash. There is **no API** for command A to execute command B. Writing “run `/other`” inside a command is **user instruction only**, not automation.
+**Platform fact — commands cannot chain:** Cursor plugin commands are markdown prompts injected when the **user** picks a slash. There is **no API** for command A to execute command B. Slash names in command bodies are **user homework only**.
 
 | Pattern | Works? | Use for |
 |---------|--------|---------|
-| User types `/context-engineer-audit` | Yes | Explicit audit |
-| Command **Progress**: “Execute **Action:** … in skill **recipe-context-engineer**” first, then TodoWrite step ids | Yes | Black-box delegation |
-| Command body lists `refs/actions/...` or `plugins/...` | **Avoid** | Leaks layout; skill **Run:** loads internal procedures |
-| Command body: “Invoke `/other-command`” as **only** routing | **No** | Forbidden orchestration |
+| User types a plugin slash | Yes | Explicit action |
+| Command **Progress**: "Execute **Action:** … in skill **recipe-context-engineer**" + TodoWrite step ids | Yes | Black-box delegation |
+| Command body lists `refs/actions/...` or `plugins/...` | **Avoid** | Leaks layout; skill **Run:** loads procedures |
+| Command body: chain slashes as **only** routing | **No** | Forbidden |
 
-Allowed: command tells the user what slash **they** may run next; skill **Classify** ends with **Next step (user)**.
-
-Docs: [Agent Skills](https://cursor.com/docs/skills), [Subagents](https://cursor.com/docs/subagents).
+Close surfaces: `close-contract.md`. Invoke modes: `skill-invocation.md` (single source).
 
 ---
 
@@ -21,10 +19,10 @@ Docs: [Agent Skills](https://cursor.com/docs/skills), [Subagents](https://cursor
 
 | Layer | TodoWrite |
 |-------|-----------|
-| **Action slash commands** (`context-engineer-create`, `-audit`, `-fix`, `-redesign`, `-test`, `-diff`, `-extract`) | **Required:** Execute **Action** first (skill **Run:** loads procedure); `merge: false` TodoWrite with step ids matching that procedure; mark `completed` before advancing |
-| **Design command** (`/context-engineer`) | Default: no forced list. **Write branch:** design assist write in skill **recipe-context-engineer** + TodoWrite `design-1-classify` … `design-4-gates` |
-| **Skill** (`recipe-context-engineer`) | **Harness precedence:** slash prompt wins Progress/inputs/output; does **not** auto-spawn todos on ambient invoke |
-| **Authored workflows** | **Required** in template: each step `todo_id`; **Orchestration** instructs executor to TodoWrite before step 1; AskQuestion before branch-specific todos |
+| **Action slash commands** | **Required:** Execute **Action** first; `merge: false` with step ids from that procedure |
+| **Design command** | Default: no forced list. **Write branch:** design action + TodoWrite `design-1-classify` … `design-4-gates` |
+| **Skill** (`recipe-context-engineer`) | Slash prompt wins Progress; does not auto-spawn todos on ambient invoke |
+| **Authored workflows** | **Required:** each step `todo_id`; TodoWrite before step 1 |
 
 ---
 
@@ -32,18 +30,14 @@ Docs: [Agent Skills](https://cursor.com/docs/skills), [Subagents](https://cursor
 
 | Goal | Do in chat | Do not |
 |------|------------|--------|
-| Missing type or clarify fields | **AskQuestion** (2–4 options; `allow_multiple` when needed) | Open-ended ask when choices are enumerable |
+| Missing type or clarify fields | **AskQuestion** (2–4 options) | Open-ended ask when choices are enumerable |
 | Research patterns before design | **Task** `subagentType: explore` (parallel OK) | Load entire repo in parent |
 
-Routing, harness precedence, and slash names: skill **recipe-context-engineer** (**Routing**, **Actions**, **Invocation**). Commands must not list `refs/actions/*` in user-facing bodies.
+Routing and actions: skill **Actions** table + `gate-prompts.md`.
 
-**AskQuestion** (Cursor): structured multiple-choice; use in classify/clarify, fix/redesign intake, and workflow branches.
+**AskQuestion:** classify/clarify, fix/redesign intake, workflow branches.
 
-**TodoWrite**: owned by **action commands** and **workflow execution** as above—not optional for those paths.
-
-**Task / subagents**: isolated context; parallel = multiple Task calls in one message.
-
-**Other skills**: discovery via `description`; manual `/skill` or `@skill`. `disable-model-invocation: true` → slash-only, like action commands.
+**Task / subagents:** isolated context; parallel = multiple Task calls in one message.
 
 ---
 
@@ -53,20 +47,7 @@ Required **## Orchestration** in **workflow** templates; optional elsewhere unle
 
 - **User invocation**: slash(es), required args
 - **Agent tools**: when to use AskQuestion, TodoWrite, Task
-- **Workflow execution**: TodoWrite one item per `todo_id` in **Steps** before step 1
-- **disable-model-invocation**: `true` for action-like artifacts; default false for judgment skills
+- **Workflow execution**: TodoWrite one item per `todo_id` before step 1
+- **Invoke modes:** see `skill-invocation.md`
 
-**Rubric:** workflow orchestration and per-step `todo_id` are **critical**; other types use judgment ids in `*.audit-rubric.md`.
-
-### Invocation matrix
-
-| Mechanism | User | Agent | Author sets |
-|-----------|------|-------|-------------|
-| Plugin command | `/name` | Prompt → skill Action + Progress todos | `commands/*.md` |
-| Skill auto | natural language | matches `description` | rich WHEN clause |
-| Skill manual | `/name` or `@name` | explicit | optional `disable-model-invocation` |
-| Subagent | `/agent` or Task | sub-run | agent markdown |
-| AskQuestion | UI | tool | procedure step / workflow branch |
-| TodoWrite | UI list | tool | action commands + workflow execution |
-
-Slash map: skill **recipe-context-engineer** **Actions** table.
+**Rubric:** workflow `todo_id` and orchestration are **critical**; other types use judgment ids in `rubrics/*.rubric.md`.

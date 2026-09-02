@@ -1,6 +1,6 @@
 [project]
 name = "ai-plugins-dev"
-version = "0.0.3"
+version = "0.0.4"
 description = "Development and test tooling for the ai-plugins marketplace repository"
 requires-python = ">=3.14"
 dependencies = ["pyyaml>=6.0.3"]
@@ -56,8 +56,9 @@ module = "tests.*"
 disallow_untyped_defs = false
 
 [tool.coverage.run]
-source = ["audit_static", "validate_planning_script"]
+source = ["audit_static", "validate_planning_script", "scripts"]
 relative_files = true
+omit = ["*/__main__.py"]
 
 [tool.coverage.report]
 exclude_lines = [

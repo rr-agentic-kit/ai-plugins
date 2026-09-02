@@ -38,8 +38,9 @@ def format_markdown(
         "",
         "## Severity summary",
     ]
+    summary = severity_summary(results)
     for sev in ("critical", "major", "minor"):
-        s = severity_summary(results).get(sev, {"pass": 0, "total": 0})
+        s = summary.get(sev, {"pass": 0, "total": 0})
         lines.append(f"- {sev.capitalize()}: {s['pass']}/{s['total']}")
     lines.extend(
         [
