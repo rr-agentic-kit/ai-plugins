@@ -2,32 +2,38 @@
 
 Apply **minimal** edits so the artifact matches **existing** intent. Prefer audit- or test-led FAIL lists.
 
-## Load (Read)
+## Ref index (Read at step)
 
-- `disambiguation.md`
-- `advisory.md`
-- `ui-brand.md`
-- `gate-prompts.md`
-- `questioning.md`
-- `fix-intake.md`
-- `instruction-design.md`
-- `frontmatter-schemas.md`
-- `chat-orchestration.md`
-- Matching artifact template
-- Prior audit or test report if user supplied
+| Ref | When |
+|-----|------|
+| `disambiguation.md` | `fix-1-read` |
+| `questioning.md` | `fix-1-read` |
+| `fix-intake.md` | `fix-1-read`, `fix-2-plan` |
+| `advisory.md` | `fix-2-plan` (scope check only) |
+| `ui-brand.md` | `fix-1-read` (banner) |
+| `frontmatter-schemas.md` | `fix-3-apply` |
+| `instruction-design.md` | `fix-2-plan` |
+| `skill-invocation.md` | `fix-3-apply` (skills) |
+| `readme-spec.md` | `fix-3-apply` (skill folders) |
+| `helper-cli.md` | `fix-3-apply` (when `scripts/`) |
+| `template-required-map.md` | `fix-3-apply` |
+| `templates/<type>.template.md` (per `classify.md`) | `fix-3-apply` |
+| Prior audit or test report | `fix-1-read` if supplied |
+| `shared-write-gates.md` | `fix-4-gates` |
+| `gate-prompts.md`, `close-contract.md` | `fix-5-close` |
 
 ## Steps
 
 ### Step 1: `fix-1-read`
 
 - **Outcome:** Target file and failure list are known; scope is fix-only.
-- **Done when:** Path and failure source resolved via `questioning.md` + `fix-intake.md` (no REQUIRED hard-stop); file read; every FAIL id (all severities) or symptom→edit mapping captured; outcome-preservation confirmed or **fix-vs-redesign** gate run → redesign if outcome change.
+- **Done when:** Path and failure source resolved via `questioning.md` (intake proceeds with assumptions); `fix-intake.md` done-when captured before `fix-2-plan`; file read; every FAIL id or symptom→edit mapping captured; outcome-preservation confirmed or **fix-vs-redesign** gate → redesign if outcome change.
 - **Banner:** `CE ► FIX` per `ui-brand.md`.
 
 ### Step 2: `fix-2-plan`
 
 - **Outcome:** Minimal diff plan addresses **every** listed FAIL or mapped symptom.
-- **Done when:** Each failed check id maps to a concrete edit; no unrelated refactors; no capability/outcome changes.
+- **Done when:** Each failed check id maps to a concrete edit; `fix-intake.md` done-when satisfied; no unrelated refactors; eval-first minimum scope.
 
 ### Step 3: `fix-3-apply`
 
@@ -37,12 +43,12 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 ### Step 4: `fix-4-gates`
 
 - **Outcome:** Shared write gates passed or write blocked.
-- **Done when:** All four gates in `refs/actions/shared-write-gates.md` completed in order (static → reflect → pre-ship → write).
+- **Done when:** All four gates in `refs/actions/shared-write-gates.md` completed in order.
 
 ### Step 5: `fix-5-close`
 
 - **Outcome:** User routed to next action or done.
-- **Done when:** **post-fix-routing** AskQuestion per `gate-prompts.md`; on selection, skill continues to routed action; else **Next Up** block per `ui-brand.md`.
+- **Done when:** **post-fix-routing** AskQuestion per `gate-prompts.md`; on selection, skill continues; else **Next Up** per `close-contract.md`.
 
 ## Stop
 

@@ -7,13 +7,14 @@ from audit_static.report import check
 def run_frontmatter(ctx: AuditContext) -> list[CheckResult]:
     results: list[CheckResult] = []
     match ctx.artifact_type:
-        case "workflow" if not ctx.has_fm:
+        case "workflow" | "skill-readme" if not ctx.has_fm:
+            label = "workflow" if ctx.artifact_type == "workflow" else "skill-readme"
             results.append(
                 check(
                     "static.frontmatter.delimiters",
                     "critical",
                     True,
-                    "workflow: frontmatter optional",
+                    f"{label}: frontmatter optional",
                 )
             )
             results.append(
@@ -21,7 +22,36 @@ def run_frontmatter(ctx: AuditContext) -> list[CheckResult]:
                     "static.frontmatter.parseable",
                     "critical",
                     True,
-                    "workflow: no frontmatter required",
+                    f"{label}: no frontmatter required",
+                )
+            )
+        case "skill-readme" if ctx.has_fm:
+            delimiter_ok = ctx.fm_err not in (
+                "missing opening --- delimiter",
+                "missing closing --- delimiter",
+            )
+            results.append(
+                check(
+                    "static.frontmatter.delimiters",
+                    "critical",
+                    delimiter_ok,
+                    (
+                        "bounded by --- lines"
+                        if delimiter_ok
+                        else (ctx.fm_err or "no frontmatter")
+                    ),
+                )
+            )
+            results.append(
+                check(
+                    "static.frontmatter.parseable",
+                    "critical",
+                    ctx.fm is not None,
+                    (
+                        "YAML parsed"
+                        if ctx.fm is not None
+                        else (ctx.fm_err or "unparseable")
+                    ),
                 )
             )
         case _:

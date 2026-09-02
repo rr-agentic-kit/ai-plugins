@@ -1,45 +1,44 @@
 # Instruction design (context artifacts)
 
-Principles for **skills**, **commands**, **agents**, **rules**, and **workflows**. Load with **create**, **extract**, **fix**, **redesign**, and **design assist write** (`refs/actions/design.md`).
+Principles for **skills**, **commands**, **agents**, **rules**, **workflows**, **Skill+Ref** packs, and **ref files**. Read at draft steps in create/fix/redesign/design/extract actions.
 
 ## Signal vs noise
 
 - **Signal**: constraints the agent cannot infer (policy, gates, exact formats, stop rules).
-- **Noise**: generic encouragement, repeated restatements of the obvious, or prose that duplicates tool docs.
+- **Noise**: generic encouragement, repeated restatements, prose that duplicates co-loaded refs.
 
-Cut noise until every paragraph changes behavior or discovery.
-
-- **Cross-file echo**: if a ref's **Load** chain includes file X, do not restate X's constraints in the loading file. The agent reads both; the restatement is pure noise.
+Cut noise until every paragraph changes behavior or discovery. If a ref's **Load** chain includes file X, do not restate X's constraints in the loading file.
 
 ## Forcing function
 
-When a choice is enumerable, prefer a **structured question** (e.g. AskQuestion in Cursor) over an open-ended “what do you want?”.
+When a choice is enumerable, prefer **AskQuestion** over open-ended asks.
 
-When work spans multiple **verifiable** steps:
-
-- **Action slash commands** → executor uses **TodoWrite** (`merge: false`) with ids from `refs/actions/<verb>.md` (**Progress** block in each command).
-- **Workflows** → each step row has `todo_id`; **Orchestration** requires TodoWrite before step 1.
-- **Design-only skill invoke** → no forced todo list unless the user chose an action slash.
-
-Do not rely on long inline checklists only the model sees when the platform can show todos.
+When work spans verifiable steps: action commands → **TodoWrite** with ids from `refs/actions/<verb>.md`; workflows → `todo_id` per step. Design-only skill invoke → no forced todo list unless user chose an action.
 
 ## Layer separation
 
 | Layer | Holds |
 |-------|--------|
-| **Skill** | Judgment, classification, reusable procedure, progressive disclosure via refs |
-| **Command** | Slash contract: required inputs, **Progress** + delegation to skill **Action**, output shape—no internal `refs/` paths in user-facing command bodies |
-| **Refs** | Templates, rubrics, long checklists—loaded only when an Action runs |
+| **Skill** | Judgment, classification, reusable procedure, progressive disclosure |
+| **Skill+Ref** | Invariant procedure in SKILL; variant/detail in `refs/`—one hop |
+| **Ref file** | Standalone constraints for one subtask; **Load** back to parent |
+| **Command** | Slash contract: inputs, delegation to skill **Action**, output shape |
+| **Refs (orchestrator)** | Templates, rubrics, checklists—Read at the step that branches |
 
-Do not duplicate the same policy in three places; **link** the canonical ref once.
+Link the canonical ref once; do not duplicate policy in three places.
 
-## Micro examples (pattern)
+## Degrees of freedom
 
-**Bad:** “Be helpful and write good code.”  
-**Good:** “Stop after listing changed files; do not commit unless the user asked.”
+| Freedom | When | Shape |
+|---------|------|-------|
+| **Low** | Fragile, irreversible, safety-critical | Exact steps, stop rules, scripts |
+| **Medium** | Repeatable workflow with known forks | AskQuestion, bounded retries |
+| **High** | Review, design, classification | Outcomes + anti-patterns + examples |
 
-**Bad:** “Consider security.”  
-**Good:** “Reject if the diff adds `eval(` or logs secrets; cite line.”
+Default **high** for judgment skills; **low** only where mistakes are costly.
 
-**Bad:** “Use best practices.”  
-**Good:** “Match surrounding file’s import style (top-level only).”
+## Progressive disclosure (one level deep)
+
+SKILL.md (or command body) → `refs/` (and `scripts/` **executed**, not pasted). Refs do **not** chain to other refs.
+
+See `helper-cli.md` when the skill folder includes `scripts/`.

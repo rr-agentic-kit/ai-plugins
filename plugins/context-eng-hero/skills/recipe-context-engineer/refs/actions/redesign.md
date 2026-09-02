@@ -2,23 +2,32 @@
 
 Change what the artifact **does**: outcome, audience, capabilities, or contracts. Structural edits allowed; document tradeoffs.
 
-## Load (Read)
+## Ref index (Read at step)
 
-- `disambiguation.md`
-- `advisory.md`
-- `redesign-intake.md`
-- `instruction-design.md`
-- `frontmatter-schemas.md`
-- `chat-orchestration.md`
-- Matching artifact template
-- Optional prior **diff** report if user compared two versions
+| Ref | When |
+|-----|------|
+| `disambiguation.md` | `redesign-1-clarify` |
+| `questioning.md` | `redesign-1-clarify` |
+| `advisory.md` | `redesign-1-clarify` |
+| `redesign-intake.md` | `redesign-1-clarify` |
+| `instruction-design.md` | `redesign-2-plan` |
+| `frontmatter-schemas.md` | `redesign-2-plan`, `redesign-3-apply` |
+| `skill-invocation.md` | `redesign-3-apply` (skills) |
+| `readme-spec.md` | `redesign-3-apply` (skill folders) |
+| `helper-cli.md` | `redesign-3-apply` (when `scripts/`) |
+| `template-required-map.md` | `redesign-3-apply` |
+| `templates/<type>.template.md` (per `classify.md`) | `redesign-3-apply` |
+| `chat-orchestration.md` | `redesign-2-plan` (workflows) |
+| Prior diff report | `redesign-1-clarify` if supplied |
+| `shared-write-gates.md` | `redesign-4-gates` |
+| `gate-prompts.md`, `ui-brand.md`, `close-contract.md` | `redesign-5-close` |
 
 ## Steps
 
 ### Step 1: `redesign-1-clarify`
 
 - **Outcome:** Delta brief and constraints are explicit.
-- **Done when:** `redesign-intake.md` satisfied; breaking-change stance recorded; no silent scope creep beyond delta brief.
+- **Done when:** `redesign-intake.md` done-when satisfied or assumptions stated; breaking-change stance recorded; no silent scope creep beyond delta brief.
 
 ### Step 2: `redesign-2-plan`
 
@@ -32,9 +41,14 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 
 ### Step 4: `redesign-4-gates`
 
-- **Outcome:** Shared write gates passed or write blocked; user told to re-audit when write succeeds.
-- **Done when:** All four gates in `refs/actions/shared-write-gates.md` completed in order (static → reflect → pre-ship → write); output includes **Recommended next step (user):** run `/context-engineer-audit` on the same path (platform cannot chain).
+- **Outcome:** Shared write gates passed or write blocked.
+- **Done when:** All four gates in `refs/actions/shared-write-gates.md` completed in order (static → reflect → pre-ship → write).
+
+### Step 5: `redesign-5-close`
+
+- **Outcome:** User routed; re-audit recommended when write succeeded.
+- **Done when:** **post-fix-routing** or **Next Up** per `close-contract.md`; if file written, note verb-only follow-up: re-audit same path.
 
 ## Stop
 
-Quality bar unchanged—static + reflection + pre-ship required before write. Do not claim parity with old audit PASS/FAIL lists; recommend fresh audit after write.
+Quality bar unchanged—static + reflection + pre-ship required before write. Do not claim parity with old audit PASS/FAIL lists.

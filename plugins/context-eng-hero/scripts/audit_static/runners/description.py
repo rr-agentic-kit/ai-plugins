@@ -5,7 +5,7 @@ from audit_static.report import check
 
 
 def run_description(ctx: AuditContext) -> list[CheckResult]:
-    if ctx.artifact_type == "workflow":
+    if ctx.artifact_type in {"workflow", "skill-readme"}:
         return []
 
     desc = (ctx.fm or {}).get("description", "")
@@ -26,6 +26,16 @@ def run_description(ctx: AuditContext) -> list[CheckResult]:
                 "major",
                 ok_len,
                 f"length={len(str(desc))} (max 1024)",
+            )
+        )
+    if ctx.artifact_type in {"skill", "command", "agent"} and has_desc:
+        ok_rec = len(str(desc)) <= 160
+        results.append(
+            check(
+                "static.description.recommended-length",
+                "minor",
+                ok_rec,
+                f"length={len(str(desc))} (recommended ≤160)",
             )
         )
     return results

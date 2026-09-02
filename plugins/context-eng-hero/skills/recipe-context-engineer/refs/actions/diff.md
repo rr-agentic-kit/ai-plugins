@@ -1,11 +1,14 @@
 # Action: diff (internal)
 
-## Load (Read)
+## Ref index (Read at step)
 
-- `disambiguation.md`
-- `diff-output.template.md`
-- `frontmatter-schemas.md`
-- `instruction-design.md` (if intent comparison needs signal/noise lens)
+| Ref | When |
+|-----|------|
+| `disambiguation.md` | `diff-1-read` |
+| `templates/diff-output.template.md` | `diff-3-report` |
+| `frontmatter-schemas.md` | `diff-2-compare` |
+| `instruction-design.md` | `diff-2-compare` (if intent comparison needs signal/noise lens) |
+| `close-contract.md` | `diff-3-report` |
 
 ## Steps
 
@@ -22,7 +25,7 @@
 ### Step 3: `diff-3-report`
 
 - **Outcome:** Tradeoff report delivered.
-- **Done when:** Output matches `diff-output.template.md`; recommendation cites evidence; no file edits.
+- **Done when:** Output matches `templates/diff-output.template.md`; recommendation cites evidence; no file edits; follow-ups verb-only per `close-contract.md`.
 
 ## Stop
 

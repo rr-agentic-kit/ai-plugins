@@ -18,7 +18,7 @@ When proceeding without asking, state these once inline:
 | Field | Default assumption |
 |-------|-------------------|
 | **Path** | None — must resolve via questioning; no silent path guess |
-| **Artifact type** | Narrowest fit from Classify table; state once if inferred from context |
+| **Artifact type** | Narrowest fit from `classify.md`; state once if inferred from context |
 | **Action** | design-assist only if verb unclear after 1 AskQuestion |
 | **Outcome preservation (fix)** | Existing artifact intent unchanged unless user signals redesign |
 | **Audience** | Agent runtime if artifact is skill/command/agent/workflow; human if command-only UX |

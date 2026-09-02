@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+# Reject reads above this size before loading into memory (local DoS guard).
+MAX_READ_BYTES = 2 * 1024 * 1024  # 2 MiB
+
 type CheckResult = dict[str, str]
 
 
@@ -44,6 +47,20 @@ class AuditContext:
                     "critical",
                     False,
                     f"file not found: {rel_path}",
+                )
+            ]
+
+        file_size = target.stat().st_size
+        if file_size > MAX_READ_BYTES:
+            return [
+                check(
+                    "static.file.size",
+                    "critical",
+                    False,
+                    (
+                        f"file exceeds size cap ({file_size} bytes > "
+                        f"{MAX_READ_BYTES} bytes): {rel_path}"
+                    ),
                 )
             ]
 
