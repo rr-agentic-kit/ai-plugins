@@ -1,0 +1,1 @@
+You should restart the pod when memory spikes. You'll see errors if you don't act quickly. We don't recommend waiting.

@@ -1,0 +1,153 @@
+{
+  "filler": [
+    {
+      "id": "in_order_to",
+      "pattern": "\\bin order to\\b",
+      "replacement": "to",
+      "flags": "i",
+      "auto_fixable": true
+    },
+    {
+      "id": "due_to_the_fact",
+      "pattern": "\\bdue to the fact that\\b",
+      "replacement": "because",
+      "flags": "i",
+      "auto_fixable": true
+    },
+    {
+      "id": "at_this_point_in_time",
+      "pattern": "\\bat this point in time\\b",
+      "replacement": "now",
+      "flags": "i",
+      "auto_fixable": true
+    },
+    {
+      "id": "in_the_event_that",
+      "pattern": "\\bin the event that\\b",
+      "replacement": "if",
+      "flags": "i",
+      "auto_fixable": true
+    },
+    {
+      "id": "for_the_purpose_of",
+      "pattern": "\\bfor the purpose of\\b",
+      "replacement": "to",
+      "flags": "i",
+      "auto_fixable": true
+    }
+  ],
+  "chatbot": [
+    {
+      "id": "hope_this_helps",
+      "pattern": "\\bI hope this helps[.!]?\\b",
+      "flags": "i",
+      "action": "drop_sentence",
+      "auto_fixable": true
+    },
+    {
+      "id": "great_question",
+      "pattern": "\\bGreat question[!]?\\b",
+      "flags": "i",
+      "action": "drop_sentence",
+      "auto_fixable": true
+    },
+    {
+      "id": "knowledge_cutoff",
+      "pattern": "\\b(as of my (last )?knowledge cutoff|my training data)\\b",
+      "flags": "i",
+      "action": "drop_sentence",
+      "auto_fixable": true
+    },
+    {
+      "id": "let_me_know",
+      "pattern": "\\bLet me know if (you('d| would) like|there's anything)\\b",
+      "flags": "i",
+      "action": "drop_sentence",
+      "auto_fixable": true
+    }
+  ],
+  "copula_avoidance": [
+    {
+      "id": "serves_as",
+      "pattern": "\\bserves as\\b",
+      "replacement": "is",
+      "flags": "i",
+      "auto_fixable": true
+    },
+    {
+      "id": "stands_as",
+      "pattern": "\\bstands as\\b",
+      "replacement": "is",
+      "flags": "i",
+      "auto_fixable": false
+    },
+    {
+      "id": "boasts",
+      "pattern": "\\bboasts\\b",
+      "replacement": "has",
+      "flags": "i",
+      "auto_fixable": false
+    },
+    {
+      "id": "features",
+      "pattern": "\\bfeatures\\b",
+      "replacement": "has",
+      "flags": "i",
+      "auto_fixable": false
+    }
+  ],
+  "banned_word": [
+    {"id": "delve", "pattern": "\\bdelve\\b", "flags": "i", "auto_fixable": false},
+    {"id": "leverage", "pattern": "\\bleverage\\b", "flags": "i", "auto_fixable": false},
+    {"id": "utilize", "pattern": "\\butilize\\b", "flags": "i", "auto_fixable": false},
+    {"id": "facilitate", "pattern": "\\bfacilitate\\b", "flags": "i", "auto_fixable": false},
+    {"id": "streamline", "pattern": "\\bstreamline\\b", "flags": "i", "auto_fixable": false},
+    {"id": "robust", "pattern": "\\brobust\\b", "flags": "i", "auto_fixable": false},
+    {"id": "comprehensive", "pattern": "\\bcomprehensive\\b", "flags": "i", "auto_fixable": false},
+    {"id": "pivotal", "pattern": "\\bpivotal\\b", "flags": "i", "auto_fixable": false},
+    {"id": "meticulous", "pattern": "\\bmeticulous\\b", "flags": "i", "auto_fixable": false},
+    {"id": "underscore_verb", "pattern": "\\bunderscores?\\b", "flags": "i", "auto_fixable": false},
+    {"id": "realm", "pattern": "\\brealm\\b", "flags": "i", "auto_fixable": false},
+    {"id": "landscape", "pattern": "\\blandscape\\b", "flags": "i", "auto_fixable": false},
+    {"id": "testament", "pattern": "\\btestament\\b", "flags": "i", "auto_fixable": false}
+  ],
+  "transition_openers": [
+    {"id": "indeed", "pattern": "(?:^|[.!?]\\s+)(Indeed)\\b", "flags": "", "auto_fixable": false},
+    {"id": "furthermore", "pattern": "(?:^|[.!?]\\s+)(Furthermore)\\b", "flags": "", "auto_fixable": false},
+    {"id": "however", "pattern": "(?:^|[.!?]\\s+)(However)\\b", "flags": "", "auto_fixable": false},
+    {"id": "notably", "pattern": "(?:^|[.!?]\\s+)(Notably)\\b", "flags": "", "auto_fixable": false},
+    {"id": "additionally", "pattern": "(?:^|[.!?]\\s+)(Additionally)\\b", "flags": "", "auto_fixable": false},
+    {"id": "consequently", "pattern": "(?:^|[.!?]\\s+)(Consequently)\\b", "flags": "", "auto_fixable": false},
+    {"id": "moreover", "pattern": "(?:^|[.!?]\\s+)(Moreover)\\b", "flags": "", "auto_fixable": false},
+    {"id": "therefore", "pattern": "(?:^|[.!?]\\s+)(Therefore)\\b", "flags": "", "auto_fixable": false}
+  ],
+  "hedges": [
+    {"id": "important_to_note", "pattern": "\\bit is important to note that\\b", "flags": "i", "auto_fixable": false},
+    {"id": "kindly", "pattern": "\\bkindly\\b", "flags": "i", "auto_fixable": false},
+    {"id": "as_discussed", "pattern": "\\bas discussed\\b", "flags": "i", "auto_fixable": false}
+  ],
+  "not_x_but_y": [
+    {
+      "id": "not_x_but_y",
+      "pattern": "\\b(it's|it is|this is) not (?:just |only )?[^,]{1,40},? but\\b",
+      "flags": "i",
+      "auto_fixable": false
+    }
+  ],
+  "quote_normalization": [
+    {
+      "id": "curly_double",
+      "pattern": "[\u201c\u201d]",
+      "replacement": "\"",
+      "flags": "",
+      "auto_fixable": true
+    },
+    {
+      "id": "curly_single",
+      "pattern": "[\u2018\u2019]",
+      "replacement": "'",
+      "flags": "",
+      "auto_fixable": true
+    }
+  ]
+}
