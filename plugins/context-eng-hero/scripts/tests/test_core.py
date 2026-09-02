@@ -23,6 +23,7 @@ from audit_static.headings import headings_present
         (Path("workflows/deploy-workflow.md"), "workflow"),
         (Path("skills/recipe-context-engineer/refs/actions/audit.md"), "unknown"),
         (Path("README.md"), "unknown"),
+        (Path("docs/notes.md"), "workflow"),
     ],
 )
 def test_detect_type(rel_path: Path, expected: str) -> None:

@@ -175,7 +175,7 @@ Capabilities and boundaries.
 
 Self-invoke; static + reflection + pre-ship before write.
 
-Executor source of truth: `SKILL.md`. This README is the human spec—not a Procedure echo.
+Source of truth: `SKILL.md`. This README is the human spec—not a Procedure echo.
 """
 
 _ORCHESTRATOR_SKILL = """\
@@ -244,7 +244,7 @@ Capabilities and boundaries.
 
 Self-invoke; static + reflection + pre-ship before write.
 
-Executor source of truth: `SKILL.md`. This README is the human spec—not a Procedure echo.
+Source of truth: `SKILL.md`. This README is the human spec—not a Procedure echo.
 """
 
 _ORCHESTRATOR_README_MISSING_ACTIONS = """\
@@ -274,22 +274,37 @@ Capabilities and boundaries.
 
 Self-invoke; static + reflection + pre-ship before write.
 
-Executor source of truth: `SKILL.md`. This README is the human spec—not a Procedure echo.
+Source of truth: `SKILL.md`. This README is the human spec—not a Procedure echo.
 """
 
 
 @pytest.mark.parametrize(
     ("fixture_body", "rel_path", "check_id", "expected"),
     [
-        (_VALID_SKILL, "skills/test-skill/SKILL.md", "static.frontmatter.delimiters", "PASS"),
-        (_VALID_SKILL, "skills/test-skill/SKILL.md", "static.frontmatter.parseable", "PASS"),
+        (
+            _VALID_SKILL,
+            "skills/test-skill/SKILL.md",
+            "static.frontmatter.delimiters",
+            "PASS",
+        ),
+        (
+            _VALID_SKILL,
+            "skills/test-skill/SKILL.md",
+            "static.frontmatter.parseable",
+            "PASS",
+        ),
         (
             "# No frontmatter\n",
             "skills/bad-skill/SKILL.md",
             "static.frontmatter.delimiters",
             "FAIL",
         ),
-        (_VALID_WORKFLOW, "workflows/test-workflow.md", "static.frontmatter.delimiters", "PASS"),
+        (
+            _VALID_WORKFLOW,
+            "workflows/test-workflow.md",
+            "static.frontmatter.delimiters",
+            "PASS",
+        ),
     ],
 )
 def test_run_frontmatter(
@@ -371,7 +386,12 @@ def test_run_naming(
 @pytest.mark.parametrize(
     ("fixture_body", "rel_path", "check_id", "expected"),
     [
-        (_VALID_SKILL, "skills/test-skill/SKILL.md", "static.description.present", "PASS"),
+        (
+            _VALID_SKILL,
+            "skills/test-skill/SKILL.md",
+            "static.description.present",
+            "PASS",
+        ),
         (
             "---\nname: test-skill\n---\n\n# Body\n",
             "skills/test-skill/SKILL.md",
@@ -504,7 +524,10 @@ def test_run_links_pass_and_fail(tmp_path: Path) -> None:
     good_rel = _write_artifact(tmp_path, "skills/test-skill/SKILL.md", good_body)
     good_ctx = _load(tmp_path, good_rel)
 
-    bad_body = _VALID_SKILL + "\nBroken [link](missing.md).\nInsecure [site](http://example.com).\n"
+    bad_body = (
+        _VALID_SKILL
+        + "\nBroken [link](missing.md).\nInsecure [site](http://example.com).\n"
+    )
     bad_rel = _write_artifact(tmp_path, "skills/bad-links/SKILL.md", bad_body)
     bad_ctx = _load(tmp_path, bad_rel)
 
@@ -571,7 +594,9 @@ def test_run_ref_file_sections(tmp_path: Path) -> None:
 
 
 def test_run_workflow_todo_id(tmp_path: Path) -> None:
-    rel = _write_artifact(tmp_path, "workflows/test-workflow.md", _VALID_WORKFLOW_WITH_TODO)
+    rel = _write_artifact(
+        tmp_path, "workflows/test-workflow.md", _VALID_WORKFLOW_WITH_TODO
+    )
     ctx = _load(tmp_path, rel)
     results = _results_map(run_workflow(ctx))
     assert results["static.workflow.todo-id"] == "PASS"

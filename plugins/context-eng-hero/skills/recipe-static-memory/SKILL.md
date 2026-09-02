@@ -1,6 +1,6 @@
 ---
 name: recipe-static-memory
-description: Authors or repairs user-global and project static memory (CLAUDE.md). Use when designing, reviewing, or fixing user-global or project CLAUDE.md files—not plugin skills or commands (recipe-context-engineer).
+description: Authors or repairs user-global and project CLAUDE.md static memory. Use when designing, reviewing, or fixing memory files—not plugin skills or commands.
 ---
 
 # Static memory (CLAUDE.md)

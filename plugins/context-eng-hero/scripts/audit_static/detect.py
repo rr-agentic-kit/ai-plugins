@@ -6,11 +6,7 @@ from pathlib import Path
 def detect_type(rel_path: Path) -> str:
     parts = rel_path.parts
     name = rel_path.name.lower()
-    if (
-        len(parts) >= 3
-        and parts[0] == "skills"
-        and name == "readme.md"
-    ):
+    if len(parts) >= 3 and parts[0] == "skills" and name == "readme.md":
         return "skill-readme"
     if (
         len(parts) == 4
@@ -28,5 +24,7 @@ def detect_type(rel_path: Path) -> str:
     if name.endswith(".mdc") or (parts and parts[0] in {".cursor", "rules"}):
         return "rule"
     if "workflow" in rel_path.stem.lower():
+        return "workflow"
+    if parts and parts[0] == "docs" and name.endswith(".md"):
         return "workflow"
     return "unknown"

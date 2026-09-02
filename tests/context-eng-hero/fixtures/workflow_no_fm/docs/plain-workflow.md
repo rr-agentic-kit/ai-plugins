@@ -8,7 +8,7 @@ Done.
 
 | Step | todo_id | Owner | Output |
 |------|---------|-------|--------|
-| 1 | wf-1 | skill | x |
+| 1 | `wf-1` | skill | x |
 
 ## Delegation
 

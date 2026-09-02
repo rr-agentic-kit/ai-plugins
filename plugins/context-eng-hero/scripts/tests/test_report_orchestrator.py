@@ -115,7 +115,9 @@ description: A valid test skill for orchestrator coverage.
     results = run_checks(plugin_root, rel_path)
     # Assert
     ids = [r["id"] for r in results]
-    first_frontmatter = next(i for i, rid in enumerate(ids) if rid.startswith("static.frontmatter"))
+    first_frontmatter = next(
+        i for i, rid in enumerate(ids) if rid.startswith("static.frontmatter")
+    )
     first_links = next(i for i, rid in enumerate(ids) if rid.startswith("static.links"))
     assert first_frontmatter < first_links
     assert len(results) > len(RUNNERS)

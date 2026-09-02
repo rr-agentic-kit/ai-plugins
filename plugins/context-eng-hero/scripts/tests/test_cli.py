@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 from audit_static.cli import _resolve_relative_path
-from conftest import SCRIPTS_DIR
 
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent
 AUDIT_CLI = SCRIPTS_DIR / "audit_static.py"
 
 _VALID_SKILL = """\
@@ -50,7 +50,9 @@ def _write_skill(plugin_root: Path, folder: str, body: str) -> Path:
     return skill_path
 
 
-def _run_audit(plugin_root: Path, relative_path: str) -> subprocess.CompletedProcess[str]:
+def _run_audit(
+    plugin_root: Path, relative_path: str
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(AUDIT_CLI), str(plugin_root), relative_path],
         capture_output=True,
@@ -81,8 +83,12 @@ def test_resolve_relative_path_ambiguous_skills_exits_with_paths(
     tmp_path: Path,
 ) -> None:
     # Arrange
-    _write_skill(tmp_path, "alpha-skill", _VALID_SKILL.replace("lone-skill", "alpha-skill"))
-    _write_skill(tmp_path, "beta-skill", _VALID_SKILL.replace("lone-skill", "beta-skill"))
+    _write_skill(
+        tmp_path, "alpha-skill", _VALID_SKILL.replace("lone-skill", "alpha-skill")
+    )
+    _write_skill(
+        tmp_path, "beta-skill", _VALID_SKILL.replace("lone-skill", "beta-skill")
+    )
     # Act / Assert
     with pytest.raises(SystemExit) as exc_info:
         _resolve_relative_path(tmp_path, ".")
@@ -125,8 +131,12 @@ def test_main_subprocess_exit_one_when_any_check_fails(tmp_path: Path) -> None:
 
 def test_main_subprocess_ambiguous_dot_path_exits_nonzero(tmp_path: Path) -> None:
     # Arrange
-    _write_skill(tmp_path, "alpha-skill", _VALID_SKILL.replace("lone-skill", "alpha-skill"))
-    _write_skill(tmp_path, "beta-skill", _VALID_SKILL.replace("lone-skill", "beta-skill"))
+    _write_skill(
+        tmp_path, "alpha-skill", _VALID_SKILL.replace("lone-skill", "alpha-skill")
+    )
+    _write_skill(
+        tmp_path, "beta-skill", _VALID_SKILL.replace("lone-skill", "beta-skill")
+    )
     # Act
     result = _run_audit(tmp_path, ".")
     # Assert
