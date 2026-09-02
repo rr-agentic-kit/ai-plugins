@@ -30,7 +30,7 @@ _SECTION_MAP = {
 }
 
 _ACTIONS_SECTION_RE = re.compile(
-    r"^## Actions\s*\n(.*)(?=(?:^## |\Z))",
+    r"^## Actions\s*\n(.*)(?=(?:^## )|\Z)",
     re.MULTILINE | re.DOTALL,
 )
 _ACTION_TABLE_DATA_ROW_RE = re.compile(
