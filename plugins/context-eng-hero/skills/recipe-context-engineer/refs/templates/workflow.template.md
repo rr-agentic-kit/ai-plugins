@@ -26,8 +26,5 @@
 
 ## Orchestration
 
-<!-- REQUIRED: when this workflow runs, executor calls TodoWrite (merge: false) with one todo per step using todo_id values before step 1; mark completed before advancing. Branching: AskQuestion first, then spawn branch-specific todos. -->
+<!-- REQUIRED (workflow.orchestration.todowrite): TodoWrite (merge: false) with one todo per step using todo_id values before step 1 -->
 
-## Validity
-
-Validate against `frontmatter-schemas.md`; before ship run static → `pre-write-reflection.md` → `pre-ship-checklist.md` (see `shared-write-gates.md` in **recipe-context-engineer** refs).

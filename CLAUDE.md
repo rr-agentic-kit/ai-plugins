@@ -47,6 +47,13 @@ Full quality matrix (Black, Mypy, Bandit, pip-audit, coverage, Sonar): see `CONT
 - Repo-root scripts: `uv run pytest tests/scripts/ -v`
 - Coverage + CI parity: `CONTRIBUTING.md`
 
+## rr-test Project Testing Context
+
+- Production scripts: `plugins/*/scripts/**/*.py`, repo-root `scripts/*.py`
+- Tests live only under `tests/<plugin>/` or `tests/scripts/` — never under `plugins/`
+- Coverage omit: `*/__main__.py` (entry shims; exercised via subprocess smoke tests)
+- Subprocess CLI tests do not attribute coverage; use direct `main()` unit tests for CLI modules
+
 ## Where to look next
 
 | Working on… | Read first |

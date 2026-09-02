@@ -40,7 +40,64 @@ items:
     assert leaf.status == "delivered"
 
 
+def test_parse_inline_meta_empty_line():
+    meta, errors = vp.parse_inline_meta_line("   ")
+    assert meta == {}
+    assert errors == [("MALFORMED_META", "   ")]
+
+
+def test_parse_inline_meta_unknown_key():
+    _, errors = vp.parse_inline_meta_line("_parent_: — | _unknown_: x")
+    assert ("UNKNOWN_KEY", "unknown") in errors
+
+
+def test_parse_yaml_empty_doc():
+    items, issues = vp.parse_yaml_doc("", "exec-summary.yaml")
+    assert items == []
+    assert issues == []
+
+
+def test_parse_yaml_item_not_mapping():
+    yaml_text = """\
+items:
+  ES-1: not-a-mapping
+"""
+    items, issues = vp.parse_yaml_doc(yaml_text, "exec-summary.yaml")
+    assert items == []
+    assert "INVALID_YAML" in error_codes(issues)
+
+
+def test_parse_yaml_unknown_key():
+    yaml_text = """\
+items:
+  ES-1:
+    title: Vision
+    UnknownKey: value
+    Parent: —
+    Kind: leaf
+    Spec: idea
+    MoSCoW: —
+"""
+    _, issues = vp.parse_yaml_doc(yaml_text, "exec-summary.yaml")
+    assert "UNKNOWN_KEY" in error_codes(issues)
+
+
 def test_parse_yaml_invalid_root():
     items, issues = vp.parse_yaml_doc("- just a list\n", "exec-summary.yaml")
     assert items == []
     assert "INVALID_YAML" in error_codes(issues)
+
+
+def test_parse_yaml_invalid_id():
+    yaml_text = """\
+items:
+  BAD:
+    title: Bad id
+    Parent: —
+    Kind: leaf
+    Spec: idea
+    MoSCoW: —
+"""
+    items, issues = vp.parse_yaml_doc(yaml_text, "exec-summary.yaml")
+    assert items == []
+    assert "INVALID_ID" in error_codes(issues)

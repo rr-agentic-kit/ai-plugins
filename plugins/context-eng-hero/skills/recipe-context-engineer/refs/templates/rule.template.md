@@ -22,6 +22,3 @@ globs: []
 
 <!-- REQUIRED: N/A or explicit exceptions -->
 
-## Validity
-
-Validate against `frontmatter-schemas.md`; before ship run static → `pre-write-reflection.md` → `pre-ship-checklist.md` (see `shared-write-gates.md` in **recipe-context-engineer** refs).

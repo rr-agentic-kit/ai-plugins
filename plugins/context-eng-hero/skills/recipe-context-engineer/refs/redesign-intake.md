@@ -1,8 +1,8 @@
 # Redesign intake (reference)
 
-Used by **Action: redesign** step 1. Capture deltas before structural planning.
+Used by **Action: redesign** step 1. Intake proceeds with stated assumptions per `questioning.md`—fields below are **done-when for apply**, not hard stops at intake.
 
-## Required
+## Done-when for apply (before `redesign-2-plan` completes)
 
 - Plugin-relative **path** to the definition file.
 - **Delta brief** from the user (paste or bullets): what should change in outcome, audience, capabilities, or failure modes.
@@ -22,4 +22,4 @@ Used by **Action: redesign** step 1. Capture deltas before structural planning.
 
 ## Stop
 
-Do not treat redesign as “fix all old audit FAILs.” Old FAILs may disappear or new ones may appear—recommend post-write **audit** in output.
+Do not treat redesign as "fix all old audit FAILs." Old FAILs may disappear or new ones may appear—recommend post-write audit in output.

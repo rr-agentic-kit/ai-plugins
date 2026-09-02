@@ -117,3 +117,37 @@ def test_parse_inline_meta_duplicate_key():
     )
     assert ("DUPLICATE_KEY", "kind") in errors
     assert meta["kind"] == "container"
+
+
+def test_parse_missing_metadata_line():
+    text = """\
+## ES-1: Vision
+"""
+    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    assert "MALFORMED_META" in error_codes(issues)
+
+
+def test_parse_list_meta_unknown_key():
+    text = """\
+## ES-1: Vision
+- **Parent:** —
+- **Kind:** leaf
+- **Spec:** idea
+- **MoSCoW:** —
+- **Priority:** P0
+"""
+    _, issues = vp.parse_markdown(text, "exec-summary.md", migrate=True)
+    assert "UNKNOWN_KEY" in error_codes(issues)
+
+
+def test_parse_list_meta_duplicate_key():
+    text = """\
+## ES-1: Vision
+- **Kind:** leaf
+- **Kind:** container
+- **Parent:** —
+- **Spec:** idea
+- **MoSCoW:** —
+"""
+    _, issues = vp.parse_markdown(text, "exec-summary.md", migrate=True)
+    assert "DUPLICATE_KEY" in error_codes(issues)

@@ -1,6 +1,6 @@
 ---
 name: your-agent-id
-description: Role and domain boundary in one or two sentences.
+description: Role and when to use in one sentence ≤160. No delegation chains or _oa-* IDs here.
 ---
 
 # <!-- REQUIRED: agent title -->
@@ -29,6 +29,3 @@ description: Role and domain boundary in one or two sentences.
 
 <!-- OPTIONAL: Task delegation, subagent type hints -->
 
-## Validity
-
-Validate against `frontmatter-schemas.md`; before ship run static → `pre-write-reflection.md` → `pre-ship-checklist.md` (see `shared-write-gates.md` in **recipe-context-engineer** refs).

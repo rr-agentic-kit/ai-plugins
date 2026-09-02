@@ -1,6 +1,6 @@
 ---
 name: your-command-id
-description: User-facing purpose in one or two sentences.
+description: User-facing outcome in one sentence ≤160.
 ---
 
 # <!-- REQUIRED: command heading -->
@@ -17,8 +17,5 @@ Execute **Action: …** in skill **<!-- REQUIRED: skill id -->**.
 
 ## Output
 
-<!-- REQUIRED: shape of response -->
+<!-- REQUIRED (command.output.shape): shape of response -->
 
-## Validity
-
-Validate against `frontmatter-schemas.md`; before ship run static → `pre-write-reflection.md` → `pre-ship-checklist.md` (see `shared-write-gates.md` in **recipe-context-engineer** refs).

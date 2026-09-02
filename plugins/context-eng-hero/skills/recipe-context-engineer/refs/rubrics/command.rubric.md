@@ -25,6 +25,7 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 
 | id | Severity | PASS when |
 |----|----------|-----------|
-| `command.description.user-facing` | minor | `description` is user-facing purpose without internal layout jargon |
+| `command.description.user-facing` | minor | `description` is user-facing purpose without internal layout jargon; ≤160 recommended |
+| `command.description.recommended-length` | minor | `description` ≤160 characters one sentence, or user explicitly accepted over-budget |
 | `command.noise.signal-ratio` | minor | No filler paragraphs without behavioral constraints |
 | `command.refs.load-efficiency` | minor | Files in this artifact's **Load** list do not duplicate each other's content; no ref is a strict subset of another co-loaded ref |

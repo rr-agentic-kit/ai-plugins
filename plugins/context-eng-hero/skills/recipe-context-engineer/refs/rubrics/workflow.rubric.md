@@ -1,6 +1,6 @@
 # Workflow audit rubric
 
-Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **Judgment** only in audit step 3. **Static** ids are produced by `scripts/audit_static.py`—do not re-score manually unless script skipped.
+Judgment rows only in audit step 3. Static ids (`static.sections.required`, `static.workflow.todo-id`, …) from `scripts/audit_static.py`.
 
 ## Judgment
 
@@ -9,7 +9,7 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | id | Severity | PASS when |
 |----|----------|-----------|
 | `workflow.steps.bounded` | critical | **Steps** table has finite rows; any loop cites explicit exit in **Exit and failure** |
-| `workflow.steps.todo-id` | critical | Every **Steps** row has non-empty `todo_id` column; ids are unique kebab strings |
+| `workflow.steps.todo-id` | critical | Every **Steps** row has non-empty `todo_id` column; ids are unique kebab strings (also `static.workflow.todo-id`) |
 | `workflow.orchestration.todowrite` | critical | **Orchestration** requires TodoWrite one todo per `todo_id` before step 1; branching uses AskQuestion first |
 | `workflow.delegation.owners` | critical | **Delegation** maps each step to an owning artifact type (skill/command/agent) |
 

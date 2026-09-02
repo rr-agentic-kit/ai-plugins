@@ -17,6 +17,8 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | id | Severity | PASS when |
 |----|----------|-----------|
 | `agent.role.domain` | major | **Role** states domain boundary in ≤3 sentences (quote) |
+| `agent.description.recommended-length` | major | `description` ≤160 characters one sentence, or user explicitly accepted over-budget |
+| `agent.description.invoke-fit` | major | `description` states purpose + when without delegation chains or internal agent IDs |
 | `agent.inputs` | major | **Inputs** states what invoker must supply or “none” with reason |
 | `agent.outputs.format` | major | **Outputs** names format (markdown table, JSON fields, file list, etc.) |
 | `agent.consistency` | major | **Role**, boundaries, and stops do not contradict (cite if FAIL) |

@@ -1,6 +1,6 @@
 # Rule behavior probes
 
-Run under **Action: test**. For each probe, record PASS / FAIL / AMBIGUOUS in `test-output.template.md`.
+Run under **Action: test**. For each probe, record PASS / FAIL / AMBIGUOUS in `templates/test-output.template.md`.
 
 ## P1 — MUST enforcement
 
