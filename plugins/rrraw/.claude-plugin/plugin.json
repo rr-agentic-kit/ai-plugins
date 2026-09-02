@@ -1,6 +1,6 @@
 {
   "name": "rrraw",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Flag-driven test excellence \u2014 assess, write, fix, and migrate tests via phase agents",
   "license": "Unlicense",
   "author": {
