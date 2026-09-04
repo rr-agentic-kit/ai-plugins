@@ -33,7 +33,7 @@ uv run pytest tests/ -v
 uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
 uv run python scripts/validate_plugin_versions.py
 uv run python scripts/install_claude_local.py
-uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}
+uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}  # rc also runs install_claude_local
 claude plugin validate .
 claude plugin validate ./plugins/context-eng-hero
 ```
