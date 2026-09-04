@@ -4,7 +4,7 @@
 
 **Load when:** After every user answer (and free-form volunteer) during discovery; on level entry (load sidecar into interview); after compose persist (prune); before Gate 4 / freeze.
 
-A PRD answer given during exec-summary must live on PRD, not as an ES assumption. Completing questions for a later doc ≠ composing or freezing that doc.
+A PRD answer given during executive-summary must live on PRD, not as an ES assumption. Completing questions for a later doc ≠ composing or freezing that doc.
 
 ## Classify, then route
 
@@ -32,7 +32,7 @@ flowchart TD
 
 ## Where notes live
 
-Owned by the **affected** document, not a global inbox. Same write / load / unload for every cascade level (`exec-summary` … `prd`). `{level}` is the only variable — no ES/PRD special case.
+Owned by the **affected** document, not a global inbox. Same write / load / unload for every cascade level (`executive-summary` … `prd`). `{level}` is the only variable — no ES/PRD special case.
 
 | Event | Same rule for every `{level}.notes.yaml` |
 |-------|------------------------------------------|
@@ -41,7 +41,7 @@ Owned by the **affected** document, not a global inbox. Same write / load / unlo
 | Unload | After that level's compose persist: prune merged/discarded; delete the file if empty. Other levels' files untouched. |
 
 - Sidecar `{output-dir}/{level}.notes.yaml` — always YAML, like raw-history. Not selected by `--format`. Not an item. Not validator input. **File presence means unfinished notes.**
-- `future.md` is not a notes sidecar. Unassigned / beyond-next only ([output-formats.md](output-formats.md)). If `status.yaml.next` is already open, park notes for that track in `{level}.notes.yaml` under `docs/plans/{next}/` — do not duplicate into `future.md`.
+- `future.md` is not a notes sidecar. Unassigned / beyond-next only ([output-formats.md](../../../refs/planning/output-formats.md)). If `status.yaml.next` is already open, park notes for that track in `{level}.notes.yaml` under `docs/plan/{next}/` — do not duplicate into `future.md`.
 - Mirror index in `session_state.note_sessions[level][]` for resume.
 - Do **not** inject parked prose into composed item headings (closed vocabulary / validator).
 
@@ -51,7 +51,7 @@ status: parked
 notes:
   - id: n-001
     captured_at: ISO-8601
-    captured_during: exec-summary
+    captured_during: executive-summary
     section: features
     text: "Guest checkout without account"
     completeness: partial   # or ready_to_incorporate
@@ -61,7 +61,7 @@ notes:
 
 | Field | Notes |
 |-------|-------|
-| `doc_type` | Cascade level that owns the note (`exec-summary` … `prd`) |
+| `doc_type` | Cascade level that owns the note (`executive-summary` … `prd`) |
 | `status` | Sidecar: `parked` only. No `incorporated` tombstone — delete resolved notes instead. |
 | `notes[].id` | `n-NNN` within that sidecar |
 | `captured_during` | `current_level` when captured |
@@ -79,7 +79,7 @@ notes:
       "id": "n-001",
       "sidecar": "prd.notes.yaml",
       "completeness": "partial",
-      "captured_during": "exec-summary"
+      "captured_during": "executive-summary"
     }
   ]
 }
@@ -151,7 +151,7 @@ Freeze: a level cannot freeze while leftover `partial` notes exist unless discar
 
 ## Failure modes this blocks
 
-- Mechanism detail recorded as exec-summary facts instead of `tech.md`
+- Mechanism detail recorded as executive-summary facts instead of `tech.md`
 - Losing a feature the user mentioned at the wrong time
 - Composing PRD before parents exist because the user volunteered a story
 - Re-asking the same content when the cascade finally reaches that level

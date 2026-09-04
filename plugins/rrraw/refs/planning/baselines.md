@@ -22,9 +22,34 @@ Rejected: shared patch across product and docs; per-doc SEMVER as the human vers
 
 ## Project knowledge vs session-state
 
-`session-state.json` is a **resume checkpoint**. It is not project knowledge.
+`session-state.json` is a **resume checkpoint** (per phase dir). It is not project knowledge.
 
-Durable record is `{PROJECT_ROOT}/docs/plans/status.yaml` (one file — not a second `lines.yaml`). Any agent in the repo must see it. First key is the injection version from [agent-config.md](agent-config.md).
+Durable record uses **three files** under `{PROJECT_ROOT}/docs/`:
+
+| File | Role |
+|------|------|
+| `rrr-status.yaml` | **Summary only** — human glance + routing (`phase`, `track`, `product`/`docs`, `discovery_complete`, `docs_shipped`, `next`, one-line `summary`). Skill refreshes on phase transitions / freeze / ship. **Not** validator pin input. Do **not** write `levels`, digests, `challenge`, or `mint_hash` here. |
+| `discovery/status.yaml` | **Detail** — ES/MRD/BRD revs, digests, pins, challenge, `mint_hash` |
+| `plan/status.yaml` | **Detail** — PRD revs, digests, pins, challenge, `mint_hash` |
+
+Any agent in the repo must see them. First key on each is the injection version from [agent-config.md](agent-config.md) (`claude_config_version` on summary is authoritative for SoT sync).
+
+### `rrr-status.yaml` (summary)
+
+```yaml
+claude_config_version: 1
+track: "0.1"
+phase: discovery          # discovery | plan | complete
+product: "0.1.0?"
+docs: "0.1.0?"
+discovery_complete: false
+docs_shipped: false
+product_status: "?"
+next: null                # "0.2" when open
+summary: "Discovering — BRD in progress"
+```
+
+### Phase `status.yaml` (detail)
 
 ```yaml
 claude_config_version: 1
@@ -36,7 +61,7 @@ docs_shipped: true
 product_status: shipped   # or "?"
 mint_hash: "sha256:..."   # skill-written; mismatch → HAND_BUMP
 levels:
-  exec-summary:
+  executive-summary:      # discovery stems only under docs/discovery/
     rev: 2                # integer frozen; "?" unfrozen
     digest: "sha256:..."  # of this doc's items.json records; null while "?"
     pins: {}
@@ -44,15 +69,12 @@ levels:
     rev: 1
     digest: "sha256:..."
     pins:
-      exec-summary: { rev: 2, digest: "sha256:..." }
+      executive-summary: { rev: 2, digest: "sha256:..." }
   brd:
     rev: "?"
     digest: null
     pins: {}
-  prd:
-    rev: "?"
-    digest: null
-    pins: {}
+  # plan/status.yaml levels contain prd only
 next_levels: {}           # populated iff next is set; same per-doc shape
 challenge:                # current track; next_challenge mirrors next_levels
   prd:
@@ -64,20 +86,22 @@ next_challenge: {}
 
 | Field | Rule |
 |-------|------|
-| `claude_config_version` | Last `injection.version` synced into root agent SoT. Not part of `mint_hash`. |
+| `claude_config_version` | Last `injection.version` synced into root agent SoT. Not part of `mint_hash`. Summary file is authoritative for sync. |
 | `track` | `major.minor` only. Skill mints after confirm. Hand-edit → `HAND_BUMP`. |
-| `product` / `docs` | Same track prefix + independent patch. Trailing `?` = that line unshipped. |
+| `product` / `docs` | Same track prefix + independent patch. Trailing `?` = that line unshipped. Mirrored on summary. |
+| `phase` / `summary` | Summary-only. Skill refreshes on freeze / handoff / ship. |
 | `next` | At most one unshipped next track. `null` if none. |
 | `docs_shipped` | `true` only after current-track docs freeze/ship. Unlock gate reads this. |
 | `product_status` | `"?"` until product ships. Skill refuses ship while docs still `?`. Not part of `mint_hash`. |
-| `mint_hash` | SHA-256 of canonical `track`, `product`, `docs`, `next`, `docs_shipped`, `levels`, `next_levels`. Skill writes it on every mint. `claude_config_version`, `product_status`, `challenge`, `next_challenge` are excluded. |
-| `levels` | Current `track`. Child `pins` name the immediate parent stem. |
+| `mint_hash` | Phase detail only. SHA-256 of canonical `track`, `product`, `docs`, `next`, `docs_shipped`, `levels`, `next_levels`. Skill writes it on every mint. |
+| `discovery_complete` | Summary-only. `true` after Discover BRD freeze + valid `business-case.yaml`. Plan entry requires this (or equivalent frozen BRD + handoff). |
+| `levels` | Current `track` stems for **this phase**. Child `pins` name the immediate parent stem. Plan PRD pins against Discovery BRD digests across dirs. |
 | `next_levels` | Next-track revs/pins when `next` is set. Empty object otherwise. |
-| `challenge` / `next_challenge` | Per-doc attestation. `next_challenge` mirrors `next_levels`. Not part of `mint_hash`. Never a validator FAIL. Skill is the only writer. |
+| `challenge` / `next_challenge` | Per-doc attestation on phase detail. Not part of `mint_hash`. Never a validator FAIL. Skill is the only writer. |
 
 Digest = `sha256:` + hex of canonical JSON for that doc’s `items.json` records (`sort_keys`, no whitespace variance). Do not hash markdown (frontmatter would be circular).
 
-Skill writes this file on first compose, freeze / lock-target / confirmed major-minor, and challenge attestation updates. Compose does not write it.
+Skill writes phase detail on first compose, freeze / lock-target / confirmed major-minor, and challenge attestation updates. Skill refreshes summary on phase transition / freeze / ship. Compose does not write either.
 
 ### Challenge attestation
 
@@ -104,7 +128,7 @@ Do not store `open_ids` in status (per-run `bs-001` is not stable). Challenge is
 
 ### `viability_stale` (session-state)
 
-AI field on binding levels (`exec-summary`, `mrd`) in `session-state.json`. Set `true` when compose changes load-bearing ES facts: premises, verdict prose, consent/privacy constraints, named Musts. Orchestrator must not treat a stale `proceed` as current. Gate 7 re-sit clears it. Challenge may `flag_risk` but never rewrites `viability[]`.
+AI field on binding levels (`executive-summary`, `mrd`) in `session-state.json`. Set `true` when compose changes load-bearing ES facts: premises, verdict prose, consent/privacy constraints, named Musts. Orchestrator must not treat a stale `proceed` as current. Gate 7 re-sit clears it. Challenge may `flag_risk` but never rewrites `viability[]`.
 
 ## Frontmatter (cascade docs)
 
@@ -125,23 +149,30 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
 
 ## Layout / directory fork
 
-`docs/plans/` holds current-track cascade docs until a next major.minor opens, then `docs/plans/{next}/` (e.g. `docs/plans/0.2/`). Root **always** keeps `status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md`.
+`docs/discovery/` holds Discover cascade docs; `docs/plan/` holds PRD+. Parking + tripwire stay at `docs/`. When a next major.minor opens, fork under the **phase** dir: `docs/discovery/{next}/` and/or `docs/plan/{next}/`. Global summary always at `docs/rrr-status.yaml`.
 
 ```
-{PROJECT_ROOT}/docs/plans/
-  status.yaml
-  agent.plan.md
-  future.md
-  tech.md
-  later.md
-  exec-summary.md          # current track
-  …
-  0.2/                     # only once next is open
-    exec-summary.md
-    …
+{PROJECT_ROOT}/docs/
+  rrr-status.yaml          # SUMMARY
+  agent.plan.md            # tripwire
+  future.md / tech.md / later.md
+  discovery/
+    status.yaml            # DETAIL — ES/MRD/BRD
+    session-state.json
+    executive-summary.md | mrd.md | brd.md
+    business-case.yaml
+    items.json | …
+    0.2/                   # only once next is open
+  plan/
+    status.yaml            # DETAIL — PRD
+    session-state.json
+    prd.md | …
+    0.2/
 ```
 
-`--output-dir` for next-track work is `{PROJECT_ROOT}/docs/plans/{next}/`. Validator pointed at a track subdir loads `status.yaml` from the parent.
+`--output-dir` for Discover next-track work is `{PROJECT_ROOT}/docs/discovery/{next}/`; Plan → `docs/plan/{next}/`. Validator pointed at a track subdir loads that phase’s `status.yaml` from the phase parent. Plan pin checks load Discovery status across dirs for BRD parent digests.
+
+Legacy `docs/plans/` is a **read fallback once** (same class as old `docs/planning/`) — announce new defaults; no auto-migrate.
 
 ## Unlock gate (skill policy, not CI)
 
@@ -165,7 +196,7 @@ Classification is judgment: patch vs redirect-to-next vs open-next vs conscious 
 
 Compose does not increment anything. After Gate 6+7 pass for a level:
 
-1. Add the level to `frozen_levels` ([cascade.md](cascade.md)).
+1. Add the level to `frozen_levels` ([cascade.md](../../skills/rr-planner/refs/cascade.md)).
 2. Set `levels[doc].rev`: `?` → `1` on first freeze; integer stays until lock-target or unfreeze.
 3. Write `digest` from that doc’s items.
 4. Child freeze copies parent `{ rev, digest }` into `pins`.
@@ -200,19 +231,19 @@ No auto-unfreeze. No bump on compose. No silent rediscover.
 
 ## `future.md` — one inbox
 
-One `{PROJECT_ROOT}/docs/plans/future.md`. Not validator input. No item ids, no SEMVER. Meeting residue / no go-nogo.
+One `{PROJECT_ROOT}/docs/future.md`. Not validator input. No item ids, no SEMVER. Meeting residue / no go-nogo.
 
 | Rule | |
 |------|--|
 | Never auto-promote | Opening next **offers** to promote matching sections; user confirms. |
-| Next track already open | Notes for that track go to `{level}.notes.yaml` under `docs/plans/{next}/`, not `future.md`. |
+| Next track already open | Notes for that track go to `{level}.notes.yaml` under the phase `{next}/` dir, not `future.md`. |
 | What belongs here | Unassigned, or beyond-next. |
 
 Rejected: `future/` folder; per-track future files.
 
 ## `tech.md` — mechanism capture
 
-One `{PROJECT_ROOT}/docs/plans/tech.md`. Same tier as `later.md` / `future.md`. **Not validator input.** No item ids, no gates, never composed into ES/MRD/BRD/PRD.
+One `{PROJECT_ROOT}/docs/tech.md`. Same tier as `later.md` / `future.md`. **Not validator input.** No item ids, no gates, never composed into ES/MRD/BRD/PRD.
 
 | Rule | |
 |------|--|
@@ -221,7 +252,7 @@ One `{PROJECT_ROOT}/docs/plans/tech.md`. Same tier as `later.md` / `future.md`. 
 
 ## `later.md` — deferred-topic parking lot
 
-One global `{PROJECT_ROOT}/docs/plans/later.md`. **Not validator input.** No item ids.
+One global `{PROJECT_ROOT}/docs/later.md`. **Not validator input.** No item ids.
 
 | Rule | |
 |------|--|
@@ -230,7 +261,7 @@ One global `{PROJECT_ROOT}/docs/plans/later.md`. **Not validator input.** No ite
 
 ## `agent.plan.md` contract
 
-Project file `{PROJECT_ROOT}/docs/plans/agent.plan.md`. Always-on for every agent. Body template and the one load line: [agent-config.md](agent-config.md).
+Project file `{PROJECT_ROOT}/docs/agent.plan.md`. Always-on for every agent. Body template and the one load line: [agent-config.md](agent-config.md).
 
 Must:
 
@@ -238,7 +269,7 @@ Must:
 - Do not delete `agent.plan.md`. Treat stripping the root load line as a pairing break: restore (append only), do not proceed with the delete.
 - On a new root agent SoT (`AGENTS.md`, `GEMINI.md`, …), add the same one line. Do not invent `.mdc` rule files. Do not rewrite those files’ bodies.
 
-Skill on each resolve (does not wait for the agent to notice): if `status.yaml` or `agent.plan.md` exists, emit/refresh `agent.plan.md` when `injection.version` advanced, append the load line to every existing root SoT, set `claude_config_version`. Idempotent.
+Skill on each resolve (does not wait for the agent to notice): if `rrr-status.yaml` or `agent.plan.md` exists, emit/refresh `agent.plan.md` when `injection.version` advanced, append the load line to every existing root SoT, set `claude_config_version` on summary. Idempotent.
 
 Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one line). Do not create `AGENTS.md` (or successors) from nothing.
 

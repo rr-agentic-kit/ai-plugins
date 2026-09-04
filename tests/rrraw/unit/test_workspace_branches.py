@@ -91,16 +91,16 @@ def test_accept_challenge_residual_sets_dirty_accepted() -> None:
 
 def test_ensure_doc_frontmatter_creates_missing_keys() -> None:
     text = "# Exec summary\n\nBody.\n"
-    new_text, outcome = ws.ensure_doc_frontmatter(text, "exec-summary", None)
+    new_text, outcome = ws.ensure_doc_frontmatter(text, "executive-summary", None)
     assert outcome == "created"
     assert new_text.startswith("---\n")
-    assert "doc_type: exec-summary" in new_text
+    assert "doc_type: executive-summary" in new_text
 
 
 def test_ensure_doc_frontmatter_ok_when_unchanged() -> None:
     status = ws.default_unfrozen_status(1)
-    text, _ = ws.ensure_doc_frontmatter("# Body\n", "exec-summary", status)
-    new_text, outcome = ws.ensure_doc_frontmatter(text, "exec-summary", status)
+    text, _ = ws.ensure_doc_frontmatter("# Body\n", "executive-summary", status)
+    new_text, outcome = ws.ensure_doc_frontmatter(text, "executive-summary", status)
     assert outcome == "ok"
     assert new_text == text
 
@@ -137,3 +137,31 @@ def test_load_frozen_levels_from_session_state(tmp_path: Path) -> None:
 def test_load_frozen_levels_invalid_json(tmp_path: Path) -> None:
     (tmp_path / "session-state.json").write_text("{bad", encoding="utf-8")
     assert ws._load_frozen_levels(tmp_path) is None
+
+
+def test_docs_root_and_rrr_status(tmp_path: Path) -> None:
+    docs = ws.docs_root(tmp_path)
+    assert docs == tmp_path / "docs"
+    assert ws.find_rrr_status_path(docs) is None
+    (docs).mkdir()
+    path = docs / "rrr-status.yaml"
+    path.write_text("track: '0.1'\n", encoding="utf-8")
+    assert ws.find_rrr_status_path(docs) == path
+    summary = ws.default_rrr_status(1)
+    assert summary["phase"] == "discovery"
+    assert "levels" not in summary
+
+
+def test_stems_for_phase_dirs(tmp_path: Path) -> None:
+    discovery = tmp_path / "discovery"
+    plan = tmp_path / "plan"
+    discovery.mkdir()
+    plan.mkdir()
+    assert ws.stems_for_dir(discovery) == ("executive-summary", "mrd", "brd")
+    assert ws.stems_for_dir(plan) == ("prd",)
+    assert ws.stems_for_dir(tmp_path) == (
+        "executive-summary",
+        "mrd",
+        "brd",
+        "prd",
+    )

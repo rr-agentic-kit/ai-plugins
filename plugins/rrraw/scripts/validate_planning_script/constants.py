@@ -5,7 +5,17 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-DOC_STEMS: tuple[str, ...] = ("exec-summary", "mrd", "brd", "prd")
+DISCOVERY_STEMS: tuple[str, ...] = ("executive-summary", "mrd", "brd")
+PLAN_STEMS: tuple[str, ...] = ("prd",)
+DOC_STEMS: tuple[str, ...] = (*DISCOVERY_STEMS, *PLAN_STEMS)
+# Legacy stem accepted on read / migrate; writers emit DOC_STEMS only.
+LEGACY_DOC_STEMS: dict[str, str] = {"exec-summary": "executive-summary"}
+DOCS_ROOT_NAME = "docs"
+RRR_STATUS_NAME = "rrr-status.yaml"
+DISCOVERY_DIR = "discovery"
+PLAN_DIR = "plan"
+LEGACY_PLANS_DIR = "plans"
+LEGACY_PLANNING_DIR = "planning"
 YAML_SKIP_KEYS = frozenset(
     {
         "title",
@@ -39,14 +49,14 @@ CANONICAL_KEY_ORDER: tuple[str, ...] = (
 )
 EM_DASH = "\u2014"
 NATIVE_INDEX_COL: dict[str, str] = {
-    "exec-summary": "MoSCoW",
+    "executive-summary": "MoSCoW",
     "mrd": "Kano",
     "brd": "MoSCoW",
     "prd": "RICE",
 }
 
 PREFIX_TO_DOC: dict[str, str] = {
-    "ES": "exec-summary",
+    "ES": "executive-summary",
     "MRD": "mrd",
     "BRD": "brd",
     "PRD": "prd",
@@ -55,7 +65,7 @@ PREFIX_TO_DOC: dict[str, str] = {
 DOC_TO_PREFIX: dict[str, str] = {v: k for k, v in PREFIX_TO_DOC.items()}
 PREFIX_LEVEL: dict[str, int] = {"ES": 0, "MRD": 1, "BRD": 2, "PRD": 3}
 DOC_METHOD: dict[str, str] = {
-    "exec-summary": "moscow",
+    "executive-summary": "moscow",
     "mrd": "kano",
     "brd": "moscow",
     "prd": "rice",
@@ -133,10 +143,8 @@ JSON_ITEM_KEYS = frozenset(
 )
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[2]
-SCHEMA_PATH = (
-    PLUGIN_ROOT / "skills" / "rr-planner" / "refs" / "schemas" / "items.schema.json"
-)
-AGENT_CONFIG_PATH = PLUGIN_ROOT / "skills" / "rr-planner" / "refs" / "agent-config.md"
+SCHEMA_PATH = PLUGIN_ROOT / "refs" / "planning" / "schemas" / "items.schema.json"
+AGENT_CONFIG_PATH = PLUGIN_ROOT / "refs" / "planning" / "agent-config.md"
 
 AGENT_PLAN_NAME = "agent.plan.md"
 AGENT_PLAN_TEMPLATE_PATH = AGENT_CONFIG_PATH.with_name(AGENT_PLAN_NAME)
@@ -144,6 +152,36 @@ STATUS_NAME = "status.yaml"
 FUTURE_NAME = "future.md"
 TECH_NAME = "tech.md"
 LATER_NAME = "later.md"
+PHASE_DIRS: tuple[str, ...] = (DISCOVERY_DIR, PLAN_DIR)
+PHASE_STEMS: dict[str, tuple[str, ...]] = {
+    DISCOVERY_DIR: DISCOVERY_STEMS,
+    PLAN_DIR: PLAN_STEMS,
+}
+BUSINESS_CASE_NAME = "business-case.yaml"
+# Compact Plan handoff — required keys (omtm / positioning_angle optional).
+BUSINESS_CASE_REQUIRED_FIELDS: frozenset[str] = frozenset(
+    {
+        "vision",
+        "problem",
+        "premises",
+        "viability_verdict",
+        "north_star",
+        "input_metrics",
+        "cost_position",
+        "defensibility",
+        "market_read",
+        "beachhead_icp",
+        "objectives",
+        "stakeholders",
+        "capabilities",
+        "constraints",
+        "non_goals",
+        "gtm_motion",
+        "open_holds",
+        "artifact_refs",
+        "ledger_pins",
+    }
+)
 CHALLENGE_STATUSES = frozenset({"dirty", "clean", "dirty-accepted"})
 CHALLENGE_KEYS = ("challenge", "next_challenge")
 MINT_EXCLUDED_KEYS = frozenset(
@@ -153,16 +191,30 @@ MINT_EXCLUDED_KEYS = frozenset(
         "product_status",
         "challenge",
         "next_challenge",
+        "discovery_complete",
     }
 )
 ROOT_SOT_FILENAMES: frozenset[str] = frozenset(
     {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CODEX.md", "CURSOR.md"}
 )
 PARENT_DOC: dict[str, str] = {
-    "mrd": "exec-summary",
+    "mrd": "executive-summary",
     "brd": "mrd",
     "prd": "brd",
 }
+
+
+def canonicalize_doc_stem(stem: str | None) -> str | None:
+    """Map legacy stems to canonical DOC_STEMS; pass through known stems."""
+    if stem is None:
+        return None
+    if stem in LEGACY_DOC_STEMS:
+        return LEGACY_DOC_STEMS[stem]
+    if stem in DOC_STEMS:
+        return stem
+    return stem
+
+
 TRACK_DIR_RE = re.compile(r"^\d+\.\d+$")
 FRONTMATTER_RE = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
 INJECTION_FENCE_RE = re.compile(r"```yaml\n(injection:.*?)\n```", re.DOTALL)
@@ -184,10 +236,14 @@ def matches_created_ts(value: str) -> bool:
 CREATED_TS_RE = _CREATED_DATE_RE
 STUB_FRONTMATTER_KEYS = frozenset({"version", "traces_from"})
 SETUP_SECTIONS: tuple[str, ...] = (
-    "plans directory",
+    "docs root",
+    "discovery directory",
+    "plan directory",
     "root SoT load line",
     AGENT_PLAN_NAME,
-    "status.yaml",
+    RRR_STATUS_NAME,
+    "discovery status.yaml",
+    "plan status.yaml",
     "cascade format",
     "cascade versioning",
 )

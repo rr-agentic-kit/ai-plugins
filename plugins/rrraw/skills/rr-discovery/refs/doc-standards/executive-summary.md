@@ -1,14 +1,14 @@
-# exec-summary
+# executive-summary
 
 **Cascade level:** 1 (foundation)  
 **Inherits from:** user input, conversation context  
 **Narrows to:** strategic vision, problem framing, and session posture for MRD  
-**Priority method:** MoSCoW on **Functional deliverables only** — [item-schema.md](item-schema.md)  
-**Blind-spots (stage-exit):** Scan only the exec-summary row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
+**Priority method:** MoSCoW on **Functional deliverables only** — [item-schema.md](../../../../refs/planning/doc-standards/item-schema.md)  
+**Blind-spots (stage-exit):** Scan only the executive-summary row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 
-Anchor all downstream docs to a clear vision, problem statement, and rationale. Every later requirement must trace back here.
+Anchor all downstream docs to a clear vision, problem statement, and rationale. L1 is a proceed/hold/pivot/kill decision memo — not a product-shape doc (that is Plan/PRD).
 
 ## Required sections
 
@@ -16,24 +16,29 @@ Anchor all downstream docs to a clear vision, problem statement, and rationale. 
 |---------|---------|-------|
 | **Posture** | Existence × commitment for this session (`greenfield`/`existing` × `unsigned`/`signed_v1`) plus `domain_context` | Prose (unnumbered) |
 | **Vision** | One-paragraph aspirational end state (what success looks like) | Prose (unnumbered) |
-| **Problem** | Specific pain being solved; who feels it; cost of inaction | Prose (unnumbered) |
-| **What must be true** | Smallest set of premises the cascade stands on; claim-class + evidence bar per premise | Prose (unnumbered) |
+| **Problem** | Specific pain; who feels it; **severity × frequency**; cost of inaction | Prose (unnumbered) |
+| **What must be true** | Smallest set of premises; claim-class + evidence bar per premise | Prose (unnumbered) |
 | **Viability verdict** | Panel verdict `proceed` … `kill` with dissent named; binding | Prose (unnumbered) |
 | **Why now** | Timing drivers — market shift, regulation, tech enabler, competitive pressure | Ranked leaves (no MoSCoW) |
-| **Success metrics** | 2–5 measurable **outcomes** tied to vision (not features, not feature SLAs) | Ranked leaves (no MoSCoW) |
+| **Success metrics** | **North Star** + ≤3 input metrics; optional **OMTM** this quarter — metric teeth required | Ranked leaves (no MoSCoW) |
+| **Cost position** | Relative cost: low-cost vs unique-value (or named hybrid); rough economics or `hold` | Prose (unnumbered) |
+| **Defensibility** | Can't / Won't — why competitors can't or won't copy — or explicit `hold` | Prose (unnumbered) |
 | **Functional deliverables** | Product-success capabilities the initiative must ship — Must-only in practice | Ranked leaves; MoSCoW (Must in practice) |
 | **Constraints** | Hard boundaries — budget, timeline, regulatory, quality, technical; NFR outcomes as tagged constraints | Ranked leaves (no MoSCoW); optional `_tag_:` |
-| **Non-goals** | Explicit exclusions to prevent scope creep | Ranked leaves (no MoSCoW) |
+| **Non-goals** | Explicit exclusions / trade-offs to prevent scope creep | Ranked leaves (no MoSCoW) |
+| **Kill criteria** *(optional but Gate 7 asks)* | What evidence by when flips verdict to kill | Prose or ranked leaves |
 | **Horizons** *(optional)* | Thematic future buckets (≤5); not an exhaustive feature list | Ranked leaves (no MoSCoW); may point at `later.md` |
 
-Prefix `ES`. Mint `ES-n` only for ranked sections. Posture, vision, problem, what-must-be-true, and viability verdict stay prose. Ranked leaves carry `Rationale`. Posture classification: [project-posture.md](../project-posture.md). Premise test and verdict: [expert-panel.md](../expert-panel.md).
+Prefix `ES`. Mint `ES-n` only for ranked sections. Posture, vision, problem, what-must-be-true, viability verdict, cost position, and defensibility stay prose. Ranked leaves carry `Rationale`. Posture classification: [project-posture.md](../project-posture.md). Premise test and verdict: [expert-panel.md](../expert-panel.md). Strategy lenses: [strategy-lenses.md](../strategy-lenses.md).
 
 ### Section scope (agent-facing)
 
 | Section | In scope | Does not belong |
 |---------|----------|-----------------|
 | **Why now** | Timing drivers, window-of-opportunity, competitive/regulatory pressure | Feature lists, implementation choices, channel tactics |
-| **Success metrics** | Outcome/result measures (adoption %, revenue, retention, task completion) | Feature SLAs (p95 latency → Constraint `quality`); decorative metrics without teeth |
+| **Success metrics** | One North Star + ≤3 inputs (+ optional OMTM); measurable outcomes | Feature SLAs; decorative metrics; many peer "north stars" |
+| **Cost position** | Relative cost strategy named; payback/CAC-LTV sketch or `hold` | Fake precision economics; architecture TCO |
+| **Defensibility** | Can't/Won't reasons or `hold` | Feature laundry lists; marketing slogans without mechanism |
 | **Functional deliverables** | Named product capabilities required for success (e.g. anonymous browse, multi-language support) | Policy mechanisms (→ Constraints); channel tactics (→ PRD); implementation detail (→ `tech.md`) |
 | **Constraints** | Hard limits stated as outcomes (`Must comply with GDPR`, `≤$50k budget`, `p95 < 200ms`) with optional `_tag_:` (`capacity`, `regulatory`, `quality`, `technical`, …) | Feature descriptions; lawful-path channel picks; consent UI flows |
 | **Non-goals** | Explicit exclusions for this initiative | Deferred work (→ `later.md` or Horizons) |
@@ -88,7 +93,9 @@ Per-doc bars only. Gate 1, the script, shared success-criteria, Gate 2 / Gate 7,
 - [ ] Posture matches confirmed `session_state.project_posture` including `domain_context`
 - [ ] Vision is outcome-focused (fail: a feature list)
 - [ ] What-must-be-true names premises with claim class and evidence bar (fail: a bare slogan)
-- [ ] Success metrics are measurable outcomes with teeth (fail: "fast", "good UX", feature SLAs)
+- [ ] Success metrics name North Star + ≤3 inputs with teeth (fail: decorative / feature SLAs)
+- [ ] Cost position and defensibility present or explicit `hold`
 - [ ] Functional deliverables are Must-only capabilities (fail: policy mechanisms or channel tactics)
 - [ ] At least one constraint **and** one non-goal stated
 - [ ] Personal-data Musts have paired consent constraints
+- [ ] Problem states severity × frequency and cost of inaction (fail: "nice idea")

@@ -35,7 +35,7 @@ Containers stay unmarked (no MoSCoW / Kano). Index tables show the level’s nat
 - Continuous among **siblings** (`1, 2, 3` — no gaps at compose). Children of item 3 are `3.1`, `3.2`, … not new top-level numbers.
 - Unique across the cascade because of the prefix (`PRD-3` ≠ `BRD-3`).
 - Max depth **2** inside a document (`n.m`). Deeper means the parent is not a real grouping — split the parent into siblings.
-- **Freeze / remap** (when IDs freeze, append-only inserts, re-compose rewrite): [cascade.md](../cascade.md). This ref owns ID shape, sibling density, and max depth.
+- **Freeze / remap** (when IDs freeze, append-only inserts, re-compose rewrite): [cascade.md](../../../skills/rr-planner/refs/cascade.md). This ref owns ID shape, sibling density, and max depth.
 
 Rejected: one global `1…N` across all four docs. Rejected: semantic names (`exec-vision`) — not continuous, do not nest.
 
@@ -77,7 +77,7 @@ Declared per level. Native priority method is a property of the **document type*
 
 | Level | Prefix | Method | Rankable leaves | Prose (unnumbered) |
 |-------|--------|--------|-----------------|--------------------|
-| exec-summary | `ES` | MoSCoW on functional deliverables only | Why now, success metrics, functional deliverables, constraints (optional `tag`), non-goals, horizons (optional) | Posture, vision, problem, what-must-be-true, viability verdict |
+| executive-summary | `ES` | MoSCoW on functional deliverables only | Why now, success metrics, functional deliverables, constraints (optional `tag`), non-goals, horizons (optional) | Posture, vision, problem, what-must-be-true, viability verdict |
 | mrd | `MRD` | Kano | Customer needs | Market overview, TAM/SAM/SOM (or internal cost-of-inaction), target segments (`**Primary:**` / `**Secondary:**`), competitors, trends, risks |
 | brd | `BRD` | MoSCoW | Objectives, rules, dependencies | Stakeholders (buyer / user / approver in the section), business risks (impact × likelihood bullets) |
 | prd | `PRD` | RICE / RIC / goal-type | Goals (`primary`/`support`), stories (RIC), features (RICE), out-of-scope (no score) | Shape, product overview, user personas (named in story bodies) |
@@ -98,9 +98,9 @@ Do not write keys that will never apply. Do not write `—` to mean “this fiel
 
 Do not apply one ranking system to the whole cascade. No 1–5. No P0/P1/P2.
 
-- **exec-summary — MoSCoW on functional deliverables only.** Posture, vision, problem, what-must-be-true, and viability verdict are **prose** (no `ES-*` id). Why now, success metrics, constraints, non-goals, and horizons are ranked leaves **without** MoSCoW. Functional deliverables are Must-only in practice (MoSCoW rank). Constraints may carry optional `_tag_:` (`regulatory`, `capacity`, `quality`, `technical`, …).
+- **executive-summary — MoSCoW on functional deliverables only.** Posture, vision, problem, what-must-be-true, and viability verdict are **prose** (no `ES-*` id). Why now, success metrics, constraints, non-goals, and horizons are ranked leaves **without** MoSCoW. Functional deliverables are Must-only in practice (MoSCoW rank). Constraints may carry optional `_tag_:` (`regulatory`, `capacity`, `quality`, `technical`, …).
 - **mrd — Kano on needs** (`basic` / `performance` / `delighter`). Why: market needs are about satisfaction-if-present vs dissatisfaction-if-absent; MoSCoW flattens delighters into Could.
-- **brd — MoSCoW on objectives, rules, and dependencies.** Compliance/contractual rules are Must. Why: business-negotiation language for cutting scope. MoSCoW legend: [project-posture.md](../project-posture.md).
+- **brd — MoSCoW on objectives, rules, and dependencies.** Compliance/contractual rules are Must. Why: business-negotiation language for cutting scope. MoSCoW legend: [project-posture.md](../../../skills/rr-planner/refs/project-posture.md).
 - **prd — RICE/RIC backlog.** Goals: `_goal-type_: primary | support`. Stories: RIC (`reach`, `impact`, `confidence` — no `effort`). Features: full RICE (`reach`, `impact`, `confidence`, `effort` Fibonacci 1,2,3,5,8,13). Out-of-scope: no RICE. Composed score not stored. Optional `_status_:` on leaves (e.g. `delivered`) — manual, not derived. Cross-doc parent: ≥1 ES **or** ≥1 BRD (C2-7). Mechanism-level detail routes to `tech.md` ([output-formats.md](../output-formats.md)).
 
 ## Spec (agreement axis)

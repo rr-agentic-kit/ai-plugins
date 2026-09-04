@@ -1,9 +1,9 @@
 # mrd (Market Requirements Document)
 
 **Cascade level:** 2  
-**Inherits from:** exec-summary (vision, problem, constraints)  
+**Inherits from:** executive-summary (vision, problem, constraints)  
 **Narrows to:** market context relevant to the stated vision  
-**Priority method:** Kano on needs — [item-schema.md](item-schema.md)  
+**Priority method:** Kano on needs — [item-schema.md](../../../../refs/planning/doc-standards/item-schema.md)  
 **Blind-spots (stage-exit):** Scan only the mrd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
@@ -14,12 +14,12 @@ Ground the initiative in market reality — segments, competitors, trends — wi
 
 | Section | Content | Items |
 |---------|---------|-------|
-| **Market overview** | Segment definition aligned to exec-summary problem | Prose (unnumbered) |
-| **TAM / SAM / SOM** | Evidence-backed sizing. `market_type: external`: TAM, SAM, SOM with sources. `market_type: internal`: affected-teams × hours × loaded cost — **no TAM**. Mandatory incumbent **and** do-nothing comparison in either variant | Prose (unnumbered); numbers cite ledger `evidence` ids |
+| **Market overview** | Segment definition aligned to executive-summary problem | Prose (unnumbered) |
+| **TAM / SAM / SOM** | Evidence-backed sizing. External: **both** top-down **and** bottom-up approaches, or explicit `hold` on the missing method — fabricated reconciliation banned. Internal: affected-teams × hours × loaded cost — **no TAM**. Mandatory incumbent **and** do-nothing comparison; switching trigger or `hold` | Prose (unnumbered); numbers cite ledger `evidence` ids |
 | **Target segments** | Primary and secondary segments with sizing estimates or proxies | Prose (unnumbered); `**Primary:**` / `**Secondary:**` in the section |
 | **Competitive landscape** | Key players, positioning, differentiation gaps; incumbent named | Prose (unnumbered) |
 | **Market trends** | 2–4 trends that support "why now" | Prose (unnumbered) |
-| **Customer needs** | Unmet needs mapped to an exec-summary metric | Ranked leaves: `basic` / `performance` / `delighter` |
+| **Customer needs** | Unmet needs mapped to an executive-summary metric | Ranked leaves: `basic` / `performance` / `delighter` |
 | **Market risks** | External threats — regulation, commoditization, disruption | Prose (unnumbered); impact × likelihood in the section |
 
 Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for this layer — do not flatten needs into MoSCoW. Sizing is a required evidence-backed section, not a research-phase deferral (`market_type: internal` skips TAM). Ranked leaves carry `Rationale`. Binding Gate 7 at this level ([expert-panel.md](../expert-panel.md)).
@@ -28,7 +28,7 @@ Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for
 
 1. Inherit vision/problem; ask "who buys vs who uses?"
 2. For competitors: accept user-stated list; probe for indirect alternatives. **Name an incumbent** (or the internal status quo) and a do-nothing option.
-3. Size the market **in this level**, evidence-backed. External: TAM/SAM/SOM with ledger evidence. Internal: teams × hours × loaded cost; skip TAM. Do not invent a number to fill the section — `hold` or `vague` is legal; a fabricated TAM is not.
+3. Size the market **in this level**, evidence-backed. External: top-down **and** bottom-up (or `hold` on the missing method); reconcile only with evidence — never invent a bridge. Internal: teams × hours × loaded cost; skip TAM. Do not invent a number — `hold` or `vague` is legal; fabricated TAM is not.
 4. Map each customer need to a ranked `ES-*` parent (usually a metric).
 5. Classify needs as Kano `basic` / `performance` / `delighter` — do not use Must/Should/Could. Mint rationales for ranked needs.
 6. Flag residual gaps beyond the claim-class budget → `research_deferred[]` with a named evidence bar, or Gate 7 `hold`.
@@ -44,6 +44,7 @@ Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for
 Per-doc bars only. Gate 1, the script, shared success-criteria, Gate 7, and Gate 6 `in_scope` own the rest.
 
 - [ ] Primary target segment defined with boundaries (fail: "SMBs" with no cutoff)
-- [ ] TAM/SAM/SOM (external) or teams×hours×cost (internal) present with evidence ids or an explicit `hold`
-- [ ] At least 2 competitors or alternatives named
-- [ ] Market trends linked to exec-summary "why now" (fail: a trend list with no timing link)
+- [ ] External sizing: top-down **and** bottom-up present, or `hold` on the missing method (fail: single fabricated number)
+- [ ] Internal: teams×hours×cost with evidence or `hold`
+- [ ] At least 2 competitors or alternatives named; incumbent + do-nothing; switching trigger or `hold`
+- [ ] Market trends linked to executive-summary "why now" (fail: a trend list with no timing link)

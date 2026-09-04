@@ -22,13 +22,13 @@ Base envelope passed to every agent (via Task prompt + JSON block).
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `payload` | `NormalizedPayload` | From [input-resolution.md](input-resolution.md) |
+| `payload` | `NormalizedPayload` | From [input-resolution.md](../../skills/rr-planner/refs/input-resolution.md) |
 | `phase` | string | Current agent phase name |
-| `level` | string | Cascade level (`exec-summary`, `mrd`, `brd`, `prd`) or null for research/challenge |
+| `level` | string | Cascade level (`executive-summary`, `mrd`, `brd`, `prd`) or null for research/challenge |
 | `epoch` | integer | 1-based; 1 for single-shot flows |
 | `round` | integer | Clarification iteration counter within a level (informational; no cap) |
 | `prior_outputs` | object | Keyed by phase name; prior structured outputs in chains |
-| `session_state` | object | Accumulated facts, decisions, assumptions, `item_registry`, `frozen_levels`, `project_posture`, `note_sessions` from [cascade.md](cascade.md) |
+| `session_state` | object | Accumulated facts, decisions, assumptions, `item_registry`, `frozen_levels`, `project_posture`, `note_sessions` from [cascade.md](../../skills/rr-planner/refs/cascade.md) |
 
 ### PhaseOutput
 
@@ -110,8 +110,8 @@ Item identity, closed `_key_:` markdown, spec/status: [doc-standards/item-schema
 
 | Field | Notes |
 |-------|-------|
-| `doc_type` | One of: `exec-summary`, `mrd`, `brd`, `prd` |
-| `doc_path` | Path of the file this agent just wrote (`{level}.md`) |
+| `doc_type` | One of: `executive-summary`, `mrd`, `brd`, `prd` |
+| `doc_path` | Path of the draft file this agent just wrote (`{level}.md`). Skill runs humanize before freeze. |
 | `sections_completed` | Required sections with content |
 | `sections_incomplete` | Required sections with gaps |
 | `clarifications_needed` | `ClarificationItem[]` — non-empty blocks `status: ok` |
@@ -121,7 +121,7 @@ Item identity, closed `_key_:` markdown, spec/status: [doc-standards/item-schema
 
 `artifacts[]` on the envelope lists paths this agent wrote (`doc_path`, `items.json`, rewritten child docs).
 
-Execution (posture required, notes ingest, sidecar prune): [project-posture.md](project-posture.md), [note-sessions.md](note-sessions.md). Must≠MVP / MoSCoW legend: [project-posture.md](project-posture.md). `reserved_ids` / ledger read-only: [decision-ledger.md](decision-ledger.md). Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md).
+Execution (posture required, notes ingest, sidecar prune): [project-posture.md](../../skills/rr-planner/refs/project-posture.md), [note-sessions.md](../../skills/rr-planner/refs/note-sessions.md). Must≠MVP / MoSCoW legend: [project-posture.md](../../skills/rr-planner/refs/project-posture.md). `reserved_ids` / ledger read-only: [decision-ledger.md](decision-ledger.md). Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md).
 
 | `status` | When |
 |----------|------|
@@ -202,7 +202,7 @@ Execution (posture required, notes ingest, sidecar prune): [project-posture.md](
 
 | Field | Notes |
 |-------|-------|
-| `findings` | Per [blind-spots.md](blind-spots.md) taxonomy **union** on the one target doc. Judgment only when `payload.static_validation.status` is `passed` or `failed`. Ledger scan: [decision-ledger.md](decision-ledger.md) Challenge. |
+| `findings` | Per [blind-spots.md](../../skills/rr-planner/refs/blind-spots.md) taxonomy **union** on the one target doc. Judgment only when `payload.static_validation.status` is `passed` or `failed`. Ledger scan: [decision-ledger.md](decision-ledger.md) Challenge. |
 | `findings[].doc` | Cascade stem where the weak spot **appears** (symptom). Required. |
 | `findings[].target_doc` | Cascade stem where the fix belongs. Same as `doc` when inline. Required. |
 | `findings[].doc_ref` | Human locator (`prd.md § 3.2`). Keep even when `doc` is set. |
@@ -229,4 +229,4 @@ Input (on `PhaseInput.payload`, not in this `data` object): `static_validation` 
 
 ## NormalizedPayload reference
 
-Shape and field rules: [input-resolution.md](input-resolution.md). Embedded as `PhaseInput.payload`. Includes `route` (`from-0` / `resume` / `continue-discover` / `start-change` / `continue-change` / `continue-next-track` / `ask`) and `--change` selectors `change_section` / `change_target`.
+Shape and field rules: [input-resolution.md](../../skills/rr-planner/refs/input-resolution.md). Embedded as `PhaseInput.payload`. Includes `route` (`from-0` / `resume` / `continue-discover` / `start-change` / `continue-change` / `continue-next-track` / `ask`) and `--change` selectors `change_section` / `change_target`.

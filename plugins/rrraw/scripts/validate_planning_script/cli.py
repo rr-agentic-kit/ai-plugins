@@ -6,12 +6,12 @@ import argparse
 import sys
 from pathlib import Path
 
-from .constants import SCHEMA_PATH
+from .constants import DOCS_ROOT_NAME, SCHEMA_PATH
 from .models import Issue
 from .rewrite import rewrite_planning_dir
 from .setup import find_repo_root, run_setup, sync_agent_injection
 from .validate import validate_dir
-from .workspace import has_cascade_docs, plans_root
+from .workspace import docs_root, has_cascade_docs, phase_root
 
 
 def require_python() -> None:
@@ -45,10 +45,19 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Validate rr-planner markdown item headers, graph, status, "
-            "and items.json drift."
+            "and items.json drift. --setup bootstraps docs/ framework layout."
         )
     )
-    parser.add_argument("planning_dir", type=Path)
+    parser.add_argument(
+        "planning_dir",
+        type=Path,
+        nargs="?",
+        default=None,
+        help=(
+            "Phase directory to validate/rewrite (docs/discovery or docs/plan). "
+            "Optional with --setup (framework uses --docs-root)."
+        ),
+    )
     parser.add_argument(
         "--depth",
         choices=("shallow", "standard", "deep"),
@@ -73,27 +82,53 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--sync-agent-config",
         action="store_true",
-        help="Emit agent.plan.md and append the load line to existing "
+        help="Emit docs/agent.plan.md and append the load line to existing "
         "root agent SoT files.",
     )
     parser.add_argument(
         "--setup",
         action="store_true",
-        help="Bootstrap or repair plans dir, status.yaml, agent.plan.md, "
-        "root SoT load line, and cascade frontmatter.",
+        help="Bootstrap or repair docs/, discovery/, plan/, rrr-status.yaml, "
+        "phase status.yaml files, agent.plan.md, and cascade frontmatter.",
     )
     parser.add_argument(
         "--repo-root",
         type=Path,
         default=None,
         help="Repo root for CLAUDE.md / AGENTS.md sync. Default: git "
-        "toplevel from planning_dir.",
+        "toplevel from planning_dir or cwd.",
+    )
+    parser.add_argument(
+        "--docs-root",
+        type=Path,
+        default=None,
+        help=f"Docs tree root for --setup / --sync-agent-config. "
+        f"Default: {{repo-root}}/{DOCS_ROOT_NAME}.",
     )
     parser.add_argument("--schema", type=Path, default=SCHEMA_PATH)
     args = parser.parse_args(argv)
     if args.setup:
-        repo = args.repo_root or find_repo_root(args.planning_dir)
-        return run_setup(args.planning_dir, repo)
+        start = args.planning_dir or args.docs_root or Path.cwd()
+        repo = args.repo_root or find_repo_root(start)
+        docs = (
+            docs_root(repo, override=args.docs_root)
+            if args.docs_root is not None
+            else docs_root(repo)
+        )
+        # Positional legacy docs/plans path: announce; still framework-setup docs/.
+        if (
+            args.planning_dir is not None
+            and args.planning_dir.name == "plans"
+            and args.docs_root is None
+        ):
+            print(
+                "note\tok\t--setup no longer takes a plans-dir; "
+                f"using {docs} (legacy docs/plans/ is read-fallback only)",
+                flush=True,
+            )
+        return run_setup(docs, repo)
+    if args.planning_dir is None:
+        parser.error("planning_dir is required unless --setup")
     if not args.planning_dir.is_dir():
         print(
             f"ERROR [NO_DIR]: {args.planning_dir} is not a directory", file=sys.stderr
@@ -103,9 +138,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"WARN [SCHEMA_MISSING]: {args.schema} not found", file=sys.stderr)
     if args.sync_agent_config:
         repo = args.repo_root or find_repo_root(args.planning_dir)
-        sync_issues = sync_agent_injection(
-            plans_root(args.planning_dir), repo, force=True
+        docs = (
+            docs_root(repo, override=args.docs_root)
+            if args.docs_root is not None
+            else (
+                phase_root(args.planning_dir).parent
+                if phase_root(args.planning_dir).name in {"discovery", "plan"}
+                else docs_root(repo)
+            )
         )
+        sync_issues = sync_agent_injection(docs, repo, force=True)
         if _print_issues(sync_issues):
             return 1
     if args.rewrite:

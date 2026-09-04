@@ -10,7 +10,7 @@ This file is **validator input** — unlike `{level}.notes.yaml`. `validate_plan
 
 | Concern | Owner |
 |---------|-------|
-| Unclear vs ambiguous input; clarify-before-assume; nuance; goal re-anchor; `decisions[]` / `assumptions[]` in `session-state.json` | [goal-anchor.md](goal-anchor.md) |
+| Unclear vs ambiguous input; clarify-before-assume; nuance; goal re-anchor; `decisions[]` / `assumptions[]` in `session-state.json` | [goal-anchor.md](../../skills/rr-planner/refs/goal-anchor.md) |
 | Evidence records, rationale graph, `flips_when`, burial, reserved ids, re-decision queue | This ref |
 
 Do not put rationale bodies, evidence claims, or `flips_when` in the decision log. Log `type: rationale` / `re_decision` / `revival` / `viability_verdict` as the human-facing pointer (`text` may cite `r-014`); the graph lives here.
@@ -70,7 +70,7 @@ Sequencing: the rationale is minted **during discovery at the moment the decisio
 | When | User (or binding panel) accepts, rejects, postpones, or pivots a ranked leaf |
 | Who writes | Skill. Compose reads `r-*` from `level_facts` and prints the closed key; it does not mint |
 | Required fields | `decision`, `subject`, `seat`, `because`, `depends_on` (may be empty list only if `flips_when` has an `event`), `flips_when` (≥1), `condition_strength`, `status: live` |
-| `seat` | Roster id from [expert-panel.md](expert-panel.md) (e.g. `growth-investor`, `domain-practitioner`) |
+| `seat` | Roster id from [expert-panel.md](../../skills/rr-planner/refs/expert-panel.md) (e.g. `growth-investor`, `domain-practitioner`) |
 | Never | Invent `r-*` at compose time; point a ranked leaf at an id not yet in this file |
 
 `decision` gives the sense of `flips_when`: the same list **invalidates** an `accept` and **revives** a `reject`. One list, both directions.
@@ -108,10 +108,10 @@ Walk `depends_on` **backward** from changed evidence. Enqueue the rationale's `s
 
 ### Triggers (always all four)
 
-1. After every evidence round ([expert-panel.md](expert-panel.md) evidence loop; also research findings that write evidence records).
+1. After every evidence round ([expert-panel.md](../../skills/rr-planner/refs/expert-panel.md) evidence loop; also research findings that write evidence records).
 2. On cascade **level entry**.
 3. On `--resume`.
-4. At **pre-save** ([proactivity.md](proactivity.md)).
+4. At **pre-save** ([proactivity.md](../../skills/rr-planner/refs/proactivity.md)).
 
 Open queue or unresolved binding `hold`/`kill` blocks freeze and pre-save persist of `final_status: ok`.
 

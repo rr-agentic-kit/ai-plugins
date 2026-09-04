@@ -1,9 +1,9 @@
 # prd (Product Requirements Document)
 
 **Cascade level:** 4  
-**Inherits from:** exec-summary + MRD + BRD  
+**Inherits from:** executive-summary + MRD + BRD  
 **Narrows to:** product capabilities, user outcomes, and scored backlog  
-**Priority method:** RICE on features; RIC on stories; `primary`/`support` on goals — [item-schema.md](item-schema.md)  
+**Priority method:** RICE on features; RIC on stories; `primary`/`support` on goals — [item-schema.md](../../../../refs/planning/doc-standards/item-schema.md)  
 **Panel seats:** Head of product + UX + domain practitioner (advisory) — [expert-panel.md](../expert-panel.md)  
 **Blind-spots (stage-exit):** Scan only the prd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
@@ -69,7 +69,7 @@ Circumstantial — some NFRs are product-facing and stay on PRD (stakeholder-vis
 1. Run **PRD-shape reflection** if `prd_shape`/`scope_mode` not yet confirmed; persist to session and Shape section.
 2. For each BRD objective, ask "what product capability delivers this?"
 3. Write user stories as outcomes: "As [persona], I can [outcome] so that [business value]."
-4. Challenge feature requests against exec-summary non-goals and functional deliverables. Under `existing`, shipped behavior is already a constraint — do not restate it as a feature to build.
+4. Challenge feature requests against executive-summary non-goals and functional deliverables. Under `existing`, shipped behavior is already a constraint — do not restate it as a feature to build.
 5. Score features with full RICE; score stories with RIC. In `discovery` mode, incomplete RICE is acceptable on `idea`/`draft` leaves — do not force RICE-complete on every leaf before the backlog shape stabilizes.
 6. WIP story without a parent capability → notes/unattached draft until shape rules attach it.
 7. Run story↔feature alignment check after scoring passes.
@@ -86,7 +86,7 @@ Circumstantial — some NFRs are product-facing and stay on PRD (stakeholder-vis
 Per-doc bars only. Gate 1, the script, shared success-criteria, and Gate 6 `in_scope` own the rest.
 
 - [ ] Shape section records confirmed `prd_shape` + `scope_mode`
-- [ ] Product overview links to exec-summary vision
+- [ ] Product overview links to executive-summary vision
 - [ ] Every BRD objective has at least one product goal
 - [ ] User stories are outcome-oriented (fail: implementation detail)
 - [ ] Features have RICE factors (or explicit `—` placeholder while `idea`/`draft`)

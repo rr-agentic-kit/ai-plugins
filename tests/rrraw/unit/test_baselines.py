@@ -15,7 +15,8 @@ def test_parse_agent_config_from_refs():
     assert "<!-- agent-plan-template -->" not in body
     config = vp.AGENT_CONFIG_PATH.read_text(encoding="utf-8")
     assert "<!-- agent-plan-template -->" not in config
-    assert "status.yaml" in body
+    assert "rrr-status.yaml" in body
     assert "rr-planner" in body
     assert "Do not delete this file" in body
     assert "## Pairing" not in body
+    assert "docs/agent.plan.md" in load_line

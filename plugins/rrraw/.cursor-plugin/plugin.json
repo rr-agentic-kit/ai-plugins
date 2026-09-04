@@ -2,17 +2,20 @@
   "name": "rrraw",
   "displayName": "RRRaw",
   "version": "0.0.4",
-  "description": "Flag-driven test excellence \u2014 assess, write, fix, and migrate tests via phase agents",
+  "description": "Discover (executive-summary\u2192BRD + business-case) + Plan (PRD+) + Test excellence \u2014 flag-driven phase agents",
   "license": "Unlicense",
   "keywords": [
+    "discovery",
+    "planning",
     "testing",
     "agents",
     "quality"
   ],
   "category": "developer-tools",
   "tags": [
+    "discovery",
+    "planning",
     "testing",
-    "agents",
-    "quality"
+    "agents"
   ]
 }

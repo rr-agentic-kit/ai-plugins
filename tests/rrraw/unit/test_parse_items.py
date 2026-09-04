@@ -23,7 +23,7 @@ def test_parse_unranked_em_dash():
 ## ES-1: Competitive window
 _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 """
-    items, _ = vp.parse_markdown(text, "exec-summary.md")
+    items, _ = vp.parse_markdown(text, "executive-summary.md")
     leaf = items[0]
     assert leaf.parent is None
     assert leaf.moscow is None
@@ -57,7 +57,7 @@ def test_unknown_metadata_key():
 ## ES-1: Vision
 _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: — | _priority_: P0
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "UNKNOWN_KEY" in error_codes(issues)
 
 
@@ -66,7 +66,7 @@ def test_missing_required_key():
 ## ES-1: Vision
 _kind_: leaf | _spec_: idea | _moscow_: —
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "MISSING_KEY" in error_codes(issues)
 
 
@@ -75,7 +75,7 @@ def test_malformed_meta_line():
 ## ES-1: Vision
 Parent: none
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "MALFORMED_META" in error_codes(issues)
 
 
@@ -87,7 +87,7 @@ def test_stale_list_meta():
 - **Spec:** idea
 - **MoSCoW:** —
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "STALE_FORMAT" in error_codes(issues)
 
 
@@ -98,7 +98,7 @@ _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 
 Vision without quotes.
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "BODY_NOT_BLOCKQUOTE" in error_codes(issues)
 
 
@@ -123,7 +123,7 @@ def test_parse_missing_metadata_line():
     text = """\
 ## ES-1: Vision
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "MALFORMED_META" in error_codes(issues)
 
 
@@ -136,7 +136,7 @@ def test_parse_list_meta_unknown_key():
 - **MoSCoW:** —
 - **Priority:** P0
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md", migrate=True)
+    _, issues = vp.parse_markdown(text, "executive-summary.md", migrate=True)
     assert "UNKNOWN_KEY" in error_codes(issues)
 
 
@@ -149,5 +149,5 @@ def test_parse_list_meta_duplicate_key():
 - **Spec:** idea
 - **MoSCoW:** —
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md", migrate=True)
+    _, issues = vp.parse_markdown(text, "executive-summary.md", migrate=True)
     assert "DUPLICATE_KEY" in error_codes(issues)

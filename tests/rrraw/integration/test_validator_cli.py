@@ -33,13 +33,14 @@ def test_cli_yaml_format_errors(tmp_path: Path):
 
 
 def test_sync_cli_greenfield(tmp_path: Path):
-    plans = tmp_path / "docs" / "plans"
-    plans.mkdir(parents=True)
+    docs = tmp_path / "docs"
+    discovery = docs / "discovery"
+    discovery.mkdir(parents=True)
     (tmp_path / "CLAUDE.md").write_text("# Project\n", encoding="utf-8")
     assert (
         vp.main(
             [
-                str(plans),
+                str(discovery),
                 "--sync-agent-config",
                 "--repo-root",
                 str(tmp_path),
@@ -47,6 +48,7 @@ def test_sync_cli_greenfield(tmp_path: Path):
         )
         == 0
     )
-    assert (plans / "agent.plan.md").is_file()
+    assert (docs / "agent.plan.md").is_file()
     _, load_line, _ = vp.parse_agent_config()
     assert load_line in (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
+    assert "docs/agent.plan.md" in load_line

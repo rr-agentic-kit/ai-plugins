@@ -6,14 +6,14 @@
 
 **Not:** a domain registry to match against. No new sidecar file — outcome lives in normal item placement/tags plus an optional `type: domain_routing` raw-history entry.
 
-Cross-reference: [blind-spots.md](blind-spots.md) categories may trigger this ref; [exec-summary.md](doc-standards/exec-summary.md) inline triggers during ES discovery.
+Cross-reference: [blind-spots.md](blind-spots.md) categories may trigger this ref; [executive-summary.md](../../rr-discovery/refs/doc-standards/executive-summary.md) inline triggers during ES discovery.
 
 ## Table template
 
 Present **one row per constituent decision**. Columns = cascade levels **actually in play** for this topic (omit unused levels). Content is domain-specific judgment — no universal row schema across domains.
 
 ```markdown
-| Decision | exec-summary | brd | prd | tech.md |
+| Decision | executive-summary | brd | prd | tech.md |
 |----------|--------------|-----|-----|---------|
 | …        | …            | …   | …   | …       |
 ```
@@ -22,7 +22,7 @@ After user approval, place items and tags per the table. Do not persist the tabl
 
 ## Example 1 — GDPR / privacy (T1)
 
-| Decision | exec-summary | brd | prd | tech.md |
+| Decision | executive-summary | brd | prd | tech.md |
 |----------|--------------|-----|-----|---------|
 | **Regime** | Constraint (`regulatory` tag): "Must comply with GDPR" + `domain_context.regulatory_regime` | Business objective if compliance is a measured outcome | — | — |
 | **Consent outcome** | Constraint (`regulatory` tag): "Consent required for taste profile + feedback; see/delete/change" | Business rule: lawful basis, data categories, retention policy, vendor DPA | Product backlog items for consent UX flows | Mechanism: consent capture, storage, audit trail |
@@ -48,7 +48,7 @@ Evidence preference: real enforcement-in-practice/case statistics over literal s
 
 ## Example 3 — Distribution ladder (O3)
 
-| Decision | exec-summary | brd | prd | tech.md |
+| Decision | executive-summary | brd | prd | tech.md |
 |----------|--------------|-----|-----|---------|
 | **Strategy** (when success-critical) | Functional deliverable or constraint: "Distributed via market-compatible channels" (e.g. iOS + Android stores) | Stakeholder/approver rules for channel commitments | — | — |
 | **Path family** (lawful enrichment) | Constraint or functional deliverable: "≥1 lawful path family viable" (manual curation / licensed provider / aggregator API / policy-compliant collection) | Business rules for vendor relationships | Channel pick + integration detail | API integration, scraping policy |

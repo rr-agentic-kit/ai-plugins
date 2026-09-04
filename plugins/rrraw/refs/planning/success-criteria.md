@@ -93,13 +93,13 @@ Vague terms (any level — do not restate per-level Gherkin done-when here):
 - No conflicting facts across levels (per cascade inheritance rules).
 - Decision log in `session-state.json` complete for all user-facing choices (`project_posture` confirmed; `scope_change` / `note_routed` when those paths ran).
 - Verbatim Q&A for those choices is in `raw-history/` (not a substitute for the decision log).
-- No leftover `partial` notes on frozen levels ([note-sessions.md](note-sessions.md)).
+- No leftover `partial` notes on frozen levels ([note-sessions.md](../../skills/rr-planner/refs/note-sessions.md)).
 
 ## Criterion: Decision traceability
 
 Every recorded decision must:
 
-- Have a `goal_ref` pointing to a ranked `ES-*` id (usually a metric) when the exec-summary exists. `project_posture` logged before a metric exists may fill `goal_ref` on the next compose once a metric is minted.
+- Have a `goal_ref` pointing to a ranked `ES-*` id (usually a metric) when the executive-summary exists. `project_posture` logged before a metric exists may fill `goal_ref` on the next compose once a metric is minted.
 - Be `user_confirmed: true` (or explicitly accepted as assumption).
 - Not contradict a later-level fact.
 
@@ -109,10 +109,10 @@ Each composed doc passes its doc-standard **done-when** checklist. Do not restat
 
 | Doc | Checklist owner |
 |-----|-----------------|
-| exec-summary | [doc-standards/exec-summary.md](doc-standards/exec-summary.md) |
-| mrd | [doc-standards/mrd.md](doc-standards/mrd.md) |
-| brd | [doc-standards/brd.md](doc-standards/brd.md) |
-| prd | [doc-standards/prd.md](doc-standards/prd.md) |
+| executive-summary | [doc-standards/executive-summary.md](../../skills/rr-discovery/refs/doc-standards/executive-summary.md) |
+| mrd | [doc-standards/mrd.md](../../skills/rr-discovery/refs/doc-standards/mrd.md) |
+| brd | [doc-standards/brd.md](../../skills/rr-discovery/refs/doc-standards/brd.md) |
+| prd | [doc-standards/prd.md](../../skills/rr-planner/refs/doc-standards/prd.md) |
 
 ## Gate output
 

@@ -1,5 +1,7 @@
 # blind-spots
 
+**Plan scope:** Stage-exit scans the **PRD row**. Discover ES/MRD/BRD challenge uses `rr-discovery` challenge-method + Discover blind-spots. Do not re-run Discover Gate 7 lenses as Plan inventiveness.
+
 **Owner:** Global blind-spot taxonomy, per-level applicability, alternatives analysis, and devil's-advocate patterns.
 
 **Load when:** Stage-exit (skill-inline, **this level's row** only) **and** `--challenge` / `--review` (challenge agent, **union** of all rows).
@@ -50,11 +52,11 @@ One catalog. Category ids are the keys used in the applicability matrix.
 
 ## Applicability matrix
 
-Stage-exit scans **only** `in_scope` + `inherit_check` for the current level. `defer` lenses must not fire at this stage (no premature PRD detail at exec-summary; no "N/A" skip of an in-scope lens). `--challenge` ignores this restriction and uses the union.
+Stage-exit scans **only** `in_scope` + `inherit_check` for the current level. `defer` lenses must not fire at this stage (no premature PRD detail at executive-summary; no "N/A" skip of an in-scope lens). `--challenge` ignores this restriction and uses the union.
 
 | Level | `in_scope` | `inherit_check` | `defer` |
 |-------|------------|-----------------|---------|
-| **exec-summary** | `negative_space`; `temporal` (why now **and** posture); `economic` (cost of inaction); `stakeholder_gaps` (who feels the pain); `assumption_debt` | — | Competitive detail → MRD. System failure modes, NFR, operational → PRD when in-scope-as-product-commitment, else `tech.md` |
+| **executive-summary** | `negative_space`; `temporal` (why now **and** posture); `economic` (cost of inaction); `stakeholder_gaps` (who feels the pain); `assumption_debt` | — | Competitive detail → MRD. System failure modes, NFR, operational → PRD when in-scope-as-product-commitment, else `tech.md` |
 | **mrd** | `competitive`; `economic` (sizing proxies); `stakeholder_gaps` (buyer vs user); `temporal` (trends vs why-now); `assumption_debt` | Exec-summary non-goals still hold | Failure modes, NFR, operational → PRD when in-scope-as-product-commitment, else `tech.md` |
 | **brd** | `stakeholder_gaps` (hidden approvers); `economic` (objectives); `operational` (internal dependencies); `temporal` (approvals); `assumption_debt` | Do not re-litigate MRD landscape | Failure modes, NFR, product Won't → PRD when in-scope-as-product-commitment, else `tech.md` |
 | **prd** | `failure_modes`; `non_functional`; `operational` (monitoring/migration); `negative_space` (product Won't); `temporal` (RICE vs posture legend; Must inflation under `signed_v1`; shipped-as-Must under `existing`); `stakeholder_gaps` (personas vs BRD); `traceability_breaks` (compound stories; facts that belong in another doc; requirement-explosion → `tech.md`); alternatives on major features | Personas/objectives vs BRD; competitive/economic only for **contradiction** with upper levels — no new market debate | Mechanism-level detail (integration points, error-handling specifics, AC overflow) → `tech.md` |
@@ -125,7 +127,7 @@ Apply on `--challenge` across all loaded docs. At stage-exit, apply only when th
 | `doc` | Cascade stem where the weak spot **appears** (symptom doc). Required. |
 | `target_doc` | Cascade stem where the fix belongs. Same as `doc` when inline; differs for dual-stub routing. |
 | `fix_action` | Recommended fix type — see enum below. Human confirms before ledger `demote`/`scope_change`. |
-| `fix_level` | Cascade level that should absorb the fix (`exec-summary` … `prd`). |
+| `fix_level` | Cascade level that should absorb the fix (`executive-summary` … `prd`). |
 | `target_artifact` | `doc` (inline edit) \| `notes` (`{level}.notes.yaml`) \| `later` (`later.md`). Park actions set this. |
 | `paired_finding_id` | When fix ≠ symptom doc, id of the mirrored stub the orchestrator writes to the partner report. |
 | `doc_ref` | Human locator; uses the `.md` filename. |
@@ -134,13 +136,13 @@ Apply on `--challenge` across all loaded docs. At stage-exit, apply only when th
 
 `reword` · `refile` · `demote` · `add_constraint` · `park_notes` · `park_later` · `flag_risk` · `scope_change`
 
-`demote` and `scope_change` are **recommendations only** — the skill never applies them without user confirmation and a ledger `r-*` ([decision-ledger.md](decision-ledger.md)).
+`demote` and `scope_change` are **recommendations only** — the skill never applies them without user confirmation and a ledger `r-*` ([decision-ledger.md](../../../refs/planning/decision-ledger.md)).
 
 ### Per-lens × per-level allowed `fix_action`
 
 All six devil's-advocate lenses stay active at every level. Constrain **output**, not the question. Values listed are **allowed**; anything not listed is forbidden for that lens at that level.
 
-| Lens | exec-summary | mrd | brd | prd |
+| Lens | executive-summary | mrd | brd | prd |
 |------|--------------|-----|-----|-----|
 | **Inversion** | `flag_risk`, `reword`, `refile` | + `add_constraint` | + `park_notes` | + `park_later` |
 | **Stakeholder** | `flag_risk`, `reword`, `refile`, `add_constraint` | same | + `park_notes` | + `park_later` |
@@ -170,7 +172,7 @@ Four-tier, never binary. None auto-block. May trigger [domain-routing.md](domain
   "legal_risk_tier": "yellow",
   "litigation_cost_benefit": "Winning plausible but legal spend exceeds revenue for 3 years",
   "fix_action": "flag_risk",
-  "fix_level": "exec-summary"
+  "fix_level": "executive-summary"
 }
 ```
 
@@ -246,7 +248,7 @@ When mechanism-level overflow exceeds PRD's product-facing scope, set `target_ar
 
 ## Static vs judgment
 
-[success-criteria.md](success-criteria.md). Judgment only: compound leaves, MoSCoW inflation vs the posture legend, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
+[success-criteria.md](../../../refs/planning/success-criteria.md). Judgment only: compound leaves, MoSCoW inflation vs the posture legend, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
 
 ## Challenge output expectations
 

@@ -22,7 +22,7 @@ Function-style executor for post-composition market evaluation. Non-interactive 
 - `status: failed` — no docs found in `output_dir` or research scope error.
 - `status: partial` — unresolved `clarifications_needed[]`.
 - `status: ok` — no new material findings this invocation; no blocking clarifications.
-- Schema: `skills/rr-planner/refs/contracts.md` § research. Iteration budget: `skills/rr-planner/refs/research-method.md`.
+- Schema: `refs/planning/contracts.md` § research. Iteration budget: `skills/rr-planner/refs/research-method.md`.
 
 ## Inputs
 
@@ -31,10 +31,10 @@ Function-style executor for post-composition market evaluation. Non-interactive 
 Required context:
 
 - `payload.output_dir`
-- Composed docs in `output_dir` (exec-summary through prd `.md` as available; yaml cascade files are stale input already rewritten at resolve)
+- Composed docs in `output_dir` (executive-summary through prd `.md` as available; yaml cascade files are stale input already rewritten at resolve)
 - `session_state.assumptions` (prioritize unvalidated)
 - Load `skills/rr-planner/refs/research-method.md` for methodology
-- Load `skills/rr-planner/refs/contracts.md` § research for output schema
+- Load `refs/planning/contracts.md` § research for output schema
 
 ## Execution
 

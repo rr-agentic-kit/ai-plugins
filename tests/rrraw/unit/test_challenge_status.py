@@ -69,7 +69,7 @@ def test_stamp_clean_and_dirty_from_doc_stem() -> None:
         "status": "clean",
         "scanned_digest": "sha256:mrd",
     }
-    assert "exec-summary" not in status["challenge"]
+    assert "executive-summary" not in status["challenge"]
 
 
 def test_stamp_zero_findings_all_reviewed_clean() -> None:
@@ -100,11 +100,11 @@ def test_invalidate_compose_dirties_clean_and_accepted() -> None:
     vp.invalidate_challenge_on_compose(status, "prd")
     vp.invalidate_challenge_on_compose(status, "brd")
     vp.invalidate_challenge_on_compose(status, "mrd")
-    vp.invalidate_challenge_on_compose(status, "exec-summary")
+    vp.invalidate_challenge_on_compose(status, "executive-summary")
     assert status["challenge"]["prd"]["status"] == "dirty"
     assert status["challenge"]["brd"]["status"] == "dirty"
     assert status["challenge"]["mrd"]["status"] == "dirty"
-    assert "exec-summary" not in status["challenge"]
+    assert "executive-summary" not in status["challenge"]
 
 
 def test_dirty_accepted_re_dirties_on_digest_change() -> None:

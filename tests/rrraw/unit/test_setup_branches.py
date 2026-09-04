@@ -44,7 +44,7 @@ def test_setup_plans_directory_when_path_is_file(tmp_path: Path) -> None:
 
 
 def test_setup_plans_directory_exists(tmp_path: Path) -> None:
-    plans = tmp_path / "docs" / "plans"
+    plans = tmp_path / "docs" / "discovery"
     plans.mkdir(parents=True)
     status, message = setup_mod.setup_plans_directory(plans, tmp_path)
     assert status == "ok"
@@ -88,32 +88,32 @@ def test_setup_cascade_format_not_directory(tmp_path: Path) -> None:
 def test_setup_cascade_versioning_yaml_read_error(tmp_path: Path) -> None:
     plans = tmp_path / "plans"
     plans.mkdir()
-    (plans / "exec-summary.md").write_text(
+    (plans / "executive-summary.md").write_text(
         "---\nversion: [unclosed\n---\n# Body\n", encoding="utf-8"
     )
     status, message = setup_mod.setup_cascade_versioning(plans)
     assert status == "failed"
-    assert "exec-summary.md" in message
+    assert "executive-summary.md" in message
 
 
 def test_sync_agent_injection_parse_error(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    plans = tmp_path / "plans"
-    plans.mkdir()
-    (plans / "status.yaml").write_text("track: 0.1\n", encoding="utf-8")
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "rrr-status.yaml").write_text("track: 0.1\n", encoding="utf-8")
 
     def _broken() -> tuple[int, str, str]:
         raise ValueError("broken config")
 
     monkeypatch.setattr(setup_mod, "parse_agent_config", _broken)
-    issues = setup_mod.sync_agent_injection(plans, tmp_path, force=True)
+    issues = setup_mod.sync_agent_injection(docs, tmp_path, force=True)
     assert len(issues) == 1
     assert issues[0].code == "HAND_BUMP"
 
 
-def test_run_setup_plans_outside_repo(tmp_path: Path, capsys: object) -> None:
-    outside = tmp_path / "outside" / "plans"
+def test_run_setup_docs_outside_repo(tmp_path: Path, capsys: object) -> None:
+    outside = tmp_path / "outside" / "docs"
     outside.mkdir(parents=True)
     repo = tmp_path / "repo"
     repo.mkdir()
