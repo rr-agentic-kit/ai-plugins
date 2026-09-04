@@ -24,9 +24,9 @@ Same as Skill, plus audit `skill-ref.*` / `ref-file.*` rows when editing the pac
 
 | Marker / section | Rubric id(s) |
 |------------------|--------------|
-| **Purpose** (one sentence) | `ref-file.purpose.standalone` |
-| Body constraints | `ref-file.standalone.value`, `ref-file.no-base-duplication` |
-| **Load** (when parent loads this) | `ref-file.load.path` |
+| Title + body constraints | `ref-file.value`, `ref-file.no-base-duplication` |
+| Optional owned-by / load-via prose | (authoring aid only — not a static section check) |
+| No sole-path peer dependency | `ref-file.no-ref-chain` |
 
 ## Command
 

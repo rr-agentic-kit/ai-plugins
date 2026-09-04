@@ -22,7 +22,7 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | `skill.description.invoke-fit` | major | `description` shape matches invoke mode (trigger keywords vs outcome-first); no ambient action verbs on self-invoke |
 | `skill.description.recommended-length` | major | `description` ≤160 characters one sentence, or user explicitly accepted over-budget in this session |
 | `skill.anti-triggers` | major | **When not to use** section exists with ≥1 bullet, or one line cites why N/A applies to this skill |
-| `skill.progressive-disclosure` | major | Body ≤~200 lines OR **Progressive disclosure** / refs name which `refs/` files load for which subtasks; refs are **one hop** from SKILL (no ref→ref chains) |
+| `skill.progressive-disclosure` | major | Body ≤~200 lines OR SKILL has **Progressive disclosure** *or* **Shared refs** *or* **Ref index** naming which ref for which step/action; one hop from that table (critical routing verdict lives on `skill-ref.protocol.load` for Skill+Ref packs — do not dual-count narrative) |
 | `skill.consistency` | major | No contradictory MUST/MUST NOT between **Purpose**, **When to use**, and **Procedure** (cite both sides if FAIL) |
 | `skill.refs.no-body-echo` | major | Skill body does not restate constraints from refs it loads via Action **Run:** or progressive disclosure (cite both sides if FAIL) |
 | `skill.refs.unique-contribution` | major | Each ref named in progressive disclosure or Action **Load** adds at least one constraint not present in the skill body or other co-loaded refs for the same action |

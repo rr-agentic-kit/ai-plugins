@@ -54,16 +54,16 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 
 **Skill+Ref additional:**
 
-- **Ref protocol** — Progressive disclosure names which ref for which subtask; fallback when no ref matches
+- **Ref protocol** — Progressive disclosure, Shared refs, or Ref index names which ref for which step/action; fallback when no ref matches
 - **Layer separation** — Invariant procedure in SKILL; variant/detail in refs only (`rubrics/skill-ref.rubric.md`)
-- **Ref standalone** — Each ref readable alone with **Purpose** + **Load** back to parent
+- **Unique refs** — Each ref adds constraints not duplicated across the pack
 
 ### Ref file
 
-- **Standalone purpose** — One falsifiable sentence without opening parent SKILL
+- **Unique value** — Body adds constraints not already in parent SKILL
 - **No base duplication** — Does not restate parent Procedure or Purpose
-- **Load path** — States parent skill and which step Read this file
-- **No ref chain** — Does not link to other refs for required context
+- **No sole-path ref chain** — Does not require another ref as the only way to get a constraint unless that peer is co-named by parent SKILL / action Ref index
+- **Layer boundary** — No invariant procedure / classify / orchestration that belongs in parent SKILL
 
 ### Command
 

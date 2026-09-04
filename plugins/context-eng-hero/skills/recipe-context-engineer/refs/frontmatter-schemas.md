@@ -53,13 +53,13 @@ No universal YAML schema; document:
 
 ## Ref file (`skills/<name>/refs/**/*.md`)
 
-YAML frontmatter and `description` are **not** required (optional if present). Required shape is Purpose / Load / Content per `templates/ref-file.template.md`.
+Skill-private docs — **not** entry points. YAML frontmatter and `description` are **not** required (optional if present). No required `## Purpose` / `## Load` / `## Content` headings; body holds constraints loaded via parent SKILL routing.
 
 | Field / rule | Requirement |
 |--------------|-------------|
 | Frontmatter | Optional; if present, must be valid YAML between `---` |
 | `description` | Not required |
-| Body | `## Purpose`, `## Load`, `## Content` (see template) |
+| Body | Title + unique constraints; optional one-line owned-by / load-via prose (see `templates/ref-file.template.md`) |
 | Path | `skills/<name>/refs/` or `skills/<name>/references/` (any depth) |
 
 ## All types

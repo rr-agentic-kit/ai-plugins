@@ -1,13 +1,5 @@
 # Ref without frontmatter
 
-## Purpose
+Skill-private constraints for the parent skill. No YAML; no required Purpose/Load/Content headings.
 
-Standalone constraints for the parent skill when this file is Read alone.
-
-## Load
-
-Parent skill Action step "Load refs"; path `skills/my-skill/SKILL.md`.
-
-## Content
-
-No parent duplication; no ref-to-ref links.
+Body adds unique constraints not already in parent SKILL.

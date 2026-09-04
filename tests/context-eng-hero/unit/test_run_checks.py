@@ -119,13 +119,15 @@ def test_ref_file_optional_frontmatter_passes(mini_plugin):
     assert delim["result"] == "PASS"
     assert "optional" in delim["evidence"]
     assert not any(r["id"] == "static.description.present" for r in results)
+    assert not any(r["id"] == "static.sections.required" for r in results)
 
 
-def test_nested_ref_file_sections_required(mini_plugin):
+def test_nested_ref_file_no_sections_required(mini_plugin):
     root = mini_plugin("ref_file_no_fm")
     rel = "skills/my-skill/refs/doc-standards/es.md"
     assert m.detect_type(Path(rel)) == "ref-file"
     results = m.run_checks(root, rel)
-    sections = result_by_id(results, "static.sections.required")
-    assert sections["result"] == "PASS"
-    assert "all required" in sections["evidence"]
+    assert all_pass(results)
+    assert not any(r["id"] == "static.sections.required" for r in results)
+    ids = [r["id"] for r in results]
+    assert len(ids) == len(set(ids)), "duplicate check ids"

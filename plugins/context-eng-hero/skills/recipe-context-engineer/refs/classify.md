@@ -8,7 +8,7 @@ Pick the **narrowest** type. Load at orchestration step 2 and action classify st
 |------|------|
 | **Skill** | Reusable procedure or policy; single SKILL.md, no sibling `refs/` pack |
 | **Skill+Ref** | Base SKILL.md + `refs/` (or `references/`) loaded per progressive disclosure—variant or deep-dive refs |
-| **Ref file** | Standalone `refs/*.md` (or `references/*.md`) loaded by a parent skill—must stand alone |
+| **Ref file** | Skill-private `refs/*.md` (or `references/*.md`) — not an entry point; loaded because parent SKILL / action Ref index names it |
 | **Command** | Named slash entry with fixed input/output contract |
 | **Agent** | Role with tools, boundaries, and stop conditions |
 | **Rule** | Always-on or glob-scoped constraint |
