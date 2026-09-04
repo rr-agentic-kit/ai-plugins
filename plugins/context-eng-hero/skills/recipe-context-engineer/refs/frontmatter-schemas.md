@@ -51,6 +51,17 @@ No universal YAML schema; document:
 - **Delegation** table (which artifact handles which step)
 - **Per-step** output contracts
 
+## Ref file (`skills/<name>/refs/**/*.md`)
+
+YAML frontmatter and `description` are **not** required (optional if present). Required shape is Purpose / Load / Content per `templates/ref-file.template.md`.
+
+| Field / rule | Requirement |
+|--------------|-------------|
+| Frontmatter | Optional; if present, must be valid YAML between `---` |
+| `description` | Not required |
+| Body | `## Purpose`, `## Load`, `## Content` (see template) |
+| Path | `skills/<name>/refs/` or `skills/<name>/references/` (any depth) |
+
 ## All types
 
 - Relative paths only; no `..`

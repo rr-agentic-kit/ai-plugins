@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import audit_static as m
 import pytest
 from conftest import all_pass, result_by_id
@@ -24,6 +26,12 @@ from conftest import all_pass, result_by_id
         ("command_missing_output", "commands/my-cmd.md", False),
         ("workflow_valid", "docs/my-workflow.md", True),
         ("workflow_no_fm", "docs/plain-workflow.md", True),
+        ("ref_file_no_fm", "skills/my-skill/refs/foo.md", True),
+        (
+            "ref_file_no_fm",
+            "skills/my-skill/refs/doc-standards/es.md",
+            True,
+        ),
         ("agent_valid", "agents/my-agent.md", True),
         ("rule_valid", "rules/my-rule.mdc", True),
     ],
@@ -101,3 +109,23 @@ def test_workflow_optional_frontmatter_passes(mini_plugin):
     delim = result_by_id(results, "static.frontmatter.delimiters")
     assert delim["result"] == "PASS"
     assert "optional" in delim["evidence"]
+
+
+def test_ref_file_optional_frontmatter_passes(mini_plugin):
+    root = mini_plugin("ref_file_no_fm")
+    results = m.run_checks(root, "skills/my-skill/refs/foo.md")
+    assert all_pass(results)
+    delim = result_by_id(results, "static.frontmatter.delimiters")
+    assert delim["result"] == "PASS"
+    assert "optional" in delim["evidence"]
+    assert not any(r["id"] == "static.description.present" for r in results)
+
+
+def test_nested_ref_file_sections_required(mini_plugin):
+    root = mini_plugin("ref_file_no_fm")
+    rel = "skills/my-skill/refs/doc-standards/es.md"
+    assert m.detect_type(Path(rel)) == "ref-file"
+    results = m.run_checks(root, rel)
+    sections = result_by_id(results, "static.sections.required")
+    assert sections["result"] == "PASS"
+    assert "all required" in sections["evidence"]

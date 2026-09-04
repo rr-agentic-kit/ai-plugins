@@ -36,3 +36,11 @@ def test_workflow_by_stem():
 
 def test_default_workflow():
     assert m.detect_type(Path("docs/notes.md")) == "workflow"
+
+
+def test_ref_file_shallow():
+    assert m.detect_type(Path("skills/x/refs/foo.md")) == "ref-file"
+
+
+def test_ref_file_nested_doc_standards():
+    assert m.detect_type(Path("skills/x/refs/doc-standards/es.md")) == "ref-file"
