@@ -23,6 +23,7 @@ from .constants import (
     FRONTMATTER_RE,
     LEGACY_DOC_STEMS,
     LEGACY_PLANS_DIR,
+    MATURITY_VALUES,
     PARENT_DOC,
     PHASE_DIRS,
     PLAN_DIR,
@@ -241,6 +242,7 @@ def _frontmatter_for_doc(stem: str, status: dict[str, Any] | None) -> dict[str, 
     track = "0.1"
     rev: Any = "?"
     pins: dict[str, Any] = {}
+    maturity: str | None = None
     if status is not None:
         raw_track = status.get("track")
         if raw_track is not None and str(raw_track).strip():
@@ -253,12 +255,18 @@ def _frontmatter_for_doc(stem: str, status: dict[str, Any] | None) -> dict[str, 
         if is_frozen_rev(status_rev):
             rev = status_rev
         pins = _frontmatter_pins(stem, levels)
-    return {
+        raw_maturity = row.get("maturity")
+        if isinstance(raw_maturity, str) and raw_maturity in MATURITY_VALUES:
+            maturity = raw_maturity
+    result: dict[str, Any] = {
         "doc_type": stem,
         "track": track,
         "doc_rev": rev,
         "pins": pins,
     }
+    if maturity is not None:
+        result["maturity"] = maturity
+    return result
 
 
 def dump_frontmatter(fm: dict[str, Any]) -> str:
@@ -272,6 +280,9 @@ def dump_frontmatter(fm: dict[str, Any]) -> str:
         lines.append(f"doc_rev: {rev}")
     else:
         lines.append('doc_rev: "?"')
+    maturity = fm.get("maturity")
+    if isinstance(maturity, str) and maturity in MATURITY_VALUES:
+        lines.append(f"maturity: {maturity}")
     pins = fm.get("pins") if isinstance(fm.get("pins"), dict) else {}
     if not pins:
         lines.append("pins: {}")
@@ -297,6 +308,13 @@ def ensure_doc_frontmatter(
     missing_required = any(key not in old_fm for key in FRONTMATTER_KEYS)
     built = _frontmatter_for_doc(stem, status)
     new_fm = {**built, "created": _preserve_created(old_fm.get("created"))}
+    old_maturity = old_fm.get("maturity")
+    if (
+        "maturity" not in new_fm
+        and isinstance(old_maturity, str)
+        and old_maturity in MATURITY_VALUES
+    ):
+        new_fm["maturity"] = old_maturity
     new_text = dump_frontmatter(new_fm) + body
     new_text = _normalize_md(new_text)
     if new_text == _normalize_md(text):
@@ -700,6 +718,52 @@ def _check_frontmatter_rev(
     return []
 
 
+def _check_maturity(
+    doc: str,
+    levels: dict[str, Any],
+    frontmatter: dict[str, dict[str, Any]],
+    rev: Any,
+) -> list[Issue]:
+    """Validate optional doc maturity; refuse freeze while code-extraction."""
+    issues: list[Issue] = []
+    raw = levels.get(doc)
+    row = raw if isinstance(raw, dict) else {}
+    status_mat = row.get("maturity")
+    fm_mat = frontmatter.get(doc, {}).get("maturity")
+    for label, value in (("status", status_mat), ("frontmatter", fm_mat)):
+        if value is None:
+            continue
+        if not isinstance(value, str) or value not in MATURITY_VALUES:
+            issues.append(
+                Issue.error(
+                    "INVALID_MATURITY",
+                    f"{doc} {label} maturity {value!r} not in "
+                    f"{sorted(MATURITY_VALUES)}",
+                    doc,
+                )
+            )
+    effective = fm_mat if fm_mat is not None else status_mat
+    if effective == "code-extraction" and is_frozen_rev(rev):
+        issues.append(
+            Issue.error(
+                "CODE_EXTRACTION_FROZEN",
+                f"{doc} maturity is code-extraction — freeze/rev mint blocked",
+                doc,
+            )
+        )
+    fm_rev = frontmatter.get(doc, {}).get("doc_rev")
+    if effective == "code-extraction" and is_frozen_rev(fm_rev):
+        issues.append(
+            Issue.error(
+                "CODE_EXTRACTION_FROZEN",
+                f"{doc} frontmatter doc_rev frozen while maturity is "
+                "code-extraction",
+                doc,
+            )
+        )
+    return issues
+
+
 def _load_parent_items(planning_dir: Path, parent: str) -> list[Item]:
     """Items for parent digest — local dir first, else discovery sibling items.json."""
     local_md = planning_dir / f"{parent}.md"
@@ -855,6 +919,7 @@ def _check_doc_baseline(
     rev = row.get("rev")
     issues.extend(_check_frozen_rev_state(doc, rev, frozen_levels))
     issues.extend(_check_frontmatter_rev(doc, frontmatter, rev))
+    issues.extend(_check_maturity(doc, levels, frontmatter, rev))
     issues.extend(_check_parent_pin(doc, rev, row, levels, items, planning_dir))
     return issues
 

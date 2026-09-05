@@ -105,6 +105,35 @@ def test_ensure_doc_frontmatter_ok_when_unchanged() -> None:
     assert new_text == text
 
 
+def test_maturity_preserved_and_freeze_blocked() -> None:
+    status = ws.default_unfrozen_status(1, stems=("executive-summary",))
+    status["levels"]["executive-summary"]["maturity"] = "code-extraction"
+    text, outcome = ws.ensure_doc_frontmatter("# Body\n", "executive-summary", status)
+    assert "maturity: code-extraction" in text
+    assert outcome in {"created", "fixed", "ok"}
+    issues = ws._check_maturity(
+        "executive-summary",
+        status["levels"],
+        {"executive-summary": {"maturity": "code-extraction", "doc_rev": "?"}},
+        "?",
+    )
+    assert issues == []
+    frozen = ws._check_maturity(
+        "executive-summary",
+        {"executive-summary": {"maturity": "code-extraction", "rev": 1}},
+        {"executive-summary": {"maturity": "code-extraction"}},
+        1,
+    )
+    assert any(i.code == "CODE_EXTRACTION_FROZEN" for i in frozen)
+    bad = ws._check_maturity(
+        "executive-summary",
+        {"executive-summary": {"maturity": "ready"}},
+        {},
+        "?",
+    )
+    assert any(i.code == "INVALID_MATURITY" for i in bad)
+
+
 def test_frontmatter_pins_from_frozen_parent() -> None:
     levels = {
         "brd": {"rev": 2, "digest": "sha256:brd"},

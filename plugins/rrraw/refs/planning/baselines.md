@@ -65,6 +65,7 @@ levels:
     rev: 2                # integer frozen; "?" unfrozen
     digest: "sha256:..."  # of this doc's items.json records; null while "?"
     pins: {}
+    # maturity: code-extraction | draft   # optional; from-code reverse only
   mrd:
     rev: 1
     digest: "sha256:..."
@@ -102,7 +103,7 @@ next_challenge: {}
 | `product_status` | `"?"` until product ships. Skill refuses ship while docs still `?`. Not part of `mint_hash`. |
 | `mint_hash` | Phase detail only. SHA-256 of canonical `track`, `product`, `docs`, `next`, `docs_shipped`, `levels`, `next_levels`. Skill writes it on every mint. Slice block is **not** part of `mint_hash` (selection stamps independently). |
 | `discovery_complete` | Summary-only. `true` after Discover BRD freeze + valid `business-case.yaml`. Plan entry requires this (or equivalent frozen BRD + handoff). |
-| `levels` | Current `track` stems for **this phase**. Child `pins` name the immediate parent stem. Plan PRD pins against Discovery BRD digests across dirs. |
+| `levels` | Current `track` stems for **this phase**. Child `pins` name the immediate parent stem. Plan PRD pins against Discovery BRD digests across dirs. Optional `maturity: code-extraction \| draft` on Discover stems — mirror of cascade frontmatter; freeze mint **refuses** while any stem is `code-extraction`. |
 | `slice` | Plan detail only. Optional. Selected requirement ids + path to `execute-slice.yaml`. Language: **slice / phase**, never sprint. Future release/version grouping may reference frozen slices — not designed here. |
 | `next_levels` | Next-track revs/pins when `next` is set. Empty object otherwise. |
 | `challenge` / `next_challenge` | Per-doc attestation on phase detail. Not part of `mint_hash`. Never a validator FAIL. Skill is the only writer. |
@@ -147,13 +148,14 @@ Replace stub `version: 1` + `traces_from`. Each `{level}.md`:
 doc_type: prd
 track: "0.1"
 doc_rev: 2          # or "?"
+# maturity: code-extraction | draft   # optional; Discover from-code only
 pins:
   brd: { rev: 2, digest: "sha256:..." }
 created: 2026-06-24T10:00:00Z
 ---
 ```
 
-ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `status.yaml` for that stem on this track.
+ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `status.yaml` for that stem on this track. Optional `maturity` is **doc-level** (`code-extraction` \| `draft`) — not an item `spec`; omit on interview-sourced docs. Mirror on `levels.<stem>.maturity`.
 
 ## Layout / directory fork
 
@@ -209,6 +211,8 @@ Classification is judgment: patch vs redirect-to-next vs open-next vs conscious 
 ## Freeze mint (skill)
 
 Compose does not increment anything. After Gate 6+7 pass for a level **or** after Plan **slice** freeze gates:
+
+**Refuse** whole-doc freeze mint (and `business-case.yaml`) while any composed Discover stem has `maturity: code-extraction` (frontmatter or `levels.<stem>.maturity`). Promote to `draft` first (`skills/rr-discovery/refs/from-code.md`). Validator: `CODE_EXTRACTION_FROZEN` / `INVALID_MATURITY`.
 
 ### Whole-doc freeze (Discover stems; optional Plan structure lock)
 
@@ -311,6 +315,8 @@ Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one lin
 | `STALE_PIN` | Frozen child pin ≠ live parent digest/rev |
 | `REV_WHILE_OPEN` | Integer `rev` / `doc_rev` on a level that is still unfrozen (`?` in status, or absent from `frozen_levels`) |
 | `HAND_BUMP` | Frozen rev / pins / `track` (canonical mint payload) changed without a matching `mint_hash` — includes a human editing major.minor in `status.yaml` |
+| `INVALID_MATURITY` | Frontmatter or `levels.<stem>.maturity` set to a value other than `code-extraction` \| `draft` |
+| `CODE_EXTRACTION_FROZEN` | Integer `rev` / `doc_rev` while maturity is still `code-extraction` |
 
 Removed from CI (never emit): `NEXT_LOCKED`, `CURRENT_NOT_PATCH`. Independent patches (`product 0.1.3` / `docs 0.1.7`) are valid. `future.md` and `agent.plan.md` are not cascade input. `challenge` / `next_challenge` are judgment/process only — never a script FAIL.
 

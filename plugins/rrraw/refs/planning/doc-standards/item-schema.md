@@ -15,7 +15,7 @@ Every numbered item has `id`, `parent`, `kind`, `spec`. Ranking fields depend on
 | `id` | all | `{DOC}-{n}` or `{DOC}-{n.m}` — see Numbering |
 | `parent` | all | Immediate parent item ID, or `—` for ES roots |
 | `kind` | all | `container` \| `leaf` |
-| `spec` | all | `idea` \| `draft` \| `ready` \| `deprecated` |
+| `spec` | all | `idea` \| `draft` \| `ready` \| `deprecated` — **not** doc maturity; Discover `maturity: code-extraction` is cascade frontmatter + `status.yaml` only (`skills/rr-discovery/refs/from-code.md`) |
 | `status` | PRD leaves only | `deferred` \| `selected` \| `in_progress` \| `delivered` — selection/delivery marker; no derivation; selecting never deletes the full requirement set |
 | `priority` | PRD **requirement** leaves only | `P1` \| `P2` \| `P3` — priority inside a feature’s full set; coexists with RICE (features) / RIC (stories). No P-tags elsewhere (MoSCoW stays Discover-only) |
 | `tag` | ES constraint leaves only | Open string (e.g. `regulatory`, `capacity`, `quality`, `technical`) — optional subtype hint |

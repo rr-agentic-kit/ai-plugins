@@ -21,6 +21,7 @@ Shared schemas and freeze rules: `refs/planning/contracts.md`, `refs/planning/ba
 |------|----------------|
 | `--discover` | `discover` |
 | `--all` | `discover` |
+| `--from-code` | `from-code` |
 | `--executive-summary` | `executive-summary` |
 | `--exec-summary` | `executive-summary` (legacy alias — prefer `--executive-summary`) |
 | `--mrd` | `mrd` |
@@ -31,7 +32,7 @@ Shared schemas and freeze rules: `refs/planning/contracts.md`, `refs/planning/ba
 | `--setup` | `setup` |
 | `--resume` | _(selector)_ — sets `resume: true`; not a second primary when paired with continue-intent |
 
-When no primary flag is present, do not emit a payload yet. Run **NL intent fallback**, then **Out-of-scope NL**, then **Status-first routing**. Default `action` = `discover` only when routing picks `from-0` (no cascade `{stem}.md`; `status.yaml` / `agent.plan.md` alone do not count). Bare invoke **never** silent-rediscovers. Combining `--setup` with another primary → `CONFLICTING_FLAGS`. `--setup` never starts discover/compose.
+When no primary flag is present, do not emit a payload yet. Run **NL intent fallback**, then **Out-of-scope NL**, then **Status-first routing**. Default `action` = `discover` only when routing picks `from-0` (no cascade `{stem}.md`; `status.yaml` / `agent.plan.md` alone do not count). Bare invoke **never** silent-rediscovers. Combining `--setup` with another primary → `CONFLICTING_FLAGS`. `--setup` never starts discover/compose. `--from-code` is exclusive with other primaries (same conflict class as `--discover`).
 
 ### Not discovery primaries
 
@@ -55,7 +56,7 @@ Default `output_dir` = `{PROJECT_ROOT}/docs/discovery/`. `--output-dir` always w
 
 | Selector | Values | Default |
 |----------|--------|---------|
-| `--input` | file path or directory | null (use conversation context) |
+| `--input` | file path or directory | null (conversation context; for `from-code`, research root defaults to `PROJECT_ROOT`) |
 | `--output-dir` | directory path | `{PROJECT_ROOT}/docs/discovery/` |
 | `--format` | `md` | `md` |
 | `--depth` | `shallow`, `standard`, `deep` | `standard` |
@@ -163,6 +164,7 @@ When no primary action flag is detected, map phrases (case-insensitive, first ma
 | Intent signal | `action` |
 |---------------|----------|
 | setup, bootstrap planning, init plans | `setup` |
+| from code, reverse from codebase, reverse-engineer discovery docs, discover from existing product source | `from-code` |
 | discover, start discovery, new venture, greenfield problem, validate idea | `discover` |
 | exec summary, executive summary, vision, problem statement, proceed/hold/kill memo | `executive-summary` |
 | market, MRD, competitive landscape, beachhead | `mrd` |
@@ -170,6 +172,8 @@ When no primary action flag is detected, map phrases (case-insensitive, first ma
 | challenge, review, critique, devil's advocate, pre-mortem, red-team | `challenge` |
 | resume, continue discovery, pick up where we left off | `discover` + `resume: true` |
 | change, revise, patch the, update the ES/MRD/BRD/… | `change` (extract `--section` / `--target` from NL; missing both → `CHANGE_MISSING_SELECTORS`) |
+
+`from-code` NL is listed **before** generic `discover` so reverse-from-source intent wins. When NL means Discover docs from source, **from-code wins over** the out-of-scope “code review” class below.
 
 If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 
@@ -185,7 +189,7 @@ If the utterance matches a **When not to use** class below → `OUT_OF_SCOPE`. D
 |-------|--------------------------------------------------------------|
 | Plan / PRD work | Request for PRD, product requirements, RICE/RIC, stories, feature backlog, `--prd`, or Plan entry without discovery freeze |
 | Research phase | Post-compose market research, `--research`, competitor deep-dive as a research report |
-| Code / ticket work | Implement, refactor, rewrite a service, review **code**, file tickets, tune production config, debug, or hotfix |
+| Code / ticket work | Implement, refactor, rewrite a service, review **code**, file tickets, tune production config, debug, or hotfix — **except** when NL matched `from-code` (Discover docs from source wins) |
 | Artifact-type advice | Asking whether something should be a skill, command, agent, rule, or workflow — unless they asked to discover that product as a venture |
 | Launch / GTM execution | Launch calendar, campaign plan, battlecard, growth-loop execution |
 
@@ -200,10 +204,11 @@ NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` **seed** the [proj
 | Dimension | Rule |
 |-----------|------|
 | Action | Exactly one primary action per invocation |
-| Cascade focus | `--executive-summary` / `--exec-summary` / `--mrd` / `--brd` are mutually exclusive with `--discover`/`--all` and with `--change` |
-| `--change` | Primary only. Requires `--section` and `--target` (flags or NL). Combining with `--discover`/`--all`/level flags/`--challenge` → `CONFLICTING_FLAGS`. Missing selectors → `CHANGE_MISSING_SELECTORS`. `--target prd` → `OUT_OF_SCOPE`. |
-| `--challenge` / `--review` | Primary only. Requires existing docs (`--input` or `--output-dir`). Combining with another primary (e.g. `--discover --challenge`) → `CONFLICTING_FLAGS`. `depth: deep` appends challenge to the discover chain — not a second primary. |
-| `--setup` | Primary only. Bootstrap/repair. Combining with `--discover`/`--all`/level flags/`--change`/`--challenge` → `CONFLICTING_FLAGS`. Never starts discover. |
+| Cascade focus | `--executive-summary` / `--exec-summary` / `--mrd` / `--brd` are mutually exclusive with `--discover`/`--all`/`--from-code` and with `--change` |
+| `--change` | Primary only. Requires `--section` and `--target` (flags or NL). Combining with `--discover`/`--all`/`--from-code`/level flags/`--challenge` → `CONFLICTING_FLAGS`. Missing selectors → `CHANGE_MISSING_SELECTORS`. `--target prd` → `OUT_OF_SCOPE`. |
+| `--challenge` / `--review` | Primary only. Requires existing docs (`--input` or `--output-dir`). Combining with another primary (e.g. `--discover --challenge` or `--from-code --challenge`) → `CONFLICTING_FLAGS`. `depth: deep` appends challenge to the **discover** chain only — not a second primary; never auto-appended for `from-code`. |
+| `--setup` | Primary only. Bootstrap/repair. Combining with `--discover`/`--all`/`--from-code`/level flags/`--change`/`--challenge` → `CONFLICTING_FLAGS`. Never starts discover. |
+| `--from-code` | Primary only. Exclusive with `--discover`/`--all`/level flags/`--change`/`--challenge`/`--setup` → `CONFLICTING_FLAGS`. Depth still trims stems; no auto challenge in chain. |
 | `--prd` / `--research` | Never valid as discovery primaries → `OUT_OF_SCOPE` (not `CONFLICTING_FLAGS`) |
 | Format | Single value only; must be `md` |
 | Depth | `shallow` cannot combine with `--mrd` / `--brd` (those imply ancestors through that level) |
@@ -221,15 +226,15 @@ Load `docs/rrr-status.yaml` (glance), then `{output_dir}/status.yaml` (or `{PROJ
 
 | `payload.route` | When |
 |-----------------|------|
-| `from-0` | No cascade `{stem}.md` for discovery stems. Greenfield discover. Summary / phase `status.yaml` / `agent.plan.md` alone do **not** count as in-progress. |
-| `resume` | `--resume`, or NL continue, or checkpoint `paused` / `in_progress` with pending work. |
+| `from-0` | No cascade `{stem}.md` for discovery stems. Greenfield discover **or** `--from-code` with empty stems. Summary / phase `status.yaml` / `agent.plan.md` alone do **not** count as in-progress. |
+| `resume` | `--resume`, or NL continue, or checkpoint `paused` / `in_progress` with pending work. Promote `code-extraction` → `draft` when continue-shaping ([from-code.md](from-code.md)). |
 | `continue-discover` | Cascade `{stem}.md` exists AND current-track discovery levels still `rev: ?` (unfrozen). Continue the open cascade. |
 | `start-change` | `--change` (or NL change) and no in-flight change checkpoint. |
 | `continue-change` | `--change` / NL change with an in-flight change on that section+target. |
 | `continue-next-track` | `next` set and next-track docs still `?`; user is working that track (or `--target next`). |
-| `ask` | Bare invoke, discovery docs frozen / `discovery_complete`, nothing open — **do not** rediscover. Ask: patch / `--change` / open-next / hand off to Plan / stop. |
+| `ask` | Bare invoke, discovery docs frozen / `discovery_complete`, nothing open — **do not** rediscover. Ask: patch / `--change` / open-next / hand off to Plan / stop. **Also** `--from-code` when cascade stems already exist — no silent overwrite; ask before replace. |
 
-`--discover` / `--all` / a level flag **overrides** this pick (still expand `cascade_levels` as below). Override does not skip unlock stops in `refs/planning/baselines.md`.
+`--discover` / `--all` / `--from-code` / a level flag **overrides** this pick (still expand `cascade_levels` as below). `--from-code` with existing stems still routes `ask` (no silent overwrite) unless the user confirms replace. Override does not skip unlock stops in `refs/planning/baselines.md`.
 
 Classify patch vs redirect-to-next vs open-next vs unfreeze per `--change` above. Those are skill stops, not validator codes.
 
@@ -263,6 +268,7 @@ Classify patch vs redirect-to-next vs open-next vs unfreeze per `--change` above
 | `action` | `cascade_levels` |
 |----------|------------------|
 | `discover` | All three discovery levels (trimmed by `depth`) |
+| `from-code` | Same depth trim as `discover` |
 | `executive-summary` | `["executive-summary"]` |
 | `mrd` | `["executive-summary", "mrd"]` |
 | `brd` | `["executive-summary", "mrd", "brd"]` |
@@ -274,23 +280,24 @@ Never emit `prd` in discovery `cascade_levels`.
 
 ### `depth` trimming
 
-| `depth` | Effective `cascade_levels` for `discover` |
+| `depth` | Effective `cascade_levels` for `discover` / `from-code` |
 |---------|-------------------------------------------|
 | `shallow` | `["executive-summary"]` only |
 | `standard` | all three |
-| `deep` | all three; `chain` appends `challenge` |
+| `deep` | all three; for `discover` only, `chain` appends `challenge` — **`from-code` never auto-appends challenge** |
 
 ### `chain` expansion
 
 | `action` | Default `chain` |
 |----------|-----------------|
 | `discover` | `["discover", "compose"]` per level; after BRD freeze → handoff ([business-case-handoff.md](business-case-handoff.md)) |
+| `from-code` | `["from-code", "compose"]` — **no** auto challenge; **no** freeze-handoff in this chain ([from-code.md](from-code.md)) |
 | `challenge` | `["challenge"]` |
 | `setup` | `["setup"]` |
 | single-level focus | `["discover", "compose"]` for specified levels |
 | `change` | `["discover", "compose"]` for `cascade_levels` (patch / lock-target / unfreeze as classified) |
 
-Ideation (when gated) runs skill-inline before L1 compose — not a separate `chain` action. Humanize is skill-owned after compose draft — [compose-prose.md](compose-prose.md).
+Ideation (when gated) runs skill-inline before L1 compose — not a separate `chain` action. **`from-code` skips ideation.** Humanize is skill-owned after compose draft — [compose-prose.md](compose-prose.md).
 
 ## Deterministic errors
 

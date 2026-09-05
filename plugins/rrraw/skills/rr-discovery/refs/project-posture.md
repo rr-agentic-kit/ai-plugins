@@ -2,9 +2,18 @@
 
 **Owner:** Pre-cascade classification of product existence and commitment, MoSCoW legend (BRD only), PRD-shape reflection defaults, and `domain_context` for the panel.
 
-**Load when:** Discover start, before executive-summary. Resume skips confirm if `session_state.project_posture` is already `user_confirmed: true` and the user has not contradicted it.
+**Load when:** Discover start, before executive-summary — including `action: from-code`. Resume skips confirm if `session_state.project_posture` is already `user_confirmed: true` and the user has not contradicted it.
 
 MoSCoW applies to **BRD only** in this skill (ES functional deliverables use Must-only; PRD uses RICE/RIC). Do not add `horizon:` on items. Do not skip MRD/BRD for `signed_v1` — change the questions, not the cascade.
+
+## From-code inventory
+
+When `action` is `from-code` ([from-code.md](from-code.md)):
+
+- May inventory the codebase beyond the 1–2 cheap scan checks below (research root = `--input` or `PROJECT_ROOT`).
+- Seed `existence: existing` (inferred) from shipped code — still **confirm** with the user.
+- Still require `domain_context`. Ask only if contradictory or missing blocking fields — **not** a full interview.
+- Do not invent industry / buyer from package names; `hold` or ask when blocking.
 
 ## Axes
 
@@ -59,7 +68,7 @@ Record a candidate with `source: inferred`. Do not write `user_confirmed: true`.
 | Empty or scaffold-only tree | `greenfield` |
 | Existing `docs/plan/` with frozen PRD or a named contract | `signed_v1` candidate |
 
-Stop after two checks. Do not inventory the codebase.
+Stop after two checks. Do not inventory the codebase — **except** when `action` is `from-code` (then inventory is the research pass; still confirm posture separately).
 
 ### 2. Confirm
 

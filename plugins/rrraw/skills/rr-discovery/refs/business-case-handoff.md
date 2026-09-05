@@ -83,6 +83,7 @@ Freeze / `discovery_complete` **fails** when any of:
 | Fabricated TAM or fake precision economics | Illegal — use `hold` / `vague` instead |
 | Conditional technique ran but artifact absent | Assumptions/OST/interview/pretotype must survive chat |
 | BRD (or ancestor) not freeze-eligible | Gates 1–7 incomplete or verdict blocks |
+| Any Discover stem still `maturity: code-extraction` | Promote to `draft` first (`skills/rr-discovery/refs/from-code.md`) |
 | `viability_verdict` disagrees with ledger | Handoff must match Gate 7 record |
 
 Fabricated market numbers remain illegal even if "required" — prefer honest `hold` in `open_holds` / premises.

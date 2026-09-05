@@ -27,6 +27,7 @@ YAML_SKIP_KEYS = frozenset(
         "item_index",
         "track",
         "doc_rev",
+        "maturity",
         "pins",
     }
 )
@@ -112,6 +113,8 @@ YAML_KEY_MAP: dict[str, str] = {
 }
 KIND_VALUES = frozenset({"container", "leaf"})
 SPEC_VALUES = frozenset({"idea", "draft", "ready", "deprecated"})
+# Doc-level only (cascade frontmatter + status levels.<stem>) — not an item spec.
+MATURITY_VALUES = frozenset({"code-extraction", "draft"})
 MOSCOW_VALUES = frozenset({"Must", "Should", "Could", "Won't"})
 KANO_VALUES = frozenset({"basic", "performance", "delighter"})
 IMPACT_VALUES = frozenset({"0.25", "0.5", "1", "2", "3"})

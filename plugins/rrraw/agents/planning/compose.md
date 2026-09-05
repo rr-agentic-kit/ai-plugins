@@ -63,7 +63,7 @@ Required context:
 9. **PRD only:** write shape/overview prose from the posture legend. Do not assume Must = MVP. Do not invent sprint/release-plan sections.
 10. **Mechanism / AC placement (PRD):** product WWAS AC stays on PRD. Standing invariants and feature mechanism are skill-owned (`architecture.md` / `deltas/`) — compose does **not** mint those files and does **not** route Plan AC into root `tech.md`. Discover parking in `tech.md` is out of compose scope.
 11. **Status / priority:** default new items `spec: idea`. Set `draft` when specifying. Never auto-promote to `ready`. On PRD requirement leaves emit `_priority_: P1|P2|P3` when ranked; optional `_status_:` from the closed enum. Selecting never deletes siblings.
-12. Render the document with closed heading + `_key_:` metadata. Leaf body is a markdown blockquote (`>`). Frontmatter: `doc_type`, `track`, `doc_rev` (`?` until freeze), `pins`, `created`. Always write markdown.
+12. Render the document with closed heading + `_key_:` metadata. Leaf body is a markdown blockquote (`>`). Frontmatter: `doc_type`, `track`, `doc_rev` (`?` until freeze), `pins`, `created`; when caller `action` is `from-code`, also `maturity: code-extraction`. Always write markdown.
 13. **Persist draft** to `payload.output_dir` before returning (`ok` and `partial` only; skip on `failed`):
     - Write `{level}.md` only (draft until skill humanize).
     - Merge this level’s item records into `items.json`.

@@ -4,11 +4,21 @@
 
 ## Pre-cascade: project posture
 
-Before executive-summary, run [project-posture.md](project-posture.md). Done: that ref's Persist condition.
+Before executive-summary, run [project-posture.md](project-posture.md). Done: that ref's Persist condition. Same for `action: from-code` (inventory + confirm; seed `existing`).
+
+## From-code pre-path
+
+When `action` is `from-code` ([from-code.md](from-code.md)):
+
+1. Run posture, then codebase research; persist `from_code_evidence`.
+2. **Skip ideation** ([ideation.md](ideation.md)).
+3. Compose stems in `cascade_levels` with `maturity: code-extraction` (frontmatter + status mirror).
+4. Ask contradictions only; stop without freeze.
+5. Inheritance may cite `session_state.from_code_evidence` as seed facts (still no invented market).
 
 ## Ideation gate
 
-If the problem space has no concrete idea yet → run [ideation.md](ideation.md) before L1 compose. Else skip. Persist conditional artifacts when produced.
+If the problem space has no concrete idea yet → run [ideation.md](ideation.md) before L1 compose. Else skip. Persist conditional artifacts when produced. **Skip when `action` is `from-code`.**
 
 ## Level order
 
@@ -33,7 +43,7 @@ flowchart TD
 
 | Level | Inherits from | Narrows to |
 |-------|---------------|------------|
-| executive-summary | user input, conversation, confirmed `project_posture` | strategic vision, problem framing, posture, metrics, defensibility |
+| executive-summary | user input, conversation, confirmed `project_posture`, optional `from_code_evidence` | strategic vision, problem framing, posture, metrics, defensibility |
 | mrd | executive-summary | market segments, competition, dual-method sizing, Kano needs |
 | brd | executive-summary + mrd | business objectives, Power×Interest stakeholders, capabilities/deps |
 
@@ -46,17 +56,17 @@ flowchart TD
 
 ## Per-level cycle
 
-Orchestration owns the skill (SKILL Procedure step 3). For each level in `cascade_levels`, apply only level-variant work:
+Orchestration owns the skill (SKILL Procedure step 3 / 3a). For each level in `cascade_levels`, apply only level-variant work:
 
 | Phase | Variant (this level) |
 |-------|----------------------|
 | Load | `doc-standards/<level>.md` + item-schema |
 | Entry | Sweep; [note-sessions.md](note-sessions.md) sidecar; [goal-anchor.md](goal-anchor.md) for the pass |
-| Discover | Inherited facts; **ES only** premise ([expert-panel.md](expert-panel.md)); gaps → notes/`raw-history`; reflect → [proactivity.md](proactivity.md); [strategy-lenses.md](strategy-lenses.md) / [gtm-framing.md](gtm-framing.md) on demand |
+| Discover | Inherited facts; **ES only** premise ([expert-panel.md](expert-panel.md)); gaps → notes/`raw-history`; reflect → [proactivity.md](proactivity.md); [strategy-lenses.md](strategy-lenses.md) / [gtm-framing.md](gtm-framing.md) on demand. From-code: seed from evidence; skip polish interview. |
 | Compose | Compose (`refs/planning/contracts.md`) → [compose-prose.md](compose-prose.md); Gate 3 static |
-| Exit | Gate 6 → Gate 7 → freeze. After **BRD** pass → SKILL `freeze-handoff` (step 5) |
+| Exit | Gate 6 → Gate 7 → freeze **only if** `maturity ≠ code-extraction`. After **BRD** pass with draft+ maturity → SKILL `freeze-handoff` (step 5). From-code: stop after compose + contradiction drain. |
 
-Stop / resume: SKILL step 3 Stop bullet.
+Stop / resume: SKILL step 3 Stop bullet. Resume that shapes `code-extraction` docs promotes maturity → `draft` then re-enters normal gates.
 
 ## Per-level completion gates
 
@@ -74,20 +84,21 @@ Stop / resume: SKILL step 3 Stop bullet.
 
 | Event | Rule |
 |-------|------|
-| First compose of a level | Dense sibling IDs. Frontmatter `doc_rev: "?"`. |
-| Cascade gates pass | Add level to `frozen_levels`. Mint `status.yaml` per `refs/planning/baselines.md`. Freeze does **not** wait on challenge-clean. |
-| BRD gates pass (`proceed` / `proceed-with-conditions`) | SKILL step 5 (`freeze-handoff`) — [business-case-handoff.md](business-case-handoff.md). |
+| First compose of a level | Dense sibling IDs. Frontmatter `doc_rev: "?"`. From-code: also `maturity: code-extraction`. |
+| Cascade gates pass | Add level to `frozen_levels` **only if** maturity ≠ `code-extraction`. Mint `status.yaml` per `refs/planning/baselines.md`. Freeze does **not** wait on challenge-clean. |
+| BRD gates pass (`proceed` / `proceed-with-conditions`) | SKILL step 5 (`freeze-handoff`) — [business-case-handoff.md](business-case-handoff.md). Blocked while any stem is `code-extraction`. |
 | Gate 7 `hold` / `pivot` / `kill` | Do **not** mint `discovery_complete`. Follow [business-case-handoff.md](business-case-handoff.md) / expert-panel ladder. |
 | Later insert on frozen level | Append next integer. |
 | Explicit re-compose of frozen level | Allowed; humanize via rewrite path; remap children. |
-| `--resume` | Continue from `item_registry` / checkpoint. |
+| `--resume` | Continue from `item_registry` / checkpoint. Promote `code-extraction` → `draft` on continue-shape. |
 | `--change` | Section + target; skill classifies patch vs redirect. |
 
 ## Advancing vs stopping
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass; queue empty | Freeze; mint docs patch; advance (or SKILL `freeze-handoff` after BRD) |
+| All gates pass; queue empty; maturity ≠ `code-extraction` | Freeze; mint docs patch; advance (or SKILL `freeze-handoff` after BRD) |
+| From-code compose done; contradictions drained/held | Stop at `code-extraction` — no freeze |
 | Pending clarifications / gate gaps | Surface question → re-discover / re-compose |
 | Gate 7 `hold` / `pivot` / `kill` | Verdict ladder — no discovery_complete |
 | Open re-decision queue | Drain before freeze |
@@ -95,4 +106,4 @@ Stop / resume: SKILL step 3 Stop bullet.
 
 ## Session state
 
-Persist schema: `refs/planning/output-formats.md`. Skill updates `level_facts`, `item_registry`, `frozen_levels`, `project_posture`, `viability[]`, `note_sessions`, `discovery_complete`, `composed_docs`. Compose writes draft cascade docs + `items.json`; skill finalizes prose via [compose-prose.md](compose-prose.md). Skill writes ledger, status, and `business-case.yaml`.
+Persist schema: `refs/planning/output-formats.md`. Skill updates `level_facts`, `item_registry`, `frozen_levels`, `project_posture`, `from_code_evidence`, `viability[]`, `note_sessions`, `discovery_complete`, `composed_docs`. Compose writes draft cascade docs + `items.json`; skill finalizes prose via [compose-prose.md](compose-prose.md). Skill writes ledger, status, and `business-case.yaml`.

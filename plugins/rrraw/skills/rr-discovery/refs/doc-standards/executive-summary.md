@@ -69,15 +69,16 @@ When GDPR, i18n, distribution, security, or enrichment-law topics surface during
 ## Extraction method (discovery)
 
 1. If `session_state.project_posture` is missing or unconfirmed, run the posture gate first (`skills/rr-discovery/refs/project-posture.md`) — scan, confirm (including `domain_context`), persist the Posture **section**. Do not start vision while posture is unset.
-2. Start with user's free-form description; extract vision and problem separately.
-3. If user leads with solution → redirect: "What problem does [solution] solve?"
-4. Run the **premise test** (`skills/rr-discovery/refs/expert-panel.md`): sit founder/CEO, seed investor, domain practitioner; write What-must-be-true; classify claims; evidence loop; write Viability verdict. Binding. Both are prose sections, not `ES-*` ids.
-5. Probe for "why now" if not stated.
-6. Separate **outcomes** (Success metrics) from **capabilities** (Functional deliverables) from **limits** (Constraints). Misfiled features (e.g. "must be in English" as a constraint) → refile to Functional deliverables.
-7. Push back on unmeasurable success metrics → apply metric-teeth rule; offer proxy with deadline or anchor.
-8. Record constraints (with `_tag_:` when helpful) and non-goals as first-class items. Under `existing`, shipped behavior lands in Constraints / non-goals, not as PRD features.
-9. Mint `ES-n` ids for ranked sections only; default `spec: idea`; promote to `draft` while specifying. Do not auto-promote to `ready`. Mint ledger rationales for ranked leaves before compose.
-10. Feature-level detail volunteered during this level → `skills/rr-discovery/refs/note-sessions.md`, not an ES fact.
+2. **When `action` is `from-code`:** seed vision/problem/constraints from `from_code_evidence`; leave weak sections thin or `hold`; ask only contradictions; set frontmatter + status `maturity: code-extraction` (`skills/rr-discovery/refs/from-code.md`). Skip steps that invent market from package names.
+3. Start with user's free-form description; extract vision and problem separately.
+4. If user leads with solution → redirect: "What problem does [solution] solve?"
+5. Run the **premise test** (`skills/rr-discovery/refs/expert-panel.md`): sit founder/CEO, seed investor, domain practitioner; write What-must-be-true; classify claims; evidence loop; write Viability verdict. Binding. Both are prose sections, not `ES-*` ids. From-code: run lightly or hold premises that lack evidence — do not invent.
+6. Probe for "why now" if not stated.
+7. Separate **outcomes** (Success metrics) from **capabilities** (Functional deliverables) from **limits** (Constraints). Misfiled features (e.g. "must be in English" as a constraint) → refile to Functional deliverables.
+8. Push back on unmeasurable success metrics → apply metric-teeth rule; offer proxy with deadline or anchor.
+9. Record constraints (with `_tag_:` when helpful) and non-goals as first-class items. Under `existing`, shipped behavior lands in Constraints / non-goals, not as PRD features.
+10. Mint `ES-n` ids for ranked sections only; default `spec: idea`; promote to `draft` while specifying. Do not auto-promote to `ready`. Mint ledger rationales for ranked leaves before compose.
+11. Feature-level detail volunteered during this level → `skills/rr-discovery/refs/note-sessions.md`, not an ES fact.
 11. Mode existence (e.g. anonymous browse) can be its own Functional-deliverable Must when success-critical — separate from the privacy/consent constraint (T7-1).
 
 ## Traceability

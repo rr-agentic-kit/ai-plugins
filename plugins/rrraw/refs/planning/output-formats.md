@@ -86,13 +86,14 @@ Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. 
 
 ## Markdown doc format
 
-Each composed doc file. Frontmatter is `track` + `doc_rev` + `pins` — not stub `version: 1` / `traces_from` ([baselines.md](baselines.md)):
+Each composed doc file. Frontmatter is `track` + `doc_rev` + optional `maturity` + `pins` — not stub `version: 1` / `traces_from` ([baselines.md](baselines.md)):
 
 ```markdown
 ---
 doc_type: prd
 track: "0.1"
 doc_rev: 2
+# maturity: code-extraction | draft   # optional; Discover from-code only
 pins:
   brd: { rev: 2, digest: "sha256:..." }
 created: 2026-06-24T10:00:00Z
@@ -110,7 +111,7 @@ created: 2026-06-24T10:00:00Z
 | PRD-3.1 | PRD-3 | ready | Must |
 ```
 
-ES `pins: {}`. Unfrozen `doc_rev: "?"`. Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Heading + `_key_:` metadata are a closed vocabulary — parser is regex, not an LLM. Item templates: [doc-standards/item-schema.md](doc-standards/item-schema.md).
+ES `pins: {}`. Unfrozen `doc_rev: "?"`. Optional `maturity: code-extraction` after `--from-code` compose; promote to `draft` on continue-shape (`skills/rr-discovery/refs/from-code.md`). Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Heading + `_key_:` metadata are a closed vocabulary — parser is regex, not an LLM. Item templates: [doc-standards/item-schema.md](doc-standards/item-schema.md).
 
 ## `items.json`
 
@@ -335,7 +336,8 @@ Written on **every stop** and after **each level completion**. Required for `--r
       "binding": true
     }
   ],
-  "note_sessions": {}
+  "note_sessions": {},
+  "from_code_evidence": null
 }
 ```
 
@@ -345,17 +347,19 @@ Written on **every stop** and after **each level completion**. Required for `--r
 
 `item_registry`: id → `{ doc, parent, kind, spec, class? }`. Skill refreshes this from `items.json` after compose. Resume uses it for minting. Frozen re-compose remap of child `parent:` is compose’s job in the same invocation.
 
-`project_posture`: `{}` until confirm; then the Session field in `skills/rr-planner/refs/project-posture.md`. Resume skips the posture gate when `user_confirmed` is true and uncontradicted.
+`project_posture`: `{}` until confirm; then the Session field in `skills/rr-discovery/refs/project-posture.md`. Resume skips the posture gate when `user_confirmed` is true and uncontradicted.
 
-`preferences.questions_per_cycle`: max AskQuestion count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-planner/refs/input-resolution.md`); confirm-once persistence.
+`from_code_evidence`: `null` until `--from-code` research; then a structured summary of codebase findings (what shipped, actors if inferable, problem signals, constraints, domain language, reflection notes). Skill-owned. Merge only contradiction clarifications into `checkpoint.pending_clarifications`. Cite in cascade inheritance; do not invent market/TAM from package names (`skills/rr-discovery/refs/from-code.md`).
+
+`preferences.questions_per_cycle`: max AskQuestion count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-discovery/refs/input-resolution.md`); confirm-once persistence.
 
 `viability_stale`: per binding level (`executive-summary`, `mrd`). Set `true` when compose changes load-bearing ES facts ([baselines.md](baselines.md)). Gate 7 re-sit clears it.
 
-`viability[]`: Gate 7 / premise-test verdicts (`skills/rr-planner/refs/expert-panel.md`). Binding at executive-summary and MRD.
+`viability[]`: Gate 7 / premise-test verdicts (`skills/rr-discovery/refs/expert-panel.md`). Binding at executive-summary and MRD.
 
-`discovery_complete`: `true` after Discover writes a valid `business-case.yaml` and freezes BRD (`skills/rr-discovery/refs/business-case-handoff.md`). Plan refuses entry without frozen BRD + handoff.
+`discovery_complete`: `true` after Discover writes a valid `business-case.yaml` and freezes BRD (`skills/rr-discovery/refs/business-case-handoff.md`). Plan refuses entry without frozen BRD + handoff. Never set while any stem is `maturity: code-extraction`.
 
-`note_sessions`: per-level index of parked notes; body is `{level}.notes.yaml` (`skills/rr-planner/refs/note-sessions.md`). Drop the key when that sidecar is deleted. Sidecars are not `--format` docs and are not parsed by `validate_planning.sh`.
+`note_sessions`: per-level index of parked notes; body is `{level}.notes.yaml` (`skills/rr-discovery/refs/note-sessions.md`). Drop the key when that sidecar is deleted. Sidecars are not `--format` docs and are not parsed by `validate_planning.sh`.
 
 Skill owns `decision-ledger.yaml` ([decision-ledger.md](decision-ledger.md)). Compose and challenge never write it. Validator loads it when present.
 

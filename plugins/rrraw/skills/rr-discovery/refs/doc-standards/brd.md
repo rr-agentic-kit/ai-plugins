@@ -28,11 +28,12 @@ Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won�
 ## Extraction method (discovery)
 
 1. For each MRD customer need, ask "what business outcome does solving this produce?"
-2. Map stakeholder roles to MRD segment **prose** (not a segment id).
-3. Probe for hidden approvers (legal, security, procurement). Place each stakeholder on Power×Interest.
-4. Distinguish business rules (Must comply) from preferences (Should/Could).
-5. Each objective gets a success criterion testable at business level, in that leaf’s body.
-6. Record build / buy / partner for strategic capabilities; founder/team execution risk when venture posture.
+2. **When `action` is `from-code`:** seed objectives/stakeholders/rules from evidence + parents; leave weak sections thin; set `maturity: code-extraction`; ask contradictions only (`skills/rr-discovery/refs/from-code.md`).
+3. Map stakeholder roles to MRD segment **prose** (not a segment id).
+4. Probe for hidden approvers (legal, security, procurement). Place each stakeholder on Power×Interest.
+5. Distinguish business rules (Must comply) from preferences (Should/Could).
+6. Each objective gets a success criterion testable at business level, in that leaf’s body.
+7. Record build / buy / partner for strategic capabilities; founder/team execution risk when venture posture.
 
 ## Traceability
 

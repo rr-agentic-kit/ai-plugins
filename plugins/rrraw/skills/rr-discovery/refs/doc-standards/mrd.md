@@ -27,11 +27,12 @@ Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for
 ## Extraction method (discovery)
 
 1. Inherit vision/problem; ask "who buys vs who uses?"
-2. For competitors: accept user-stated list; probe for indirect alternatives. **Name an incumbent** (or the internal status quo) and a do-nothing option.
-3. Size the market **in this level**, evidence-backed. External: top-down **and** bottom-up (or `hold` on the missing method); reconcile only with evidence. Internal: teams × hours × loaded cost; skip TAM. Fabricated sizing → freeze fail / claim check (`skills/rr-discovery/refs/business-case-handoff.md`, `skills/rr-discovery/refs/compose-prose.md`).
-4. Map each customer need to a ranked `ES-*` parent (usually a metric).
-5. Classify needs as Kano `basic` / `performance` / `delighter` — do not use Must/Should/Could. Mint rationales for ranked needs.
-6. Flag residual gaps beyond the claim-class budget → `research_deferred[]` with a named evidence bar, or Gate 7 `hold`.
+2. **When `action` is `from-code`:** seed segments/competitors/needs only from `from_code_evidence` + parent ES; leave sizing/ICP thin or `hold` — never invent TAM from package names; set `maturity: code-extraction`; ask contradictions only (`skills/rr-discovery/refs/from-code.md`).
+3. For competitors: accept user-stated list; probe for indirect alternatives. **Name an incumbent** (or the internal status quo) and a do-nothing option.
+4. Size the market **in this level**, evidence-backed. External: top-down **and** bottom-up (or `hold` on the missing method); reconcile only with evidence. Internal: teams × hours × loaded cost; skip TAM. Fabricated sizing → freeze fail / claim check (`skills/rr-discovery/refs/business-case-handoff.md`, `skills/rr-discovery/refs/compose-prose.md`).
+5. Map each customer need to a ranked `ES-*` parent (usually a metric).
+6. Classify needs as Kano `basic` / `performance` / `delighter` — do not use Must/Should/Could. Mint rationales for ranked needs.
+7. Flag residual gaps beyond the claim-class budget → `research_deferred[]` with a named evidence bar, or Gate 7 `hold`.
 
 ## Traceability
 
