@@ -4,13 +4,13 @@
 
 **Load when:** After BRD Gates 1–7 pass and the skill is ready to freeze discovery; also when validating Plan entry or repairing a missing handoff.
 
-**Does not:** replace `executive-summary.md` / `mrd.md` / `brd.md`, mint PRD, or auto-advance Plan. Shared freeze/mint rules: [baselines.md](../../../refs/planning/baselines.md), [cascade.md](cascade.md).
+**Does not:** replace `executive-summary.md` / `mrd.md` / `brd.md`, mint PRD, or auto-advance Plan. Shared freeze/mint rules: `refs/planning/baselines.md`, [cascade.md](cascade.md).
 
 ## When handoff runs
 
 After **BRD** completes Gates 1–7 with verdict `proceed` or `proceed-with-conditions`:
 
-1. Mint level freeze for `brd` (and ensure ES/MRD already frozen) per [cascade.md](cascade.md) / [baselines.md](../../../refs/planning/baselines.md).
+1. Mint level freeze for `brd` (and ensure ES/MRD already frozen) per [cascade.md](cascade.md) / `refs/planning/baselines.md`.
 2. Write `{output_dir}/business-case.yaml` with required fields below.
 3. Stamp `status.yaml` / session: `discovery_complete: true` (and digest pins as baselines require).
 4. Require conditional artifacts on disk if those techniques ran ([ideation.md](ideation.md), [interview-method.md](interview-method.md)).

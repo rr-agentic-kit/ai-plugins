@@ -3,8 +3,8 @@
 **Cascade level:** 2  
 **Inherits from:** executive-summary (vision, problem, constraints)  
 **Narrows to:** market context relevant to the stated vision  
-**Priority method:** Kano on needs — [item-schema.md](../../../../refs/planning/doc-standards/item-schema.md)  
-**Blind-spots (stage-exit):** Scan only the mrd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
+**Priority method:** Kano on needs — `refs/planning/doc-standards/item-schema.md`  
+**Blind-spots (stage-exit):** Scan only the mrd row in `skills/rr-discovery/refs/blind-spots.md` (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Ground the initiative in market reality — segments, competitors, trends — wi
 | **Customer needs** | Unmet needs mapped to an executive-summary metric | Ranked leaves: `basic` / `performance` / `delighter` |
 | **Market risks** | External threats — regulation, commoditization, disruption | Prose (unnumbered); impact × likelihood in the section |
 
-Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for this layer — do not flatten needs into MoSCoW. Sizing is a required evidence-backed section, not a research-phase deferral (`market_type: internal` skips TAM). Ranked leaves carry `Rationale`. Binding Gate 7 at this level ([expert-panel.md](../expert-panel.md)).
+Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for this layer — do not flatten needs into MoSCoW. Sizing is a required evidence-backed section, not a research-phase deferral (`market_type: internal` skips TAM). Ranked leaves carry `Rationale`. Binding Gate 7 at this level (`skills/rr-discovery/refs/expert-panel.md`).
 
 ## Extraction method (discovery)
 

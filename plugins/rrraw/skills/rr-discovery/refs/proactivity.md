@@ -2,9 +2,9 @@
 
 **Owner:** Active panel loop during discovery — auto-reflection, search-vs-research split, reflect triggers, and write-time pre-save.
 
-**Load when:** Reflect/explore trigger fires during inline discovery (not during the post-composition research phase — see [research-method.md](research-method.md)). **Also** at write-time pre-save reflection (after stage-exit blind-spots + Gate 7 + success-criteria; all depths; files already on disk). Pre-save does not replace stage-exit blind-spots or Gate 7.
+**Load when:** Reflect/explore trigger fires during inline discovery (not during post-composition Plan research (`rr-planner`)). **Also** at write-time pre-save reflection (after stage-exit blind-spots + Gate 7 + success-criteria; all depths; files already on disk). Pre-save does not replace stage-exit blind-spots or Gate 7.
 
-Panel seats, verdict ladder, claim classes, evidence loop, and owe-an-alternative: [expert-panel.md](expert-panel.md). Sweep and ledger writes: [decision-ledger.md](../../../refs/planning/decision-ledger.md). Pre-save block: that ledger's open-queue / binding `hold`/`kill` rule.
+Panel seats, verdict ladder, claim classes, evidence loop, and owe-an-alternative: [expert-panel.md](expert-panel.md). Sweep and ledger writes: `refs/planning/decision-ledger.md`. Pre-save block: that ledger's open-queue / binding `hold`/`kill` rule.
 
 ## Active panel loop
 
@@ -62,9 +62,9 @@ Fire reflection when any of:
 
 ## Pre-save reflection (write-time)
 
-Runs **after** stage-exit blind-spots (Gate 6), Gate 7 viability, and [success-criteria.md](../../../refs/planning/success-criteria.md), **after compose files exist**, **before** the skill's `session-state.json` persist. All depths. Pause / stop does **not** trigger this.
+Runs **after** stage-exit blind-spots (Gate 6), Gate 7 viability, and `refs/planning/success-criteria.md`, **after compose files exist**, **before** the skill's `session-state.json` persist. All depths. Pause / stop does **not** trigger this.
 
-**Block** when [decision-ledger.md](../../../refs/planning/decision-ledger.md) open-queue / binding `hold`/`kill` rule fires (do not write `final_status: ok`; do not freeze leftover drafts as accepted). Advisory `hold` at BRD/PRD does not block if the user accepted it.
+**Block** when `refs/planning/decision-ledger.md` open-queue / binding `hold`/`kill` rule fires (do not write `final_status: ok`; do not freeze leftover drafts as accepted). Advisory `hold` at BRD/PRD does not block if the user accepted it.
 
 This is thinner than discovery-time Gate 5 and does **not** re-run the blind-spot taxonomy:
 

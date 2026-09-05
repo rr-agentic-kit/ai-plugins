@@ -29,7 +29,7 @@ Before solution talk, lock the pain:
 
 Reject "nice idea" framing. If who/frequency/cost cannot be named → AskQuestion; do not invent. Park unresolved as `open_holds` candidates for L1.
 
-Log material framing choices as ledger assumptions/decisions ([decision-ledger.md](../../../refs/planning/decision-ledger.md)).
+Log material framing choices as ledger assumptions/decisions (`refs/planning/decision-ledger.md`).
 
 ## Multi-perspective brainstorm
 

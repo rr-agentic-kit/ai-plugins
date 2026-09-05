@@ -12,21 +12,6 @@ Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`
 
 **Out of scope:** PRD / RICE / stories / research reports / launch calendars / architecture authorship as Discover deliverable.
 
-Shared ledger / items / baselines: `plugins/rrraw/refs/planning/`.
-
-## When
-
-### Use when
-
-- Proving a bet before PRD (`--discover` / `--executive-summary` / `--mrd` / `--brd`)
-- Bootstrap or repair `docs/` (`--setup`) without starting compose
-- Resume discovery (`--resume`) or challenge ES/MRD/BRD (`--challenge`)
-
-### Avoid when
-
-- PRD compose, feature backlog, or post-compose research → `rr-planner`
-- Implementation, code review, tickets, analytics/CI
-
 ## Actions
 
 | id | outcome | pick when |
@@ -37,12 +22,47 @@ Shared ledger / items / baselines: `plugins/rrraw/refs/planning/`.
 | `challenge` | Pre-mortem / red-team report | Existing Discover docs |
 | `resume` | Continue checkpoint | Paused Discover session |
 
+## When
+
+### Use when
+
+- Proving a bet before PRD (`--discover` / `--executive-summary` / `--mrd` / `--brd`)
+- Bootstrap or repair `docs/` (`--setup`) — does not start discover
+- Resume discovery (`--resume`) or challenge ES/MRD/BRD (`--challenge`)
+
+### Avoid when
+
+- Need Plan (PRD / research / feature backlog) → `rr-planner`
+- Implementation, code review, tickets, analytics/CI
+
 ## Philosophy
 
 - **Hard freeze** — Plan refuses entry without frozen BRD + valid `business-case.yaml`
 - **No fabricated TAM** — `hold` / `vague` beat fake precision
 - **Humanize** — Cascade prose is not AI-slop; machine files skip humanize
 - **Anti-triggers** — Features/RICE/launch calendars park to Plan or notes
+
+## UX
+
+### Invoke
+
+Flags (`--setup` / `--discover` / `--challenge` / …) or clear Discover NL; bare invoke never silent-rediscovers.
+
+### Intake
+
+Status-first (summary → phase status + session-state); resolve emits payload before cascade.
+
+### Clarify
+
+AskQuestion on vague posture/domain, binding panel `hold`, or missing freeze fields — do not invent.
+
+### Output
+
+Cascade stems + handoff on BRD freeze; challenge reports when requested; machine files skip humanize.
+
+### Close
+
+Session-state + status stamps written; Next Up is Plan (`rr-planner`) after freeze.
 
 ## Technique refs
 
@@ -56,4 +76,15 @@ Shared ledger / items / baselines: `plugins/rrraw/refs/planning/`.
 | [business-case-handoff](refs/business-case-handoff.md) | Compact Plan handoff |
 | [compose-prose](refs/compose-prose.md) | Humanize gate before cascade `.md` persist |
 
-Bare invoke never silent-rediscovers — [refs/input-resolution.md](refs/input-resolution.md).
+## Constraints
+
+- **Invoke:** Auto — no `disable-model-invocation`; ambient WHEN description is enough
+- **Gates:** BRD freeze + humanize before cascade `.md` persist; no fabricated TAM
+- **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
+- **Eval-first:** Fix FAIL audit ids only; preserve outcome (no redesign)
+
+## Notes
+
+- Shared ledger / items / baselines: plugin `refs/planning/` (link there directly — no skill stubs)
+- Bare invoke never silent-rediscovers — [refs/input-resolution.md](refs/input-resolution.md)
+- Technique refs above are skill-local under `skills/rr-discovery/refs/`

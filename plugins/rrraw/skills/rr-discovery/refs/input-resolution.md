@@ -4,7 +4,7 @@
 
 **Scope:** `rr-discovery` only. Plan actions (`--prd`, `--research`, PRD compose) belong to `rr-planner` — do not invent them here.
 
-Shared schemas and freeze rules: [contracts.md](../../../refs/planning/contracts.md), [baselines.md](../../../refs/planning/baselines.md), [output-formats.md](../../../refs/planning/output-formats.md), [setup.md](../../../refs/planning/setup.md). Load the shared package directly.
+Shared schemas and freeze rules: `refs/planning/contracts.md`, `refs/planning/baselines.md`, `refs/planning/output-formats.md`, `refs/planning/setup.md`. Load the shared package directly.
 
 ## Responsibilities
 
@@ -13,7 +13,7 @@ Shared schemas and freeze rules: [contracts.md](../../../refs/planning/contracts
 - Resolve `PROJECT_ROOT` and default `output_dir`.
 - Fall back to NL intent when no explicit action flag is present.
 - Apply conflict matrix and precedence rules.
-- Emit `NormalizedPayload` (see [contracts.md](../../../refs/planning/contracts.md)) plus `resolution_trace`.
+- Emit `NormalizedPayload` (see `refs/planning/contracts.md`) plus `resolution_trace`.
 
 ## Primary action flags
 
@@ -49,7 +49,7 @@ When no primary flag is present, do not emit a payload yet. Run **NL intent fall
 1. `git rev-parse --show-toplevel` if the working tree is a git repo.
 2. Else workspace / current working directory root.
 
-Default `output_dir` = `{PROJECT_ROOT}/docs/discovery/`. `--output-dir` always wins. When phase `status.yaml.next` is set and the route is `continue-next-track` (or `--target` names that track), set `output_dir` to `{PROJECT_ROOT}/docs/discovery/{next}/` unless `--output-dir` was explicit. Summary `rrr-status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md` stay in `{PROJECT_ROOT}/docs/`; phase detail in `docs/discovery/` ([baselines.md](../../../refs/planning/baselines.md)).
+Default `output_dir` = `{PROJECT_ROOT}/docs/discovery/`. `--output-dir` always wins. When phase `status.yaml.next` is set and the route is `continue-next-track` (or `--target` names that track), set `output_dir` to `{PROJECT_ROOT}/docs/discovery/{next}/` unless `--output-dir` was explicit. Summary `rrr-status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md` stay in `{PROJECT_ROOT}/docs/`; phase detail in `docs/discovery/` (`refs/planning/baselines.md`).
 
 ## Shared selectors
 
@@ -68,7 +68,7 @@ Default `output_dir` = `{PROJECT_ROOT}/docs/discovery/`. `--output-dir` always w
 
 `--format yaml` and `--format json` are not plan-document formats. Do **not** alias either to md. Emit `UNSUPPORTED_FORMAT`.
 
-Allowed JSON on disk (not selected by `--format`): `items.json` and `session-state.json`. Agent `Task` payloads stay JSON (internal). `payload.format` stays `"md"`. Durable project knowledge is `rrr-status.yaml` (summary) + `docs/discovery/status.yaml` (detail); skill-owned — [baselines.md](../../../refs/planning/baselines.md). `business-case.yaml` is YAML handoff — [business-case-handoff.md](business-case-handoff.md).
+Allowed JSON on disk (not selected by `--format`): `items.json` and `session-state.json`. Agent `Task` payloads stay JSON (internal). `payload.format` stays `"md"`. Durable project knowledge is `rrr-status.yaml` (summary) + `docs/discovery/status.yaml` (detail); skill-owned — `refs/planning/baselines.md`. `business-case.yaml` is YAML handoff — [business-case-handoff.md](business-case-handoff.md).
 
 ### Question mode
 
@@ -117,7 +117,7 @@ After payload emit, the skill **classifies** (judgment — not CI):
 | **open-next** | Current docs shipped, no next, user wants minor+ → confirm, then mint `next` as `{track+minor}.0?`. Refuse if current docs still `?`. |
 | **unfreeze** | Obligations break, no next (or patch-sized). Ask. Never auto-unfreeze. |
 
-Unlock / patch-only-current: [baselines.md](../../../refs/planning/baselines.md). Do **not** emit `NEXT_LOCKED` or `CURRENT_NOT_PATCH`.
+Unlock / patch-only-current: `refs/planning/baselines.md`. Do **not** emit `NEXT_LOCKED` or `CURRENT_NOT_PATCH`.
 
 ### Legacy path fallback
 
@@ -229,7 +229,7 @@ Load `docs/rrr-status.yaml` (glance), then `{output_dir}/status.yaml` (or `{PROJ
 | `continue-next-track` | `next` set and next-track docs still `?`; user is working that track (or `--target next`). |
 | `ask` | Bare invoke, discovery docs frozen / `discovery_complete`, nothing open — **do not** rediscover. Ask: patch / `--change` / open-next / hand off to Plan / stop. |
 
-`--discover` / `--all` / a level flag **overrides** this pick (still expand `cascade_levels` as below). Override does not skip unlock stops in [baselines.md](../../../refs/planning/baselines.md).
+`--discover` / `--all` / a level flag **overrides** this pick (still expand `cascade_levels` as below). Override does not skip unlock stops in `refs/planning/baselines.md`.
 
 Classify patch vs redirect-to-next vs open-next vs unfreeze per `--change` above. Those are skill stops, not validator codes.
 
@@ -308,4 +308,4 @@ Stop immediately; do not invoke agents. Return `PhaseError` with code below.
 | `UNSUPPORTED_DEPTH` | Depth not in allowed set |
 | `OUT_OF_SCOPE` | `--prd` / `--research`, Plan/PRD NL, research-phase NL, code/ticket work, or artifact-type advice with no discovery primary |
 
-Error response shape: see [contracts.md](../../../refs/planning/contracts.md) `PhaseError`.
+Error response shape: see `refs/planning/contracts.md` `PhaseError`.

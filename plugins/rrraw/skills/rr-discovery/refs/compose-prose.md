@@ -22,10 +22,10 @@ claim check → persist .md
 ```
 
 1. **Compose agent emits draft** — facts locked to ledger / `items.json` / level notes. Agent returns slim receipt; it does **not** call humanize.
-2. **Skill loads** [`skills/docs/rr-humanize/`](../../docs/rr-humanize/SKILL.md):
-   - **generate** on first write of that stem/artifact — [refs/generate.md](../../docs/rr-humanize/refs/generate.md)
-   - **rewrite** on re-compose / patch prose — [refs/rewrite.md](../../docs/rr-humanize/refs/rewrite.md)
-   - Always apply [refs/readability.md](../../docs/rr-humanize/refs/readability.md) during reshape.
+2. **Skill loads** `skills/docs/rr-humanize/SKILL.md`:
+   - **generate** on first write of that stem/artifact — `skills/docs/rr-humanize/refs/generate.md`
+   - **rewrite** on re-compose / patch prose — `skills/docs/rr-humanize/refs/rewrite.md`
+   - Always apply `skills/docs/rr-humanize/refs/readability.md` during reshape.
 3. **CLI budget** (per persist):
    - generate ≤ **1** `scan`
    - rewrite ≤ **2** (`scan`, optional `apply-safe`)
@@ -55,7 +55,7 @@ Do not run scan/reshape on these.
 | Challenge report prose body | Frontmatter keys (`doc_rev`, `depth`, …) |
 | Session artifacts listed above | Rank enums, rationale id tokens |
 
-Preserve hedges that encode real uncertainty (`hold`, `vague`) — firm tone must not delete honest unknowns ([rr-humanize rewrite meaning lock](../../docs/rr-humanize/refs/rewrite.md)).
+Preserve hedges that encode real uncertainty (`hold`, `vague`) — firm tone must not delete honest unknowns (`skills/docs/rr-humanize/refs/rewrite.md`).
 
 ## Ownership split
 

@@ -136,7 +136,7 @@ Apply on `--challenge` across all loaded docs. At stage-exit, apply only when th
 
 `reword` · `refile` · `demote` · `add_constraint` · `park_notes` · `park_later` · `flag_risk` · `scope_change`
 
-`demote` and `scope_change` are **recommendations only** — the skill never applies them without user confirmation and a ledger `r-*` ([decision-ledger.md](../../../refs/planning/decision-ledger.md)).
+`demote` and `scope_change` are **recommendations only** — the skill never applies them without user confirmation and a ledger `r-*` (`refs/planning/decision-ledger.md`).
 
 ### Per-lens × per-level allowed `fix_action`
 
@@ -248,7 +248,7 @@ When mechanism-level overflow exceeds PRD's product-facing scope, set `target_ar
 
 ## Static vs judgment
 
-[success-criteria.md](../../../refs/planning/success-criteria.md). Judgment only: compound leaves, MoSCoW inflation vs the posture legend, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
+`refs/planning/success-criteria.md`. Judgment only: compound leaves, MoSCoW inflation vs the posture legend, vague AC, missing/wrong posture, off-level facts sitting on the wrong doc.
 
 ## Challenge output expectations
 

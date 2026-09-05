@@ -3,8 +3,8 @@
 **Cascade level:** 1 (foundation)  
 **Inherits from:** user input, conversation context  
 **Narrows to:** strategic vision, problem framing, and session posture for MRD  
-**Priority method:** MoSCoW on **Functional deliverables only** — [item-schema.md](../../../../refs/planning/doc-standards/item-schema.md)  
-**Blind-spots (stage-exit):** Scan only the executive-summary row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
+**Priority method:** MoSCoW on **Functional deliverables only** — `refs/planning/doc-standards/item-schema.md`  
+**Blind-spots (stage-exit):** Scan only the executive-summary row in `skills/rr-discovery/refs/blind-spots.md` (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 
@@ -29,7 +29,7 @@ Anchor all downstream docs to a clear vision, problem statement, and rationale. 
 | **Kill criteria** *(optional but Gate 7 asks)* | What evidence by when flips verdict to kill | Prose or ranked leaves |
 | **Horizons** *(optional)* | Thematic future buckets (≤5); not an exhaustive feature list | Ranked leaves (no MoSCoW); may point at `later.md` |
 
-Prefix `ES`. Mint `ES-n` only for ranked sections. Posture, vision, problem, what-must-be-true, viability verdict, cost position, and defensibility stay prose. Ranked leaves carry `Rationale`. Posture classification: [project-posture.md](../project-posture.md). Premise test and verdict: [expert-panel.md](../expert-panel.md). Strategy lenses: [strategy-lenses.md](../strategy-lenses.md).
+Prefix `ES`. Mint `ES-n` only for ranked sections. Posture, vision, problem, what-must-be-true, viability verdict, cost position, and defensibility stay prose. Ranked leaves carry `Rationale`. Posture classification: `skills/rr-discovery/refs/project-posture.md`. Premise test and verdict: `skills/rr-discovery/refs/expert-panel.md`. Strategy lenses: `skills/rr-discovery/refs/strategy-lenses.md`.
 
 ### Section scope (agent-facing)
 
@@ -60,24 +60,24 @@ Consent scope is **derived, not a fixed list**. Any Functional-deliverable Must 
 
 ## Domain-routing triggers
 
-When GDPR, i18n, distribution, security, or enrichment-law topics surface during ES discovery, load [domain-routing.md](../domain-routing.md) and emit a placement table **once per distinct domain topic** — user reviews once, skill applies routing silently thereafter. Examples:
+When GDPR, i18n, distribution, security, or enrichment-law topics surface during ES discovery, load `skills/rr-discovery/refs/domain-routing.md` and emit a placement table **once per distinct domain topic** — user reviews once, skill applies routing silently thereafter. Examples:
 
 - **GDPR/privacy** — regime + consent outcome at ES (Constraints); business rules at BRD; product backlog at PRD; mechanism at `tech.md`
 - **i18n** — "multi-language support" is a Functional deliverable Must; locale matrix and copy workflow are PRD
-- **Distribution** — strategy ("market-compatible channels") at ES when success-critical; beta/alpha/private-link tactics at PRD only ([domain-routing.md](../domain-routing.md) § distribution)
+- **Distribution** — strategy ("market-compatible channels") at ES when success-critical; beta/alpha/private-link tactics at PRD only (`skills/rr-discovery/refs/domain-routing.md` § distribution)
 
 ## Extraction method (discovery)
 
-1. If `session_state.project_posture` is missing or unconfirmed, run the posture gate first ([project-posture.md](../project-posture.md)) — scan, confirm (including `domain_context`), persist the Posture **section**. Do not start vision while posture is unset.
+1. If `session_state.project_posture` is missing or unconfirmed, run the posture gate first (`skills/rr-discovery/refs/project-posture.md`) — scan, confirm (including `domain_context`), persist the Posture **section**. Do not start vision while posture is unset.
 2. Start with user's free-form description; extract vision and problem separately.
 3. If user leads with solution → redirect: "What problem does [solution] solve?"
-4. Run the **premise test** ([expert-panel.md](../expert-panel.md)): sit founder/CEO, seed investor, domain practitioner; write What-must-be-true; classify claims; evidence loop; write Viability verdict. Binding. Both are prose sections, not `ES-*` ids.
+4. Run the **premise test** (`skills/rr-discovery/refs/expert-panel.md`): sit founder/CEO, seed investor, domain practitioner; write What-must-be-true; classify claims; evidence loop; write Viability verdict. Binding. Both are prose sections, not `ES-*` ids.
 5. Probe for "why now" if not stated.
 6. Separate **outcomes** (Success metrics) from **capabilities** (Functional deliverables) from **limits** (Constraints). Misfiled features (e.g. "must be in English" as a constraint) → refile to Functional deliverables.
 7. Push back on unmeasurable success metrics → apply metric-teeth rule; offer proxy with deadline or anchor.
 8. Record constraints (with `_tag_:` when helpful) and non-goals as first-class items. Under `existing`, shipped behavior lands in Constraints / non-goals, not as PRD features.
 9. Mint `ES-n` ids for ranked sections only; default `spec: idea`; promote to `draft` while specifying. Do not auto-promote to `ready`. Mint ledger rationales for ranked leaves before compose.
-10. Feature-level detail volunteered during this level → [note-sessions.md](../note-sessions.md), not an ES fact.
+10. Feature-level detail volunteered during this level → `skills/rr-discovery/refs/note-sessions.md`, not an ES fact.
 11. Mode existence (e.g. anonymous browse) can be its own Functional-deliverable Must when success-critical — separate from the privacy/consent constraint (T7-1).
 
 ## Traceability

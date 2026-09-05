@@ -3,9 +3,9 @@
 **Cascade level:** 3  
 **Inherits from:** executive-summary + MRD  
 **Narrows to:** business objectives, stakeholders, and business-level constraints  
-**Priority method:** MoSCoW on objectives, rules, and dependencies — [item-schema.md](../../../../refs/planning/doc-standards/item-schema.md)  
-**Panel seats:** CFO + COO + domain practitioner (advisory) — [expert-panel.md](../expert-panel.md)  
-**Blind-spots (stage-exit):** Scan only the brd row in [blind-spots.md](../blind-spots.md) (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
+**Priority method:** MoSCoW on objectives, rules, and dependencies — `refs/planning/doc-standards/item-schema.md`  
+**Panel seats:** CFO + COO + domain practitioner (advisory) — `skills/rr-discovery/refs/expert-panel.md`  
+**Blind-spots (stage-exit):** Scan only the brd row in `skills/rr-discovery/refs/blind-spots.md` (`in_scope` + `inherit_check`). Do not copy the taxonomy here.
 
 ## Purpose
 

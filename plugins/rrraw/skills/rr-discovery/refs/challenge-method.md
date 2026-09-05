@@ -6,7 +6,7 @@
 
 **Complements:** Blind-spot taxonomy in [blind-spots.md](blind-spots.md) (category scan). This ref owns **how** to attack strategy and kill criteria — not the full taxonomy table.
 
-**Does not:** auto-unfreeze, mint versions, invent TAM, or rewrite cascade docs without skill compose. Findings persist as `{stem}.challenge.report.md`; skill stamps `status.yaml` challenge attestation ([baselines.md](../../../refs/planning/baselines.md)).
+**Does not:** auto-unfreeze, mint versions, invent TAM, or rewrite cascade docs without skill compose. Findings persist as `{stem}.challenge.report.md`; skill stamps `status.yaml` challenge attestation (`refs/planning/baselines.md`).
 
 ## Pre-mortem
 
@@ -67,7 +67,7 @@ Orchestrator persists `{stem}.challenge.report.md` with frontmatter `depth`. Bod
 5. Mapping to blind-spot category ids when applicable
 6. Residual accepts (user-accepted) vs open
 
-Do not claim `clean-shallow` / `clean-deep` in the report body — skill stamps attestation only when findings are zero for that stem ([baselines.md](../../../refs/planning/baselines.md)).
+Do not claim `clean-shallow` / `clean-deep` in the report body — skill stamps attestation only when findings are zero for that stem (`refs/planning/baselines.md`).
 
 ## Interaction with cascade
 
