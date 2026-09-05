@@ -60,6 +60,7 @@ def test_setup_greenfield(tmp_path: Path, capsys: object) -> None:
     assert rows["plan status.yaml"][0] == "created"
     assert rows["cascade format"][0] == "ok"
     assert rows["cascade versioning"][0] == "ok"
+    assert rows["pr validate workflow"][0] == "created"
     assert docs.is_dir()
     assert (docs / "discovery").is_dir()
     assert (docs / "plan").is_dir()
@@ -67,6 +68,9 @@ def test_setup_greenfield(tmp_path: Path, capsys: object) -> None:
     assert (docs / "discovery" / "status.yaml").is_file()
     assert (docs / "plan" / "status.yaml").is_file()
     assert (docs / "agent.plan.md").is_file()
+    workflow = tmp_path / ".github" / "workflows" / "rrr-validate-planning.yml"
+    assert workflow.is_file()
+    assert "HAND_BUMP" in workflow.read_text(encoding="utf-8")
     assert not (docs / "future.md").exists()
     for stem in vp.DISCOVERY_STEMS:
         assert not (docs / "discovery" / f"{stem}.md").exists()

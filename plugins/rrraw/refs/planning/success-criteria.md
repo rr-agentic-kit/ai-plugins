@@ -29,7 +29,7 @@ sh scripts/validate_planning.sh <output-dir>
 - `spec == ready` ⇒ real rank present (`—` does not count); cross-doc parent `ready` (same-doc container exempt)
 - md `_key_:` headers vs `items.json` drift
 - Ranked-leaf `Rationale` present and resolving when `decision-ledger.yaml` exists (`LEDGER_MISSING` is a warning and skips these checks)
-- When `status.yaml` exists: `PARENT_UNFROZEN`, `STALE_PIN`, `REV_WHILE_OPEN`, `HAND_BUMP` ([baselines.md](baselines.md)). Do **not** FAIL major/minor policy, `NEXT_LOCKED`, or `CURRENT_NOT_PATCH`. Independent product/docs patches are valid. `future.md` and `agent.plan.md` are not script input.
+- When `status.yaml` exists: `PARENT_UNFROZEN`, `STALE_PIN`, `REV_WHILE_OPEN`, `HAND_BUMP` ([baselines.md](baselines.md)). Do **not** FAIL major/minor policy, `NEXT_LOCKED`, or `CURRENT_NOT_PATCH`. Independent product/docs patches are valid. `future.md` and `agent.plan.md` are not script input. **PR CI** (setup-installed) is the authoritative fail-closed path — local-only is insufficient ([setup.md](setup.md)).
 
 Schema: [schemas/items.schema.json](schemas/items.schema.json).
 

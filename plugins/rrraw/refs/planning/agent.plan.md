@@ -1,10 +1,10 @@
 # Planning pairing (always on)
 
-This file is not the planner. Pairing, unlock, and version mint live in skills `rr-discovery` (Discover: executive-summary → BRD + business-case) and `rr-planner` (Plan: PRD+ from frozen business case).
+This file is a **tripwire only** — not the planner and not a version mint. Pairing, unlock, and version mint live in flow skills `rr-discovery` (Discover) and `rr-planner` (Plan); future Execute uses the same Shared law. Version SoT: plugin `refs/planning/baselines.md` (no skill-local copies).
 
-Read `rrr-status.yaml` in this directory for a one-line glance (`phase`, `track`, `summary`). Operational pins/digests live in `discovery/status.yaml` and `plan/status.yaml` — load the phase file before freeze, pin, or challenge work.
+Read `rrr-status.yaml` in this directory for a one-line glance (`phase`, `track`, `docs`, `product`, `next`, `summary`). Operational pins/digests live in `discovery/status.yaml` and `plan/status.yaml` — load the phase file before freeze, pin, or challenge work.
 
-Patches to the current track are allowed. Any non-patch version change (`track`, major/minor, open-next, unfreeze, frozen `rev` / pins) — **stop** and load skill `rr-discovery` or `rr-planner` as appropriate. Do not classify or mint here. Do not edit those fields by hand.
+Patches to the current track are allowed. Any non-patch version change (`track`, major/minor, open-next, unfreeze, frozen `rev` / pins) — **stop** and load skill `rr-discovery` or `rr-planner` as appropriate. Do not classify or mint here. Do not edit those fields by hand (PR CI fails `HAND_BUMP`).
 
 Do not delete this file.
 

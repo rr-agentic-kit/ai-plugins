@@ -106,5 +106,7 @@ Session-state + status stamps written. **Next Up:** after slice freeze → Execu
 ## Notes
 
 - Selectors and depth: [refs/input-resolution.md](refs/input-resolution.md)
-- Shared ledger / items / baselines: plugin `refs/planning/` (link there directly — no skill stubs)
+- **Version law (Shared):** `refs/planning/baselines.md` — flow skills only; no skill-local version stubs. Non-loaders: humanize, git helpers, rr-test. Index: `refs/planning/README.md`
+- Shared ledger / items / setup: plugin `refs/planning/` (link there directly — no skill stubs)
 - Technique refs above are skill-local under `skills/rr-planner/refs/`
+- `docs/agent.plan.md` is tripwire only — refuse non-patch; route here or `rr-discovery`

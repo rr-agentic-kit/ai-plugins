@@ -22,6 +22,9 @@ If Gate 7 is `hold` / `pivot` / `kill` → **do not** mint `discovery_complete`.
 
 | Field | Source | Notes |
 |-------|--------|-------|
+| `track` | phase `status.yaml` | Shared `major.minor` at freeze — stamp from status |
+| `docs` | phase `status.yaml` | Docs line after freeze mint (incl. patch++) |
+| `product` | phase `status.yaml` | Product line at handoff (often still `?`) |
 | `vision` | executive-summary | One durable vision statement |
 | `problem` | executive-summary | Who / severity × frequency / cost of inaction |
 | `premises` | what-must-be-true + claim-class | List; each ties to ledger evidence or explicit `hold` |
@@ -43,6 +46,8 @@ If Gate 7 is `hold` / `pivot` / `kill` → **do not** mint `discovery_complete`.
 | `open_holds` | cascade + techniques | Explicit `hold` / `vague` sizing or deferred evidence bars |
 | `artifact_refs` | session | Paths to conditional artifacts if present |
 | `ledger_pins` | decision-ledger | Reserved rationale/evidence ids Plan must not recycle |
+
+Version stamps (`track` / `docs` / `product`) must match Discover phase status at mint. Do not invent a parallel SemVer — `refs/planning/baselines.md`.
 
 ### `stakeholders` shape
 
@@ -78,7 +83,7 @@ Freeze / `discovery_complete` **fails** when any of:
 
 | Condition | Why |
 |-----------|-----|
-| Required field missing or empty | Plan cannot enter safely |
+| Required field missing or empty | Plan cannot enter safely (incl. `track` / `docs` / `product` stamps) |
 | Success metric decorative | North Star / inputs lack decision teeth (cannot detect failure) |
 | Fabricated TAM or fake precision economics | Illegal — use `hold` / `vague` instead |
 | Conditional technique ran but artifact absent | Assumptions/OST/interview/pretotype must survive chat |
@@ -98,6 +103,9 @@ Fabricated market numbers remain illegal even if "required" — prefer honest `h
 ## Minimal skeleton
 
 ```yaml
+track: "0.1"
+docs: "0.1.1"
+product: "0.1.0?"
 vision: "…"
 problem: "…"
 premises:

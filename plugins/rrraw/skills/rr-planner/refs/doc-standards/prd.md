@@ -1,5 +1,6 @@
 # prd (Product Requirements Document)
 
+**Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
 **Cascade level:** Plan primary doc  
 **Inherits from:** Frozen executive-summary + MRD + BRD + `business-case.yaml`  
 **Narrows to:** Full feature requirement sets, scored backlog, WWAS AC, selection status  
@@ -31,6 +32,7 @@ Before minting structure, recommend `prd_shape` + `scope_mode` (+ optional `arch
 
 | Section | Content | Items |
 |---------|---------|-------|
+| **Human brief** | Decision/ask, what changed, top risks/holds, feedback needed — reviewable without the item graph | Prose (unnumbered); no new IDs |
 | **Shape** | Confirmed `prd_shape` + `scope_mode` (+ arch/interview mode if set) | Prose (unnumbered) |
 | **Product overview** | One-paragraph product description tied to vision | Prose (unnumbered) |
 | **Goals** | Product goals mapped to BRD objectives | Ranked leaves; `_goal-type_: primary \| support` |
@@ -41,7 +43,7 @@ Before minting structure, recommend `prd_shape` + `scope_mode` (+ optional `arch
 | **Acceptance (WWAS)** | Why / What / observable Acceptance — product pass/fail | Prose or leaves tied to selected requirements; smell-gate before slice freeze |
 | **Out of scope** | Product-level exclusions (inherits exec non-goals) | Ranked leaves; no RICE |
 
-Prefix `PRD`. Product scoping + observable AC. **P-tags only on requirement leaves.** No MoSCoW. No sprint / capacity / velocity ceremony. No release-phasing doc in this pass. Personas stay a section; stories name a persona in the body — they do not parent to a persona id.
+Prefix `PRD`. Product scoping + observable AC. **P-tags only on requirement leaves.** No MoSCoW. No sprint / capacity / velocity ceremony. No release-phasing doc in this pass. Personas stay a section; stories name a persona in the body — they do not parent to a persona id. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `rr-humanize`.
 
 Selection: `_status_: deferred | selected | in_progress | delivered` on leaves. Selecting “build now” **never** deletes/shrinks the full set and never invents a second scope doc. Language: **slice / phase**.
 
@@ -82,7 +84,9 @@ Follow `skills/rr-planner/refs/plan-interview.md`: objective → capability → 
 5. Score with architecture in the same pass. Incomplete RICE ok on `idea`/`draft` in `discovery` mode.
 6. Capture full requirement set with P1–P3; select via status.
 7. WWAS + `skills/rr-planner/refs/req-smell.md` before slice freeze.
-8. Slice freeze → `skills/rr-planner/refs/execute-handoff.md`.
+8. Write or refresh **Human brief** from locked facts last — claim-check; no invented claims (`refs/planning/doc-standards/dual-audience.md`).
+9. Persist cascade `.md` only after skill `compose-prose` → `rr-humanize`.
+10. Slice freeze → `skills/rr-planner/refs/execute-handoff.md`.
 
 ## Traceability (C2-7)
 
@@ -93,6 +97,7 @@ Follow `skills/rr-planner/refs/plan-interview.md`: objective → capability → 
 
 ## Done-when checklist
 
+- [ ] Human brief is reviewable without the item graph (decision/ask + feedback needed; no invented claims)
 - [ ] Shape section records confirmed `prd_shape` + `scope_mode`
 - [ ] Product overview links to executive-summary vision
 - [ ] Every BRD objective has at least one product goal

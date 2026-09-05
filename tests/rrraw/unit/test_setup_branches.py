@@ -35,6 +35,19 @@ injection:
         setup_mod.parse_agent_config(text)
 
 
+def test_setup_pr_validate_workflow_idempotent(tmp_path: Path) -> None:
+    first = setup_mod.setup_pr_validate_workflow(tmp_path)
+    assert first[0] == "created"
+    path = tmp_path / ".github" / "workflows" / "rrr-validate-planning.yml"
+    assert path.is_file()
+    assert "HAND_BUMP" in path.read_text(encoding="utf-8")
+    second = setup_mod.setup_pr_validate_workflow(tmp_path)
+    assert second == ("ok", "matches template")
+    path.write_text("stale\n", encoding="utf-8")
+    third = setup_mod.setup_pr_validate_workflow(tmp_path)
+    assert third[0] == "fixed"
+
+
 def test_setup_plans_directory_when_path_is_file(tmp_path: Path) -> None:
     blocker = tmp_path / "plans"
     blocker.write_text("not a dir", encoding="utf-8")

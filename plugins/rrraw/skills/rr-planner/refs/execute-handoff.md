@@ -22,7 +22,7 @@ Skill writes `refs/planning/output-formats.md` kernel:
 | **Non-goals** | Explicit exclusions for this slice |
 | **Success signal** | Observable pass/fail |
 
-Plus **pins:** requirement ids, parents, delta paths, `architecture_rev` (may be `draft`), AC refs.
+Plus **version stamps** (`track`, `docs`, `product` from Plan phase status at freeze) and **pins:** requirement ids, parents, delta paths, `architecture_rev` (may be `draft`), AC refs.
 
 Stamp `plan/status.yaml` `slice:` (`refs/planning/baselines.md`).
 
@@ -46,6 +46,6 @@ Future **Execute** consumes the kernel. No Execute skill in this redesign. Futur
 
 ## Done-when
 
-- Kernel five fields + pins present
+- Kernel five fields + version stamps (`track` / `docs` / `product`) + pins present
 - `slice:` stamped; deferred requirements still on PRD
 - Fail conditions not violated

@@ -18,6 +18,8 @@ from .constants import (
     LEGACY_PLANS_DIR,
     PLAN_DIR,
     PLAN_STEMS,
+    PR_VALIDATE_WORKFLOW_REL,
+    PR_VALIDATE_WORKFLOW_TEMPLATE_PATH,
     ROOT_SOT_FILENAMES,
     RRR_STATUS_NAME,
     SETUP_SECTIONS,
@@ -290,6 +292,30 @@ def setup_cascade_versioning(phase_dir: Path) -> tuple[str, str]:
     return "ok", "already canonical"
 
 
+def setup_pr_validate_workflow(repo_root: Path) -> tuple[str, str]:
+    """Install PR-scoped validate_planning workflow (fail closed on HAND_BUMP)."""
+    try:
+        template = PR_VALIDATE_WORKFLOW_TEMPLATE_PATH.read_text(encoding="utf-8")
+    except OSError as exc:
+        return "failed", f"missing workflow template: {exc}"
+    if not template.strip():
+        return "failed", "workflow template is empty"
+    expected = template if template.endswith("\n") else template + "\n"
+    path = repo_root / PR_VALIDATE_WORKFLOW_REL
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.is_file():
+            path.write_text(expected, encoding="utf-8")
+            return "created", "wrote PR validate workflow"
+        current = path.read_text(encoding="utf-8")
+        if current == expected:
+            return "ok", "matches template"
+        path.write_text(expected, encoding="utf-8")
+        return "fixed", "overwrote to template"
+    except OSError as exc:
+        return "failed", str(exc)
+
+
 def _merge_cascade_outcomes(
     outcomes: list[tuple[str, str]],
 ) -> tuple[str, str]:
@@ -365,6 +391,7 @@ def run_setup(docs: Path, repo_root: Path) -> int:
     ]
     results.append(("cascade format", *_merge_cascade_outcomes(format_outcomes)))
     results.append(("cascade versioning", *_merge_cascade_outcomes(version_outcomes)))
+    results.append(("pr validate workflow", *setup_pr_validate_workflow(repo_root)))
     by_name = {name: (status, message) for name, status, message in results}
     failed = False
     for name in SETUP_SECTIONS:

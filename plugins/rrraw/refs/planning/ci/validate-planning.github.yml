@@ -1,0 +1,47 @@
+# Installed by rrraw framework --setup into the host repo.
+# Fails the PR on HAND_BUMP / STALE_PIN / PARENT_UNFROZEN / REV_WHILE_OPEN / maturity codes.
+# Does not mint or classify track major/minor. See refs/planning/baselines.md + setup.md.
+name: rrr-validate-planning
+
+on:
+  pull_request:
+    paths:
+      - "docs/discovery/**"
+      - "docs/plan/**"
+      - "docs/rrr-status.yaml"
+      - "docs/agent.plan.md"
+      - ".github/workflows/rrr-validate-planning.yml"
+
+jobs:
+  validate-planning:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve validate_planning.sh
+        id: resolve
+        env:
+          RRR_PLUGIN_ROOT: ${{ vars.RRR_PLUGIN_ROOT }}
+        run: |
+          set -euo pipefail
+          if [ -n "${RRR_VALIDATE_SH:-}" ] && [ -f "$RRR_VALIDATE_SH" ]; then
+            echo "script=$RRR_VALIDATE_SH" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -n "${RRR_PLUGIN_ROOT:-}" ] && [ -f "$RRR_PLUGIN_ROOT/scripts/validate_planning.sh" ]; then
+            echo "script=$RRR_PLUGIN_ROOT/scripts/validate_planning.sh" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -f plugins/rrraw/scripts/validate_planning.sh ]; then
+            echo "script=plugins/rrraw/scripts/validate_planning.sh" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::error::validate_planning.sh not found. Set repo variable RRR_PLUGIN_ROOT or env RRR_VALIDATE_SH (see rrraw refs/planning/setup.md). Local-only validation is insufficient — PR must fail closed on HAND_BUMP."
+          exit 1
+
+      - name: Validate discovery + plan
+        run: |
+          set -euo pipefail
+          SH="${{ steps.resolve.outputs.script }}"
+          sh "$SH" docs/discovery
+          sh "$SH" docs/plan

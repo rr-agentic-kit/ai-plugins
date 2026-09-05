@@ -2,6 +2,8 @@
 
 Flag-driven test excellence: one skill routes phase agents to assess quality, find gaps, write high-signal tests, fix failures, and triage flaky behavior. No command files; no mandatory artifact I/O.
 
+**Does not** load planning version law (`refs/planning/baselines.md`) — orthogonal to Discover→Plan→Execute track/patch mint.
+
 **Runtime:** [SKILL.md](SKILL.md) · **Policies:** [refs/](refs/)
 
 ## Philosophy

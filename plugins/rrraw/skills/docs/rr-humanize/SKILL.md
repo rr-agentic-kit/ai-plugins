@@ -42,4 +42,4 @@ Empty rewrite input → ask for text. Empty generate brief → ask what to write
 | [register.md](refs/register.md) | Voice and tone |
 | [params.md](refs/params.md) | Flag enums and errors |
 
-Paths relative to plugin root: `skills/docs/humanize/...`
+Paths relative to plugin root: `skills/docs/rr-humanize/...`

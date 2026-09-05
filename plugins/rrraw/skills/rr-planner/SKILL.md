@@ -59,7 +59,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 |-----|------|
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
 | `refs/planning/progress.md` | Every invocation |
-| `refs/planning/setup.md` / `refs/planning/baselines.md` / `refs/planning/agent-config.md` | Setup, freeze, sync |
+| `refs/planning/setup.md` / `refs/planning/baselines.md` / `refs/planning/agent-config.md` | Setup; **version law** (freeze / open-next / ship); sync |
 | [cascade.md](refs/cascade.md) / [project-posture.md](refs/project-posture.md) | Plan body |
 | [plan-interview.md](refs/plan-interview.md) / [prioritization-lens.md](refs/prioritization-lens.md) / [system-design.md](refs/system-design.md) | Interview + score |
 | [doc-standards/prd.md](refs/doc-standards/prd.md) / architecture / constitution / feature-delta | Compose standing + PRD |
@@ -71,7 +71,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | `skills/rr-discovery/refs/compose-prose.md` | Every cascade `.md` persist |
 | `skills/rr-discovery/refs/business-case-handoff.md` | Entry gate |
 | `refs/planning/contracts.md` | Before any `Task` |
-| Shared package | plugin `refs/planning/` (link there directly — no skill stubs) |
+| Shared package | plugin `refs/planning/` (link there directly — no skill stubs). Versioning SoT: `refs/planning/baselines.md` only — future Execute loads the same file. |
 
 No matching technique ref → stop + AskQuestion; do not invent procedure.
 

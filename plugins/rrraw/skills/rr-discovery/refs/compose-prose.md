@@ -2,9 +2,11 @@
 
 **Owner:** Mandatory humanize gate before cascade `.md` (and human-facing session artifacts) hit disk. **Orchestrating skill owns this** — the compose agent does not.
 
-**Load when:** After compose agent returns a draft receipt for `executive-summary` / `mrd` / `brd`, or when persisting conditional session markdown (`assumptions.md`, `opportunity-tree.md`, `interview-synthesis.md`, `pretotype-brief.md`, challenge report prose). Plan reuses the same gate for PRD writes.
+**Load when:** After compose agent returns a draft receipt for `executive-summary` / `mrd` / `brd`, or when persisting conditional session markdown (`assumptions.md`, `opportunity-tree.md`, `interview-synthesis.md`, `pretotype-brief.md`, challenge report prose). Plan reuses the same gate for PRD writes and standing spine / constitution / feature-delta prose.
 
 **Does not:** change item IDs, frontmatter contracts, MoSCoW/Kano ranks, or ledger facts. Meaning lock to ledger/items is absolute.
+
+**Dual audience:** `refs/planning/doc-standards/dual-audience.md` — Human brief is first body section; claim-check covers the brief; default register `active` + `plain`.
 
 ## Pipeline
 
@@ -30,7 +32,7 @@ claim check → persist .md
    - generate ≤ **1** `scan`
    - rewrite ≤ **2** (`scan`, optional `apply-safe`)
    - Paths relative to plugin root, e.g. `python3 skills/docs/rr-humanize/scripts/cli.py scan …` (follow humanize SKILL for exact invocation).
-4. **Claim check** — humanize must **not** invent TAM, metrics, Musts, stakeholders, or premises. Every sentence traces to draft/ledger/items. Structural IDs, YAML frontmatter, and item blocks are **out of scope** for lexicon wipe — prose sections only.
+4. **Claim check** — humanize must **not** invent TAM, metrics, Musts, stakeholders, or premises. Every sentence traces to draft/ledger/items — **including Human brief**. Structural IDs, YAML frontmatter, and `_key_:` lines are **out of scope** for lexicon wipe. Narrative prose **and** leaf `>` blockquote bodies are in scope (readable shalls; do not wipe rank enums or rationale tokens).
 5. **Persist** only after claim check passes. On failure → fix prose or AskQuestion; do not write invented specificity.
 
 ## Machine files — skip humanize
@@ -51,9 +53,10 @@ Do not run scan/reshape on these.
 
 | In scope | Out of scope for lexicon / readability wipe |
 |----------|-----------------------------------------------|
-| Narrative sections, overviews, appendices | `{DOC}-n.m` ids, `_key_:` lines, parent pointers |
+| Narrative sections, overviews, appendices, **Human brief** | `{DOC}-n.m` ids, `_key_:` lines, parent pointers |
+| Leaf `>` blockquote bodies (readable shalls) | Rank enums (`Must`, `basic`, RICE factors), rationale id tokens (`r-NNN`) |
 | Challenge report prose body | Frontmatter keys (`doc_rev`, `depth`, …) |
-| Session artifacts listed above | Rank enums, rationale id tokens |
+| Session artifacts listed above | Heading id prefixes on item lines |
 
 Preserve hedges that encode real uncertainty (`hold`, `vague`) — firm tone must not delete honest unknowns (`skills/docs/rr-humanize/refs/rewrite.md`).
 

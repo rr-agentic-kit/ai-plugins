@@ -4,7 +4,7 @@
 
 **Load when:** Discovering, composing, validating, or challenging any cascade doc.
 
-Audience: compose agent + orchestrator. Working surface is markdown. Validation target is structured (`items.json`).
+Audience: compose agent + orchestrator (AI/validator). Working surface is markdown. Validation target is structured (`items.json`). Cascade stems (ES/MRD/BRD/PRD) are dual-audience — Human brief lives in level doc-standards, contract in [dual-audience.md](dual-audience.md). This file does not address human readers.
 
 ## Shared fields
 
@@ -78,10 +78,10 @@ Declared per level. Native priority method is a property of the **document type*
 
 | Level | Prefix | Method | Rankable leaves | Prose (unnumbered) |
 |-------|--------|--------|-----------------|--------------------|
-| executive-summary | `ES` | MoSCoW on functional deliverables only | Why now, success metrics, functional deliverables, constraints (optional `tag`), non-goals, horizons (optional) | Posture, vision, problem, what-must-be-true, viability verdict |
-| mrd | `MRD` | Kano | Customer needs | Market overview, TAM/SAM/SOM (or internal cost-of-inaction), target segments (`**Primary:**` / `**Secondary:**`), competitors, trends, risks |
-| brd | `BRD` | MoSCoW | Objectives, rules, dependencies | Stakeholders (buyer / user / approver in the section), business risks (impact × likelihood bullets) |
-| prd | `PRD` | RICE / RIC / goal-type + requirement P1–P3 | Goals (`primary`/`support`), stories (RIC), features (RICE), requirement leaves (`priority` + `status`), out-of-scope (no score) | Shape, product overview, user personas (named in story bodies), WWAS AC |
+| executive-summary | `ES` | MoSCoW on functional deliverables only | Why now, success metrics, functional deliverables, constraints (optional `tag`), non-goals, horizons (optional) | **Human brief**, posture, vision, problem, what-must-be-true, viability verdict |
+| mrd | `MRD` | Kano | Customer needs | **Human brief**, market overview, TAM/SAM/SOM (or internal cost-of-inaction), target segments (`**Primary:**` / `**Secondary:**`), competitors, trends, risks |
+| brd | `BRD` | MoSCoW | Objectives, rules, dependencies | **Human brief**, stakeholders (buyer / user / approver in the section), business risks (impact × likelihood bullets) |
+| prd | `PRD` | RICE / RIC / goal-type + requirement P1–P3 | Goals (`primary`/`support`), stories (RIC), features (RICE), requirement leaves (`priority` + `status`), out-of-scope (no score) | **Human brief**, shape, product overview, user personas (named in story bodies), WWAS AC |
 
 ES functional deliverables are Must-only in practice. ES constraints may carry optional `tag`. MRD segments state primary/secondary in the section (not a rank, not an id). MRD/BRD risks state impact × likelihood in the section. PRD `status` / `priority` are manual leaf fields — not derived from children.
 

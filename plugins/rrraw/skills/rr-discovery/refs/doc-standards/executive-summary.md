@@ -1,5 +1,6 @@
 # executive-summary
 
+**Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
 **Cascade level:** 1 (foundation)  
 **Inherits from:** user input, conversation context  
 **Narrows to:** strategic vision, problem framing, and session posture for MRD  
@@ -14,6 +15,7 @@ Anchor all downstream docs to a clear vision, problem statement, and rationale. 
 
 | Section | Content | Items |
 |---------|---------|-------|
+| **Human brief** | Decision/ask, what changed, top risks/holds, feedback needed — reviewable without the item graph | Prose (unnumbered); no new IDs |
 | **Posture** | Existence × commitment for this session (`greenfield`/`existing` × `unsigned`/`signed_v1`) plus `domain_context` | Prose (unnumbered) |
 | **Vision** | One-paragraph aspirational end state (what success looks like) | Prose (unnumbered) |
 | **Problem** | Specific pain; who feels it; **severity × frequency**; cost of inaction | Prose (unnumbered) |
@@ -29,7 +31,7 @@ Anchor all downstream docs to a clear vision, problem statement, and rationale. 
 | **Kill criteria** *(optional but Gate 7 asks)* | What evidence by when flips verdict to kill | Prose or ranked leaves |
 | **Horizons** *(optional)* | Thematic future buckets (≤5); not an exhaustive feature list | Ranked leaves (no MoSCoW); may point at `later.md` |
 
-Prefix `ES`. Mint `ES-n` only for ranked sections. Posture, vision, problem, what-must-be-true, viability verdict, cost position, and defensibility stay prose. Ranked leaves carry `Rationale`. Posture classification: `skills/rr-discovery/refs/project-posture.md`. Premise test and verdict: `skills/rr-discovery/refs/expert-panel.md`. Strategy lenses: `skills/rr-discovery/refs/strategy-lenses.md`.
+Prefix `ES`. Mint `ES-n` only for ranked sections. Human brief, posture, vision, problem, what-must-be-true, viability verdict, cost position, and defensibility stay prose. Ranked leaves carry `Rationale`. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `rr-humanize`. Posture classification: `skills/rr-discovery/refs/project-posture.md`. Premise test and verdict: `skills/rr-discovery/refs/expert-panel.md`. Strategy lenses: `skills/rr-discovery/refs/strategy-lenses.md`.
 
 ### Section scope (agent-facing)
 
@@ -78,8 +80,10 @@ When GDPR, i18n, distribution, security, or enrichment-law topics surface during
 8. Push back on unmeasurable success metrics → apply metric-teeth rule; offer proxy with deadline or anchor.
 9. Record constraints (with `_tag_:` when helpful) and non-goals as first-class items. Under `existing`, shipped behavior lands in Constraints / non-goals, not as PRD features.
 10. Mint `ES-n` ids for ranked sections only; default `spec: idea`; promote to `draft` while specifying. Do not auto-promote to `ready`. Mint ledger rationales for ranked leaves before compose.
-11. Feature-level detail volunteered during this level → `skills/rr-discovery/refs/note-sessions.md`, not an ES fact.
-11. Mode existence (e.g. anonymous browse) can be its own Functional-deliverable Must when success-critical — separate from the privacy/consent constraint (T7-1).
+11. Write or refresh **Human brief** from locked facts last — claim-check; no invented claims (`refs/planning/doc-standards/dual-audience.md`).
+12. Feature-level detail volunteered during this level → `skills/rr-discovery/refs/note-sessions.md`, not an ES fact.
+13. Mode existence (e.g. anonymous browse) can be its own Functional-deliverable Must when success-critical — separate from the privacy/consent constraint (T7-1).
+14. Persist cascade `.md` only after skill `compose-prose` → `rr-humanize` (compose agent does not humanize).
 
 ## Traceability
 
@@ -91,6 +95,7 @@ When GDPR, i18n, distribution, security, or enrichment-law topics surface during
 
 Per-doc bars only. Gate 1, the script, shared success-criteria, Gate 2 / Gate 7, and Gate 6 `in_scope` own the rest.
 
+- [ ] Human brief is reviewable without the item graph (decision/ask + feedback needed; no invented claims)
 - [ ] Posture matches confirmed `session_state.project_posture` including `domain_context`
 - [ ] Vision is outcome-focused (fail: a feature list)
 - [ ] What-must-be-true names premises with claim class and evidence bar (fail: a bare slogan)

@@ -10,7 +10,7 @@ Pairing policy lives in [baselines.md](baselines.md). This file locks wording so
 
 ```yaml
 injection:
-  version: 1
+  version: 2
   load_line: "Read `docs/agent.plan.md` before any planning, pairing, or version work. Do not remove this line."
 ```
 

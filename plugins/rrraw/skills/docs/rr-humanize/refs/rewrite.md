@@ -13,7 +13,7 @@ Preserve all factual claims from source; never add names, numbers, dates, quotes
 
 ## Steps
 
-1. **Scan** — `python3 skills/docs/humanize/scripts/cli.py scan [path]` (required; counts toward budget).
+1. **Scan** — `python3 skills/docs/rr-humanize/scripts/cli.py scan [path]` (required; counts toward budget).
 2. **Meaning lock** — Extract claims, entities, numbers, hedges that express real uncertainty. Do not delete factual uncertainty when `--tone firm` (see `refs/lexicon.md`).
 3. **Apply-safe** (optional, second call max) — `apply-safe [--dry-run]` for `result.auto_fixable` only. Do not use if scan reports no auto-fixable hits.
 4. **LLM reshape** — Load `refs/readability.md`. Load `refs/lexicon.md` only for categories in `result.hits` with `needs_judgment: true` per hit or category.

@@ -101,7 +101,11 @@ created: 2026-06-24T10:00:00Z
 
 # PRD: [Title]
 
-[doc content from compose agent — item headings + `_key_:` line + `>` body per item-schema]
+## Human brief
+
+[decision/ask, what changed, top risks/holds, feedback needed — dual-audience; no new IDs]
+
+[remaining prose sections + item headings + `_key_:` line + `>` body per item-schema]
 
 ## Item index
 
@@ -111,7 +115,7 @@ created: 2026-06-24T10:00:00Z
 | PRD-3.1 | PRD-3 | ready | Must |
 ```
 
-ES `pins: {}`. Unfrozen `doc_rev: "?"`. Optional `maturity: code-extraction` after `--from-code` compose; promote to `draft` on continue-shape (`skills/rr-discovery/refs/from-code.md`). Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Heading + `_key_:` metadata are a closed vocabulary — parser is regex, not an LLM. Item templates: [doc-standards/item-schema.md](doc-standards/item-schema.md).
+ES `pins: {}`. Unfrozen `doc_rev: "?"`. Optional `maturity: code-extraction` after `--from-code` compose; promote to `draft` on continue-shape (`skills/rr-discovery/refs/from-code.md`). Index column 4 is the level’s native field (`MoSCoW` / `Kano` / `Class`). Heading + `_key_:` metadata are a closed vocabulary — parser is regex, not an LLM. Item templates: [doc-standards/item-schema.md](doc-standards/item-schema.md). Dual audience (Human brief first, then prose/items/index): [doc-standards/dual-audience.md](doc-standards/dual-audience.md).
 
 ## `items.json`
 
@@ -236,6 +240,9 @@ Standards: Plan `refs/doc-standards/architecture.md`, `constitution.md`, `featur
 Skill-owned machine handoff on **slice freeze**. **Skip humanize.** Compact — not a PRD dump.
 
 ```yaml
+track: "0.1"
+docs: "0.1.7"
+product: "0.1.0?"
 slice_id: slice-001
 why: "..."
 capabilities:
@@ -255,6 +262,7 @@ pins:
 
 | Field | Rule |
 |-------|------|
+| `track` / `docs` / `product` | Required stamps from Plan phase status at freeze ([baselines.md](baselines.md)) |
 | Why / Capabilities / Constraints / Non-goals / Success signal | Required kernel — five fields only for prose obligations |
 | `pins` | Requirement ids, parents, delta paths, architecture rev (may be `draft`), AC refs |
 | Fail freeze | Smell-fail AC without hold; Effort without architecture; shrinking the full requirement table to “match the slice” |
@@ -367,9 +375,11 @@ Skill owns `decision-ledger.yaml` ([decision-ledger.md](decision-ledger.md)). Co
 
 Discover skill-owned machine handoff after BRD freeze. Field contract: `skills/rr-discovery/refs/business-case-handoff.md`. **Skip humanize.** Not a cascade stem — validator may check presence/required keys for Plan entry fixtures; does not participate in item graph.
 
+Required version stamps on every mint (from Discover phase status): `track`, `docs`, `product` — same SemVer model as [baselines.md](baselines.md).
+
 ## Cascade prose persist
 
-After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD and conditional session markdown artifacts.
+After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing spine/constitution/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md).
 
 ## Status merge
 

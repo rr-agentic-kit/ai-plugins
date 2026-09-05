@@ -9,6 +9,9 @@ import yaml
 from helpers import VALID_FILES, error_codes, write_planning
 
 MINIMAL_BUSINESS_CASE: dict = {
+    "track": "0.1",
+    "docs": "0.1.1",
+    "product": "0.1.0?",
     "vision": "Self-serve checkout without accounts",
     "problem": "Guests abandon when forced to register",
     "premises": [

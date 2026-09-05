@@ -1,5 +1,6 @@
 # brd (Business Requirements Document)
 
+**Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
 **Cascade level:** 3  
 **Inherits from:** executive-summary + MRD  
 **Narrows to:** business objectives, stakeholders, and business-level constraints  
@@ -15,6 +16,7 @@ Translate market context into business outcomes the organization must achieve. B
 
 | Section | Content | Items |
 |---------|---------|-------|
+| **Human brief** | Decision/ask, what changed, top risks/holds, feedback needed — reviewable without the item graph | Prose (unnumbered); no new IDs |
 | **Business objectives** | 3–7 measurable business outcomes (revenue, cost, risk, compliance) | Ranked leaves |
 | **Stakeholders** | Buyer / user / approver **plus** Power×Interest grid (communicate / satisfy / manage closely / monitor) | Prose (unnumbered) |
 | **Capabilities** | Strategic build vs buy vs partner choices (not architecture) | Ranked leaves or prose bullets |
@@ -23,7 +25,7 @@ Translate market context into business outcomes the organization must achieve. B
 | **Dependencies** | Internal teams, systems, approvals required | Ranked leaves |
 | **Business risks** | Organizational, financial, reputational risks with mitigations | Prose (unnumbered); impact × likelihood bullets |
 
-Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won’t is how stakeholders cut scope. Mint `BRD-n` for objectives, rules, and dependencies only.
+Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won’t is how stakeholders cut scope. Mint `BRD-n` for objectives, rules, and dependencies only. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `rr-humanize`.
 
 ## Extraction method (discovery)
 
@@ -34,6 +36,8 @@ Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won�
 5. Distinguish business rules (Must comply) from preferences (Should/Could).
 6. Each objective gets a success criterion testable at business level, in that leaf’s body.
 7. Record build / buy / partner for strategic capabilities; founder/team execution risk when venture posture.
+8. Write or refresh **Human brief** from locked facts last — claim-check; no invented claims (`refs/planning/doc-standards/dual-audience.md`).
+9. Persist cascade `.md` only after skill `compose-prose` → `rr-humanize`.
 
 ## Traceability
 
@@ -45,6 +49,7 @@ Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won�
 
 Per-doc bars only. Gate 1, the script, shared success-criteria, and Gate 6 `in_scope` own the rest.
 
+- [ ] Human brief is reviewable without the item graph (decision/ask + feedback needed; no invented claims)
 - [ ] At least 3 business objectives with measurable success criteria (fail: "improve efficiency")
 - [ ] Buyer and user distinguished (if applicable); Power×Interest grid present
 - [ ] Build/buy/partner recorded for strategic capabilities

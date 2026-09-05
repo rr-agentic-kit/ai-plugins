@@ -91,6 +91,8 @@ Session-state + status stamps written. **Next Up:** after freeze → Plan (`rr-p
 
 ## Notes
 
-- Shared ledger / items / baselines: plugin `refs/planning/` (link there directly — no skill stubs)
+- **Version law (Shared):** `refs/planning/baselines.md` — flow skills only; no skill-local version stubs. Non-loaders: humanize, git helpers, rr-test. Index: `refs/planning/README.md`
+- Shared ledger / items / setup: plugin `refs/planning/` (link there directly — no skill stubs)
 - Bare invoke never silent-rediscovers — [refs/input-resolution.md](refs/input-resolution.md)
 - Technique refs above are skill-local under `skills/rr-discovery/refs/`
+- `docs/agent.plan.md` is tripwire only — refuse non-patch; route here or `rr-planner`

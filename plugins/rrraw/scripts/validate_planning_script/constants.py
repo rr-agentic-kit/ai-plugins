@@ -169,6 +169,9 @@ BUSINESS_CASE_NAME = "business-case.yaml"
 # Compact Plan handoff — required keys (omtm / positioning_angle optional).
 BUSINESS_CASE_REQUIRED_FIELDS: frozenset[str] = frozenset(
     {
+        "track",
+        "docs",
+        "product",
         "vision",
         "problem",
         "premises",
@@ -189,6 +192,10 @@ BUSINESS_CASE_REQUIRED_FIELDS: frozenset[str] = frozenset(
         "artifact_refs",
         "ledger_pins",
     }
+)
+PR_VALIDATE_WORKFLOW_REL = Path(".github") / "workflows" / "rrr-validate-planning.yml"
+PR_VALIDATE_WORKFLOW_TEMPLATE_PATH = (
+    PLUGIN_ROOT / "refs" / "planning" / "ci" / "validate-planning.github.yml"
 )
 CHALLENGE_STATUSES = frozenset({"dirty", "clean", "dirty-accepted"})
 CHALLENGE_KEYS = ("challenge", "next_challenge")
@@ -254,6 +261,7 @@ SETUP_SECTIONS: tuple[str, ...] = (
     "plan status.yaml",
     "cascade format",
     "cascade versioning",
+    "pr validate workflow",
 )
 FRONTMATTER_KEYS: tuple[str, ...] = (
     "doc_type",

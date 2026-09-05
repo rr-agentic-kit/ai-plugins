@@ -68,7 +68,7 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
 | `refs/planning/progress.md` | Every invocation |
 | `refs/planning/setup.md` | `action: setup`; resolve rewrite/sync |
-| `refs/planning/baselines.md` | Resolve; freeze; challenge stamp |
+| `refs/planning/baselines.md` | **Version law** — resolve; freeze; challenge stamp; open-next; ship |
 | [cascade.md](refs/cascade.md) | Discover-path actions |
 | [project-posture.md](refs/project-posture.md) | Discover / from-code start |
 | [from-code.md](refs/from-code.md) | `action: from-code` |
@@ -81,7 +81,7 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 | [challenge-method.md](refs/challenge-method.md) | `--challenge` / `depth: deep` |
 | `refs/planning/contracts.md` | Before any subagent `Task` |
 
-Shared planning package: plugin `refs/planning/` (link there directly — no skill stubs).
+Shared planning package: plugin `refs/planning/` (link there directly — no skill stubs). Versioning SoT is `refs/planning/baselines.md` only — do not copy into this skill tree. Future Execute loads the same file.
 
 ## Agent delegation
 

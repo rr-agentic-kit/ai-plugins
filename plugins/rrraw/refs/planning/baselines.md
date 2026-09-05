@@ -1,8 +1,10 @@
 # baselines
 
-**Owner:** Shared `major.minor` track, independent product/docs patches, freeze pins, unlock policy, `status.yaml`, `agent.plan.md`, and `future.md`. Skill is the only writer of those artifacts. CI does not mint or classify major/minor.
+**Owner:** Shared `major.minor` track, independent product/docs patches, freeze pins, unlock policy, product-ship ceremony, `status.yaml`, `agent.plan.md`, and `future.md`. Skill is the only writer of those artifacts. CI does not mint or classify major/minor — it FAILs mechanical integrity (`HAND_BUMP`, …) on **PRs**.
 
-**Load when:** Every resolve (status-first pick); freeze / `--change` / open-next; compose frontmatter (`track`, `doc_rev`, `pins`).
+**Load when:** Every resolve (status-first pick); freeze / `--change` / open-next; compose frontmatter (`track`, `doc_rev`, `pins`); product ship / unlock.
+
+**Package index:** [README.md](README.md) — versioning is Shared under `refs/planning/`; **flow skills only** (Discover, Plan, future Execute). Non-loaders: `rr-humanize`, git helpers, `rr-test`. No skill-local `baselines.md` stubs.
 
 Item identity, spec, PRD `status` / `priority`, and Effort provenance stay in [doc-standards/item-schema.md](doc-standards/item-schema.md). This ref does not change them. Tickets and technical docs stay out — they target `track` + item id.
 
@@ -18,7 +20,49 @@ Humans talk in **0.1 / 0.2**. Product and docs share that track. Patches diverge
 | **Per-doc rev** | Pin identity only (`BRD@2` + digest). Not the human version. | `2` or `?` |
 | **`?`** | Unshipped / unfrozen. Compose does not increment. | `docs 0.2.0?`, `rev: ?` |
 
-Rejected: shared patch across product and docs; per-doc SEMVER as the human version; CI minting major/minor.
+Glance from `rrr-status.yaml`: `track`, `docs`, `product`, `next` open?, `docs_shipped`, `product_status`.
+
+### SemVer map (track vs patch)
+
+Market SemVer: patch = compatible; minor = additive public surface; major = break. RRRaw maps **track** to the rare minor/major *product-line* decision; **docs/product patches** absorb compatible churn. Pins = content-addressed lineage (not paragraph tags).
+
+| Token | Bumps when | Does **not** bump when |
+|-------|------------|-------------------------|
+| **Track** `major.minor` | Intentional release / planning fork: new capability set, breaking obligation rewrite, or confirmed “next product line” | Grammar; additive PRD item; bugfix; lock-target pin refresh |
+| **Docs patch** `track.N` | Freeze, lock-target, or skill-classified obligation-**preserving** doc change (style, clarify, additive item that does not break upstream/downstream pins) | Product code changes |
+| **Product patch** `track.N` | Ship hotfix / bugfix / non-breaking behavior on same track | Doc-only edits |
+| **doc_rev** (integer) | Freeze / lock-target identity of that stem | Human “version” talk |
+
+| Change | Classify as | Version effect |
+|--------|-------------|----------------|
+| Grammar / style; same meaning | **docs patch** (or compose-only if still `rev: ?`) | `docs`++; pins unchanged if digest obligations identical path; else lock-target |
+| Bug fix in code; no behavior contract change | **product patch** | `product`++; track unchanged |
+| New PRD item; upstream BRD still satisfied; no child obligation break | **docs patch** on same track | `docs`++; PRD `rev`++ on freeze/lock-target — **not** `0.1→0.2` |
+| Same item’s meaning changes so architecture/AC/downstream break | unfreeze or **open-next** (skill confirm) | track minor/major — rare |
+| First implementation of a selected slice ships | product ship ceremony | `product`++; may set `docs_shipped` / lock per below |
+
+**Anti-pattern `0.999`:** Treating every small PRD edit as a track minor. That misuses **track**. Hundreds of PRD/doc edits stay on `0.1.x` docs / `0.1.y` product. Humans still say “we’re on 0.1.” Track minor is a **fork decision** (one unshipped `next` at a time).
+
+**Additive PRD ≠ track bump:** Doc addition is not a docs-breaking change. Behavior risk is priced at **product** ship / slice selection — not by minting `0.2` every time someone types a new requirement.
+
+### Control split
+
+| Who | May bump | May not |
+|-----|----------|---------|
+| Skill (Discover or Plan; future Execute) | **docs patch** on freeze / lock-target / obligation-preserving edit; **product patch** on ship/hotfix; **track** open-next after confirm | hand-edit `track` / frozen rev / pins / mint_hash |
+| Compose | prose/items only; no version fields | all version fields |
+| PR CI (setup-installed) | FAIL on `HAND_BUMP`, `STALE_PIN`, … | mint or classify track major/minor |
+
+### Rejected patterns
+
+| Pattern | Why reject |
+|---------|------------|
+| Shared patch across product and docs | Patches must diverge independently |
+| Per-doc SEMVER as the human version | Humans talk track; `doc_rev` is pin identity only |
+| CI minting or failing major/minor policy | Skill judgment after confirm; CI is mechanical only |
+| Inline forward markers (`[0.2]` tags inside living `0.1` files) | Dual systems, digest death, noisy diffs, task races, per-doc SemVer creep |
+| Every PRD / doc tweak → track minor | **0.999 failure mode** — use docs patch instead |
+| Immutable full-tree CoW (`docs/0.1/`, `docs/0.2/` as default) | Heavy duplication; weak patch-on-shipped-track — compliance zip-per-release only, not default |
 
 ## Project knowledge vs session-state
 
@@ -192,7 +236,7 @@ Legacy `docs/plans/` is a **read fallback once** (same class as old `docs/planni
 
 ## Unlock gate (skill policy, not CI)
 
-Not a validator FAIL. Not an auto-bump. `agent.plan.md` refuses non-patch version work and routes here. This skill classifies.
+Not a validator FAIL. Not an auto-bump. `agent.plan.md` refuses non-patch version work and routes here. Flow skill classifies.
 
 ```
 0.1 docs ?        → refuse open 0.2; refuse ship product 0.1
@@ -201,6 +245,31 @@ Not a validator FAIL. Not an auto-bump. `agent.plan.md` refuses non-patch versio
 ```
 
 One unshipped next track. Scripts **never** increment `track` / major / minor. Only this skill mints those after explicit confirm.
+
+## Product ship ceremony (skill)
+
+Locks the relationship between **docs freeze/ship**, **product line**, and **unlock**. Skill is the only writer. Not a CI classification.
+
+| Field | Meaning |
+|-------|---------|
+| `docs_shipped` | `true` only after current-track docs are freeze-complete enough to ship against (Discover BRD + Plan obligations for the ship unit). Unlock gate reads this. |
+| `product_status` | `"?"` until product ships; then `shipped` (or host-equivalent). Skill refuses product ship while docs still carry trailing `?` on the docs line **or** `docs_shipped` is false. |
+| `product` patch | ++ on ship / hotfix / non-breaking product change on this track. |
+
+Ceremony (same track):
+
+1. **Docs ready** — stems frozen (or slice freeze for Plan handoff); `docs` line has no trailing `?` for the ship unit; skill sets `docs_shipped: true` when docs are the ship baseline.
+2. **Product ship** — after confirm: `product` patch++; set `product_status: shipped`; refresh summary. Recompute phase `mint_hash` where product/docs are in the mint payload.
+3. **Unlock / open-next** — allowed only when unlock gate permits (`docs_shipped` and confirm). Opening `next` does **not** auto-ship product.
+4. **Hotfix on shipped track** — `product` patch++ only; track unchanged; docs unchanged unless a docs patch is also classified.
+
+Refuse:
+
+- Ship product while `docs` is still `?` or `docs_shipped: false`
+- Open next track while current docs are still `?`
+- Hand-edit `docs_shipped` / `product_status` / `product` / `track` without skill mint → PR `HAND_BUMP` when mint payload drifts
+
+Future **Execute** owns the product-ship mint path on this same ceremony — do not invent a third version model.
 
 ## Patch-only current (skill, not CI)
 
@@ -305,9 +374,18 @@ Skill on each resolve (does not wait for the agent to notice): if `rrr-status.ya
 
 Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one line). Do not create `AGENTS.md` (or successors) from nothing.
 
-## CI / validator — mechanical only
+## CI / validator — mechanical only (PR-scoped)
 
 `validate_planning.sh` may FAIL these. It must not mint versions and must not FAIL "this looks like a minor."
+
+**Authoritative scope is the pull request.** Framework `--setup` wires a host-repo PR check ([setup.md](setup.md)). Local pre-push / agent preflight may run the same script optionally — local-only validation is **insufficient**. Hand-edit of mint fields must fail the **merge**, not hope an agent notices.
+
+| Check | When | Owner |
+|-------|------|-------|
+| `HAND_BUMP`, `STALE_PIN`, `PARENT_UNFROZEN`, `REV_WHILE_OPEN`, maturity codes | **PR** CI on planning paths (`docs/discovery/**`, `docs/plan/**`, status / tripwire) | `validate_planning*` installed by **framework setup** |
+| Same codes | Optional local pre-push / agent preflight | same script |
+| patch vs open-next vs unfreeze | On `--change` / upstream freeze | skill judgment |
+| Unlock / product ship policy | Before minting `next` or shipping product | skill (not CI classification) |
 
 | Code | Condition |
 |------|-----------|
@@ -324,6 +402,7 @@ Removed from CI (never emit): `NEXT_LOCKED`, `CURRENT_NOT_PATCH`. Independent pa
 
 - Tickets, technical docs, or `.mdc` rule files.
 - A second `lines.yaml`.
-- Shared patch; per-doc SEMVER as the human version.
+- Shared patch; per-doc SEMVER as the human version; inline `[N.M]` forward markers; track bump on every PRD edit.
 - CI minting or failing major/minor policy.
 - Auto-unfreeze; bump on compose; silent rediscover.
+- Version procedure in `rr-humanize`, git helpers, or `rr-test`.
