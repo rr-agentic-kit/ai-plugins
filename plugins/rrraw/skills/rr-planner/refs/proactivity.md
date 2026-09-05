@@ -1,87 +1,86 @@
 # proactivity
 
-**Owner:** Active panel loop during discovery — auto-reflection, search-vs-research split, reflect triggers, and write-time pre-save.
+**Owner:** Active dual-lens loop during Plan — auto-reflection, Effort-without-architecture block, Coach/Fast nudge, write-time pre-save.
 
-**Load when:** Reflect/explore trigger fires during inline discovery (not during the post-composition research phase — see [research-method.md](research-method.md)). **Also** at write-time pre-save reflection (after stage-exit blind-spots + Gate 7 + success-criteria; all depths; files already on disk). Pre-save does not replace stage-exit blind-spots or Gate 7.
+**Load when:** Reflect/explore trigger fires during Plan interview (not post-composition research — see [research-method.md](research-method.md)). **Also** at write-time pre-save (after stage-exit + Gate 7 + success-criteria; files on disk). Pre-save does not replace stage-exit or Gate 7.
 
-Panel seats, verdict ladder, claim classes, evidence loop, and owe-an-alternative: [expert-panel.md](expert-panel.md). Sweep and ledger writes: [decision-ledger.md](../../../refs/planning/decision-ledger.md). Pre-save block: that ledger's open-queue / binding `hold`/`kill` rule.
+Panel seats / verdict ladder: [expert-panel.md](expert-panel.md). Sweep/ledger: `refs/planning/decision-ledger.md`. Interview: [plan-interview.md](plan-interview.md).
 
-## Active panel loop
+## Active panel loop (Plan)
 
-After each discovery sub-section (not necessarily each full level):
+After each Plan sub-section:
 
-1. **Mirror back** — Summarize what was captured in 2–3 sentences.
-2. **Sit the level's roster** — Name the seats ([expert-panel.md](expert-panel.md)). Domain practitioner is instantiated from `domain_context`.
-3. **Falsify / evidence / alternatives** — Run [expert-panel.md](expert-panel.md) evidence loop and, if a seat would block, that ref's conduct protocol.
-4. **Probe gaps** — One targeted question the user has not addressed:
+1. **Mirror back** — 2–3 sentences of what was captured (product **and** system lens).
+2. **Sit dual-lens** — Founder product + architecture judgment in one sitting — no role handoff.
+3. **Falsify / evidence / alternatives** — expert-panel evidence loop when seats would block.
+4. **Probe gaps** — One targeted question:
    - "What happens if [assumption] is wrong?"
    - "Who loses if we succeed?"
    - "What are we explicitly NOT doing?"
-5. **Surface risks** — Name one risk or tradeoff implied by current facts. Classify per [expert-panel.md](expert-panel.md).
-6. **Record** — Add surfaced items to `assumptions[]` or `decisions[]` in session state. Mint a ledger rationale when the decision is made. Write evidence records from any search this pass. Run the sweep.
+   - "Where does this live in the spine vs a feature delta?"
+5. **Surface risks** — One risk/tradeoff; classify per expert-panel.
+6. **Record** — assumptions/decisions; mint ledger rationale; sweep.
 
-**Stop** per [expert-panel.md](expert-panel.md) evidence-loop stop. Cap at one pass per level section after that (avoid interrogation fatigue).
+**Hard block:** feature RICE Effort or slice freeze without architecture decision for that capability this pass ([system-design.md](system-design.md)).
 
-## Challenge prompts (discovery-time)
+**Stop** per expert-panel evidence-loop stop. Cap at one pass per section after that.
 
-Lightweight devil's-advocate during discovery — not the full `--challenge` agent:
+## Challenge prompts (Plan-time)
+
+Lightweight devil's-advocate during Plan — not the full `--challenge` agent:
 
 | Trigger | Prompt pattern |
 |---------|----------------|
 | Single-stakeholder framing | "Who else is affected but not mentioned?" |
-| Solution-before-problem | "Restate the problem without mentioning the solution." |
-| PRD shape confirmed | Run **PRD-shape reflection** once ([project-posture.md](project-posture.md)). Do not ask a generic "v1 or future phase?" |
+| Solution-before-problem | "Restate the outcome without the mechanism." |
+| PRD shape confirmed | Run PRD-shape + arch_doc_mode once ([project-posture.md](project-posture.md)). |
+| Effort without architecture | **Block** — force spine/delta before Effort. |
 | Happy-path only | "What is the primary failure mode?" |
-| Market / economic claim without evidence | Classify and run the evidence loop ([expert-panel.md](expert-panel.md)). Do not defer TAM/SAM/SOM to research when `premise-critical`. |
-| Seat blocks | Conduct protocol ([expert-panel.md](expert-panel.md)). |
+| Sprint / capacity language | Refuse; reframe as slice selection. |
+| Coach/Fast not offered this session | Offer once ([plan-interview.md](plan-interview.md)). |
+| Seat blocks | Conduct protocol (expert-panel). |
 
 ## Exploration rules
 
-| Allowed during discovery | Deferred to research phase |
-|--------------------------|---------------------------|
-| User's stated competitors | Broad competitor landscape scan |
-| User's known regulations | Standards/regulatory deep dive |
-| Premise-critical sizing and "what must be true" (external TAM/SAM/SOM **or** internal cost-of-inaction) | Multi-round citation-backed evaluation beyond the class budget |
-| "I think X because Y" validation | Exhaustive adjacent-market study |
-| Targeted search within the **claim-class budget** | Research iterations after compose |
-
-Search budgets and evidence loop: [expert-panel.md](expert-panel.md). Search to validate a specific claim or fill a blocking gap — not to decorate. Residual gap broader than the class budget → that ref's evidence-loop stop (`hold` or `research_deferred[]`).
+| Allowed during Plan | Deferred |
+|---------------------|----------|
+| Frozen business-case facts | Market/GTM re-debate → `rr-discovery` |
+| Targeted search for NFR/standards cited in AC | Broad competitor landscape (research phase) |
+| Architecture judgment for Effort | Inventing Execute/test code |
 
 ## Reflect/explore triggers
 
 Fire reflection when any of:
 
 - User provides >3 paragraphs without structure → offer to extract structured facts.
-- Conflicting statements detected within same level.
-- Level gate 5 (proactivity) not yet satisfied.
-- User says "I think", "probably", "maybe" on a blocking or `premise-critical` fact.
-- Compose agent returns `clarifications_needed[]` with `severity: high`.
-- PRD shape just confirmed → PRD-shape reflection (once per PRD compose; same fatigue cap as Gate 5).
+- Conflicting statements within Plan.
+- Gate 5 (proactivity) not yet satisfied.
+- User says "I think", "probably", "maybe" on a blocking fact.
+- Compose returns `clarifications_needed[]` with `severity: high`.
+- PRD shape / arch mode just confirmed.
+- Effort requested without spine/delta.
 - Sweep enqueued an item, or a seat issued `hold` / `pivot` / `kill`.
-- Evidence round just landed (always sweep; reflect if anything invalidated).
 
 ## Pre-save reflection (write-time)
 
-Runs **after** stage-exit blind-spots (Gate 6), Gate 7 viability, and [success-criteria.md](../../../refs/planning/success-criteria.md), **after compose files exist**, **before** the skill's `session-state.json` persist. All depths. Pause / stop does **not** trigger this.
+Runs **after** stage-exit (Gate 6), Gate 7, and `refs/planning/success-criteria.md`, **after compose files exist**, **before** `session-state.json` persist. Pause / stop does **not** trigger this.
 
-**Block** when [decision-ledger.md](../../../refs/planning/decision-ledger.md) open-queue / binding `hold`/`kill` rule fires (do not write `final_status: ok`; do not freeze leftover drafts as accepted). Advisory `hold` at BRD/PRD does not block if the user accepted it.
-
-This is thinner than discovery-time Gate 5 and does **not** re-run the blind-spot taxonomy:
+**Block** when ledger open-queue / binding `hold`/`kill` fires. Advisory `hold` at PRD does not block if user accepted it.
 
 1. Run the sweep (trigger 4).
-2. **One pass** over remaining gaps and obvious improvements (missing non-goal, unmeasurable metric, unaccepted `blocking` assumption, compose `sections_incomplete`, open queue, binding `hold`).
-3. Surface at most a handful of questions; user may accept **non-viability** gaps. User may not silently accept an open queue or binding `hold`/`kill` — drain, pivot, or confirm kill with a revival trigger.
-4. **Max one fix cycle** — re-compose affected levels once if the user supplies fixes (compose overwrites files). Do not loop.
+2. **One pass** over remaining gaps (missing non-goal, smell-fail AC without hold, Effort-without-architecture, compose `sections_incomplete`, open queue).
+3. Surface at most a handful of questions; user may accept **non-viability** gaps.
+4. **Max one fix cycle** — re-compose once if user supplies fixes.
 5. Then skill writes `session-state.json` only.
 
-Do not invent mechanism-level detail during pre-save of an earlier level — park it in `tech.md`. Do not spawn the challenge agent.
+Do not invent Plan AC into `tech.md`. Do not spawn the challenge agent at pre-save.
 
 ## Output to session state
 
 ```json
 {
   "reflections": [{
-    "level": "brd",
+    "level": "prd",
     "summary": "",
     "gaps_probed": [],
     "risks_surfaced": [],
@@ -90,8 +89,8 @@ Do not invent mechanism-level detail during pre-save of an earlier level — par
   }],
   "research_deferred": [{
     "topic": "",
-    "reason": "requires broad market study beyond claim-class budget",
-    "level": "mrd",
+    "reason": "requires broad study beyond Plan budget",
+    "level": "prd",
     "evidence_bar": ""
   }]
 }

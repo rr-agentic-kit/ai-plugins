@@ -753,6 +753,7 @@ def _load_parent_items(planning_dir: Path, parent: str) -> list[Item]:
                 kind=str(row.get("kind", "leaf")),
                 spec=str(row.get("spec", "draft")),
                 status=row.get("status"),
+                priority=row.get("priority"),
                 tag=row.get("tag"),
                 goal_type=row.get("goal_type"),
                 reach=row.get("reach"),

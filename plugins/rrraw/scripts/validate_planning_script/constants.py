@@ -35,6 +35,7 @@ CANONICAL_KEY_ORDER: tuple[str, ...] = (
     "kind",
     "spec",
     "status",
+    "priority",
     "tag",
     "goal-type",
     "reach",
@@ -96,6 +97,7 @@ YAML_KEY_MAP: dict[str, str] = {
     "Kind": "kind",
     "Spec": "spec",
     "Status": "status",
+    "Priority": "priority",
     "Tag": "tag",
     "Goal-type": "goal-type",
     "Reach": "reach",
@@ -116,6 +118,8 @@ IMPACT_VALUES = frozenset({"0.25", "0.5", "1", "2", "3"})
 CONFIDENCE_VALUES = frozenset({"low", "medium", "high"})
 EFFORT_VALUES = frozenset({"1", "2", "3", "5", "8", "13"})
 GOAL_TYPE_VALUES = frozenset({"primary", "support"})
+STATUS_VALUES = frozenset({"deferred", "selected", "in_progress", "delivered"})
+PRIORITY_VALUES = frozenset({"P1", "P2", "P3"})
 RICE_FACTOR_KEYS = frozenset({"reach", "impact", "confidence", "effort"})
 NULL_SENTINELS = frozenset({"\u2014", "-", "\u2013", "\u2212", "null", ""})
 JSON_ITEM_KEYS = frozenset(
@@ -125,6 +129,7 @@ JSON_ITEM_KEYS = frozenset(
         "kind",
         "spec",
         "status",
+        "priority",
         "tag",
         "goal_type",
         "reach",

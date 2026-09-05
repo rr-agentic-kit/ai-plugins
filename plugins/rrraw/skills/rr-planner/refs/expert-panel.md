@@ -4,7 +4,7 @@
 
 **Load when:** Exec-summary premise test; every level's Gate 7; evidence round after a premise-critical claim; `--resume` when `viability[]` or the re-decision queue is open. Not during compose (compose consumes minted rationale ids; it does not sit the panel).
 
-The verdict is a **state**, not an exit. Invalidation never auto-flips item status ([decision-ledger.md](../../../refs/planning/decision-ledger.md)).
+The verdict is a **state**, not an exit. Invalidation never auto-flips item status (`refs/planning/decision-ledger.md`).
 
 ## domain_context
 
@@ -33,10 +33,10 @@ A turn that only critiques is incomplete. When blocking, the seat owes a path.
 
 1. **Name the standard** being applied (investor hurdle, operational constraint, practitioner lived-experience, SRE error budget).
 2. **Ask** the question that standard requires.
-3. **State the evidence bar** — what would satisfy it. Prefer a measurable bar; an honest qualitative bar beats a fabricated number ([decision-ledger.md](../../../refs/planning/decision-ledger.md) no-fabricated-numbers). For legal/regulatory claims, prefer **real enforcement-in-practice and case statistics** over literal statute reading (T6-1).
+3. **State the evidence bar** — what would satisfy it. Prefer a measurable bar; an honest qualitative bar beats a fabricated number (`refs/planning/decision-ledger.md` no-fabricated-numbers). For legal/regulatory claims, prefer **real enforcement-in-practice and case statistics** over literal statute reading (T6-1).
 4. **If blocking: owe an alternative.** Put 2–3 options on the comparison table in [blind-spots.md](blind-spots.md), including do-nothing / buy / pivot-the-premise. Critique without a proposed path is an incomplete turn. The option-generation prompt ("Name two paths that still move an ES metric if this premise is wrong") is the **sole `hold` trigger** — a T6-1 legal-risk tier is not itself a block.
 
-Record the turn in raw-history with `source: panel` ([output-formats.md](../../../refs/planning/output-formats.md)). Mint the rationale in the ledger at the moment the decision is made — before compose references the id.
+Record the turn in raw-history with `source: panel` (`refs/planning/output-formats.md`). Mint the rationale in the ledger at the moment the decision is made — before compose references the id.
 
 ## Claim classes and evidence loop
 
@@ -54,7 +54,7 @@ After a `premise-critical` or `supporting` claim is stated:
 
 1. Classify the claim. Do not search `color`.
 2. Run searches within the class budget. Write each result as an `evidence` record in the ledger (status `supported` \| `refuted` \| `unknown`).
-3. Run the re-decision sweep ([decision-ledger.md](../../../refs/planning/decision-ledger.md)).
+3. Run the re-decision sweep (`refs/planning/decision-ledger.md`).
 4. **Stop** when the evidence bar is met **or** the residual risk is recorded (`hold`, assumption with `blocking` set, or `research_deferred` with a named bar). User saying "accurate" is not a stop.
 
 Do not treat a search result as verified fact without writing the evidence record. Do not invent a TAM to pass the MRD section.
@@ -115,4 +115,4 @@ Done: both sections present; verdict ≠ `hold` unless the user accepts the bann
 
 After Gate 6, sit this level's roster. Run the conduct protocol on the level's load-bearing claims (Must / `must-correct` / Kano `basic`, plus anything the sweep enqueued). Write `viability[]` for this level. Binding at ES/MRD; advisory below.
 
-Open `re_decision_queue` or unresolved binding `hold`/`kill` → do not freeze ([success-criteria.md](../../../refs/planning/success-criteria.md), [proactivity.md](proactivity.md)).
+Open `re_decision_queue` or unresolved binding `hold`/`kill` → do not freeze (`refs/planning/success-criteria.md`, [proactivity.md](proactivity.md)).

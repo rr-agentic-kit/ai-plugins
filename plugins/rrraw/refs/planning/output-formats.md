@@ -33,14 +33,20 @@ Cascade docs write to `payload.output_dir` (Discover default `{PROJECT_ROOT}/doc
     raw-history/
     0.2/                          # only once next opens
   plan/
-    status.yaml                   # DETAIL — PRD
+    status.yaml                   # DETAIL — PRD + optional slice
     session-state.json
     prd.md
+    architecture.md               # standing spine (invariants-first)
+    constitution.md               # optional when arch_doc_mode: split
+    deltas/                       # per-feature ADR-lite
+      <feature-id>.md
+    execute-slice.yaml            # 5-field Execute kernel on slice freeze
     research-report.md
     prd.notes.yaml
     items.json
     decision-ledger.yaml
     prd.challenge.report.md
+    architecture.challenge.report.md  # when challenging standing spine
     raw-history/
     0.2/
 ```
@@ -51,6 +57,10 @@ Cascade docs write to `payload.output_dir` (Discover default `{PROJECT_ROOT}/doc
 | mrd | `discovery/mrd.md` |
 | brd | `discovery/brd.md` |
 | prd | `plan/prd.md` |
+| architecture spine | `plan/architecture.md` (standing; Plan-owned; humanize) |
+| constitution | `plan/constitution.md` (optional; `arch_doc_mode: split`; else section of architecture) |
+| feature delta | `plan/deltas/<feature-id>.md` (ADR-lite; supersede-only once accepted) |
+| execute slice kernel | `plan/execute-slice.yaml` (machine; skill-owned on slice freeze; **skip humanize**) |
 | business-case handoff | `discovery/business-case.yaml` (machine; Discover freeze; Plan entry gate; **skip humanize**) |
 | assumptions map | `discovery/assumptions.md` (conditional; humanize) |
 | opportunity tree | `discovery/opportunity-tree.md` (conditional; humanize) |
@@ -60,7 +70,7 @@ Cascade docs write to `payload.output_dir` (Discover default `{PROJECT_ROOT}/doc
 | phase baseline status | `{discovery\|plan}/status.yaml` (YAML; skill-owned; validator input — mechanical codes only) |
 | version tripwire | `agent.plan.md` (skill-owned; **not** validator cascade input; pairing SoT is this skill) |
 | future inbox | `future.md` (**not** validator input; no ids; no SEMVER) |
-| tech capture | `tech.md` (**not** validator input; no ids; no gates; passive append-only) |
+| tech capture | `tech.md` (**not** validator input; Discover parking only — Plan does not author AC/ADR here) |
 | later parking lot | `later.md` (**not** validator input; no ids; passive; distinct from `{level}.notes.yaml`) |
 | off-level notes | `{level}.notes.yaml` under the phase dir (always YAML; same write/load/delete for every level; exists only while unresolved) |
 | item graph | `{phase}/items.json` (always JSON) |
@@ -68,11 +78,11 @@ Cascade docs write to `payload.output_dir` (Discover default `{PROJECT_ROOT}/doc
 | session checkpoint | `{phase}/session-state.json` (always JSON) |
 | Q&A history | `{phase}/raw-history/{UTC compact ISO-8601}.yaml` |
 | research report | `plan/research-report.md` |
-| challenge report | `{phase}/{stem}.challenge.report.md` (one per cascade doc; overwrite on each scan of that stem) |
+| challenge report | `{phase}/{stem}.challenge.report.md` (one per cascade/standing doc; overwrite on each scan of that stem) |
 
 Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet. File exists only while unresolved notes remain; skill deletes it when empty after compose persist. Create `{phase}/{next}/` only when the skill mints `next` after confirm.
 
-`--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` ([input-resolution.md](../../skills/rr-discovery/refs/input-resolution.md)). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and phase `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md`, `agent.plan.md`, `tech.md`, `later.md`, and `rrr-status.yaml` are **not validator cascade input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
+`--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` (`skills/rr-discovery/refs/input-resolution.md`). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and phase `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md`, `agent.plan.md`, `tech.md`, `later.md`, and `rrr-status.yaml` are **not validator cascade input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
 
 ## Markdown doc format
 
@@ -202,12 +212,53 @@ Rejected: `future/` folder; per-track future files; treating this file as a casc
 
 ## `tech.md`
 
-One file at `{PROJECT_ROOT}/docs/tech.md`. Same tier as `later.md` / `future.md`. Create on first mechanism-level append. **Not validator input.** No item ids, no gates, never composed into cascade docs.
+One file at `{PROJECT_ROOT}/docs/tech.md`. Same tier as `later.md` / `future.md`. Create on first Discover mechanism append. **Not validator input.** No item ids, no gates, never composed into cascade docs.
 
 | Rule | |
 |------|--|
-| Passive | Skill appends freely when mechanism-level detail surfaces (shalls, AC, integration points, NFR mechanism, error-handling specifics, requirement-explosion overflow). No periodic maintenance; rr-planner does not re-read it on later passes. |
+| Discover parking | Append early mechanism notes before Plan owns architecture. |
+| Plan | Do **not** author product AC, integration contracts, or ADRs here — use `architecture.md` / `constitution.md` / `deltas/`. |
 | Not cascade | Never mint item ids; never run Gates 1–7 against this file. |
+
+## Standing Plan docs (spine / constitution / deltas)
+
+| Artifact | Role |
+|----------|------|
+| `plan/architecture.md` | Standing **spine** — invariants only (`Binds` / `Prevents` / `Rule`). Stack dump is seed, not spine. |
+| `plan/constitution.md` | Non-negotiables when `arch_doc_mode: split`; else a section of architecture. |
+| `plan/deltas/<feature-id>.md` | Per-feature ADR-lite delta vs spine — never restate the spine. Supersede-only once accepted. |
+
+Standards: Plan `refs/doc-standards/architecture.md`, `constitution.md`, `feature-delta.md`. Not item-graph validators (no `PRD-*` ids required). Skill may humanize prose bodies.
+
+## `execute-slice.yaml` (5-field Execute kernel)
+
+Skill-owned machine handoff on **slice freeze**. **Skip humanize.** Compact — not a PRD dump.
+
+```yaml
+slice_id: slice-001
+why: "..."
+capabilities:
+  - "..."
+constraints:
+  - "..."
+non_goals:
+  - "..."
+success_signal: "observable pass/fail"
+pins:
+  requirement_ids: [PRD-3.1, PRD-3.2]
+  parents: [PRD-3]
+  delta_paths: [deltas/PRD-3.md]
+  architecture_rev: draft   # or integer; draft allowed
+  ac_refs: ["prd.md § Guest checkout AC"]
+```
+
+| Field | Rule |
+|-------|------|
+| Why / Capabilities / Constraints / Non-goals / Success signal | Required kernel — five fields only for prose obligations |
+| `pins` | Requirement ids, parents, delta paths, architecture rev (may be `draft`), AC refs |
+| Fail freeze | Smell-fail AC without hold; Effort without architecture; shrinking the full requirement table to “match the slice” |
+
+Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. **No Execute skill** in this redesign — Next Up is future Execute.
 
 ## `later.md`
 
@@ -294,27 +345,27 @@ Written on **every stop** and after **each level completion**. Required for `--r
 
 `item_registry`: id → `{ doc, parent, kind, spec, class? }`. Skill refreshes this from `items.json` after compose. Resume uses it for minting. Frozen re-compose remap of child `parent:` is compose’s job in the same invocation.
 
-`project_posture`: `{}` until confirm; then the Session field in [project-posture.md](../../skills/rr-planner/refs/project-posture.md). Resume skips the posture gate when `user_confirmed` is true and uncontradicted.
+`project_posture`: `{}` until confirm; then the Session field in `skills/rr-planner/refs/project-posture.md`. Resume skips the posture gate when `user_confirmed` is true and uncontradicted.
 
-`preferences.questions_per_cycle`: max AskQuestion count per address cycle (default `1`). Set via `--questions-per-cycle N` ([input-resolution.md](../../skills/rr-planner/refs/input-resolution.md)); confirm-once persistence.
+`preferences.questions_per_cycle`: max AskQuestion count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-planner/refs/input-resolution.md`); confirm-once persistence.
 
 `viability_stale`: per binding level (`executive-summary`, `mrd`). Set `true` when compose changes load-bearing ES facts ([baselines.md](baselines.md)). Gate 7 re-sit clears it.
 
-`viability[]`: Gate 7 / premise-test verdicts ([expert-panel.md](../../skills/rr-planner/refs/expert-panel.md)). Binding at executive-summary and MRD.
+`viability[]`: Gate 7 / premise-test verdicts (`skills/rr-planner/refs/expert-panel.md`). Binding at executive-summary and MRD.
 
-`discovery_complete`: `true` after Discover writes a valid `business-case.yaml` and freezes BRD ([business-case-handoff](../../skills/rr-discovery/refs/business-case-handoff.md)). Plan refuses entry without frozen BRD + handoff.
+`discovery_complete`: `true` after Discover writes a valid `business-case.yaml` and freezes BRD (`skills/rr-discovery/refs/business-case-handoff.md`). Plan refuses entry without frozen BRD + handoff.
 
-`note_sessions`: per-level index of parked notes; body is `{level}.notes.yaml` ([note-sessions.md](../../skills/rr-planner/refs/note-sessions.md)). Drop the key when that sidecar is deleted. Sidecars are not `--format` docs and are not parsed by `validate_planning.sh`.
+`note_sessions`: per-level index of parked notes; body is `{level}.notes.yaml` (`skills/rr-planner/refs/note-sessions.md`). Drop the key when that sidecar is deleted. Sidecars are not `--format` docs and are not parsed by `validate_planning.sh`.
 
 Skill owns `decision-ledger.yaml` ([decision-ledger.md](decision-ledger.md)). Compose and challenge never write it. Validator loads it when present.
 
 ## `business-case.yaml`
 
-Discover skill-owned machine handoff after BRD freeze. Field contract: [business-case-handoff.md](../../skills/rr-discovery/refs/business-case-handoff.md). **Skip humanize.** Not a cascade stem — validator may check presence/required keys for Plan entry fixtures; does not participate in item graph.
+Discover skill-owned machine handoff after BRD freeze. Field contract: `skills/rr-discovery/refs/business-case-handoff.md`. **Skip humanize.** Not a cascade stem — validator may check presence/required keys for Plan entry fixtures; does not participate in item graph.
 
 ## Cascade prose persist
 
-After compose agent draft: orchestrating skill runs [compose-prose.md](../../skills/rr-discovery/refs/compose-prose.md) (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD and conditional session markdown artifacts.
+After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD and conditional session markdown artifacts.
 
 ## Status merge
 
@@ -327,13 +378,13 @@ After compose agent draft: orchestrating skill runs [compose-prose.md](../../ski
 
 ## Adapter rules
 
-1. Overwrite confirm: [cascade.md](../../skills/rr-planner/refs/cascade.md) per-level discovery step 8. Skip the prompt when `--input` implied refresh.
+1. Overwrite confirm: `skills/rr-planner/refs/cascade.md` per-level discovery step 8. Skip the prompt when `--input` implied refresh.
 2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `viability[]`, `note_sessions`, `composed_docs` paths). Skill is the only writer of this file. Skill is also the only writer of `decision-ledger.yaml`, `status.yaml`, `agent.plan.md`, and `future.md`.
 3. Compose writes/merges `items.json`. Skill reads it; skill does not write it. Compose reads `reserved_ids` from the ledger and never re-mints those ids. Compose writes frontmatter `track` / `doc_rev` / `pins`; skill mints `status.yaml` after freeze.
 4. Append a raw-history turn after every Q&A; do not wait for stage-exit. Skill owns `raw-history/`.
-5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars; prune: [note-sessions.md](../../skills/rr-planner/refs/note-sessions.md). Next-track notes while `next` is open go to that track's sidecar, not `future.md`.
+5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars; prune: `skills/rr-planner/refs/note-sessions.md`. Next-track notes while `next` is open go to that track's sidecar, not `future.md`.
 6. Research and challenge reports are standalone `.md` files, not merged into cascade docs. Skill persists those reports from findings JSON. Challenge overwrites `{stem}.challenge.report.md` for the challenged stem only (worklist, not history).
 7. Compose writes human cascade docs (`{level}.md` only). Document bodies never travel through chat. Research/challenge still return findings JSON. Compose does not write `status.yaml` / `agent.plan.md` / `future.md`. After compose persist, the skill dirties that doc’s `challenge.status` when it was `clean-shallow`, `clean-deep`, or `dirty-accepted`.
 8. After compose Task: parse slim receipt → if clarifications, ask and re-invoke → else read `items.json` to refresh `item_registry` → Gate 3 static ([success-criteria.md](success-criteria.md)). FAIL blocks `final_status: ok`. Sidecars, `future.md`, and `agent.plan.md` are not validator input.
-9. Pause skips pre-save ([proactivity.md](../../skills/rr-planner/refs/proactivity.md)). Freeze is a `frozen_levels` update plus a docs-patch mint in phase `status.yaml` (+ summary refresh), not a second write of the doc ([cascade.md](../../skills/rr-planner/refs/cascade.md), [baselines.md](baselines.md)).
+9. Pause skips pre-save (`skills/rr-planner/refs/proactivity.md`). Freeze is a `frozen_levels` update plus a docs-patch mint in phase `status.yaml` (+ summary refresh), not a second write of the doc (`skills/rr-planner/refs/cascade.md`, [baselines.md](baselines.md)).
 10. First compose: write phase `status.yaml`, refresh `rrr-status.yaml`, emit `docs/agent.plan.md`, sync the one-liner on existing root SoT, set `claude_config_version` ([agent-config.md](agent-config.md)).

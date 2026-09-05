@@ -40,9 +40,9 @@ Required context:
 - Load matching skill `refs/doc-standards/<doc_type>.md` (Discover: `skills/rr-discovery/…`; Plan: `skills/rr-planner/…`)
 - Load `refs/planning/doc-standards/item-schema.md` for IDs, split, parent, spec/build, templates, `Rationale`
 - Load `refs/planning/decision-ledger.md` for `reserved_ids` and the compose-never-writes boundary
-- Load caller posture ref for MoSCoW legend / PRD release-phasing
+- Load caller posture ref for MoSCoW legend / PRD shape / arch_doc_mode
 - Load `refs/planning/contracts.md` § compose for output schema
-- Load `refs/planning/output-formats.md` for filenames, markdown layout, `items.json` merge
+- Load `refs/planning/output-formats.md` for filenames, markdown layout, `items.json` merge, standing Plan paths
 - Load `refs/planning/baselines.md` for pin/digest/rev; do not mint `status.yaml` (skill owns it)
 
 ## Execution
@@ -60,9 +60,9 @@ Required context:
    - Items present in `items.json` for this `doc` but absent from `level_facts` (killed) → drop and list in `items_removed[]`.
 7. Set `parent:` to the immediate parent only. ES roots: `—`.
 8. Fill the **level’s** priority method on ranked leaves. Required **prose** sections stay unnumbered. Never emit `_rationale_: —`. Ranked leaves: write `_rationale_: r-NNN` from `level_facts`.
-9. **PRD only:** write release-phasing prose from the posture legend. Do not assume Must = MVP.
-10. **Mechanism overflow:** route shalls, AC, integration points, NFR mechanism to `tech.md` — not cascade item ids.
-11. **Status:** default new items `spec: idea`. Set `draft` when specifying. Never auto-promote to `ready`.
+9. **PRD only:** write shape/overview prose from the posture legend. Do not assume Must = MVP. Do not invent sprint/release-plan sections.
+10. **Mechanism / AC placement (PRD):** product WWAS AC stays on PRD. Standing invariants and feature mechanism are skill-owned (`architecture.md` / `deltas/`) — compose does **not** mint those files and does **not** route Plan AC into root `tech.md`. Discover parking in `tech.md` is out of compose scope.
+11. **Status / priority:** default new items `spec: idea`. Set `draft` when specifying. Never auto-promote to `ready`. On PRD requirement leaves emit `_priority_: P1|P2|P3` when ranked; optional `_status_:` from the closed enum. Selecting never deletes siblings.
 12. Render the document with closed heading + `_key_:` metadata. Leaf body is a markdown blockquote (`>`). Frontmatter: `doc_type`, `track`, `doc_rev` (`?` until freeze), `pins`, `created`. Always write markdown.
 13. **Persist draft** to `payload.output_dir` before returning (`ok` and `partial` only; skip on `failed`):
     - Write `{level}.md` only (draft until skill humanize).

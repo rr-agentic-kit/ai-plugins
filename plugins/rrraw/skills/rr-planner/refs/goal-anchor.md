@@ -1,6 +1,6 @@
 # goal-anchor
 
-**Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format. Reason-graph concerns (evidence, `flips_when`, burial, re-decision queue) live in [decision-ledger.md](../../../refs/planning/decision-ledger.md) — this ref does not own them.
+**Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format. Reason-graph concerns (evidence, `flips_when`, burial, re-decision queue) live in `refs/planning/decision-ledger.md` — this ref does not own them.
 
 **Load when:** Entire discovery pass at every cascade level (always-on). Not a trigger. Also on parent/child fact conflict, posture confirm, and off-level owner ambiguity.
 
@@ -26,11 +26,11 @@ When input is unclear or ambiguous:
    - `text` → numbered options inline in chat; user replies in conversation
 4. **Capture nuance** — If user picks "other" or adds qualifiers, record full text, not just the label.
 5. **Re-anchor** — After resolution, restate the decision tied to the user's stated goal.
-6. **Append history** — After every Q&A turn, append to `raw-history/{UTC}.yaml` ([output-formats.md](../../../refs/planning/output-formats.md)).
+6. **Append history** — After every Q&A turn, append to `raw-history/{UTC}.yaml` (`refs/planning/output-formats.md`).
 
 Do not proceed to compose (and do not freeze the level) until blocking clarifications are resolved or explicitly accepted.
 
-Static vs judgment: [success-criteria.md](../../../refs/planning/success-criteria.md). This ref owns judgment only (vague input, conflict, nuance).
+Static vs judgment: `refs/planning/success-criteria.md`. This ref owns judgment only (vague input, conflict, nuance).
 
 ## Clarify-before-assume
 
@@ -58,7 +58,7 @@ Preserve in `decisions[]` or `level_facts`:
 - Scope boundaries ("only enterprise tier", "not mobile")
 - Temporal qualifiers ("by Q3", "after migration")
 - Conditional behavior ("if SSO enabled")
-- Priority signals (MoSCoW / Kano / triad class — never P0/P1/P2)
+- Priority signals (MoSCoW / Kano / RICE / **P1–P3 on PRD requirement leaves only** — never P-tags elsewhere)
 - Negative requirements ("must NOT store PII")
 
 Flattening nuance into generic statements is a gate failure.

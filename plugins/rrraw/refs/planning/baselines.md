@@ -4,7 +4,7 @@
 
 **Load when:** Every resolve (status-first pick); freeze / `--change` / open-next; compose frontmatter (`track`, `doc_rev`, `pins`).
 
-Item identity, spec, and PRD `status` stay in [doc-standards/item-schema.md](doc-standards/item-schema.md). This ref does not change them. Tickets and technical docs stay out — they target `track` + item id.
+Item identity, spec, PRD `status` / `priority`, and Effort provenance stay in [doc-standards/item-schema.md](doc-standards/item-schema.md). This ref does not change them. Tickets and technical docs stay out — they target `track` + item id.
 
 ## Version model
 
@@ -30,7 +30,7 @@ Durable record uses **three files** under `{PROJECT_ROOT}/docs/`:
 |------|------|
 | `rrr-status.yaml` | **Summary only** — human glance + routing (`phase`, `track`, `product`/`docs`, `discovery_complete`, `docs_shipped`, `next`, one-line `summary`). Skill refreshes on phase transitions / freeze / ship. **Not** validator pin input. Do **not** write `levels`, digests, `challenge`, or `mint_hash` here. |
 | `discovery/status.yaml` | **Detail** — ES/MRD/BRD revs, digests, pins, challenge, `mint_hash` |
-| `plan/status.yaml` | **Detail** — PRD revs, digests, pins, challenge, `mint_hash` |
+| `plan/status.yaml` | **Detail** — PRD revs, digests, pins, challenge, `mint_hash`, optional **slice** freeze unit |
 
 Any agent in the repo must see them. First key on each is the injection version from [agent-config.md](agent-config.md) (`claude_config_version` on summary is authoritative for SoT sync).
 
@@ -75,6 +75,13 @@ levels:
     digest: null
     pins: {}
   # plan/status.yaml levels contain prd only
+  # optional Plan slice freeze (selection unit — not a sprint):
+  # slice:
+  #   id: slice-001
+  #   status: frozen | draft | ?
+  #   requirement_ids: [PRD-3.1, PRD-3.2]
+  #   execute_kernel: execute-slice.yaml
+  #   architecture_rev: draft | integer
 next_levels: {}           # populated iff next is set; same per-doc shape
 challenge:                # current track; next_challenge mirrors next_levels
   prd:
@@ -93,9 +100,10 @@ next_challenge: {}
 | `next` | At most one unshipped next track. `null` if none. |
 | `docs_shipped` | `true` only after current-track docs freeze/ship. Unlock gate reads this. |
 | `product_status` | `"?"` until product ships. Skill refuses ship while docs still `?`. Not part of `mint_hash`. |
-| `mint_hash` | Phase detail only. SHA-256 of canonical `track`, `product`, `docs`, `next`, `docs_shipped`, `levels`, `next_levels`. Skill writes it on every mint. |
+| `mint_hash` | Phase detail only. SHA-256 of canonical `track`, `product`, `docs`, `next`, `docs_shipped`, `levels`, `next_levels`. Skill writes it on every mint. Slice block is **not** part of `mint_hash` (selection stamps independently). |
 | `discovery_complete` | Summary-only. `true` after Discover BRD freeze + valid `business-case.yaml`. Plan entry requires this (or equivalent frozen BRD + handoff). |
 | `levels` | Current `track` stems for **this phase**. Child `pins` name the immediate parent stem. Plan PRD pins against Discovery BRD digests across dirs. |
+| `slice` | Plan detail only. Optional. Selected requirement ids + path to `execute-slice.yaml`. Language: **slice / phase**, never sprint. Future release/version grouping may reference frozen slices — not designed here. |
 | `next_levels` | Next-track revs/pins when `next` is set. Empty object otherwise. |
 | `challenge` / `next_challenge` | Per-doc attestation on phase detail. Not part of `mint_hash`. Never a validator FAIL. Skill is the only writer. |
 
@@ -164,9 +172,15 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
     items.json | …
     0.2/                   # only once next is open
   plan/
-    status.yaml            # DETAIL — PRD
+    status.yaml            # DETAIL — PRD + optional slice
     session-state.json
-    prd.md | …
+    prd.md
+    architecture.md        # standing spine (invariants)
+    constitution.md        # optional; when arch_doc_mode: split
+    deltas/                # per-feature ADR-lite deltas
+      <feature-id>.md
+    execute-slice.yaml     # compact 5-field Execute kernel (on slice freeze)
+    …
     0.2/
 ```
 
@@ -194,15 +208,28 @@ Classification is judgment: patch vs redirect-to-next vs open-next vs conscious 
 
 ## Freeze mint (skill)
 
-Compose does not increment anything. After Gate 6+7 pass for a level:
+Compose does not increment anything. After Gate 6+7 pass for a level **or** after Plan **slice** freeze gates:
 
-1. Add the level to `frozen_levels` ([cascade.md](../../skills/rr-planner/refs/cascade.md)).
+### Whole-doc freeze (Discover stems; optional Plan structure lock)
+
+1. Add the level to `frozen_levels` (`skills/rr-planner/refs/cascade.md` for Plan; Discover cascade for ES/MRD/BRD).
 2. Set `levels[doc].rev`: `?` → `1` on first freeze; integer stays until lock-target or unfreeze.
 3. Write `digest` from that doc’s items.
 4. Child freeze copies parent `{ rev, digest }` into `pins`.
 5. Docs patch++. Product patch unchanged.
 6. Recompute `mint_hash`.
 7. If `levels.<doc>.digest` ≠ `challenge.<doc>.scanned_digest` → set that stem `dirty`.
+
+### Slice freeze (Plan)
+
+Primary Plan freeze unit is a **selected requirement slice**, not the whole PRD table.
+
+1. Smell-gate AC (`req-smell` + WWAS) pass or explicit hold.
+2. Same-sitting architecture exists for selected capabilities (spine and/or feature deltas); architecture rev may be `draft`.
+3. Write/overwrite `docs/plan/execute-slice.yaml` (5-field kernel + pins) — [output-formats.md](output-formats.md).
+4. Stamp `plan/status.yaml` `slice:` with requirement ids + kernel path; do **not** shrink/delete deferred requirement rows.
+5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is.
+6. Whole-PRD freeze remains optional structure lock only — not the default handoff to Execute.
 
 Major/minor (`track`, `next`) only on confirm — never on this mint. Challenge attestation is not a freeze gate.
 
@@ -241,13 +268,14 @@ One `{PROJECT_ROOT}/docs/future.md`. Not validator input. No item ids, no SEMVER
 
 Rejected: `future/` folder; per-track future files.
 
-## `tech.md` — mechanism capture
+## `tech.md` — Discover mechanism parking
 
 One `{PROJECT_ROOT}/docs/tech.md`. Same tier as `later.md` / `future.md`. **Not validator input.** No item ids, no gates, never composed into ES/MRD/BRD/PRD.
 
 | Rule | |
 |------|--|
-| Passive | Skill appends freely when mechanism-level detail surfaces (shalls, AC, integration points, NFR mechanism, error-handling specifics, requirement-explosion overflow). No periodic maintenance; rr-planner does not re-read it on later passes. |
+| Discover | Skill may append early mechanism notes that surface before Plan owns architecture. |
+| Plan | **Does not** author product AC, integration contracts, or ADRs here. Standing truth = `docs/plan/architecture.md` (+ optional `constitution.md`) and `docs/plan/deltas/<feature-id>.md`. |
 | Not a cascade doc | Never mint item ids; never run Gates 1–7 against this file. |
 
 ## `later.md` — deferred-topic parking lot

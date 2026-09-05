@@ -32,7 +32,11 @@
         },
         "status": {
           "type": "string",
-          "minLength": 1
+          "enum": ["deferred", "selected", "in_progress", "delivered"]
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["P1", "P2", "P3"]
         },
         "tag": {
           "type": "string",

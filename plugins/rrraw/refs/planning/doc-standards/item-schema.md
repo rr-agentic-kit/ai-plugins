@@ -1,6 +1,6 @@
 # item-schema
 
-**Owner:** Shared item identity, parent walk, atomic split, per-level priority/scoring methods, spec states, optional PRD `status`, and parseable markdown. Numbering and status live here once — level standards keep section lists and done-when.
+**Owner:** Shared item identity, parent walk, atomic split, per-level priority/scoring methods, spec states, PRD requirement `priority` + selection `status`, Effort provenance, and parseable markdown. Numbering and status live here once — level standards keep section lists and done-when.
 
 **Load when:** Discovering, composing, validating, or challenging any cascade doc.
 
@@ -8,7 +8,7 @@ Audience: compose agent + orchestrator. Working surface is markdown. Validation 
 
 ## Shared fields
 
-Every numbered item has `id`, `parent`, `kind`, `spec`. Priority fields depend on the **document type** (not a per-item choice). `status` exists only on PRD leaves (manual delivery marker — e.g. `delivered`).
+Every numbered item has `id`, `parent`, `kind`, `spec`. Ranking fields depend on the **document type** (not a per-item choice). `status` and `priority` exist only on PRD leaves (selection + requirement priority — not derived from children).
 
 | Field | Where | Values |
 |-------|-------|--------|
@@ -16,14 +16,15 @@ Every numbered item has `id`, `parent`, `kind`, `spec`. Priority fields depend o
 | `parent` | all | Immediate parent item ID, or `—` for ES roots |
 | `kind` | all | `container` \| `leaf` |
 | `spec` | all | `idea` \| `draft` \| `ready` \| `deprecated` |
-| `status` | PRD leaves only | Open string (e.g. `delivered`) — set directly by user/dev workflow; no derivation |
+| `status` | PRD leaves only | `deferred` \| `selected` \| `in_progress` \| `delivered` — selection/delivery marker; no derivation; selecting never deletes the full requirement set |
+| `priority` | PRD **requirement** leaves only | `P1` \| `P2` \| `P3` — priority inside a feature’s full set; coexists with RICE (features) / RIC (stories). No P-tags elsewhere (MoSCoW stays Discover-only) |
 | `tag` | ES constraint leaves only | Open string (e.g. `regulatory`, `capacity`, `quality`, `technical`) — optional subtype hint |
 | `goal_type` | PRD goal leaves only | `primary` \| `support` |
 | `reach` | PRD story/feature leaves | Percentage string with named denominator (e.g. `40% of monthly active users`) |
 | `impact` | PRD story/feature leaves | `0.25` \| `0.5` \| `1` \| `2` \| `3` |
 | `confidence` | PRD story/feature leaves | `low` \| `medium` \| `high` |
-| `effort` | PRD feature leaves only | Fibonacci `1` \| `2` \| `3` \| `5` \| `8` \| `13` |
-| `rationale` | ranked leaves | `r-\d{3,}` pointer into [decision-ledger.md](../decision-ledger.md). Optional on containers. Required once the leaf has a real rank/score value. Never emit `_rationale_: —`. |
+| `effort` | PRD feature leaves only | Fibonacci `1` \| `2` \| `3` \| `5` \| `8` \| `13` — **same-sitting** with architecture for that capability (spine and/or feature delta) before score is real; see Effort provenance |
+| `rationale` | ranked leaves | `r-\d{3,}` pointer into `refs/planning/decision-ledger.md`. Optional on containers. Required once the leaf has a real rank/score value. Never emit `_rationale_: —`. |
 | `supersedes` / `superseded-by` | optional | Replacement pair (both ends or neither). JSON field remains `superseded_by`. |
 
 Containers stay unmarked (no MoSCoW / Kano). Index tables show the level’s native field.
@@ -35,7 +36,7 @@ Containers stay unmarked (no MoSCoW / Kano). Index tables show the level’s nat
 - Continuous among **siblings** (`1, 2, 3` — no gaps at compose). Children of item 3 are `3.1`, `3.2`, … not new top-level numbers.
 - Unique across the cascade because of the prefix (`PRD-3` ≠ `BRD-3`).
 - Max depth **2** inside a document (`n.m`). Deeper means the parent is not a real grouping — split the parent into siblings.
-- **Freeze / remap** (when IDs freeze, append-only inserts, re-compose rewrite): [cascade.md](../../../skills/rr-planner/refs/cascade.md). This ref owns ID shape, sibling density, and max depth.
+- **Freeze / remap** (when IDs freeze, append-only inserts, re-compose rewrite): `skills/rr-planner/refs/cascade.md`. This ref owns ID shape, sibling density, and max depth.
 
 Rejected: one global `1…N` across all four docs. Rejected: semantic names (`exec-vision`) — not continuous, do not nest.
 
@@ -80,15 +81,15 @@ Declared per level. Native priority method is a property of the **document type*
 | executive-summary | `ES` | MoSCoW on functional deliverables only | Why now, success metrics, functional deliverables, constraints (optional `tag`), non-goals, horizons (optional) | Posture, vision, problem, what-must-be-true, viability verdict |
 | mrd | `MRD` | Kano | Customer needs | Market overview, TAM/SAM/SOM (or internal cost-of-inaction), target segments (`**Primary:**` / `**Secondary:**`), competitors, trends, risks |
 | brd | `BRD` | MoSCoW | Objectives, rules, dependencies | Stakeholders (buyer / user / approver in the section), business risks (impact × likelihood bullets) |
-| prd | `PRD` | RICE / RIC / goal-type | Goals (`primary`/`support`), stories (RIC), features (RICE), out-of-scope (no score) | Shape, product overview, user personas (named in story bodies) |
+| prd | `PRD` | RICE / RIC / goal-type + requirement P1–P3 | Goals (`primary`/`support`), stories (RIC), features (RICE), requirement leaves (`priority` + `status`), out-of-scope (no score) | Shape, product overview, user personas (named in story bodies), WWAS AC |
 
-ES functional deliverables are Must-only in practice. ES constraints may carry optional `tag`. MRD segments state primary/secondary in the section (not a rank, not an id). MRD/BRD risks state impact × likelihood in the section. PRD `status` (e.g. `delivered`) is a manual leaf field — not derived from children.
+ES functional deliverables are Must-only in practice. ES constraints may carry optional `tag`. MRD segments state primary/secondary in the section (not a rank, not an id). MRD/BRD risks state impact × likelihood in the section. PRD `status` / `priority` are manual leaf fields — not derived from children.
 
 ### Emit: omit vs placeholder
 
 Do not write keys that will never apply. Do not write `—` to mean “this field is not a thing.”
 
-- **Omit** — empty by nature / inapplicable: containers have no `_moscow_` / `_kano_` / RICE keys (already `CONTAINER_RANK` if present). No `_status_` except on PRD leaves. No `_tag_` except on ES constraint leaves. No `_goal-type_` except on PRD goal leaves. No `_rationale_` until minted (never `_rationale_: —`). No method key on a heading that is not an item.
+- **Omit** — empty by nature / inapplicable: containers have no `_moscow_` / `_kano_` / RICE keys (already `CONTAINER_RANK` if present). No `_status_` / `_priority_` except on PRD leaves (`priority` = requirement leaves only). No `_tag_` except on ES constraint leaves. No `_goal-type_` except on PRD goal leaves. No `_rationale_` until minted (never `_rationale_: —`). No method key on a heading that is not an item.
 - **Placeholder `—`** — expected on this item, not yet decided: ranked leaf still `idea`/`draft` without a value → `_moscow_: —`, `_kano_: —`, or RICE factor `—`. Drop the key once the real value is written.
 - **Ready** — real rank/score required where the section demands it. `spec: ready` + missing required method key or `—` is `DOR`, not an unranked item.
 
@@ -96,12 +97,16 @@ Do not write keys that will never apply. Do not write `—` to mean “this fiel
 
 ### Per-level methods
 
-Do not apply one ranking system to the whole cascade. No 1–5. No P0/P1/P2.
+Do not apply one ranking system to the whole cascade. No 1–5. **No P-tags except PRD requirement leaves** (`P1`/`P2`/`P3`). MoSCoW stays Discover-only.
 
 - **executive-summary — MoSCoW on functional deliverables only.** Posture, vision, problem, what-must-be-true, and viability verdict are **prose** (no `ES-*` id). Why now, success metrics, constraints, non-goals, and horizons are ranked leaves **without** MoSCoW. Functional deliverables are Must-only in practice (MoSCoW rank). Constraints may carry optional `_tag_:` (`regulatory`, `capacity`, `quality`, `technical`, …).
 - **mrd — Kano on needs** (`basic` / `performance` / `delighter`). Why: market needs are about satisfaction-if-present vs dissatisfaction-if-absent; MoSCoW flattens delighters into Could.
-- **brd — MoSCoW on objectives, rules, and dependencies.** Compliance/contractual rules are Must. Why: business-negotiation language for cutting scope. MoSCoW legend: [project-posture.md](../../../skills/rr-planner/refs/project-posture.md).
-- **prd — RICE/RIC backlog.** Goals: `_goal-type_: primary | support`. Stories: RIC (`reach`, `impact`, `confidence` — no `effort`). Features: full RICE (`reach`, `impact`, `confidence`, `effort` Fibonacci 1,2,3,5,8,13). Out-of-scope: no RICE. Composed score not stored. Optional `_status_:` on leaves (e.g. `delivered`) — manual, not derived. Cross-doc parent: ≥1 ES **or** ≥1 BRD (C2-7). Mechanism-level detail routes to `tech.md` ([output-formats.md](../output-formats.md)).
+- **brd — MoSCoW on objectives, rules, and dependencies.** Compliance/contractual rules are Must. Why: business-negotiation language for cutting scope. MoSCoW legend: Discover `skills/rr-discovery/refs/project-posture.md`.
+- **prd — RICE/RIC backlog + requirement priority + selection.** Goals: `_goal-type_: primary | support`. Stories: RIC (`reach`, `impact`, `confidence` — no `effort`). Features: full RICE (`reach`, `impact`, `confidence`, `effort` Fibonacci 1,2,3,5,8,13). Requirement leaves: `_priority_: P1|P2|P3` plus optional `_status_:` (`deferred` \| `selected` \| `in_progress` \| `delivered`). Out-of-scope: no RICE. Composed score not stored. Cross-doc parent: ≥1 ES **or** ≥1 BRD (C2-7). Plan mechanism/AC lives in standing architecture + feature deltas + WWAS AC — **not** root `tech.md` (`refs/planning/output-formats.md`). Discover may still park early mechanism notes in `tech.md`.
+
+### Effort provenance (PRD features)
+
+`_effort_:` is real only when an architecture decision for that capability exists **in the same Plan pass** (standing spine update and/or `docs/plan/deltas/<feature-id>.md`). Refuse Effort-without-architecture. Fibonacci remains a relative size, not sprint capacity.
 
 ## Spec (agreement axis)
 
@@ -135,9 +140,10 @@ Discovery defaults new items to `idea`. Moving to `draft` means “we are specif
 ### Example mapping
 
 - Feature scored, approved: `PRD-4.1 spec:ready _reach_: 60% of MAU | _impact_: 2 | _confidence_: medium | _effort_: 5`. Story still fuzzy: `PRD-4.2 spec:draft`. Container `PRD-4 spec:draft`.
-- Shipped feature: `PRD-4.1 spec:ready _status_: delivered` (manual marker).
+- Selected requirement: `PRD-4.1.1 spec:ready _priority_: P1 | _status_: selected` (full set kept; siblings may stay `_status_: deferred`).
+- Shipped leaf: `PRD-4.1.1 … _status_: delivered` (manual marker).
 - ES consent constraint: `ES-5 spec:ready _tag_: regulatory` (no MoSCoW).
-- Replace a requirement: `PRD-4.1 spec:deprecated superseded_by:PRD-9`; `PRD-9 spec:draft supersedes:PRD-4.1` until user promotes `ready`.
+- Replace a requirement: `PRD-4.1.1 spec:deprecated superseded_by:PRD-9`; `PRD-9 spec:draft supersedes:PRD-4.1.1` until user promotes `ready`.
 
 ## Canonical item surface (closed vocabulary)
 
@@ -167,20 +173,21 @@ Split segments on `\s+\|\s+(?=_[a-z][a-z0-9-]*_:)` so effect text may contain `|
 |-------------------|-----|-------------------------|
 | **Required (all items)** | `parent`, `kind`, `spec` | same |
 | **Ranked leaves also** | `rationale` (`r-NNN`, minted in the ledger before compose prints it) | `rationale` |
-| **PRD leaves also** | `status` (open string, e.g. `delivered`) | `status` |
+| **PRD leaves also** | `status` (`deferred` \| `selected` \| `in_progress` \| `delivered`) | `status` |
+| **PRD requirement leaves also** | `priority` (`P1` \| `P2` \| `P3`) | `priority` |
 | **PRD goal leaves also** | `goal-type` (`primary` \| `support`) | `goal_type` |
 | **PRD story/feature leaves also** | `reach`, `impact`, `confidence`; `effort` on features only | same |
 | **ES constraint leaves also** | `tag` (open string, e.g. `regulatory`) | `tag` |
 | **Leaves, native method** | `moscow` (ES functional deliverables, BRD) \| `kano` (MRD) | `moscow` \| `kano` |
 | **Optional** | `supersedes`, `superseded-by`; `rationale` on containers | `supersedes`, `superseded_by` |
 
-Canonical emit order: `parent, kind, spec, status, tag, goal-type, reach, impact, confidence, effort, moscow, kano, rationale, supersedes, superseded-by`. Omit inapplicable keys. `--rewrite` must not inject method `—` when the source omitted the key. Emit only keys present on the item (plus required `parent`/`kind`/`spec` for a parseable header).
+Canonical emit order: `parent, kind, spec, status, priority, tag, goal-type, reach, impact, confidence, effort, moscow, kano, rationale, supersedes, superseded-by`. Omit inapplicable keys. `--rewrite` must not inject method `—` when the source omitted the key. Emit only keys present on the item (plus required `parent`/`kind`/`spec` for a parseable header).
 
 Unknown keys or missing required keys (`parent`, `kind`, `spec`) → validator FAIL. Body is the blockquote (AI-judged). `idea`/`draft` leaves may omit method/score keys or emit `—`. `ready` leaves missing a **real** rank/score where required (`—` does not count) → `DOR`.
 
 `_parent_: —` means graph null (ES roots). Native rank `—` means “applicable, not yet decided.”
 
-JSON shape: [schemas/items.schema.json](../schemas/items.schema.json). Graph checks: `scripts/validate_planning.sh` (md-only; `--format yaml|json` is `UNSUPPORTED_FORMAT`).
+JSON shape: `refs/planning/schemas/items.schema.json`. Graph checks: `scripts/validate_planning.sh` (md-only; `--format yaml|json` is `UNSUPPORTED_FORMAT`).
 
 **Code owns:** unique IDs, parent/supersede pointers, numbering density, kind invariant, required keys, status legality, doc/`items.json` drift, rationale id shape and resolution against `decision-ledger.yaml`.
 
@@ -254,13 +261,22 @@ _parent_: BRD-2 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visi
 > Enable checkout without account creation for first-time buyers.
 ```
 
-### Leaf — PRD with delivery status
+### Leaf — PRD feature (RICE + selection)
 
 ```markdown
 #### PRD-3: Guest checkout
-_parent_: BRD-2 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visitors | _impact_: 2 | _confidence_: medium | _effort_: 5 | _status_: delivered | _rationale_: r-014
+_parent_: BRD-2 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visitors | _impact_: 2 | _confidence_: medium | _effort_: 5 | _status_: selected | _rationale_: r-014
 
 > Enable checkout without account creation for first-time buyers.
+```
+
+### Leaf — PRD requirement (P-priority + selection)
+
+```markdown
+#### PRD-3.1: Guest may pay without account
+_parent_: PRD-3 | _kind_: leaf | _spec_: ready | _priority_: P1 | _status_: selected | _rationale_: r-015
+
+> Guest completes payment without creating an account; account optional after purchase.
 ```
 
 ## Item index
