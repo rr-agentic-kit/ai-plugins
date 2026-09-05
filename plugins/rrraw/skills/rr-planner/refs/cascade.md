@@ -1,15 +1,10 @@
 # cascade
 
-**Owner:** Plan flow — posture, standing architecture, interview/score, full requirements, selection, AC smell, optional technical challenge, slice freeze. Discover cascade (ES→MRD→BRD + business-case) is owned by `rr-discovery`.
+**Owner:** Plan level order, inheritance/narrowing, freeze/remap, per-level cycle variants and gates. Orchestration is SKILL Procedure step 4. Discover cascade (ES→MRD→BRD + business-case) is owned by `rr-discovery`.
 
 ## Entry gate (before Plan)
 
-Refuse Plan compose/change unless:
-
-1. `brd` ∈ discovery `session_state.frozen_levels` (or discovery `status.yaml` frozen BRD), **and**
-2. Valid `business-case.yaml` present (`skills/rr-discovery/refs/business-case-handoff.md`)
-
-Skill enforces via [input-resolution.md](input-resolution.md). Brownfield migration = one AskQuestion, not silent.
+SoT: [input-resolution.md](input-resolution.md) Entry gate (frozen BRD + `business-case.yaml`; brownfield = one AskQuestion). Do not restate conditions here.
 
 ## Pre-Plan: posture
 
@@ -51,29 +46,21 @@ flowchart TD
 4. **Unknown vs off-level** — [note-sessions.md](note-sessions.md). Market/viability reopen → park and route to `rr-discovery`.
 5. **Selection ≠ shrink** — `_status_:` only; never delete deferred requirements to “match the slice.”
 
-## Per-level Plan flow (skill-inline)
+## Per-level cycle
 
-For Plan actions (`prd` / `change` / freeze-slice):
+Orchestration owns the skill (SKILL Procedure step 4). For `prd` / `change` / `freeze-slice`, apply only Plan-variant work:
 
-1. Load [prd.md](doc-standards/prd.md), item-schema, [plan-interview.md](plan-interview.md).
-2. On entry: re-decision sweep (`refs/planning/decision-ledger.md`); sidecar load ([note-sessions.md](note-sessions.md)).
-3. Present handoff summary. Run posture + Coach/Fast once ([project-posture.md](project-posture.md)).
-4. **Standing** — author/update spine (+ constitution per mode); feature deltas as capabilities score ([system-design.md](system-design.md), [adr-lite.md](adr-lite.md)).
-5. Interview → score+architect same sitting. Mint ledger rationale when ranked-leaf decisions land.
-6. After every Q&A: notes + raw-history. Reflect triggers → [proactivity.md](proactivity.md).
-7. Compose PRD (`doc_type: prd` only) → **mandatory** `skills/rr-discovery/refs/compose-prose.md`. Dirty challenge attestation when clean (`refs/planning/baselines.md`).
-8. Clarification loop (`refs/planning/contracts.md`).
-9. Select via `_status_:`; WWAS + [req-smell.md](req-smell.md).
-10. Optional technical challenge — inject Plan [challenge-method.md](challenge-method.md); parent keeps compact summary.
-11. **Slice freeze** — [execute-handoff.md](execute-handoff.md); stamp `status.yaml` `slice:`. Whole-PRD freeze = optional structure lock only.
+| Phase | Variant (Plan) |
+|-------|----------------|
+| Load | [prd.md](doc-standards/prd.md) + item-schema + [plan-interview.md](plan-interview.md) |
+| Entry | Re-decision sweep (`refs/planning/decision-ledger.md`); [note-sessions.md](note-sessions.md) sidecar; handoff summary; then Pre-Plan posture above |
+| Standing | Spine (+ constitution per mode); feature deltas when scoring ([system-design.md](system-design.md), [adr-lite.md](adr-lite.md), [architecture.md](doc-standards/architecture.md), [feature-delta.md](doc-standards/feature-delta.md)) |
+| Interview / score | [plan-interview.md](plan-interview.md) → [prioritization-lens.md](prioritization-lens.md); Effort gated by [system-design.md](system-design.md); mint ledger rationale on ranked leaves; after Q&A → notes + raw-history; reflect → [proactivity.md](proactivity.md) |
+| Requirements / select | Full P1–P3 set; `_status_:` only — never shrink the table |
+| Compose | Compose `Task` (`doc_type: prd` only) → **mandatory** `skills/rr-discovery/refs/compose-prose.md`; clarification loop (`refs/planning/contracts.md`); dirty challenge attestation when clean (`refs/planning/baselines.md`) |
+| Exit | WWAS + [req-smell.md](req-smell.md); optional tech challenge (inject Plan [challenge-method.md](challenge-method.md); compact `parent_summary`); [execute-handoff.md](execute-handoff.md) slice freeze; whole-PRD freeze = optional structure lock only |
 
-## Stop and resume
-
-1. Leave composed files on disk (drafts until slice/structure freeze). Do not rewrite Discover docs.
-2. Checkpoint `session-state.json`.
-3. Set `checkpoint.status: paused` with `current_level` reflecting Plan phase.
-
-Resume: `rr-planner --resume --output-dir <same-dir>`.
+Stop / resume: leave drafts on disk; checkpoint `session-state.json` with `checkpoint.status: paused`. Resume: `rr-planner --resume --output-dir <same-dir>`. Do not rewrite Discover docs.
 
 ## Per-level completion gates
 
@@ -83,7 +70,7 @@ Resume: `rr-planner --resume --output-dir <same-dir>`.
 | 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | That ref's conditions |
 | 3 Inheritance integrity | `refs/planning/success-criteria.md` | Static + judgment |
 | 4 Compose acceptance | contracts + prd standard | Compose ok/accepted partial; humanize done |
-| 5 Proactivity | [proactivity.md](proactivity.md) | Effort-without-architecture blocked; dual-lens |
+| 5 Proactivity | [proactivity.md](proactivity.md) | Dual-lens; Effort gated per [system-design.md](system-design.md) |
 | 6 Stage-exit | [blind-spots.md](blind-spots.md) | Technical-plan row; premise-critical → Gate 7 |
 | 7 Viability | [expert-panel.md](expert-panel.md) | Advisory weight vs Discover binding — still required |
 | Slice | [execute-handoff.md](execute-handoff.md) + req-smell | Kernel mint; selection intact |

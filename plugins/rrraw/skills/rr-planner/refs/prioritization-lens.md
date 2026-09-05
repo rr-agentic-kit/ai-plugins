@@ -32,7 +32,7 @@ Never run all frameworks in one pass. Ask once which lens if the founder rejects
 - Shrinking the requirement table to match what ships — use `_status_:` selection instead
 - Fibonacci as sprint capacity theater
 - P0 / MoSCoW on PRD
-- Scoring Effort without spine/delta for that capability
+- Effort without architecture — [system-design.md](system-design.md)
 
 ## Done-when
 

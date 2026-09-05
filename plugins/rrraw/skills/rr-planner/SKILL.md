@@ -26,16 +26,7 @@ Produce **Plan** artifacts from a **frozen business case**: full feature require
 - Release/version bundling of slices → deferred; do not invent those artifacts this pass
 - Implementation, Execute, ship-check, or ticket writing that is not cascade planning
 - Inventing docs to run research or challenge — those actions require existing docs ([input-resolution.md](refs/input-resolution.md))
-- Starting Plan without frozen BRD + `business-case.yaml` (see Entry gate)
-
-## Entry gate
-
-Refuse Plan compose/change/freeze-slice unless:
-
-1. `brd` ∈ discovery `session_state.frozen_levels` (or `docs/discovery/status.yaml` frozen BRD rev), **and**
-2. `docs/discovery/business-case.yaml` present with required fields (`skills/rr-discovery/refs/business-case-handoff.md`)
-
-Exception: documented brownfield migration (legacy shallow ES+PRD) — one AskQuestion, not silent. Missing handoff → point user to `rr-discovery` freeze.
+- Starting Plan without frozen BRD + `business-case.yaml` — [input-resolution.md](refs/input-resolution.md) Entry gate
 
 ## Procedure
 
@@ -54,19 +45,9 @@ Phrases: `refs/planning/progress.md` on every invocation.
 
 2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start Plan compose. Default `output_dir` = `docs/plan/`.
 
-3. **entry-gate** — Enforce Entry gate above. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
+3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
 
-4. **Plan body** — Load [cascade.md](refs/cascade.md). In order:
-   - **posture** — [project-posture.md](refs/project-posture.md) (PRD-shape, `arch_doc_mode`); offer Coach/Fast once ([plan-interview.md](refs/plan-interview.md)).
-   - **standing** — [architecture.md](refs/doc-standards/architecture.md) / [constitution.md](refs/doc-standards/constitution.md); deltas via [adr-lite.md](refs/adr-lite.md) + [feature-delta.md](refs/doc-standards/feature-delta.md).
-   - **interview** — [plan-interview.md](refs/plan-interview.md); notes before questions; one question/cycle default.
-   - **score-architect** — [prioritization-lens.md](refs/prioritization-lens.md) + [system-design.md](refs/system-design.md). **Hard stop:** no feature Effort without architecture this pass.
-   - **requirements** — full set with P1–P3 ([prd.md](refs/doc-standards/prd.md)); never shrink for build-now.
-   - **select** — `_status_:` on leaves (`deferred` \| `selected` \| …).
-   - **ac-smell** — WWAS + [req-smell.md](refs/req-smell.md); fail freeze without hold.
-   - **tech-challenge?** — when requested or `depth: deep`: `Task` challenge; **inject** [challenge-method.md](refs/challenge-method.md); parent keeps compact `parent_summary` only (`refs/planning/contracts.md`).
-   - **slice-freeze** — [execute-handoff.md](refs/execute-handoff.md); mint `execute-slice.yaml`; stamp `status.yaml` `slice:`. Draft architecture allowed.
-   - **compose / humanize** — as needed: compose `Task` (`doc_type: prd` only) → mandatory compose-prose. Whole-PRD freeze = optional structure lock only.
+4. **Plan body** — Load [cascade.md](refs/cascade.md). For `prd` / `change` / `freeze-slice`: run Pre-Plan posture → Level order → Per-level cycle as that ref directs. Mark `posture`, `standing`, `interview`, `score-architect`, `requirements`, `select`, `ac-smell`, `tech-challenge?`, `slice-freeze`, `compose`/`humanize` as cascade phases complete. Done: that ref's Advancing vs stopping conditions or pause checkpoint.
 
 5. **research / challenge** — Load `refs/planning/contracts.md`. Research: [research-method.md](refs/research-method.md). Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method). Persist reports per `refs/planning/output-formats.md`. Completes `write`.
 
@@ -84,10 +65,15 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | [doc-standards/prd.md](refs/doc-standards/prd.md) / architecture / constitution / feature-delta | Compose standing + PRD |
 | [req-smell.md](refs/req-smell.md) / [execute-handoff.md](refs/execute-handoff.md) | Pre-freeze / slice freeze |
 | [challenge-method.md](refs/challenge-method.md) / [blind-spots.md](refs/blind-spots.md) | Challenge / stage-exit |
+| [goal-anchor.md](refs/goal-anchor.md) / [expert-panel.md](refs/expert-panel.md) | Plan pass / Gate 2; Gate 7 / resume viability |
+| [note-sessions.md](refs/note-sessions.md) | After every Q&A; Plan level entry |
+| [domain-routing.md](refs/domain-routing.md) | Challenge / blind-spot domain placement |
 | `skills/rr-discovery/refs/compose-prose.md` | Every cascade `.md` persist |
 | `skills/rr-discovery/refs/business-case-handoff.md` | Entry gate |
 | `refs/planning/contracts.md` | Before any `Task` |
 | Shared package | plugin `refs/planning/` (link there directly — no skill stubs) |
+
+No matching technique ref → stop + AskQuestion; do not invent procedure.
 
 ## Agent delegation
 
@@ -96,3 +82,5 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | compose | `agents/planning/compose.md` | `refs/planning/contracts.md` — allowlist `prd` |
 | research | `agents/planning/research.md` | `refs/planning/contracts.md` |
 | challenge | `agents/planning/challenge.md` | `refs/planning/contracts.md` + Plan [challenge-method.md](refs/challenge-method.md) inject; compact `parent_summary` |
+
+Compose does **not** own humanize — skill runs `skills/rr-discovery/refs/compose-prose.md` after draft receipt.

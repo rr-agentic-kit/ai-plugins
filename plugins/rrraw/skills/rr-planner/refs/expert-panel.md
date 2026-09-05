@@ -2,7 +2,7 @@
 
 **Owner:** Seat roster, conduct protocol, evidence loop, and viability verdict. The panel co-designs — a seat that blocks owes an alternative.
 
-**Load when:** Exec-summary premise test; every level's Gate 7; evidence round after a premise-critical claim; `--resume` when `viability[]` or the re-decision queue is open. Not during compose (compose consumes minted rationale ids; it does not sit the panel).
+**Load when:** Plan Gate 7 (PRD advisory); evidence round after a premise-critical claim; `--resume` when `viability[]` or the re-decision queue is open. Route-back to Discover when ES/MRD/BRD roster seats apply. Not during compose (compose consumes minted rationale ids; it does not sit the panel).
 
 The verdict is a **state**, not an exit. Invalidation never auto-flips item status (`refs/planning/decision-ledger.md`).
 
@@ -40,7 +40,7 @@ Record the turn in raw-history with `source: panel` (`refs/planning/output-forma
 
 ## Claim classes and evidence loop
 
-Discovery search is budgeted by **claim class**, not a flat cap of 2. Research phase ([research-method.md](research-method.md)) stays the broad post-composition pass.
+Plan panel search is budgeted by **claim class**, not a flat cap of 2. Broad post-composition research stays in [research-method.md](research-method.md).
 
 | Class | What | Budget |
 |-------|------|--------|
@@ -71,7 +71,7 @@ Non-terminal. Recorded in `session_state.viability[]` and, for ranked-leaf decis
 |---------|---------|----------|
 | `proceed` | Evidence bar met; no blocking dissent | Yes, if other gates pass |
 | `proceed-with-conditions` | Proceed; named conditions become `flips_when` on the rationale | Yes; conditions live in the ledger |
-| `pivot(option)` | Premise or scope reframed; `option` is a concrete alternative from the comparison table | Do not freeze; re-discover affected sections |
+| `pivot(option)` | Premise or scope reframed; `option` is a concrete alternative from the comparison table | Do not freeze; re-open affected Plan sections (market/viability → route to `rr-discovery`) |
 | `hold(evidence)` | Missing evidence is named; bar is explicit | Do not freeze; do not advance. Prepend VIABILITY HOLD. |
 | `kill` | Pivot options exhausted **and** user confirms. Write revival trigger (`flips_when` on a `reject` rationale) and bury the item | Checkpoint; do not recycle the id |
 
@@ -100,19 +100,12 @@ Silent resolution of dissent is a gate failure.
 
 An internal project that reports TAM/SAM/SOM is a protocol failure — the numbers are not the decision.
 
-## Premise test (executive-summary)
+## Premise test (route-back only)
 
-During ES discovery, after posture confirm and `domain_context`, before freezing ES:
+Plan does **not** re-run the ES premise test. If Gate 7 / challenge surfaces a premise-critical market or viability reopen → park and route to `rr-discovery` (roster rows for ES/MRD/BRD below are for that route-back + advisory dissent context). Do not invent ES sections under `docs/plan/`.
 
-1. Sit founder/CEO, seed investor, and domain practitioner.
-2. Produce the **What must be true** prose section — the smallest set of premises the rest of the cascade stands on. Do not mint an `ES-*` id for it.
-3. Classify each premise (`premise-critical` / `supporting` / `color`) and run the evidence loop.
-4. Record the **Viability verdict** as prose (`proceed` … `kill`). Binding. Do not mint an `ES-*` id for it.
+## Gate 7 (Plan levels)
 
-Done: both sections present; verdict ≠ `hold` unless the user accepts the banner; rationales minted for any ranked ES leaves that depend on those premises.
+After Gate 6, sit this level's roster (PRD = advisory). Run the conduct protocol on load-bearing claims (Must / `must-correct` / selected leaves, plus anything the sweep enqueued). Write `viability[]` for this level. Binding at ES/MRD stays Discover-owned; Plan Gate 7 is advisory — still record; user may accept and proceed.
 
-## Gate 7 (every level)
-
-After Gate 6, sit this level's roster. Run the conduct protocol on the level's load-bearing claims (Must / `must-correct` / Kano `basic`, plus anything the sweep enqueued). Write `viability[]` for this level. Binding at ES/MRD; advisory below.
-
-Open `re_decision_queue` or unresolved binding `hold`/`kill` → do not freeze (`refs/planning/success-criteria.md`, [proactivity.md](proactivity.md)).
+Open `re_decision_queue` or unresolved binding `hold`/`kill` from Discover → do not freeze Plan (`refs/planning/success-criteria.md`, [proactivity.md](proactivity.md)).

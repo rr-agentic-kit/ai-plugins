@@ -42,5 +42,5 @@ Persist on `session_state.project_posture`. Compose/standing layer read these fo
 
 - Composing PRD without confirmed Discover posture / handoff
 - Running a PRD MoSCoW cut-pass instead of RICE + P-tags on requirements
-- Effort without architecture mode / standing layer
+- Effort without architecture mode / standing layer ([system-design.md](system-design.md))
 - Re-opening signed BRD Must as Plan inventiveness

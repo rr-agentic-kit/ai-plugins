@@ -2,7 +2,7 @@
 
 **Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format. Reason-graph concerns (evidence, `flips_when`, burial, re-decision queue) live in `refs/planning/decision-ledger.md` — this ref does not own them.
 
-**Load when:** Entire discovery pass at every cascade level (always-on). Not a trigger. Also on parent/child fact conflict, posture confirm, and off-level owner ambiguity.
+**Load when:** Entire Plan pass at every Plan level (always-on). Not a trigger. Also on parent/child fact conflict, posture confirm, and off-level owner ambiguity.
 
 Unclear and ambiguous user statements are **blocking**. Do not record them as facts, and do not treat an unresolved guess as a true assumption, until the protocol below completes or the user explicitly accepts an `assumption` with `blocking` set.
 
@@ -135,7 +135,7 @@ Do not copy `flips_when`, evidence claims, or graveyard snapshots into this log.
 | Confirm | `AskQuestion` confirm | "Confirm: [statement] — yes/no?" |
 | Free-text follow-up | `AskQuestion` with Other | "Or describe in your own words:" |
 
-After each answer: append raw-history YAML, then update the decision/assumption log in session state, then continue discovery. Off-level answers: classify owner first ([note-sessions.md](note-sessions.md)); `type: note_routed` when parked.
+After each answer: append raw-history YAML, then update the decision/assumption log in session state, then continue the current Plan phase. Off-level answers: classify owner first ([note-sessions.md](note-sessions.md)); `type: note_routed` when parked.
 
 Posture confirm: `type: project_posture`, `user_confirmed: true`. New Must after `signed_v1`: `type: scope_change` or reject — [project-posture.md](project-posture.md).
 

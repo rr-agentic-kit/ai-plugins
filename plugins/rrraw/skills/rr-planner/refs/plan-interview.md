@@ -31,7 +31,7 @@ objective → capability → story → feature → full requirement set (P1–P3
 2. Name capabilities that deliver objectives.
 3. Stories: outcome form default — `As [persona], I can… so that…`. Optional **job story** body for B2B/situation-heavy: `When… I want… so I can…` — not a second backlog.
 4. Features: RICE; stories: RIC ([prioritization-lens.md](prioritization-lens.md)).
-5. **Hard stop:** no feature Effort and no slice freeze until architecture for that capability exists this pass ([system-design.md](system-design.md), [adr-lite.md](adr-lite.md)).
+5. **Hard stop:** [system-design.md](system-design.md) same-sitting rule (+ [adr-lite.md](adr-lite.md) when ADR shape applies).
 6. Capture the **full** requirement set; select build-now with `_status_:` — never delete deferred rows.
 7. Narrowing UX: talk capability/cost — never “fill PRD §6.”
 

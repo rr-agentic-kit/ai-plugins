@@ -31,7 +31,7 @@ Stamp `plan/status.yaml` `slice:` (`refs/planning/baselines.md`).
 | Condition | Action |
 |-----------|--------|
 | Smell-fail AC without explicit hold | Refuse |
-| Effort without architecture pass | Refuse |
+| Effort without architecture ([system-design.md](system-design.md)) | Refuse |
 | Slice shrinks/deletes the full requirement table | Refuse — selection is `_status_:` only |
 | Product AC written as test code | Refuse — AC stays WWAS product pass/fail |
 | Market re-debate | Route to `rr-discovery` |

@@ -12,22 +12,7 @@ Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution), featu
 
 **Explicitly no traditional sprints** (no capacity/velocity theater). Sequencing language: **slice / phase / selected requirements**. Release/version bundling of frozen slices is a later Plan add-on — not this skill’s inventiveness.
 
-**Out of scope:** Problem/market/viability/ideation/GTM — route to Discover. Execute / ship-check — future.
-
-## When
-
-### Use when
-
-- Frozen BRD + `business-case.yaml` exist and you need Plan (`--prd`, `--change`, `--freeze-slice`)
-- Research or challenge **Plan** docs (`--research`, `--challenge`)
-- Shared `--setup` / `--resume` at Plan
-
-### Avoid when
-
-- Problem, market, viability, ideation, beachhead → `rr-discovery`
-- Starting Plan without freeze + handoff (entry gate)
-- Asking for sprint planning / velocity as Plan process
-- Asking this skill to invent a release/version plan this pass
+**Out of scope:** Execute / ship-check / ticket writing — future.
 
 ## Actions
 
@@ -39,12 +24,65 @@ Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution), featu
 | `freeze-slice` | Mint `execute-slice.yaml` + stamp slice | Selected requirements + smell-clean AC |
 | `research` | Cited findings on existing docs | Post-compose |
 | `challenge` | Technical pre-mortem + red-team | Prefer Plan targets; compact parent summary |
-| `resume` | Continue Plan checkpoint | Paused Plan |
+
+`--resume` is a **selector** (continue Plan checkpoint), not a primary action — [input-resolution.md](refs/input-resolution.md).
+
+## When
+
+### Use when
+
+- Frozen BRD + `business-case.yaml` exist and you need Plan (`--prd`, `--change`, `--freeze-slice`)
+- Research or challenge **Plan** docs (`--research`, `--challenge`)
+- Shared `--setup` or continue a paused Plan session (`--resume` selector)
+
+### Avoid when
+
+- Problem, market, viability, ideation, beachhead → `rr-discovery`
+- Starting Plan without freeze + handoff (entry gate)
+- Asking for sprint planning / velocity as Plan process
+- Asking this skill to invent a release/version plan this pass
+
+## Philosophy
+
+- **Entry gate** — Frozen BRD + valid `business-case.yaml`
+- **Full scope honesty + thin selection** — `_status_:` never deletes the requirement table
+- **Spine + deltas + slice kernel** — small standing contracts beat fat PRD dumps to Execute
+- **Dual-lens founder** — product + architecture in one sitting
+- **Anti-triggers** — Discover flags → `rr-discovery`; sprint language → slice selection
+
+## UX
+
+### Invoke
+
+Flags (`--setup` / `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / …) or clear Plan NL; bare invoke never silent-composes without entry gate.
+
+### Intake
+
+Status-first (`rrr-status` → `docs/plan/status.yaml` + session-state); resolve emits payload before Plan body. Entry gate also reads discovery freeze + handoff.
+
+### Clarify
+
+AskQuestion on entry-gate fail, vague posture/`domain_context`, binding panel `hold`, smell-fail AC, or missing freeze fields — do not invent. Cap stays `questions_per_cycle`.
+
+### Output
+
+PRD + standing spine/deltas + WWAS AC + selection status; slice freeze kernel when requested; research/challenge reports; cascade prose only after humanize.
+
+### Close
+
+Session-state + status stamps written. **Next Up:** after slice freeze → Execute (future); after compose → research/challenge or freeze-slice.
 
 ## Technique index
 
 | Technique | Ref |
 |-----------|-----|
+| Cascade / Plan gates | [refs/cascade.md](refs/cascade.md) |
+| Project posture | [refs/project-posture.md](refs/project-posture.md) |
+| Goal anchor / clarify | [refs/goal-anchor.md](refs/goal-anchor.md) |
+| Note sessions | [refs/note-sessions.md](refs/note-sessions.md) |
+| Expert panel / Gate 7 | [refs/expert-panel.md](refs/expert-panel.md) |
+| Domain routing | [refs/domain-routing.md](refs/domain-routing.md) |
+| Blind spots | [refs/blind-spots.md](refs/blind-spots.md) |
 | Coach / Fast interview | [refs/plan-interview.md](refs/plan-interview.md) |
 | RICE / RIC / on-demand lenses | [refs/prioritization-lens.md](refs/prioritization-lens.md) |
 | Same-sitting system design | [refs/system-design.md](refs/system-design.md) |
@@ -55,13 +93,18 @@ Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution), featu
 | WWAS + smell gate | [refs/req-smell.md](refs/req-smell.md) |
 | Slice freeze kernel | [refs/execute-handoff.md](refs/execute-handoff.md) |
 | Technical challenge | [refs/challenge-method.md](refs/challenge-method.md) |
+| Research method | [refs/research-method.md](refs/research-method.md) |
+| Pre-save proactivity | [refs/proactivity.md](refs/proactivity.md) |
 
-## Philosophy
+## Constraints
 
-- **Entry gate** — Frozen BRD + valid `business-case.yaml`
-- **Full scope honesty + thin selection** — `_status_:` never deletes the requirement table
-- **Spine + deltas + slice kernel** — small standing contracts beat fat PRD dumps to Execute
-- **Dual-lens founder** — product + architecture in one sitting
-- **Anti-triggers** — Discover flags → `rr-discovery`; sprint language → slice selection
+- **Invoke:** Auto — no `disable-model-invocation`; ambient WHEN description is enough
+- **Gates:** Entry gate (frozen BRD + handoff); humanize before cascade `.md` persist; Effort requires architecture this pass; smell-fail blocks freeze
+- **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
+- **Eval-first:** Fix FAIL audit ids only; preserve Plan outcome (no redesign)
 
-Selectors and depth: [refs/input-resolution.md](refs/input-resolution.md). Shared package → plugin `refs/planning/`.
+## Notes
+
+- Selectors and depth: [refs/input-resolution.md](refs/input-resolution.md)
+- Shared ledger / items / baselines: plugin `refs/planning/` (link there directly — no skill stubs)
+- Technique refs above are skill-local under `skills/rr-planner/refs/`

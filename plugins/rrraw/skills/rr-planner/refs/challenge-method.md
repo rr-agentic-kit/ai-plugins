@@ -41,7 +41,7 @@ Assume the **slice / standing design failed** in production. Work backward:
 | Spine | Soft invariants, missing `Prevents`, stack dump posing as spine |
 | Feature delta | Restated spine, silent edit of accepted ADR, missing rejections |
 | WWAS AC | Vague verbs, loopholes, unobservable acceptance ([req-smell.md](req-smell.md)) |
-| Selection | Slice that deleted deferred requirements; Effort without architecture |
+| Selection | Slice that deleted deferred requirements; Effort without architecture ([system-design.md](system-design.md)) |
 
 ## Parent summary contract
 

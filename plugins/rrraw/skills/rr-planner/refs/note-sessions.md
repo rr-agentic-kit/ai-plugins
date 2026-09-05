@@ -2,9 +2,9 @@
 
 **Owner:** Classify off-level answers, park them on the **affected** document, and incorporate them when that level is current. Source of truth for park / deepen / apply **and** sidecar prune.
 
-**Load when:** After every user answer (and free-form volunteer) during discovery; on level entry (load sidecar into interview); after compose persist (prune); before Gate 4 / freeze.
+**Load when:** After every user answer (and free-form volunteer) during a Plan session; on Plan level entry (load sidecar into interview); after compose persist (prune); before Gate 4 / freeze.
 
-A PRD answer given during executive-summary must live on PRD, not as an ES assumption. Completing questions for a later doc ≠ composing or freezing that doc.
+A later-level answer given mid-PRD (or during standing-arch) must live on that owner doc, not as a current-level fact. Completing questions for a later doc ≠ composing or freezing that doc.
 
 ## Classify, then route
 
@@ -12,7 +12,7 @@ After every user answer, classify which cascade level owns it using that level's
 
 | Owner | Action |
 |-------|--------|
-| Same as `current_level` | Record on current discovery (`level_facts`) |
+| Same as `current_level` | Record on current Plan level (`level_facts`) |
 | Other level | Do **not** record as a current-level fact. Park, deepen, or apply (below). |
 | Ambiguous | Goal-anchor: "which document?" — [goal-anchor.md](goal-anchor.md) |
 
@@ -99,7 +99,7 @@ Do not skip cascade: parent pointers still require the parent level to exist at 
 
 ## Interview on level entry
 
-When discovery enters a level, **before** new doc-standard questions:
+When Plan enters a level (`docs/plan/` `current_level`), **before** new doc-standard questions:
 
 1. Load `{level}.notes.yaml` if present. Mandatory — not optional presentation.
 2. Walk every note:
