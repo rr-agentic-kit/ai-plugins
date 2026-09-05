@@ -28,33 +28,33 @@ Prove a product (venture or internal) exists before naming Plan capabilities. Ow
 
 ## Procedure
 
-TodoWrite `merge: false` before step 1 with stable ids `resolve`, `posture`, `ideation`, `premise`, `level-<n>` (one per `payload.cascade_levels` entry), `sweep`, `compose`, `humanize`, `stage-exit`, `verdict`, `freeze-handoff`, `write`. Mark `completed` before advancing. Re-add `sweep`, `compose`, `humanize`, `stage-exit`, and `verdict` with `merge: true` when entering the next level. Omit discovery level todos when `action` is `challenge`. When `action` is `setup`: only `resolve`, `setup`.
+TodoWrite `merge: false` before step 1 with stable ids `resolve`, `setup`, `posture`, `ideation`, `premise`, `level-<n>` (one per `payload.cascade_levels` entry), `sweep`, `compose`, `humanize`, `stage-exit`, `verdict`, `freeze-handoff`, `write`. Mark `completed` before advancing. Per level: re-add `sweep` → `compose` → `humanize` → `stage-exit` → `verdict` with `merge: true` (cascade cycle). Omit discovery level todos when `action` is `challenge`. When `action` is `setup`: only `resolve`, `setup`.
 
 Phrases: `refs/planning/progress.md` on every invocation.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Accept legacy `--exec-summary` → `executive-summary`. No `--prd` / `--research` as primary. Status-first: read `docs/rrr-status.yaml` then `docs/discovery/status.yaml` + session-state. If cascade docs exist, rewrite via `sh scripts/validate_planning.sh --rewrite <dir>`. Sync agent config via `refs/planning/agent-config.md`. Done: payload emitted. Stop: that ref's deterministic errors.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Done/Stop: that ref.
 
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
 | `setup` | step 2 (completes `write`). Stop. | `setup` |
-| `discover`, `executive-summary`…`brd`, `change` | step 3 → step 5 → step 6 | posture through write |
+| `discover`, `executive-summary`…`brd`, `change` | step 3, then chain below | posture through write |
 | `challenge` | step 4 (completes `write`) | `write` only |
 
-If `payload.chain` includes `challenge`, run step 4 after last freeze and before step 6.
+Chain after step 3: if `payload.chain` includes `challenge` → `3 → 4 → 5 → 6`; else → `3 → 5 → 6`.
 
-2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start discover. Default `output_dir` = `docs/discovery/`.
+2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Default `output_dir` = `docs/discovery/`. Done: setup script succeeded; completes `write`. Stop: setup errors; do not start discover.
 
-3. **discover** — Load [project-posture.md](refs/project-posture.md) (includes `domain_context`). Done: that ref's persist condition.
-   - For each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md).
-   - After compose draft: **mandatory** [compose-prose.md](refs/compose-prose.md) before treating persist complete.
+3. **discover** — Load [project-posture.md](refs/project-posture.md) (includes `domain_context`). Done: that ref's Persist condition.
+   - For each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md) (per-level cycle + gates).
    - On-demand: [interview-method.md](refs/interview-method.md), [strategy-lenses.md](refs/strategy-lenses.md), [gtm-framing.md](refs/gtm-framing.md).
-   - Done: last listed level frozen. After BRD freeze → step 5.
+   - Done: last listed level frozen. Then follow chain (step 1): challenge-in-chain → step 4; else → step 5.
+   - Stop / pause ("stop", "pause", "done for now"): leave drafts on disk; checkpoint `session-state.json` (`refs/planning/output-formats.md`); set `checkpoint.status: paused` with `current_level`; skip pre-save. Resume: `--resume --output-dir <same-dir>` — load checkpoint; sweep; continue.
 
-4. **challenge** — Load `refs/planning/contracts.md`, [challenge-method.md](refs/challenge-method.md), [blind-spots.md](refs/blind-spots.md), `refs/planning/decision-ledger.md`. `Task` challenge agent for **exactly one** ES/MRD/BRD stem; **inject** `challenge-method.md` path into the Task prompt. Persist `{stem}.challenge.report.md` (humanize prose body). Stamp `docs/discovery/status.yaml` challenge per `refs/planning/baselines.md`. Completes `write`.
+4. **challenge** — Load `refs/planning/contracts.md`, [challenge-method.md](refs/challenge-method.md), [blind-spots.md](refs/blind-spots.md), `refs/planning/decision-ledger.md`. `Task` challenge agent for **exactly one** ES/MRD/BRD stem; **inject** `challenge-method.md` path into the Task prompt. Persist `{stem}.challenge.report.md` (humanize prose body). Stamp `docs/discovery/status.yaml` challenge per `refs/planning/baselines.md`. Done: report + stamp written; completes `write` when challenge is primary. Stop: contracts/challenge-method errors; missing stem.
 
-5. **freeze-handoff** (after BRD Gates 1–7) — Load [business-case-handoff.md](refs/business-case-handoff.md). Follow that ref for mint, write, stamp, and conditional artifacts. Fail freeze per that ref (missing required fields or decorative metrics). **Next Up:** Plan (`rr-planner`).
+5. **freeze-handoff** (after BRD Gates 1–7) — Load [business-case-handoff.md](refs/business-case-handoff.md). Done/Stop: that ref. **Next Up:** Plan (`rr-planner`).
 
-6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + phase `status.yaml` + refresh `rrr-status.yaml` per `refs/planning/output-formats.md`. Done: session-state + statuses written.
+6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + phase `status.yaml` + refresh `rrr-status.yaml` per `refs/planning/output-formats.md`. Done: session-state + statuses written. Stop: pre-save block (open queue / binding `hold`/`kill`).
 
 ## Shared refs (load on demand)
 
@@ -71,6 +71,7 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 | [business-case-handoff.md](refs/business-case-handoff.md) | BRD freeze → Plan handoff |
 | `refs/doc-standards/<level>.md` | Composing that level |
 | [goal-anchor.md](refs/goal-anchor.md) / [expert-panel.md](refs/expert-panel.md) | Discovery pass / Gate 7 |
+| [domain-routing.md](refs/domain-routing.md) | Blind-spot names a domain topic |
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A; level entry |
 | [challenge-method.md](refs/challenge-method.md) | `--challenge` / `depth: deep` |
 | `refs/planning/contracts.md` | Before any subagent `Task` |
@@ -85,5 +86,3 @@ Shared planning package: plugin `refs/planning/` (link there directly — no ski
 |-------|------|----------|
 | compose | `agents/planning/compose.md` | `refs/planning/contracts.md` § compose — allowlist `executive-summary`\|`mrd`\|`brd` |
 | challenge | `agents/planning/challenge.md` | `refs/planning/contracts.md` § challenge + [challenge-method.md](refs/challenge-method.md) |
-
-Compose does **not** own humanize — skill runs [compose-prose.md](refs/compose-prose.md) after draft receipt.

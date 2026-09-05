@@ -12,11 +12,8 @@ After each discovery sub-section (not necessarily each full level):
 
 1. **Mirror back** — Summarize what was captured in 2–3 sentences.
 2. **Sit the level's roster** — Name the seats ([expert-panel.md](expert-panel.md)). Domain practitioner is instantiated from `domain_context`.
-3. **Falsify / evidence / alternatives** — Run [expert-panel.md](expert-panel.md) evidence loop and, if a seat would block, that ref's conduct protocol.
-4. **Probe gaps** — One targeted question the user has not addressed:
-   - "What happens if [assumption] is wrong?"
-   - "Who loses if we succeed?"
-   - "What are we explicitly NOT doing?"
+3. **Falsify / evidence / alternatives** — Per [expert-panel.md](expert-panel.md) (evidence loop + conduct when a seat would block).
+4. **Probe gaps** — Per [expert-panel.md](expert-panel.md): one targeted question the user has not addressed (assumption-wrong / who-loses / explicit NOT).
 5. **Surface risks** — Name one risk or tradeoff implied by current facts. Classify per [expert-panel.md](expert-panel.md).
 6. **Record** — Add surfaced items to `assumptions[]` or `decisions[]` in session state. Mint a ledger rationale when the decision is made. Write evidence records from any search this pass. Run the sweep.
 
@@ -56,7 +53,7 @@ Fire reflection when any of:
 - Level gate 5 (proactivity) not yet satisfied.
 - User says "I think", "probably", "maybe" on a blocking or `premise-critical` fact.
 - Compose agent returns `clarifications_needed[]` with `severity: high`.
-- PRD shape just confirmed → PRD-shape reflection (once per PRD compose; same fatigue cap as Gate 5).
+- PRD shape just confirmed during Discover posture → run PRD-shape reflection once ([project-posture.md](project-posture.md); same fatigue cap as Gate 5).
 - Sweep enqueued an item, or a seat issued `hold` / `pivot` / `kill`.
 - Evidence round just landed (always sweep; reflect if anything invalidated).
 

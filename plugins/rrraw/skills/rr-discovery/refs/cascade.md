@@ -1,10 +1,10 @@
 # cascade
 
-**Owner:** Top-down discovery level order (executive-summary → MRD → BRD), inheritance/narrowing, freeze/remap, per-level gates, and BRD → business-case handoff.
+**Owner:** Top-down discovery level order (executive-summary → MRD → BRD), inheritance/narrowing, freeze/remap, and per-level gates. Handoff mint is SKILL step 5.
 
 ## Pre-cascade: project posture
 
-Before executive-summary, run [project-posture.md](project-posture.md). Done: that ref's persist condition.
+Before executive-summary, run [project-posture.md](project-posture.md). Done: that ref's Persist condition.
 
 ## Ideation gate
 
@@ -44,40 +44,28 @@ flowchart TD
 3. **Explicit narrowing** — record narrowing as a decision in `session-state.json`.
 4. **Unknown vs off-level** — [note-sessions.md](note-sessions.md). Feature/RICE detail → Plan notes, not Discover Musts.
 
-## Per-level discovery flow (skill-inline)
+## Per-level cycle
 
-For each level in `cascade_levels`:
+Orchestration owns the skill (SKILL Procedure step 3). For each level in `cascade_levels`, apply only level-variant work:
 
-1. Load `doc-standards/<level>.md` and `refs/planning/doc-standards/item-schema.md`.
-2. On level entry: re-decision sweep (`refs/planning/decision-ledger.md`); sidecar load ([note-sessions.md](note-sessions.md)).
-3. Load [goal-anchor.md](goal-anchor.md) for the entire discovery pass.
-4. Present inherited facts. **Executive-summary only:** premise test ([expert-panel.md](expert-panel.md)).
-5. Ask for gaps. Mint ledger rationales for ranked leaves (`refs/planning/decision-ledger.md`).
-6. After every Q&A: [note-sessions.md](note-sessions.md) + `raw-history`. On reflect → [proactivity.md](proactivity.md). Strategy/GTM on demand: [strategy-lenses.md](strategy-lenses.md), [gtm-framing.md](gtm-framing.md).
-7. Accumulate `level_facts`. Invoke compose (`refs/planning/contracts.md`).
-8. **Humanize** — after compose draft receipt, run [compose-prose.md](compose-prose.md) before treating persist complete. Prune notes after final write. Dirty challenge attestation if needed (`refs/planning/baselines.md`).
-9. Clarification loop (`refs/planning/contracts.md`).
-10. Refresh `item_registry` from `items.json`. Gate 3 static (`refs/planning/success-criteria.md`).
-11. Gate 6 then Gate 7. On Gate pass: **freeze** this level. After **BRD** freeze: [business-case-handoff.md](business-case-handoff.md).
+| Phase | Variant (this level) |
+|-------|----------------------|
+| Load | `doc-standards/<level>.md` + item-schema |
+| Entry | Sweep; [note-sessions.md](note-sessions.md) sidecar; [goal-anchor.md](goal-anchor.md) for the pass |
+| Discover | Inherited facts; **ES only** premise ([expert-panel.md](expert-panel.md)); gaps → notes/`raw-history`; reflect → [proactivity.md](proactivity.md); [strategy-lenses.md](strategy-lenses.md) / [gtm-framing.md](gtm-framing.md) on demand |
+| Compose | Compose (`refs/planning/contracts.md`) → [compose-prose.md](compose-prose.md); Gate 3 static |
+| Exit | Gate 6 → Gate 7 → freeze. After **BRD** pass → SKILL `freeze-handoff` (step 5) |
 
-## Stop and resume
-
-User may stop ("stop", "pause", "done for now"):
-
-1. Leave composed files on disk (drafts until freeze). Do not run pre-save.
-2. Checkpoint `session-state.json` (`refs/planning/output-formats.md`).
-3. Set `checkpoint.status: paused` with `current_level`.
-
-Resume: `rr-discovery --resume --output-dir <same-dir>`. Load checkpoint; sweep; continue.
+Stop / resume: SKILL step 3 Stop bullet.
 
 ## Per-level completion gates
 
 | Gate | Owner | Done when |
 |------|-------|-----------|
 | 1 Section coverage | this file | Every required section has a resolved fact or explicit assumption `blocking: false` |
-| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | That ref's level-complete conditions |
+| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | Disambiguation protocol complete; no blocking unclear/ambiguous input ([goal-anchor.md](goal-anchor.md) §§ Unclear vs ambiguous, Disambiguation protocol) |
 | 3 Inheritance integrity | `refs/planning/success-criteria.md` | Static script + judgment list |
-| 4 Compose acceptance | `refs/planning/contracts.md` + doc-standard + [compose-prose.md](compose-prose.md) | Compose ok/accepted partial **and** humanize claim check passed |
+| 4 Compose acceptance | [compose-prose.md](compose-prose.md) | Compose ok/accepted partial **and** humanize claim check passed |
 | 5 Proactivity | [proactivity.md](proactivity.md) | `standard`/`deep` discovery-time stop |
 | 6 Stage-exit | [blind-spots.md](blind-spots.md) | ES/MRD/BRD row only (`in_scope` + `inherit_check`) |
 | 7 Viability | [expert-panel.md](expert-panel.md) | Binding at ES/MRD; advisory at BRD |
@@ -88,8 +76,8 @@ Resume: `rr-discovery --resume --output-dir <same-dir>`. Load checkpoint; sweep;
 |-------|------|
 | First compose of a level | Dense sibling IDs. Frontmatter `doc_rev: "?"`. |
 | Cascade gates pass | Add level to `frozen_levels`. Mint `status.yaml` per `refs/planning/baselines.md`. Freeze does **not** wait on challenge-clean. |
-| BRD gates pass (`proceed` / `proceed-with-conditions`) | Run [business-case-handoff.md](business-case-handoff.md): write `business-case.yaml`, stamp `discovery_complete: true`. |
-| Gate 7 `hold` / `pivot` / `kill` | Do **not** mint `discovery_complete`. Follow expert-panel ladder. |
+| BRD gates pass (`proceed` / `proceed-with-conditions`) | SKILL step 5 (`freeze-handoff`) — [business-case-handoff.md](business-case-handoff.md). |
+| Gate 7 `hold` / `pivot` / `kill` | Do **not** mint `discovery_complete`. Follow [business-case-handoff.md](business-case-handoff.md) / expert-panel ladder. |
 | Later insert on frozen level | Append next integer. |
 | Explicit re-compose of frozen level | Allowed; humanize via rewrite path; remap children. |
 | `--resume` | Continue from `item_registry` / checkpoint. |
@@ -99,11 +87,11 @@ Resume: `rr-discovery --resume --output-dir <same-dir>`. Load checkpoint; sweep;
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass; queue empty | Freeze; mint docs patch; advance (or handoff after BRD) |
+| All gates pass; queue empty | Freeze; mint docs patch; advance (or SKILL `freeze-handoff` after BRD) |
 | Pending clarifications / gate gaps | Surface question → re-discover / re-compose |
 | Gate 7 `hold` / `pivot` / `kill` | Verdict ladder — no discovery_complete |
 | Open re-decision queue | Drain before freeze |
-| User pause | Checkpoint; skip pre-save |
+| User pause | SKILL step 3 Stop — checkpoint; skip pre-save |
 
 ## Session state
 

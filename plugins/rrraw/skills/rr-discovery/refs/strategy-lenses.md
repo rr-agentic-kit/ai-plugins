@@ -67,8 +67,8 @@ Required honesty for freeze (external ventures):
 
 Rules:
 
-1. Fabricated TAM / precision economics → illegal. Prefer `hold` / `vague` with evidence bar.
-2. Decorative metrics (vanity without decision teeth) → fail freeze ([business-case-handoff.md](business-case-handoff.md)).
+1. Fabricated TAM / precision economics → illegal — cite [business-case-handoff.md](business-case-handoff.md) (freeze fail) and [compose-prose.md](compose-prose.md) (claim check). Prefer `hold` / `vague` with evidence bar.
+2. Decorative metrics → fail freeze per handoff Done-when / freeze failure table.
 3. Economics narrative goes in L1 / MRD prose or appendix — handoff stores `cost_position` + `open_holds`, not a spreadsheet dump.
 
 ## Where fills live

@@ -20,7 +20,8 @@ Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`
 | `discover` | Cascade through BRD + freeze handoff | New or continue Discover |
 | `change` | Patch frozen Discover stem | `--change` + section + target on ES/MRD/BRD |
 | `challenge` | Pre-mortem / red-team report | Existing Discover docs |
-| `resume` | Continue checkpoint | Paused Discover session |
+
+`--resume` is a **selector** (continue checkpoint), not a primary action — [input-resolution.md](refs/input-resolution.md).
 
 ## When
 
@@ -28,7 +29,7 @@ Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`
 
 - Proving a bet before PRD (`--discover` / `--executive-summary` / `--mrd` / `--brd`)
 - Bootstrap or repair `docs/` (`--setup`) — does not start discover
-- Resume discovery (`--resume`) or challenge ES/MRD/BRD (`--challenge`)
+- Continue a paused Discover session (`--resume` selector) or challenge ES/MRD/BRD (`--challenge`)
 
 ### Avoid when
 

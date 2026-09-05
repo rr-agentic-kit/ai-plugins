@@ -33,8 +33,7 @@ flowchart TD
   start[Discover start] --> scan[Scan repo + plans]
   scan --> confirm[Confirm existence and commitment]
   confirm --> persist[Write project_posture + ES Posture section]
-  persist --> prdShape[PRD-shape reflection at PRD entry]
-  prdShape --> cascade[Cascade executive-summary through PRD]
+  persist --> cascade[Cascade executive-summary through BRD]
 ```
 
 | | `unsigned` (scope negotiable) | `signed_v1` (scope locked) |
@@ -101,6 +100,17 @@ Do not invent an industry to fill the shape. Missing `market_type` is blocking â
 ### 5. Resume
 
 `--resume`: do not re-ask unless the user contradicts the stored posture. Contradiction â†’ re-confirm, rewrite the Posture section, log a new `project_posture` decision.
+
+## Persist condition
+
+Done when all of:
+
+- `session_state.project_posture.user_confirmed: true`
+- `domain_context` populated (`industry`, `buyer_archetype`, `regulatory_regime`, `market_type`)
+- Exec-summary **Posture** section written (no `ES-*` id)
+- Decision log entry `type: project_posture`, `user_confirmed: true`
+
+Stop: confirm blocked; `market_type` missing; user contradicts without re-confirm.
 
 ## Session field
 
