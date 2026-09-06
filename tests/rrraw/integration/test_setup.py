@@ -51,6 +51,9 @@ def test_setup_greenfield(tmp_path: Path, capsys: object) -> None:
     code, rows = invoke_setup(tmp_path, capsys)
     assert code == 0
     assert rows["docs root"][0] == "created"
+    assert rows["rr directory"][0] == "created"
+    assert rows["layout migrate"][0] == "ok"
+    assert rows["tasks directory"][0] == "created"
     assert rows["discovery directory"][0] == "created"
     assert rows["plan directory"][0] == "created"
     assert rows["root SoT load line"][0] == "fixed"
@@ -62,28 +65,34 @@ def test_setup_greenfield(tmp_path: Path, capsys: object) -> None:
     assert rows["cascade versioning"][0] == "ok"
     assert rows["pr validate workflow"][0] == "created"
     assert docs.is_dir()
-    assert (docs / "discovery").is_dir()
-    assert (docs / "plan").is_dir()
-    assert (docs / vp.RRR_STATUS_NAME).is_file()
-    assert (docs / "discovery" / "status.yaml").is_file()
-    assert (docs / "plan" / "status.yaml").is_file()
-    assert (docs / "agent.plan.md").is_file()
+    rr = docs / "rr"
+    assert rr.is_dir()
+    assert (rr / "tasks").is_dir()
+    discovery = rr / "0.1" / "discovery"
+    plan = rr / "0.1" / "plan"
+    assert discovery.is_dir()
+    assert plan.is_dir()
+    assert (rr / vp.RRR_STATUS_NAME).is_file()
+    assert (discovery / "status.yaml").is_file()
+    assert (plan / "status.yaml").is_file()
+    assert (rr / "agent.plan.md").is_file()
     workflow = tmp_path / ".github" / "workflows" / "rrr-validate-planning.yml"
     assert workflow.is_file()
     assert "HAND_BUMP" in workflow.read_text(encoding="utf-8")
-    assert not (docs / "future.md").exists()
+    assert "docs/rr/**" in workflow.read_text(encoding="utf-8")
+    assert not (rr / "future.md").exists()
     for stem in vp.DISCOVERY_STEMS:
-        assert not (docs / "discovery" / f"{stem}.md").exists()
+        assert not (discovery / f"{stem}.md").exists()
     for stem in vp.PLAN_STEMS:
-        assert not (docs / "plan" / f"{stem}.md").exists()
+        assert not (plan / f"{stem}.md").exists()
     assert not (tmp_path / "AGENTS.md").exists()
     _, load_line, body = vp.parse_agent_config()
-    assert "docs/agent.plan.md" in load_line
+    assert "docs/rr/agent.plan.md" in load_line
     assert load_line in (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
-    assert (docs / "agent.plan.md").read_text(encoding="utf-8") == (
+    assert (rr / "agent.plan.md").read_text(encoding="utf-8") == (
         body if body.endswith("\n") else body + "\n"
     )
-    summary, issues = vp.load_status(docs / vp.RRR_STATUS_NAME)
+    summary, issues = vp.load_status(rr / vp.RRR_STATUS_NAME)
     assert not issues
     assert summary is not None
     assert summary["phase"] == "discovery"
@@ -91,17 +100,17 @@ def test_setup_greenfield(tmp_path: Path, capsys: object) -> None:
     assert summary["discovery_complete"] is False
     assert "summary" in summary
     assert "levels" not in summary
-    discovery, _ = vp.load_status(docs / "discovery" / "status.yaml")
-    assert discovery is not None
-    assert set(discovery["levels"]) == set(vp.DISCOVERY_STEMS)
+    discovery_status, _ = vp.load_status(discovery / "status.yaml")
+    assert discovery_status is not None
+    assert set(discovery_status["levels"]) == set(vp.DISCOVERY_STEMS)
     for doc in vp.DISCOVERY_STEMS:
-        assert discovery["levels"][doc]["rev"] == "?"
-    assert discovery["mint_hash"] == vp.compute_mint_hash(discovery)
-    plan, _ = vp.load_status(docs / "plan" / "status.yaml")
-    assert plan is not None
-    assert set(plan["levels"]) == set(vp.PLAN_STEMS)
-    assert plan["levels"]["prd"]["rev"] == "?"
-    assert plan["mint_hash"] == vp.compute_mint_hash(plan)
+        assert discovery_status["levels"][doc]["rev"] == "?"
+    assert discovery_status["mint_hash"] == vp.compute_mint_hash(discovery_status)
+    plan_status, _ = vp.load_status(plan / "status.yaml")
+    assert plan_status is not None
+    assert set(plan_status["levels"]) == set(vp.PLAN_STEMS)
+    assert plan_status["levels"]["prd"]["rev"] == "?"
+    assert plan_status["mint_hash"] == vp.compute_mint_hash(plan_status)
 
 
 def test_setup_does_not_create_missing_sot(tmp_path: Path, capsys: object) -> None:
@@ -118,17 +127,20 @@ def test_setup_stub_version_migration(tmp_path: Path, capsys: object) -> None:
     (tmp_path / "CLAUDE.md").write_text("# Project\n", encoding="utf-8")
     code, rows = invoke_setup(tmp_path, capsys)
     assert code == 0
+    assert rows["layout migrate"][0] == "fixed"
     assert rows["cascade versioning"][0] == "fixed"
-    text = (discovery / "executive-summary.md").read_text(encoding="utf-8")
+    migrated = tmp_path / "docs" / "rr" / "0.1" / "discovery"
+    text = (migrated / "executive-summary.md").read_text(encoding="utf-8")
     fm = vp.parse_frontmatter(text)
     assert "version" not in fm
     assert "traces_from" not in fm
     assert fm["doc_type"] == "executive-summary"
     assert str(fm["track"]) == "0.1"
     assert fm["doc_rev"] in ("?", None)
-    status, _ = vp.load_status(discovery / "status.yaml")
+    status, _ = vp.load_status(migrated / "status.yaml")
     assert status is not None
     assert status["levels"]["executive-summary"]["rev"] == "?"
+    assert not discovery.exists()
 
 
 def test_setup_idempotent_second_run(tmp_path: Path, capsys: object) -> None:
@@ -145,11 +157,11 @@ def test_setup_idempotent_second_run(tmp_path: Path, capsys: object) -> None:
 def test_setup_from0_when_only_statuses(tmp_path: Path, capsys: object) -> None:
     (tmp_path / "CLAUDE.md").write_text("# Project\n", encoding="utf-8")
     invoke_setup(tmp_path, capsys)
-    docs = tmp_path / "docs"
-    assert (docs / vp.RRR_STATUS_NAME).is_file()
-    assert (docs / "agent.plan.md").is_file()
-    assert not vp.has_cascade_docs(docs / "discovery")
-    assert not vp.has_cascade_docs(docs / "plan")
+    rr = tmp_path / "docs" / "rr"
+    assert (rr / vp.RRR_STATUS_NAME).is_file()
+    assert (rr / "agent.plan.md").is_file()
+    assert not vp.has_cascade_docs(rr / "0.1" / "discovery")
+    assert not vp.has_cascade_docs(rr / "0.1" / "plan")
 
 
 def test_setup_integer_revs_from_existing_status(
@@ -179,11 +191,12 @@ def test_setup_integer_revs_from_existing_status(
     (tmp_path / "CLAUDE.md").write_text("# Project\n", encoding="utf-8")
     code, _ = invoke_setup(tmp_path, capsys)
     assert code == 0
+    migrated = tmp_path / "docs" / "rr" / "0.1" / "discovery"
     fm = vp.parse_frontmatter(
-        (discovery / "executive-summary.md").read_text(encoding="utf-8")
+        (migrated / "executive-summary.md").read_text(encoding="utf-8")
     )
     assert fm["doc_rev"] == 2
-    reloaded, _ = vp.load_status(discovery / "status.yaml")
+    reloaded, _ = vp.load_status(migrated / "status.yaml")
     assert reloaded is not None
     assert reloaded["levels"]["executive-summary"]["rev"] == 2
     assert str(reloaded["track"]) == "0.1"
@@ -202,7 +215,8 @@ def test_setup_fills_challenge_on_legacy_status(tmp_path: Path, capsys: object) 
     (tmp_path / "CLAUDE.md").write_text("# Project\n", encoding="utf-8")
     code, _ = invoke_setup(tmp_path, capsys)
     assert code == 0
-    reloaded, _ = vp.load_status(discovery / "status.yaml")
+    migrated = tmp_path / "docs" / "rr" / "0.1" / "discovery"
+    reloaded, _ = vp.load_status(migrated / "status.yaml")
     assert reloaded is not None
     assert reloaded["challenge"] == {}
     assert reloaded["next_challenge"] == {}

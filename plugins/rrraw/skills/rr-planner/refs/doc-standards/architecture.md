@@ -3,7 +3,7 @@
 **Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
 **Owner:** Standing architecture spine standard — invariants only.
 
-**Path:** `docs/plan/architecture.md`  
+**Path:** `docs/rr/{track}/plan/architecture.md`  
 **Load when:** Plan `standing` todo; same-sitting Effort; slice freeze pins.
 
 **Does not:** Restate full stack/tree as the spine. Stack dump may seed; spine is invariants. Product AC stays on PRD.

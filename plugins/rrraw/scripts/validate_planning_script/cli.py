@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .constants import DOCS_ROOT_NAME, SCHEMA_PATH
+from .constants import DOCS_ROOT_NAME, PHASE_DIRS, SCHEMA_PATH, TRACK_DIR_RE
 from .models import Issue
 from .rewrite import rewrite_planning_dir
 from .setup import find_repo_root, run_setup, sync_agent_injection
@@ -40,12 +40,28 @@ def _print_issues(issues: list[Issue]) -> int:
     return count
 
 
+def _docs_from_phase(planning_dir: Path, repo: Path) -> Path:
+    """Resolve ``docs/`` from a phase dir under version-first or legacy layout."""
+    root = phase_root(planning_dir)
+    if root.name in PHASE_DIRS:
+        parent = root.parent
+        if TRACK_DIR_RE.fullmatch(parent.name):
+            # docs/rr/{track}/{phase}
+            rr = parent.parent
+            if rr.name == "rr":
+                return rr.parent
+        if parent.name == "rr":
+            return parent.parent
+        return parent
+    return docs_root(repo)
+
+
 def main(argv: list[str] | None = None) -> int:
     require_python()
     parser = argparse.ArgumentParser(
         description=(
             "Validate rr-planner markdown item headers, graph, status, "
-            "and items.json drift. --setup bootstraps docs/ framework layout."
+            "and items.json drift. --setup bootstraps docs/rr/ framework layout."
         )
     )
     parser.add_argument(
@@ -54,7 +70,8 @@ def main(argv: list[str] | None = None) -> int:
         nargs="?",
         default=None,
         help=(
-            "Phase directory to validate/rewrite (docs/discovery or docs/plan). "
+            "Phase directory to validate/rewrite "
+            "(docs/rr/{track}/discovery or .../plan). "
             "Optional with --setup (framework uses --docs-root)."
         ),
     )
@@ -82,14 +99,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--sync-agent-config",
         action="store_true",
-        help="Emit docs/agent.plan.md and append the load line to existing "
+        help="Emit docs/rr/agent.plan.md and append the load line to existing "
         "root agent SoT files.",
     )
     parser.add_argument(
         "--setup",
         action="store_true",
-        help="Bootstrap or repair docs/, discovery/, plan/, rrr-status.yaml, "
-        "phase status.yaml files, agent.plan.md, and cascade frontmatter.",
+        help="Bootstrap or repair docs/rr/, versioned phase dirs, "
+        "rrr-status.yaml, phase status.yaml files, agent.plan.md, "
+        "and cascade frontmatter.",
     )
     parser.add_argument(
         "--repo-root",
@@ -115,7 +133,6 @@ def main(argv: list[str] | None = None) -> int:
             if args.docs_root is not None
             else docs_root(repo)
         )
-        # Positional legacy docs/plans path: announce; still framework-setup docs/.
         if (
             args.planning_dir is not None
             and args.planning_dir.name == "plans"
@@ -123,7 +140,7 @@ def main(argv: list[str] | None = None) -> int:
         ):
             print(
                 "note\tok\t--setup no longer takes a plans-dir; "
-                f"using {docs} (legacy docs/plans/ is read-fallback only)",
+                f"using {docs} (legacy docs/plans/ migrates via layout migrate)",
                 flush=True,
             )
         return run_setup(docs, repo)
@@ -141,11 +158,7 @@ def main(argv: list[str] | None = None) -> int:
         docs = (
             docs_root(repo, override=args.docs_root)
             if args.docs_root is not None
-            else (
-                phase_root(args.planning_dir).parent
-                if phase_root(args.planning_dir).name in {"discovery", "plan"}
-                else docs_root(repo)
-            )
+            else _docs_from_phase(args.planning_dir, repo)
         )
         sync_issues = sync_agent_injection(docs, repo, force=True)
         if _print_issues(sync_issues):

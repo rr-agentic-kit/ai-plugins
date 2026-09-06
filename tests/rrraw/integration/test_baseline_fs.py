@@ -16,13 +16,15 @@ from helpers import (
 
 
 def test_emit_agent_plan(tmp_path: Path):
-    path = vp.emit_agent_plan(tmp_path)
-    assert path == tmp_path / "agent.plan.md"
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    path = vp.emit_agent_plan(docs)
+    assert path == docs / "rr" / "agent.plan.md"
     text = path.read_text(encoding="utf-8")
     assert text.startswith("# Planning pairing")
     assert "rrr-status.yaml" in text
     assert text.endswith("\n")
-    vp.emit_agent_plan(tmp_path)
+    vp.emit_agent_plan(docs)
     assert path.read_text(encoding="utf-8") == text
 
 
@@ -66,19 +68,20 @@ def test_sync_does_not_create_missing_sot(tmp_path: Path):
 
 def test_sync_agent_injection_sets_claude_config_version(tmp_path: Path):
     docs = tmp_path / "docs"
-    docs.mkdir()
+    rr = docs / "rr"
+    rr.mkdir(parents=True)
     summary = vp.default_rrr_status(0)
-    vp.write_status_yaml(docs / vp.RRR_STATUS_NAME, summary)
+    vp.write_status_yaml(rr / vp.RRR_STATUS_NAME, summary)
     (tmp_path / "CLAUDE.md").write_text("# Project\n", encoding="utf-8")
     issues = vp.sync_agent_injection(docs, tmp_path, force=True)
     assert error_codes(issues) == set()
-    assert (docs / "agent.plan.md").is_file()
-    reloaded, _ = vp.load_status(docs / vp.RRR_STATUS_NAME)
+    assert (rr / "agent.plan.md").is_file()
+    reloaded, _ = vp.load_status(rr / vp.RRR_STATUS_NAME)
     assert reloaded is not None
     assert reloaded["claude_config_version"] == vp.parse_agent_config()[0]
     _, load_line, _ = vp.parse_agent_config()
     assert load_line in (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
-    assert "docs/agent.plan.md" in load_line
+    assert "docs/rr/agent.plan.md" in load_line
 
 
 def test_independent_patches_ok(tmp_path: Path):

@@ -33,7 +33,7 @@ TodoWrite `merge: false` before step 1 with stable ids `resolve`, `posture`, `id
 
 Phrases: `refs/planning/progress.md` on every invocation.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Accept legacy `--exec-summary` → `executive-summary`. No `--prd` / `--research` as primary. Status-first: read `docs/rrr-status.yaml` then `docs/discovery/status.yaml` + session-state. If cascade docs exist, rewrite via `sh scripts/validate_planning.sh --rewrite <dir>`. Sync agent config via `refs/planning/agent-config.md`. Done: payload emitted. Stop: that ref's deterministic errors.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Accept legacy `--exec-summary` → `executive-summary`. No `--prd` / `--research` as primary. Status-first: read `docs/rr/rrr-status.yaml` then `docs/rr/{track}/discovery/status.yaml` + session-state. If cascade docs exist, rewrite via `sh scripts/validate_planning.sh --rewrite <dir>`. Sync agent config via `refs/planning/agent-config.md`. Done: payload emitted. Stop: that ref's deterministic errors.
 
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
@@ -44,7 +44,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 
 If `payload.chain` includes `challenge`, run step 4 after last freeze and before step 6.
 
-2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start discover. Default `output_dir` = `docs/discovery/`.
+2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start discover. Default `output_dir` = `docs/rr/{track}/discovery/`.
 
 3. **discover** — Load [project-posture.md](refs/project-posture.md) (includes `domain_context`). Done: that ref's persist condition.
    - **Ideation gate** — If problem space without concrete idea → load [ideation.md](refs/ideation.md) before L1 compose; else skip. Persist OST/assumptions/pretotype when produced (humanize session artifacts via [compose-prose.md](refs/compose-prose.md)). **Skip entirely when `action` is `from-code`.**
@@ -55,7 +55,7 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 
 3a. **from-code** — Load [from-code.md](refs/from-code.md) after posture. Research codebase (`--input` root or `PROJECT_ROOT`); persist `from_code_evidence`; compose stems with `maturity: code-extraction`; ask **contradictions only**; stop without freeze. On later `--resume` / continue-shaping that edits toward normal Discover: promote maturity → `draft`, then enter step 3 discover chain (gates/freeze as interview-sourced).
 
-4. **challenge** — Load `refs/planning/contracts.md`, [challenge-method.md](refs/challenge-method.md), [blind-spots.md](refs/blind-spots.md), `refs/planning/decision-ledger.md`. `Task` challenge agent for **exactly one** ES/MRD/BRD stem; **inject** `challenge-method.md` path into the Task prompt. Persist `{stem}.challenge.report.md` (humanize prose body). Stamp `docs/discovery/status.yaml` challenge per `refs/planning/baselines.md`. Completes `write`.
+4. **challenge** — Load `refs/planning/contracts.md`, [challenge-method.md](refs/challenge-method.md), [blind-spots.md](refs/blind-spots.md), `refs/planning/decision-ledger.md`. `Task` challenge agent for **exactly one** ES/MRD/BRD stem; **inject** `challenge-method.md` path into the Task prompt. Persist `{stem}.challenge.report.md` (humanize prose body). Stamp `docs/rr/{track}/discovery/status.yaml` challenge per `refs/planning/baselines.md`. Completes `write`.
 
 5. **freeze-handoff** (after BRD Gates 1–7) — Load [business-case-handoff.md](refs/business-case-handoff.md). **Refuse** while any stem is `maturity: code-extraction`. Mint freeze, write `business-case.yaml`, stamp detail + summary (`discovery_complete`, `phase`, `summary` line), require conditional artifacts if techniques ran. Fail freeze on missing required fields or decorative metrics. **Next Up:** Plan (`rr-planner`).
 

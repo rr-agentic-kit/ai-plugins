@@ -48,14 +48,14 @@ When no primary flag is present, run **NL intent fallback**, then **Out-of-scope
 1. `git rev-parse --show-toplevel` if git repo.
 2. Else workspace / cwd root.
 
-Default `output_dir` = `{PROJECT_ROOT}/docs/plan/`. `--output-dir` always wins. When `status.yaml.next` is set and route is `continue-next-track`, set `output_dir` to `{PROJECT_ROOT}/docs/plan/{next}/` unless explicit. Summary + parking stay in `{PROJECT_ROOT}/docs/`.
+Default `output_dir` = `{PROJECT_ROOT}/docs/rr/{track}/plan/` (track from `docs/rr/rrr-status.yaml`, default `0.1`). `--output-dir` always wins. When `status.yaml.next` is set and route is `continue-next-track`, set `output_dir` to `{PROJECT_ROOT}/docs/rr/{next}/plan/` unless explicit. Summary + parking stay in `{PROJECT_ROOT}/docs/rr/`.
 
 ## Shared selectors
 
 | Selector | Values | Default |
 |----------|--------|---------|
 | `--input` | file path or directory | null |
-| `--output-dir` | directory path | `{PROJECT_ROOT}/docs/plan/` |
+| `--output-dir` | directory path | `{PROJECT_ROOT}/docs/rr/{track}/plan/` |
 | `--format` | `md` | `md` |
 | `--depth` | `shallow`, `standard`, `deep` | `standard` |
 | `--text-mode` | _(flag)_ | off — `AskQuestion` |
@@ -89,7 +89,7 @@ After payload emit, skill **classifies** patch / redirect-to-next / open-next / 
 
 ### Legacy path fallback
 
-Same once-announce fallback for `docs/plans/` and `docs/planning/` as before.
+Same once-announce fallback as Discover: prefer `docs/rr/{track}/plan/`; if only legacy `docs/plan/`, `docs/plans/`, or `docs/planning/` has a checkpoint, announce and point at `--setup` layout migrate.
 
 ### Depth normalization
 
@@ -143,7 +143,7 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 
 ## Status-first routing
 
-Load `docs/rrr-status.yaml`, then `{output_dir}/status.yaml` and `session-state.json`. Entry gate also reads discovery status + `business-case.yaml`.
+Load `docs/rr/rrr-status.yaml` (fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml` and `session-state.json`. Entry gate also reads discovery status + `business-case.yaml`.
 
 | `payload.route` | When |
 |-----------------|------|
@@ -171,7 +171,7 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 {
   "action": "prd",
   "input": null,
-  "output_dir": "{PROJECT_ROOT}/docs/plan/",
+  "output_dir": "{PROJECT_ROOT}/docs/rr/0.1/plan/",
   "format": "md",
   "depth": "standard",
   "question_mode": "ask",

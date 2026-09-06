@@ -11,11 +11,23 @@ DOC_STEMS: tuple[str, ...] = (*DISCOVERY_STEMS, *PLAN_STEMS)
 # Legacy stem accepted on read / migrate; writers emit DOC_STEMS only.
 LEGACY_DOC_STEMS: dict[str, str] = {"exec-summary": "executive-summary"}
 DOCS_ROOT_NAME = "docs"
+RR_DIR = "rr"
+TASKS_DIR = "tasks"
 RRR_STATUS_NAME = "rrr-status.yaml"
 DISCOVERY_DIR = "discovery"
 PLAN_DIR = "plan"
 LEGACY_PLANS_DIR = "plans"
 LEGACY_PLANNING_DIR = "planning"
+# Standing Plan docs (not cascade stems) moved with legacy flat layouts.
+PLAN_STANDING_NAMES: frozenset[str] = frozenset(
+    {
+        "architecture.md",
+        "constitution.md",
+        "execute-slice.yaml",
+        "research-report.md",
+        "deltas",
+    }
+)
 YAML_SKIP_KEYS = frozenset(
     {
         "title",
@@ -160,6 +172,13 @@ STATUS_NAME = "status.yaml"
 FUTURE_NAME = "future.md"
 TECH_NAME = "tech.md"
 LATER_NAME = "later.md"
+PARKING_NAMES: tuple[str, ...] = (
+    RRR_STATUS_NAME,
+    AGENT_PLAN_NAME,
+    FUTURE_NAME,
+    TECH_NAME,
+    LATER_NAME,
+)
 PHASE_DIRS: tuple[str, ...] = (DISCOVERY_DIR, PLAN_DIR)
 PHASE_STEMS: dict[str, tuple[str, ...]] = {
     DISCOVERY_DIR: DISCOVERY_STEMS,
@@ -252,6 +271,9 @@ CREATED_TS_RE = _CREATED_DATE_RE
 STUB_FRONTMATTER_KEYS = frozenset({"version", "traces_from"})
 SETUP_SECTIONS: tuple[str, ...] = (
     "docs root",
+    "rr directory",
+    "layout migrate",
+    "tasks directory",
     "discovery directory",
     "plan directory",
     "root SoT load line",

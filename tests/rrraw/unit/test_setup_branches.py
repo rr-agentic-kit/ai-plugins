@@ -71,14 +71,15 @@ def test_setup_root_sot_no_files(tmp_path: Path) -> None:
 
 
 def test_setup_agent_plan_overwrites_mismatch(tmp_path: Path) -> None:
-    plans = tmp_path / "plans"
-    plans.mkdir()
+    docs = tmp_path / "docs"
+    rr = docs / "rr"
+    rr.mkdir(parents=True)
     body = "# Planning pairing\n\nTemplate body.\n"
-    (plans / "agent.plan.md").write_text("# stale\n", encoding="utf-8")
-    status, message = setup_mod.setup_agent_plan(plans, body)
+    (rr / "agent.plan.md").write_text("# stale\n", encoding="utf-8")
+    status, message = setup_mod.setup_agent_plan(docs, body)
     assert status == "fixed"
     assert message == "overwrote to template"
-    assert (plans / "agent.plan.md").read_text(encoding="utf-8") == body
+    assert (rr / "agent.plan.md").read_text(encoding="utf-8") == body
 
 
 def test_setup_status_invalid_yaml(tmp_path: Path) -> None:
@@ -113,8 +114,9 @@ def test_sync_agent_injection_parse_error(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     docs = tmp_path / "docs"
-    docs.mkdir()
-    (docs / "rrr-status.yaml").write_text("track: 0.1\n", encoding="utf-8")
+    rr = docs / "rr"
+    rr.mkdir(parents=True)
+    (rr / "rrr-status.yaml").write_text("track: 0.1\n", encoding="utf-8")
 
     def _broken() -> tuple[int, str, str]:
         raise ValueError("broken config")

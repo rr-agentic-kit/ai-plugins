@@ -3,7 +3,7 @@
 **Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
 **Owner:** Per-feature change vs standing spine (OpenSpec-style delta mindset).
 
-**Path:** `docs/plan/deltas/<feature-id>.md`  
+**Path:** `docs/rr/{track}/plan/deltas/<feature-id>.md`  
 **Load when:** Same-sitting architecture for a scored feature; slice freeze pins.
 
 **Does not:** Restate `architecture.md`. Does not shrink the PRD requirement table.

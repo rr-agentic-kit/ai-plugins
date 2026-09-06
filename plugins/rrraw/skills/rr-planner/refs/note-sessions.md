@@ -41,7 +41,7 @@ Owned by the **affected** document, not a global inbox. Same write / load / unlo
 | Unload | After that level's compose persist: prune merged/discarded; delete the file if empty. Other levels' files untouched. |
 
 - Sidecar `{output-dir}/{level}.notes.yaml` — always YAML, like raw-history. Not selected by `--format`. Not an item. Not validator input. **File presence means unfinished notes.**
-- `future.md` is not a notes sidecar. Unassigned / beyond-next only (`refs/planning/output-formats.md`). If `status.yaml.next` is already open, park notes for that track in `{level}.notes.yaml` under `docs/plan/{next}/` — do not duplicate into `future.md`.
+- `future.md` is not a notes sidecar. Unassigned / beyond-next only (`refs/planning/output-formats.md`). If `status.yaml.next` is already open, park notes for that track in `{level}.notes.yaml` under `docs/rr/{next}/plan/` — do not duplicate into `future.md`.
 - Mirror index in `session_state.note_sessions[level][]` for resume.
 - Do **not** inject parked prose into composed item headings (closed vocabulary / validator).
 
@@ -99,7 +99,7 @@ Do not skip cascade: parent pointers still require the parent level to exist at 
 
 ## Interview on level entry
 
-When Plan enters a level (`docs/plan/` `current_level`), **before** new doc-standard questions:
+When Plan enters a level (`docs/rr/{track}/plan/` `current_level`), **before** new doc-standard questions:
 
 1. Load `{level}.notes.yaml` if present. Mandatory — not optional presentation.
 2. Walk every note:

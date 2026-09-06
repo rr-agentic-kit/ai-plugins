@@ -172,13 +172,30 @@ def test_docs_root_and_rrr_status(tmp_path: Path) -> None:
     docs = ws.docs_root(tmp_path)
     assert docs == tmp_path / "docs"
     assert ws.find_rrr_status_path(docs) is None
-    (docs).mkdir()
+    docs.mkdir()
     path = docs / "rrr-status.yaml"
     path.write_text("track: '0.1'\n", encoding="utf-8")
     assert ws.find_rrr_status_path(docs) == path
+    rr = docs / "rr"
+    rr.mkdir()
+    modern = rr / "rrr-status.yaml"
+    modern.write_text("track: '0.2'\n", encoding="utf-8")
+    assert ws.find_rrr_status_path(docs) == modern
+    assert ws.current_track(docs) == "0.2"
     summary = ws.default_rrr_status(1)
     assert summary["phase"] == "discovery"
     assert "levels" not in summary
+
+
+def test_discovery_dir_for_version_first(tmp_path: Path) -> None:
+    plan = tmp_path / "docs" / "rr" / "0.1" / "plan"
+    discovery = tmp_path / "docs" / "rr" / "0.1" / "discovery"
+    plan.mkdir(parents=True)
+    discovery.mkdir(parents=True)
+    (plan / "status.yaml").write_text("track: '0.1'\n", encoding="utf-8")
+    assert ws.discovery_dir_for(plan) == discovery
+    assert ws.phase_root(plan) == plan
+    assert ws.track_for_phase(plan) == "0.1"
 
 
 def test_stems_for_phase_dirs(tmp_path: Path) -> None:

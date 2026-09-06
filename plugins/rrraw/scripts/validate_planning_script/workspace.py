@@ -28,9 +28,11 @@ from .constants import (
     PHASE_DIRS,
     PLAN_DIR,
     PLAN_STEMS,
+    RR_DIR,
     RRR_STATUS_NAME,
     STATUS_NAME,
     STUB_FRONTMATTER_KEYS,
+    TASKS_DIR,
     TRACK_DIR_RE,
     canonicalize_doc_stem,
     matches_created_ts,
@@ -80,30 +82,73 @@ def docs_root(repo_root: Path, *, override: Path | None = None) -> Path:
     return resolve_within_root(repo_root / DOCS_ROOT_NAME, repo_root)
 
 
+def rr_root(docs: Path) -> Path:
+    """``docs/rr/`` — rrraw-owned tree (parking + versioned phase dirs)."""
+    return docs / RR_DIR
+
+
+def tasks_dir(docs: Path) -> Path:
+    """``docs/rr/tasks/`` — reserved global task tree (not CoW'd on open-next)."""
+    return rr_root(docs) / TASKS_DIR
+
+
+def rrr_status_path(docs: Path) -> Path:
+    """Canonical summary path: ``docs/rr/rrr-status.yaml``."""
+    return rr_root(docs) / RRR_STATUS_NAME
+
+
+def track_phase_dir(docs: Path, track: str, phase: str) -> Path:
+    """``docs/rr/{track}/{phase}/`` (phase is ``discovery`` or ``plan``)."""
+    return rr_root(docs) / track / phase
+
+
 def find_rrr_status_path(docs: Path) -> Path | None:
-    path = docs / RRR_STATUS_NAME
-    return path if path.is_file() else None
+    """Prefer ``docs/rr/rrr-status.yaml``; else legacy ``docs/rrr-status.yaml``."""
+    for path in (rrr_status_path(docs), docs / RRR_STATUS_NAME):
+        if path.is_file():
+            return path
+    return None
+
+
+def current_track(docs: Path) -> str:
+    """Track from rrr-status (new or legacy path); default ``0.1``."""
+    path = find_rrr_status_path(docs)
+    if path is not None:
+        data, _ = load_status(path)
+        if data is not None:
+            raw = data.get("track")
+            if raw is not None and str(raw).strip():
+                return str(raw).strip()
+    return "0.1"
 
 
 def phase_root(planning_dir: Path) -> Path:
-    """Phase directory that owns status.yaml (discovery/ or plan/, or legacy flat).
+    """Phase directory that owns ``status.yaml`` (``discovery/`` or ``plan/``).
 
-    Walks up from a track subdir (e.g. ``0.2/``). Accepts legacy ``docs/plans/``
-    as a read fallback when that tree still has a local status.yaml.
+    Walks up until ``status.yaml`` exists. Under version-first layout the phase
+    parent is a track dir matching ``TRACK_DIR_RE``. Accepts legacy
+    ``docs/plans/`` and phase-first ``docs/{phase}/`` when those still have a
+    local status.yaml.
     """
-    if (planning_dir / STATUS_NAME).is_file():
-        return planning_dir
-    if (
-        TRACK_DIR_RE.fullmatch(planning_dir.name)
-        and (planning_dir.parent / STATUS_NAME).is_file()
-    ):
-        return planning_dir.parent
+    current = planning_dir.resolve()
+    for candidate in (current, *current.parents):
+        if (candidate / STATUS_NAME).is_file():
+            return candidate
     return planning_dir
 
 
 def plans_root(planning_dir: Path) -> Path:
     """Alias for :func:`phase_root` (legacy name kept for callers/tests)."""
     return phase_root(planning_dir)
+
+
+def track_for_phase(planning_dir: Path) -> str | None:
+    """Track dir name when phase lives under ``docs/rr/{track}/{phase}/``."""
+    root = phase_root(planning_dir)
+    parent = root.parent
+    if TRACK_DIR_RE.fullmatch(parent.name):
+        return parent.name
+    return None
 
 
 def find_phase_status_path(phase_dir: Path) -> Path | None:
@@ -134,7 +179,11 @@ def stems_for_dir(planning_dir: Path) -> tuple[str, ...]:
 
 
 def discovery_dir_for(planning_dir: Path) -> Path | None:
-    """Sibling ``docs/discovery/`` when validating ``docs/plan/`` (or track subdir)."""
+    """Sibling discovery phase under the same track (or legacy phase-first).
+
+    Version-first: ``docs/rr/{track}/plan`` → ``docs/rr/{track}/discovery``.
+    Legacy phase-first: ``docs/plan`` → ``docs/discovery`` (migration window).
+    """
     root = phase_root(planning_dir)
     if root.name == PLAN_DIR:
         candidate = root.parent / DISCOVERY_DIR

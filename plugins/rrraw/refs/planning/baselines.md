@@ -105,7 +105,7 @@ docs_shipped: true
 product_status: shipped   # or "?"
 mint_hash: "sha256:..."   # skill-written; mismatch → HAND_BUMP
 levels:
-  executive-summary:      # discovery stems only under docs/discovery/
+  executive-summary:      # discovery stems only under docs/rr/{track}/discovery/
     rev: 2                # integer frozen; "?" unfrozen
     digest: "sha256:..."  # of this doc's items.json records; null while "?"
     pins: {}
@@ -203,36 +203,39 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
 
 ## Layout / directory fork
 
-`docs/discovery/` holds Discover cascade docs; `docs/plan/` holds PRD+. Parking + tripwire stay at `docs/`. When a next major.minor opens, fork under the **phase** dir: `docs/discovery/{next}/` and/or `docs/plan/{next}/`. Global summary always at `docs/rrr-status.yaml`.
+**Default (version-first):** every track lives under `docs/rr/{track}/`. Discover cascade → `docs/rr/{track}/discovery/`; Plan → `docs/rr/{track}/plan/`. Parking + tripwire + summary live at `docs/rr/`. When a next major.minor opens, create `docs/rr/{next}/{phase}/` — **not** phase-subdir forks.
 
 ```
-{PROJECT_ROOT}/docs/
+{PROJECT_ROOT}/docs/rr/
   rrr-status.yaml          # SUMMARY
   agent.plan.md            # tripwire
   future.md / tech.md / later.md
-  discovery/
-    status.yaml            # DETAIL — ES/MRD/BRD
-    session-state.json
-    executive-summary.md | mrd.md | brd.md
-    business-case.yaml
-    items.json | …
-    0.2/                   # only once next is open
-  plan/
-    status.yaml            # DETAIL — PRD + optional slice
-    session-state.json
-    prd.md
-    architecture.md        # standing spine (invariants)
-    constitution.md        # optional; when arch_doc_mode: split
-    deltas/                # per-feature ADR-lite deltas
-      <feature-id>.md
-    execute-slice.yaml     # compact 5-field Execute kernel (on slice freeze)
-    …
-    0.2/
+  tasks/                   # reserved (global; not CoW on open-next)
+  0.1/
+    discovery/
+      status.yaml          # DETAIL — ES/MRD/BRD
+      session-state.json
+      executive-summary.md | mrd.md | brd.md
+      business-case.yaml
+      items.json | …
+    plan/
+      status.yaml          # DETAIL — PRD + optional slice
+      session-state.json
+      prd.md
+      architecture.md      # standing spine (invariants)
+      constitution.md      # optional; when arch_doc_mode: split
+      deltas/              # per-feature ADR-lite deltas
+        <feature-id>.md
+      execute-slice.yaml   # compact 5-field Execute kernel (on slice freeze)
+      …
+  0.2/                     # next track once opened
+    discovery/
+    plan/
 ```
 
-`--output-dir` for Discover next-track work is `{PROJECT_ROOT}/docs/discovery/{next}/`; Plan → `docs/plan/{next}/`. Validator pointed at a track subdir loads that phase’s `status.yaml` from the phase parent. Plan pin checks load Discovery status across dirs for BRD parent digests.
+`--output-dir` for Discover next-track work is `{PROJECT_ROOT}/docs/rr/{next}/discovery/`; Plan → `docs/rr/{next}/plan/`. Validator pointed at a phase dir loads that phase’s `status.yaml` (walk-up). Plan pin checks load Discovery status across sibling phase dirs for BRD parent digests.
 
-Legacy `docs/plans/` is a **read fallback once** (same class as old `docs/planning/`) — announce new defaults; no auto-migrate.
+**Rejected (old phase-first CoW):** forking under `docs/discovery/{next}/` or `docs/plan/{next}/` while keeping current track flat at `docs/{phase}/`. That model mixed phase-first roots with version subdirs and forced awkward CoW. `--setup` `layout migrate` moves those trees into version-first. Legacy `docs/plans/` / `docs/planning/` also migrate (no announce-only).
 
 ## Unlock gate (skill policy, not CI)
 
@@ -299,7 +302,7 @@ Primary Plan freeze unit is a **selected requirement slice**, not the whole PRD 
 
 1. Smell-gate AC (`req-smell` + WWAS) pass or explicit hold.
 2. Same-sitting architecture exists for selected capabilities (spine and/or feature deltas); architecture rev may be `draft`.
-3. Write/overwrite `docs/plan/execute-slice.yaml` (5-field kernel + pins) — [output-formats.md](output-formats.md).
+3. Write/overwrite `docs/rr/{track}/plan/execute-slice.yaml` (5-field kernel + pins) — [output-formats.md](output-formats.md).
 4. Stamp `plan/status.yaml` `slice:` with requirement ids + kernel path; do **not** shrink/delete deferred requirement rows.
 5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is.
 6. Whole-PRD freeze remains optional structure lock only — not the default handoff to Execute.
@@ -331,24 +334,24 @@ No auto-unfreeze. No bump on compose. No silent rediscover.
 
 ## `future.md` — one inbox
 
-One `{PROJECT_ROOT}/docs/future.md`. Not validator input. No item ids, no SEMVER. Meeting residue / no go-nogo.
+One `{PROJECT_ROOT}/docs/rr/future.md`. Not validator input. No item ids, no SEMVER. Meeting residue / no go-nogo.
 
 | Rule | |
 |------|--|
 | Never auto-promote | Opening next **offers** to promote matching sections; user confirms. |
-| Next track already open | Notes for that track go to `{level}.notes.yaml` under the phase `{next}/` dir, not `future.md`. |
+| Next track already open | Notes for that track go to `{level}.notes.yaml` under `docs/rr/{next}/{phase}/`, not `future.md`. |
 | What belongs here | Unassigned, or beyond-next. |
 
 Rejected: `future/` folder; per-track future files.
 
 ## `tech.md` — Discover mechanism parking
 
-One `{PROJECT_ROOT}/docs/tech.md`. Same tier as `later.md` / `future.md`. **Not validator input.** No item ids, no gates, never composed into ES/MRD/BRD/PRD.
+One `{PROJECT_ROOT}/docs/rr/tech.md`. Same tier as `later.md` / `future.md`. **Not validator input.** No item ids, no gates, never composed into ES/MRD/BRD/PRD.
 
 | Rule | |
 |------|--|
 | Discover | Skill may append early mechanism notes that surface before Plan owns architecture. |
-| Plan | **Does not** author product AC, integration contracts, or ADRs here. Standing truth = `docs/plan/architecture.md` (+ optional `constitution.md`) and `docs/plan/deltas/<feature-id>.md`. |
+| Plan | **Does not** author product AC, integration contracts, or ADRs here. Standing truth = `docs/rr/{track}/plan/architecture.md` (+ optional `constitution.md`) and `docs/rr/{track}/plan/deltas/<feature-id>.md`. |
 | Not a cascade doc | Never mint item ids; never run Gates 1–7 against this file. |
 
 ## `later.md` — deferred-topic parking lot
@@ -362,7 +365,7 @@ One global `{PROJECT_ROOT}/docs/later.md`. **Not validator input.** No item ids.
 
 ## `agent.plan.md` contract
 
-Project file `{PROJECT_ROOT}/docs/agent.plan.md`. Always-on for every agent. Body template and the one load line: [agent-config.md](agent-config.md).
+Project file `{PROJECT_ROOT}/docs/rr/agent.plan.md`. Always-on for every agent. Body template and the one load line: [agent-config.md](agent-config.md).
 
 Must:
 
@@ -382,7 +385,7 @@ Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one lin
 
 | Check | When | Owner |
 |-------|------|-------|
-| `HAND_BUMP`, `STALE_PIN`, `PARENT_UNFROZEN`, `REV_WHILE_OPEN`, maturity codes | **PR** CI on planning paths (`docs/discovery/**`, `docs/plan/**`, status / tripwire) | `validate_planning*` installed by **framework setup** |
+| `HAND_BUMP`, `STALE_PIN`, `PARENT_UNFROZEN`, `REV_WHILE_OPEN`, maturity codes | **PR** CI on planning paths (`docs/rr/**`) | `validate_planning*` installed by **framework setup** |
 | Same codes | Optional local pre-push / agent preflight | same script |
 | patch vs open-next vs unfreeze | On `--change` / upstream freeze | skill judgment |
 | Unlock / product ship policy | Before minting `next` or shipping product | skill (not CI classification) |

@@ -106,7 +106,7 @@ Do not apply one ranking system to the whole cascade. No 1–5. **No P-tags exce
 
 ### Effort provenance (PRD features)
 
-`_effort_:` is real only when an architecture decision for that capability exists **in the same Plan pass** (standing spine update and/or `docs/plan/deltas/<feature-id>.md`). Refuse Effort-without-architecture. Fibonacci remains a relative size, not sprint capacity.
+`_effort_:` is real only when an architecture decision for that capability exists **in the same Plan pass** (standing spine update and/or `docs/rr/{track}/plan/deltas/<feature-id>.md`). Refuse Effort-without-architecture. Fibonacci remains a relative size, not sprint capacity.
 
 ## Spec (agreement axis)
 

@@ -8,79 +8,87 @@ Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md). Sche
 
 ## Layout
 
-Cascade docs write to `payload.output_dir` (Discover default `{PROJECT_ROOT}/docs/discovery/`; Plan default `{PROJECT_ROOT}/docs/plan/`; next-track → `{phase}/{next}/`). Root **always** keeps `rrr-status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md` in `{PROJECT_ROOT}/docs/` — never a second `lines.yaml`. Reject writing operational detail (`levels`, digests, `challenge`, `mint_hash`) into `rrr-status.yaml`.
+Cascade docs write to `payload.output_dir` (Discover default `{PROJECT_ROOT}/docs/rr/{track}/discovery/`; Plan default `{PROJECT_ROOT}/docs/rr/{track}/plan/`; next-track → `{PROJECT_ROOT}/docs/rr/{next}/{phase}/`). Summary + parking **always** live under `{PROJECT_ROOT}/docs/rr/` (`rrr-status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, `later.md`) — never a second `lines.yaml`. Reject writing operational detail (`levels`, digests, `challenge`, `mint_hash`) into `rrr-status.yaml`.
 
 ```
-{PROJECT_ROOT}/docs/
+{PROJECT_ROOT}/docs/rr/
   rrr-status.yaml                 # SUMMARY — phase/track/product/docs glance (not pin input)
   agent.plan.md                   # non-patch tripwire (skill-owned; not cascade input)
   future.md / tech.md / later.md  # parking (not validator input)
-  discovery/
-    status.yaml                   # DETAIL — ES/MRD/BRD revs/pins/challenge/mint_hash
-    session-state.json
-    executive-summary.md
-    mrd.md
-    brd.md
-    business-case.yaml            # Discover→Plan hard gate (skill-owned; not cascade stem)
-    assumptions.md                # conditional
-    opportunity-tree.md           # conditional
-    interview-synthesis.md        # conditional
-    pretotype-brief.md            # conditional
-    *.notes.yaml
-    items.json
-    decision-ledger.yaml
-    *.challenge.report.md
-    raw-history/
-    0.2/                          # only once next opens
-  plan/
-    status.yaml                   # DETAIL — PRD + optional slice
-    session-state.json
-    prd.md
-    architecture.md               # standing spine (invariants-first)
-    constitution.md               # optional when arch_doc_mode: split
-    deltas/                       # per-feature ADR-lite
-      <feature-id>.md
-    execute-slice.yaml            # 5-field Execute kernel on slice freeze
-    research-report.md
-    prd.notes.yaml
-    items.json
-    decision-ledger.yaml
-    prd.challenge.report.md
-    architecture.challenge.report.md  # when challenging standing spine
-    raw-history/
-    0.2/
+  tasks/                          # reserved — tsk-{NNN}-{intent}/ (global; not CoW on open-next)
+  0.1/                            # current track (every track is version-first)
+    discovery/
+      status.yaml                 # DETAIL — ES/MRD/BRD revs/pins/challenge/mint_hash
+      session-state.json
+      executive-summary.md
+      mrd.md
+      brd.md
+      business-case.yaml          # Discover→Plan hard gate (skill-owned; not cascade stem)
+      assumptions.md              # conditional
+      opportunity-tree.md         # conditional
+      interview-synthesis.md      # conditional
+      pretotype-brief.md          # conditional
+      *.notes.yaml
+      items.json
+      decision-ledger.yaml
+      *.challenge.report.md
+      raw-history/
+    plan/
+      status.yaml                 # DETAIL — PRD + optional slice
+      session-state.json
+      prd.md
+      architecture.md             # standing spine (invariants-first)
+      constitution.md             # optional when arch_doc_mode: split
+      deltas/                     # per-feature ADR-lite
+        <feature-id>.md
+      execute-slice.yaml          # 5-field Execute kernel on slice freeze
+      research-report.md
+      prd.notes.yaml
+      items.json
+      decision-ledger.yaml
+      prd.challenge.report.md
+      architecture.challenge.report.md  # when challenging standing spine
+      raw-history/
+  0.2/                            # next track once opened (replaces phase-subdir forks)
+    discovery/
+    plan/
 ```
 
 | Doc type | Filename |
 |----------|----------|
-| executive-summary | `discovery/executive-summary.md` |
-| mrd | `discovery/mrd.md` |
-| brd | `discovery/brd.md` |
-| prd | `plan/prd.md` |
-| architecture spine | `plan/architecture.md` (standing; Plan-owned; humanize) |
-| constitution | `plan/constitution.md` (optional; `arch_doc_mode: split`; else section of architecture) |
-| feature delta | `plan/deltas/<feature-id>.md` (ADR-lite; supersede-only once accepted) |
-| execute slice kernel | `plan/execute-slice.yaml` (machine; skill-owned on slice freeze; **skip humanize**) |
-| business-case handoff | `discovery/business-case.yaml` (machine; Discover freeze; Plan entry gate; **skip humanize**) |
-| assumptions map | `discovery/assumptions.md` (conditional; humanize) |
-| opportunity tree | `discovery/opportunity-tree.md` (conditional; humanize) |
-| interview synthesis | `discovery/interview-synthesis.md` (conditional; humanize) |
-| pretotype brief | `discovery/pretotype-brief.md` (conditional; humanize) |
-| summary status | `rrr-status.yaml` (YAML; skill-owned; **not** pin/digest input) |
-| phase baseline status | `{discovery\|plan}/status.yaml` (YAML; skill-owned; validator input — mechanical codes only) |
-| version tripwire | `agent.plan.md` (skill-owned; **not** validator cascade input; pairing SoT is this skill) |
-| future inbox | `future.md` (**not** validator input; no ids; no SEMVER) |
-| tech capture | `tech.md` (**not** validator input; Discover parking only — Plan does not author AC/ADR here) |
-| later parking lot | `later.md` (**not** validator input; no ids; passive; distinct from `{level}.notes.yaml`) |
+| executive-summary | `{track}/discovery/executive-summary.md` |
+| mrd | `{track}/discovery/mrd.md` |
+| brd | `{track}/discovery/brd.md` |
+| prd | `{track}/plan/prd.md` |
+| architecture spine | `{track}/plan/architecture.md` (standing; Plan-owned; humanize) |
+| constitution | `{track}/plan/constitution.md` (optional; `arch_doc_mode: split`; else section of architecture) |
+| feature delta | `{track}/plan/deltas/<feature-id>.md` (ADR-lite; supersede-only once accepted) |
+| execute slice kernel | `{track}/plan/execute-slice.yaml` (machine; skill-owned on slice freeze; **skip humanize**) |
+| business-case handoff | `{track}/discovery/business-case.yaml` (machine; Discover freeze; Plan entry gate; **skip humanize**) |
+| assumptions map | `{track}/discovery/assumptions.md` (conditional; humanize) |
+| opportunity tree | `{track}/discovery/opportunity-tree.md` (conditional; humanize) |
+| interview synthesis | `{track}/discovery/interview-synthesis.md` (conditional; humanize) |
+| pretotype brief | `{track}/discovery/pretotype-brief.md` (conditional; humanize) |
+| summary status | `rr/rrr-status.yaml` (YAML; skill-owned; **not** pin/digest input) |
+| phase baseline status | `{track}/{discovery\|plan}/status.yaml` (YAML; skill-owned; validator input — mechanical codes only) |
+| version tripwire | `rr/agent.plan.md` (skill-owned; **not** validator cascade input; pairing SoT is this skill) |
+| future inbox | `rr/future.md` (**not** validator input; no ids; no SEMVER) |
+| tech capture | `rr/tech.md` (**not** validator input; Discover parking only — Plan does not author AC/ADR here) |
+| later parking lot | `rr/later.md` (**not** validator input; no ids; passive; distinct from `{level}.notes.yaml`) |
 | off-level notes | `{level}.notes.yaml` under the phase dir (always YAML; same write/load/delete for every level; exists only while unresolved) |
-| item graph | `{phase}/items.json` (always JSON) |
-| decision ledger | `{phase}/decision-ledger.yaml` (always YAML; skill-owned; validator input) |
-| session checkpoint | `{phase}/session-state.json` (always JSON) |
-| Q&A history | `{phase}/raw-history/{UTC compact ISO-8601}.yaml` |
-| research report | `plan/research-report.md` |
-| challenge report | `{phase}/{stem}.challenge.report.md` (one per cascade/standing doc; overwrite on each scan of that stem) |
+| item graph | `{track}/{phase}/items.json` (always JSON) |
+| decision ledger | `{track}/{phase}/decision-ledger.yaml` (always YAML; skill-owned; validator input) |
+| session checkpoint | `{track}/{phase}/session-state.json` (always JSON) |
+| Q&A history | `{track}/{phase}/raw-history/{UTC compact ISO-8601}.yaml` |
+| research report | `{track}/plan/research-report.md` |
+| challenge report | `{track}/{phase}/{stem}.challenge.report.md` (one per cascade/standing doc; overwrite on each scan of that stem) |
+| tasks (reserved) | `rr/tasks/tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md` — see below |
 
-Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet. File exists only while unresolved notes remain; skill deletes it when empty after compose persist. Create `{phase}/{next}/` only when the skill mints `next` after confirm.
+Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet. File exists only while unresolved notes remain; skill deletes it when empty after compose persist. Create `docs/rr/{next}/{phase}/` only when the skill mints `next` after confirm.
+
+### Tasks (reserved)
+
+Global under `docs/rr/tasks/` — **not** per-track folders. Naming: `tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md`. Frontmatter carries `track` for version metadata. **Never** copy-on-write when opening a next track. Out of validator scope for now (same class as `future.md`). Task authoring / Execute integration is a later pass.
 
 `--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` (`skills/rr-discovery/refs/input-resolution.md`). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and phase `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md`, `agent.plan.md`, `tech.md`, `later.md`, and `rrr-status.yaml` are **not validator cascade input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
 
@@ -149,7 +157,7 @@ Filename: UTC compact ISO-8601 (`YYYY-MM-DDTHHMMSSZ.yaml`), e.g. `2026-08-15T185
 session:
   started: 2026-08-15T18:52:03Z
   action: discover
-  output_dir: /abs/path/docs/discovery
+  output_dir: /abs/path/docs/rr/0.1/discovery
   question_mode: ask
   depth: standard
 turns:
@@ -195,7 +203,7 @@ Validator input for mechanical codes only (`PARENT_UNFROZEN`, `STALE_PIN`, `REV_
 
 ## `agent.plan.md`
 
-Always-on tripwire: refuse non-patch version work and protect the root load line. Pairing policy is this skill ([baselines.md](baselines.md)), not this file. Body template: [agent.plan.md](agent.plan.md) (version + load line: [agent-config.md](agent-config.md)). Skill emits/overwrites on first compose, `--setup`, and when `injection.version` advances. **Not** validator cascade input. Lives at `{PROJECT_ROOT}/docs/agent.plan.md`.
+Always-on tripwire: refuse non-patch version work and protect the root load line. Pairing policy is this skill ([baselines.md](baselines.md)), not this file. Body template: [agent.plan.md](agent.plan.md) (version + load line: [agent-config.md](agent-config.md)). Skill emits/overwrites on first compose, `--setup`, and when `injection.version` advances. **Not** validator cascade input. Lives at `{PROJECT_ROOT}/docs/rr/agent.plan.md`.
 
 Resolve sync (idempotent): append the locked load line to existing root SoT files (`CLAUDE.md`, `AGENTS.md`, and any new root agent SoT). Restore if stripped. Do not create missing SoT files. Do not rewrite their bodies. Set `rrr-status.yaml.claude_config_version`.
 
@@ -205,19 +213,19 @@ sh scripts/validate_planning.sh --sync-agent-config --repo-root <PROJECT_ROOT> -
 
 ## `future.md`
 
-One inbox at `{PROJECT_ROOT}/docs/future.md`. Create on first parked beyond-current note that has **no** owning track yet. **Not validator input.** No item ids. No SEMVER. Meeting residue / no go-nogo.
+One inbox at `{PROJECT_ROOT}/docs/rr/future.md`. Create on first parked beyond-current note that has **no** owning track yet. **Not validator input.** No item ids. No SEMVER. Meeting residue / no go-nogo.
 
 | Rule | |
 |------|--|
 | Never auto-promote | Opening next **offers** to promote matching sections; user confirms each. |
-| Next track already open | Do **not** duplicate into `future.md`. Notes for that track go to `{level}.notes.yaml` under `{phase}/{next}/`. |
+| Next track already open | Do **not** duplicate into `future.md`. Notes for that track go to `{level}.notes.yaml` under `docs/rr/{next}/{phase}/`. |
 | What belongs here | Unassigned, or beyond-next (past the one open next track). |
 
 Rejected: `future/` folder; per-track future files; treating this file as a cascade doc.
 
 ## `tech.md`
 
-One file at `{PROJECT_ROOT}/docs/tech.md`. Same tier as `later.md` / `future.md`. Create on first Discover mechanism append. **Not validator input.** No item ids, no gates, never composed into cascade docs.
+One file at `{PROJECT_ROOT}/docs/rr/tech.md`. Same tier as `later.md` / `future.md`. Create on first Discover mechanism append. **Not validator input.** No item ids, no gates, never composed into cascade docs.
 
 | Rule | |
 |------|--|
@@ -229,9 +237,9 @@ One file at `{PROJECT_ROOT}/docs/tech.md`. Same tier as `later.md` / `future.md`
 
 | Artifact | Role |
 |----------|------|
-| `plan/architecture.md` | Standing **spine** — invariants only (`Binds` / `Prevents` / `Rule`). Stack dump is seed, not spine. |
-| `plan/constitution.md` | Non-negotiables when `arch_doc_mode: split`; else a section of architecture. |
-| `plan/deltas/<feature-id>.md` | Per-feature ADR-lite delta vs spine — never restate the spine. Supersede-only once accepted. |
+| `{track}/plan/architecture.md` | Standing **spine** — invariants only (`Binds` / `Prevents` / `Rule`). Stack dump is seed, not spine. |
+| `{track}/plan/constitution.md` | Non-negotiables when `arch_doc_mode: split`; else a section of architecture. |
+| `{track}/plan/deltas/<feature-id>.md` | Per-feature ADR-lite delta vs spine — never restate the spine. Supersede-only once accepted. |
 
 Standards: Plan `refs/doc-standards/architecture.md`, `constitution.md`, `feature-delta.md`. Not item-graph validators (no `PRD-*` ids required). Skill may humanize prose bodies.
 
@@ -307,7 +315,7 @@ Written on **every stop** and after **each level completion**. Required for `--r
     "depth": "standard",
     "question_mode": "ask",
     "format": "md",
-    "output_dir": "{PROJECT_ROOT}/docs/discovery/",
+    "output_dir": "{PROJECT_ROOT}/docs/rr/0.1/discovery/",
     "raw_history_path": "raw-history/2026-08-15T185203Z.yaml",
     "updated": "ISO-8601"
   },
@@ -401,4 +409,4 @@ After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/co
 7. Compose writes human cascade docs (`{level}.md` only). Document bodies never travel through chat. Research/challenge still return findings JSON. Compose does not write `status.yaml` / `agent.plan.md` / `future.md`. After compose persist, the skill dirties that doc’s `challenge.status` when it was `clean-shallow`, `clean-deep`, or `dirty-accepted`.
 8. After compose Task: parse slim receipt → if clarifications, ask and re-invoke → else read `items.json` to refresh `item_registry` → Gate 3 static ([success-criteria.md](success-criteria.md)). FAIL blocks `final_status: ok`. Sidecars, `future.md`, and `agent.plan.md` are not validator input.
 9. Pause skips pre-save (`skills/rr-planner/refs/proactivity.md`). Freeze is a `frozen_levels` update plus a docs-patch mint in phase `status.yaml` (+ summary refresh), not a second write of the doc (`skills/rr-planner/refs/cascade.md`, [baselines.md](baselines.md)).
-10. First compose: write phase `status.yaml`, refresh `rrr-status.yaml`, emit `docs/agent.plan.md`, sync the one-liner on existing root SoT, set `claude_config_version` ([agent-config.md](agent-config.md)).
+10. First compose: write phase `status.yaml`, refresh `rrr-status.yaml`, emit `docs/rr/agent.plan.md`, sync the one-liner on existing root SoT, set `claude_config_version` ([agent-config.md](agent-config.md)).

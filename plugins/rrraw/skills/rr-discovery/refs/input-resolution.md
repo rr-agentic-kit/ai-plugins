@@ -50,14 +50,14 @@ When no primary flag is present, do not emit a payload yet. Run **NL intent fall
 1. `git rev-parse --show-toplevel` if the working tree is a git repo.
 2. Else workspace / current working directory root.
 
-Default `output_dir` = `{PROJECT_ROOT}/docs/discovery/`. `--output-dir` always wins. When phase `status.yaml.next` is set and the route is `continue-next-track` (or `--target` names that track), set `output_dir` to `{PROJECT_ROOT}/docs/discovery/{next}/` unless `--output-dir` was explicit. Summary `rrr-status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md` stay in `{PROJECT_ROOT}/docs/`; phase detail in `docs/discovery/` (`refs/planning/baselines.md`).
+Default `output_dir` = `{PROJECT_ROOT}/docs/rr/{track}/discovery/` (track from `docs/rr/rrr-status.yaml`, default `0.1`). `--output-dir` always wins. When phase `status.yaml.next` is set and the route is `continue-next-track` (or `--target` names that track), set `output_dir` to `{PROJECT_ROOT}/docs/rr/{next}/discovery/` unless `--output-dir` was explicit. Summary `rrr-status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, and `later.md` stay in `{PROJECT_ROOT}/docs/rr/`; phase detail under `docs/rr/{track}/discovery/` (`refs/planning/baselines.md`).
 
 ## Shared selectors
 
 | Selector | Values | Default |
 |----------|--------|---------|
 | `--input` | file path or directory | null (conversation context; for `from-code`, research root defaults to `PROJECT_ROOT`) |
-| `--output-dir` | directory path | `{PROJECT_ROOT}/docs/discovery/` |
+| `--output-dir` | directory path | `{PROJECT_ROOT}/docs/rr/{track}/discovery/` |
 | `--format` | `md` | `md` |
 | `--depth` | `shallow`, `standard`, `deep` | `standard` |
 | `--text-mode` | _(flag, no value)_ | off — questions use `AskQuestion` |
@@ -69,7 +69,7 @@ Default `output_dir` = `{PROJECT_ROOT}/docs/discovery/`. `--output-dir` always w
 
 `--format yaml` and `--format json` are not plan-document formats. Do **not** alias either to md. Emit `UNSUPPORTED_FORMAT`.
 
-Allowed JSON on disk (not selected by `--format`): `items.json` and `session-state.json`. Agent `Task` payloads stay JSON (internal). `payload.format` stays `"md"`. Durable project knowledge is `rrr-status.yaml` (summary) + `docs/discovery/status.yaml` (detail); skill-owned — `refs/planning/baselines.md`. `business-case.yaml` is YAML handoff — [business-case-handoff.md](business-case-handoff.md).
+Allowed JSON on disk (not selected by `--format`): `items.json` and `session-state.json`. Agent `Task` payloads stay JSON (internal). `payload.format` stays `"md"`. Durable project knowledge is `docs/rr/rrr-status.yaml` (summary) + `docs/rr/{track}/discovery/status.yaml` (detail); skill-owned — `refs/planning/baselines.md`. `business-case.yaml` is YAML handoff — [business-case-handoff.md](business-case-handoff.md).
 
 ### Question mode
 
@@ -122,11 +122,11 @@ Unlock / patch-only-current: `refs/planning/baselines.md`. Do **not** emit `NEXT
 
 ### Legacy path fallback
 
-Only when `output_dir` is the **default** (`{PROJECT_ROOT}/docs/discovery/`) and resume is requested:
+Only when `output_dir` is the **default** (`{PROJECT_ROOT}/docs/rr/{track}/discovery/`) and resume is requested:
 
-1. If `{PROJECT_ROOT}/docs/discovery/session-state.json` exists → use it.
-2. Else if `{PROJECT_ROOT}/docs/plans/session-state.json` exists → **once**: set `output_dir` to that path, tell the user the new default is `docs/discovery/` (and `docs/plan/` for Plan), do **not** copy or migrate.
-3. Else if `{PROJECT_ROOT}/docs/planning/session-state.json` exists → same one-shot announce.
+1. If `{PROJECT_ROOT}/docs/rr/{track}/discovery/session-state.json` exists → use it.
+2. Else if `{PROJECT_ROOT}/docs/discovery/session-state.json` exists → **once**: set `output_dir` there, tell the user to run `--setup` (layout migrate to `docs/rr/`), do **not** copy.
+3. Else if `{PROJECT_ROOT}/docs/plans/session-state.json` or `docs/planning/session-state.json` exists → same one-shot announce; prefer `--setup` migrate.
 4. Else `MISSING_CHECKPOINT`.
 
 Explicit `--output-dir` skips this fallback.
@@ -222,7 +222,7 @@ NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` **seed** the [proj
 
 ## Status-first routing
 
-Load `docs/rrr-status.yaml` (glance), then `{output_dir}/status.yaml` (or `{PROJECT_ROOT}/docs/discovery/status.yaml` when `output_dir` is a next-track subdir) and `session-state.json`. Pick **one** route. Do not start posture until this pick is done.
+Load `docs/rr/rrr-status.yaml` (glance; fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml` (or `{PROJECT_ROOT}/docs/rr/{track}/discovery/status.yaml` when `output_dir` is a next-track phase dir) and `session-state.json`. Pick **one** route. Do not start posture until this pick is done.
 
 | `payload.route` | When |
 |-----------------|------|
@@ -244,7 +244,7 @@ Classify patch vs redirect-to-next vs open-next vs unfreeze per `--change` above
 {
   "action": "discover",
   "input": null,
-  "output_dir": "{PROJECT_ROOT}/docs/discovery/",
+  "output_dir": "{PROJECT_ROOT}/docs/rr/0.1/discovery/",
   "format": "md",
   "depth": "standard",
   "question_mode": "ask",

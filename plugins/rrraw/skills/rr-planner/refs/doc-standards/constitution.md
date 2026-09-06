@@ -3,7 +3,7 @@
 **Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
 **Owner:** Non-negotiable Plan constraints (engineering/product constitution).
 
-**Path:** `docs/plan/constitution.md` when `arch_doc_mode: split`; otherwise a section of `architecture.md`.
+**Path:** `docs/rr/{track}/plan/constitution.md` when `arch_doc_mode: split`; otherwise a section of `architecture.md`.
 
 **Load when:** Posture sets `arch_doc_mode`; standing layer authoring.
 

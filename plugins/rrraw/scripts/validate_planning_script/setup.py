@@ -1,4 +1,4 @@
-"""--setup, agent.plan.md, root SoT load line, dual phase dirs."""
+"""--setup, agent.plan.md, root SoT load line, version-first docs/rr/ layout."""
 
 from __future__ import annotations
 
@@ -13,9 +13,7 @@ from .constants import (
     AGENT_PLAN_TEMPLATE_PATH,
     DISCOVERY_DIR,
     DISCOVERY_STEMS,
-    DOCS_ROOT_NAME,
     INJECTION_FENCE_RE,
-    LEGACY_PLANS_DIR,
     PLAN_DIR,
     PLAN_STEMS,
     PR_VALIDATE_WORKFLOW_REL,
@@ -25,21 +23,28 @@ from .constants import (
     SETUP_SECTIONS,
     STATUS_NAME,
 )
+from .layout_migrate import migrate_docs_layout
 from .models import Issue, has_errors
 from .rewrite import rewrite_planning_dir
 from .workspace import (
     compute_mint_hash,
+    current_track,
     default_rrr_status,
     default_unfrozen_status,
     ensure_doc_frontmatter,
     fill_rrr_status_missing,
     fill_status_missing,
     find_repo_root,
+    find_rrr_status_path,
     find_status_path,
     has_cascade_docs,
     load_status,
     resolve_within_root,
+    rr_root,
+    rrr_status_path,
     stems_for_dir,
+    tasks_dir,
+    track_phase_dir,
     write_status_yaml,
 )
 
@@ -71,7 +76,9 @@ def parse_agent_config(text: str | None = None) -> tuple[int, str, str]:
 
 
 def emit_agent_plan(docs: Path, *, body: str | None = None) -> Path:
-    safe_dir = resolve_within_root(docs, find_repo_root(docs))
+    """Write ``agent.plan.md`` under ``docs/rr/`` (``docs`` may be docs root or rr)."""
+    parking = docs if docs.name == "rr" else rr_root(docs)
+    safe_dir = resolve_within_root(parking, find_repo_root(docs))
     safe_dir.mkdir(parents=True, exist_ok=True)
     text = body if body is not None else parse_agent_config()[2]
     path = safe_dir / AGENT_PLAN_NAME
@@ -105,19 +112,27 @@ def sync_agent_injection(
     *,
     force: bool = False,
 ) -> list[Issue]:
-    """Emit docs/agent.plan.md and bump rrr-status claude_config_version."""
+    """Emit docs/rr/agent.plan.md and bump rrr-status claude_config_version."""
     issues: list[Issue] = []
-    status_path = docs / RRR_STATUS_NAME
-    plan_path = docs / AGENT_PLAN_NAME
-    if not force and not status_path.is_file() and not plan_path.is_file():
+    parking = rr_root(docs) if docs.name != "rr" else docs
+    docs_root_path = parking.parent if parking.name == "rr" else docs
+    status_path = find_rrr_status_path(docs_root_path)
+    plan_path = parking / AGENT_PLAN_NAME
+    legacy_plan = docs_root_path / AGENT_PLAN_NAME
+    if (
+        not force
+        and status_path is None
+        and not plan_path.is_file()
+        and not legacy_plan.is_file()
+    ):
         return issues
     try:
         version, load_line, body = parse_agent_config()
     except (OSError, ValueError, yaml.YAMLError) as exc:
         return [Issue.error("HAND_BUMP", f"agent-config.md: {exc}")]
-    emit_agent_plan(docs, body=body)
+    emit_agent_plan(docs_root_path, body=body)
     sync_root_sot(repo_root, load_line)
-    if not status_path.is_file():
+    if status_path is None:
         return issues
     data, load_issues = load_status(status_path)
     issues.extend(load_issues)
@@ -162,7 +177,8 @@ def setup_root_sot(repo_root: Path, load_line: str) -> tuple[str, str]:
 
 
 def setup_agent_plan(docs: Path, body: str) -> tuple[str, str]:
-    path = docs / AGENT_PLAN_NAME
+    parking = rr_root(docs)
+    path = parking / AGENT_PLAN_NAME
     expected = body if body.endswith("\n") else body + "\n"
     if not path.is_file():
         try:
@@ -181,13 +197,18 @@ def setup_agent_plan(docs: Path, body: str) -> tuple[str, str]:
 
 
 def setup_rrr_status(docs: Path, injection_version: int) -> tuple[str, str]:
-    path = docs / RRR_STATUS_NAME
+    path = rrr_status_path(docs)
     if not path.is_file():
-        try:
-            write_status_yaml(path, default_rrr_status(injection_version))
-        except OSError as exc:
-            return "failed", str(exc)
-        return "created", "minted summary defaults"
+        legacy = docs / RRR_STATUS_NAME
+        if legacy.is_file():
+            path = legacy
+        else:
+            try:
+                rr_root(docs).mkdir(parents=True, exist_ok=True)
+                write_status_yaml(path, default_rrr_status(injection_version))
+            except OSError as exc:
+                return "failed", str(exc)
+            return "created", "minted summary defaults"
     data, issues = load_status(path)
     if data is None:
         message = issues[0].message if issues else f"invalid {RRR_STATUS_NAME}"
@@ -331,29 +352,22 @@ def _merge_cascade_outcomes(
     return "ok", "already canonical"
 
 
-def _announce_legacy_plans(docs: Path) -> None:
-    legacy = docs / LEGACY_PLANS_DIR
-    if legacy.is_dir() and (legacy / STATUS_NAME).is_file():
-        print(
-            f"note\tok\tlegacy {DOCS_ROOT_NAME}/{LEGACY_PLANS_DIR}/ "
-            f"detected — new default is {DOCS_ROOT_NAME}/"
-            f"{{{DISCOVERY_DIR},{PLAN_DIR}}}/; no auto-migrate",
-            flush=True,
-        )
-
-
 def run_setup(docs: Path, repo_root: Path) -> int:
-    """Framework setup: docs/, discovery/, plan/, rrr-status, dual detail statuses."""
+    """Framework setup: docs/rr/{track}/{phase}/, parking, rrr-status, dual statuses."""
     try:
         safe_docs = resolve_within_root(docs, repo_root)
     except ValueError as exc:
         print(f"docs root\tfailed\t{exc}")
         return 1
-    _announce_legacy_plans(safe_docs)
     results: list[tuple[str, str, str]] = []
     results.append(("docs root", *setup_mkdir(safe_docs, repo_root)))
-    discovery = safe_docs / DISCOVERY_DIR
-    plan = safe_docs / PLAN_DIR
+    rr = rr_root(safe_docs)
+    results.append(("rr directory", *setup_mkdir(rr, repo_root)))
+    results.append(("layout migrate", *migrate_docs_layout(safe_docs)))
+    results.append(("tasks directory", *setup_mkdir(tasks_dir(safe_docs), repo_root)))
+    track = current_track(safe_docs)
+    discovery = track_phase_dir(safe_docs, track, DISCOVERY_DIR)
+    plan = track_phase_dir(safe_docs, track, PLAN_DIR)
     results.append(("discovery directory", *setup_mkdir(discovery, repo_root)))
     results.append(("plan directory", *setup_mkdir(plan, repo_root)))
     try:

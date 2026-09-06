@@ -6,10 +6,7 @@ name: rrr-validate-planning
 on:
   pull_request:
     paths:
-      - "docs/discovery/**"
-      - "docs/plan/**"
-      - "docs/rrr-status.yaml"
-      - "docs/agent.plan.md"
+      - "docs/rr/**"
       - ".github/workflows/rrr-validate-planning.yml"
 
 jobs:
@@ -39,9 +36,33 @@ jobs:
           echo "::error::validate_planning.sh not found. Set repo variable RRR_PLUGIN_ROOT or env RRR_VALIDATE_SH (see rrraw refs/planning/setup.md). Local-only validation is insufficient — PR must fail closed on HAND_BUMP."
           exit 1
 
-      - name: Validate discovery + plan
+      - name: Validate docs/rr track phase dirs
         run: |
           set -euo pipefail
           SH="${{ steps.resolve.outputs.script }}"
-          sh "$SH" docs/discovery
-          sh "$SH" docs/plan
+          if [ ! -d docs/rr ]; then
+            echo "No docs/rr/ tree — nothing to validate"
+            exit 0
+          fi
+          found=0
+          for track in docs/rr/*/; do
+            [ -d "$track" ] || continue
+            name="$(basename "$track")"
+            case "$name" in
+              *[!0-9.]*|"") continue ;;
+            esac
+            # TRACK_DIR_RE: ^\d+\.\d+$
+            if ! echo "$name" | grep -Eq '^[0-9]+\.[0-9]+$'; then
+              continue
+            fi
+            for phase in discovery plan; do
+              dir="${track}${phase}"
+              if [ -d "$dir" ]; then
+                found=1
+                sh "$SH" "$dir"
+              fi
+            done
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "No docs/rr/{track}/{discovery|plan}/ dirs — nothing to validate"
+          fi

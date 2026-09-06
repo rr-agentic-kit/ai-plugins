@@ -2,7 +2,7 @@
 
 **Owner:** Lightweight ADR rules for standing architecture and feature deltas. Accepted decisions are append-only / supersede-only.
 
-**Load when:** Writing or revising `docs/plan/architecture.md`, `constitution.md`, or `docs/plan/deltas/<feature-id>.md`.
+**Load when:** Writing or revising `docs/rr/{track}/plan/architecture.md`, `constitution.md`, or `docs/rr/{track}/plan/deltas/<feature-id>.md`.
 
 **Does not:** Replace the decision-ledger `r-*` graph. Does not invent a second audit trail (no BMAD memlog).
 

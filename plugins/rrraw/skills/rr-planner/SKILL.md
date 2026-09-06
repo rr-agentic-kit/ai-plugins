@@ -34,7 +34,7 @@ TodoWrite `merge: false` before step 1 with stable ids: `resolve` → `setup?` �
 
 Phrases: `refs/planning/progress.md` on every invocation.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Prefer `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--setup` / `--resume`. Discover flags/NL → stop and route to `rr-discovery`. Sprint/capacity/velocity → refuse and reframe as slice selection. Status-first: `docs/rrr-status.yaml` then `docs/plan/status.yaml` + session-state; entry gate also reads discovery detail. Rewrite/sync via `refs/planning/setup.md` / `refs/planning/agent-config.md`. Done: payload emitted.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Prefer `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--setup` / `--resume`. Discover flags/NL → stop and route to `rr-discovery`. Sprint/capacity/velocity → refuse and reframe as slice selection. Status-first: `docs/rr/rrr-status.yaml` then `docs/rr/{track}/plan/status.yaml` + session-state; entry gate also reads discovery detail. Rewrite/sync via `refs/planning/setup.md` / `refs/planning/agent-config.md`. Done: payload emitted.
 
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
@@ -43,7 +43,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | `freeze-slice` | step 3 → ac-smell → challenge? → slice-freeze → write | as listed |
 | `research`, `challenge` | step 5 (completes `write`) | `write` only |
 
-2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start Plan compose. Default `output_dir` = `docs/plan/`.
+2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start Plan compose. Default `output_dir` = `docs/rr/{track}/plan/`.
 
 3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
 
@@ -51,7 +51,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 
 5. **research / challenge** — Load `refs/planning/contracts.md`. Research: [research-method.md](refs/research-method.md). Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method). Persist reports per `refs/planning/output-formats.md`. Completes `write`.
 
-6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + `docs/plan/status.yaml` + refresh `rrr-status.yaml`. First compose: emit `docs/agent.plan.md` + sync root SoT. Done: session-state + statuses written.
+6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + `docs/rr/{track}/plan/status.yaml` + refresh `rrr-status.yaml`. First compose: emit `docs/rr/agent.plan.md` + sync root SoT. Done: session-state + statuses written.
 
 ## Shared refs (load on demand)
 
