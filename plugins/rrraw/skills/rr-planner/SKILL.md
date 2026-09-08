@@ -21,7 +21,7 @@ Produce cascade planning docs (exec-summary → PRD) from flags and conversation
 
 ## When not to use
 
-- Implementation, code review, or ticket writing that is not cascade planning
+- Implementation, code review, or ticket writing that is not cascade planning → **rr-builder**
 - Artifact-type advice (skill vs command, process checklist) that is not a product to plan
 - Inventing docs to run research or challenge — those actions require existing docs ([input-resolution.md](refs/input-resolution.md))
 - Inventing a skip of parent cascade levels — level flags expand ancestors; `depth: shallow` is the only trim ([input-resolution.md](refs/input-resolution.md))

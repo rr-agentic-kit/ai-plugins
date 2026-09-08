@@ -10,7 +10,7 @@ Required:
 - `payload.scope` pointing at flaky test(s)
 - Symptom data: failure logs, rerun pattern, CI metadata when available
 
-Load severity categories from [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md).
+Load severity categories from [shared-heuristics.md](../../skills/rr-builder/rr-tester/refs/shared-heuristics.md).
 
 ## Execution
 
@@ -21,7 +21,7 @@ Load severity categories from [shared-heuristics.md](../../skills/rr-test/refs/s
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § flaky.
+`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § flaky.
 
 ## Constraints
 

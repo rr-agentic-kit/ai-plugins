@@ -1,7 +1,7 @@
 {
   "name": "rrraw",
-  "version": "0.0.4",
-  "description": "Flag-driven test excellence \u2014 assess, write, fix, and migrate tests via phase agents",
+  "version": "0.0.5",
+  "description": "Planning, build/review, local git, and forge-agnostic CI (GitHub/GitLab)",
   "license": "Unlicense",
   "author": {
     "name": "ai-plugins maintainers"

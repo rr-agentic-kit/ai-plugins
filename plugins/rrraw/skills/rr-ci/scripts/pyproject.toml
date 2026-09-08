@@ -1,0 +1,27 @@
+[project]
+name = "rr-ci"
+version = "0.1.0"
+description = "Forge-agnostic CI CLI for agents (gh/glab, JSON envelope)"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+rr-ci = "cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+only-include = [
+  "cli.py", "__main__.py", "emit.py", "errors.py", "gitutil.py",
+  "glab.py", "gh.py", "forge.py", "detect_remote.py", "github_backend.py",
+  "poll.py", "job_trace.py", "code_quality_reports.py", "pipeline_util.py",
+  "debug_pipeline.py", "pipeline_security_reports.py", "mr_add_preflight.py",
+  "mr_add_preflight_support.py", "mr_common.py", "mr_ensure_review_instructions.py",
+  "mr_review_submit.py", "mr_review_submit_api.py", "mr_review_submit_decisions.py",
+  "mr_review_submit_graphql.py", "mr_review_submit_support.py",
+  "mr_skip_threads.py", "mr_ci_review_preflight.py",
+  "pending_reviews.py", "pending_reviews_graphql.py",
+]

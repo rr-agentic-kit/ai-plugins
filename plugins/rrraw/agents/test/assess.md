@@ -8,9 +8,9 @@ Function-style executor for `--assess` and `--identify-redundant-tests`. No plan
 
 Required context:
 - `payload.scope`, `payload.target`
-- Load [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md) for verdict, calibration, redundancy, overtest, and exhaustive enumeration rules
-- Load [coverage-exclusions.md](../../skills/rr-test/refs/coverage-exclusions.md) for non-testable taxonomy
-- Apply scope ordering from [determinism.md](../../skills/rr-test/refs/determinism.md)
+- Load [shared-heuristics.md](../../skills/rr-builder/rr-tester/refs/shared-heuristics.md) for verdict, calibration, redundancy, overtest, and exhaustive enumeration rules
+- Load [coverage-exclusions.md](../../skills/rr-builder/rr-tester/refs/coverage-exclusions.md) for non-testable taxonomy
+- Apply scope ordering from [determinism.md](../../skills/rr-builder/rr-tester/refs/determinism.md)
 
 ## Execution
 
@@ -35,7 +35,7 @@ Required context:
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § assess.
+`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § assess.
 
 Required fields: `enumeration_complete`, `scope_manifest`, `verdict`, `scopes`, `counts` (including `overtest`), `redundant_tests`, `overtest_tests`.
 
