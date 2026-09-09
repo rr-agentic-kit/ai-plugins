@@ -212,6 +212,22 @@ BUSINESS_CASE_REQUIRED_FIELDS: frozenset[str] = frozenset(
         "ledger_pins",
     }
 )
+EXECUTE_SLICE_NAME = "execute-slice.yaml"
+# Compact Execute kernel — required top-level keys when the file is present.
+EXECUTE_SLICE_REQUIRED_FIELDS: frozenset[str] = frozenset(
+    {
+        "track",
+        "docs",
+        "product",
+        "slice_id",
+        "why",
+        "capabilities",
+        "constraints",
+        "non_goals",
+        "success_signal",
+        "pins",
+    }
+)
 PR_VALIDATE_WORKFLOW_REL = Path(".github") / "workflows" / "rrr-validate-planning.yml"
 PR_VALIDATE_WORKFLOW_TEMPLATE_PATH = (
     PLUGIN_ROOT / "refs" / "planning" / "ci" / "validate-planning.github.yml"

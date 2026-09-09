@@ -15,7 +15,7 @@
 | Goals | `primary` / `support` | Not RICE |
 | Requirement leaves | **P1 / P2 / P3** | Priority inside a feature’s full set — `refs/planning/doc-standards/item-schema.md` |
 
-Effort is real only with same-sitting architecture ([plan-interview.md](plan-interview.md), [system-design.md](system-design.md)).
+Effort is real only with same-sitting architecture that cites **Effort drivers** ([plan-interview.md](plan-interview.md), [system-design.md](system-design.md)). UI-facing: UX cost drivers required.
 
 ## On-demand lenses (pick one)
 
@@ -32,10 +32,11 @@ Never run all frameworks in one pass. Ask once which lens if the founder rejects
 - Shrinking the requirement table to match what ships — use `_status_:` selection instead
 - Fibonacci as sprint capacity theater
 - P0 / MoSCoW on PRD
-- Effort without architecture — [system-design.md](system-design.md)
+- Effort without architecture / without Effort drivers — [system-design.md](system-design.md)
+- Happy-Path Effort (coding-only; ignore UX or integration cost)
 
 ## Done-when
 
 - Default RICE/RIC applied unless an on-demand lens was explicitly chosen
 - P1–P3 only on requirement leaves
-- Effort gated by architecture pass
+- Effort gated by architecture pass with Effort drivers cited

@@ -245,7 +245,7 @@ Standards: Plan `refs/doc-standards/architecture.md`, `constitution.md`, `featur
 
 ## `execute-slice.yaml` (5-field Execute kernel)
 
-Skill-owned machine handoff on **slice freeze**. **Skip humanize.** Compact — not a PRD dump.
+Skill-owned machine handoff on **slice freeze**. **Skip humanize.** Compact — not a PRD dump. Success = pin-complete kernel Execute can fuse code+test from — not PRD section coverage.
 
 ```yaml
 track: "0.1"
@@ -256,26 +256,28 @@ why: "..."
 capabilities:
   - "..."
 constraints:
-  - "..."
+  - "..."   # cite spine/delta obligations (mechanism + UX-shape when UI-facing)
 non_goals:
   - "..."
 success_signal: "observable pass/fail"
 pins:
   requirement_ids: [PRD-3.1, PRD-3.2]
   parents: [PRD-3]
-  delta_paths: [deltas/PRD-3.md]
-  architecture_rev: draft   # or integer; draft allowed
+  delta_paths: [deltas/PRD-3.md]   # files must exist under plan dir
+  architecture_rev: draft   # or integer; draft ≠ missing Decision/Effort drivers
   ac_refs: ["prd.md § Guest checkout AC"]
 ```
 
 | Field | Rule |
 |-------|------|
 | `track` / `docs` / `product` | Required stamps from Plan phase status at freeze ([baselines.md](baselines.md)) |
-| Why / Capabilities / Constraints / Non-goals / Success signal | Required kernel — five fields only for prose obligations |
-| `pins` | Requirement ids, parents, delta paths, architecture rev (may be `draft`), AC refs |
-| Fail freeze | Smell-fail AC without hold; Effort without architecture; shrinking the full requirement table to “match the slice” |
+| `slice_id` | Required stable id for this freeze unit |
+| Why / Capabilities / Constraints / Non-goals / Success signal | Required kernel — five fields only for prose obligations; Constraints must cite delta/spine, not only product goals |
+| `pins` | Requirement ids, parents, delta paths (existing files), architecture rev (may be `draft`), AC refs |
+| Fail freeze | Smell-fail AC without hold; Effort without architecture or Effort drivers; UI-facing without UX-shape; empty `delta_paths` when mechanism needed; shrinking the full requirement table to “match the slice” |
+| Validator (when file present) | Required-field + `delta_paths` file existence — `EXECUTE_SLICE_*` codes; judgment owns smell/WWAS |
 
-Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. **No Execute skill** in this redesign — Next Up is future Execute.
+Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. **No Execute skill** in this redesign — Next Up is future Execute. Execute starts fused code+test; no separate tech-planning step.
 
 ## `later.md`
 

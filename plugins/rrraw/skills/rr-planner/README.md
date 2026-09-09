@@ -1,18 +1,18 @@
 # rr-planner
 
-Flag-driven **Plan**: full requirements + scored backlog + architecture spine + slice freeze from a frozen `business-case.yaml`. Human index only — runtime is [SKILL.md](SKILL.md) + [refs/](refs/).
+Flag-driven **Plan**: honest Effort + buildable slice handoff from a frozen `business-case.yaml`. Human index only — runtime is [SKILL.md](SKILL.md) + [refs/](refs/).
 
 ## Why
 
-Specify what to build after Discover proved the bet — with system judgment in the same sitting. Refuse Effort-without-architecture, requirement-table shrink-to-ship, smell-fail AC, sprint ceremony, and silent PRD inventiveness when BRD is not frozen.
+Specify what to build after Discover proved the bet — with system judgment in the same sitting so RICE Effort is trustworthy and Execute does not invent mechanism or cost-driving UX shape. Refuse Effort-without-architecture, Effort without cost-driver cites, requirement-table shrink-to-ship, smell-fail AC, sprint ceremony, and silent PRD inventiveness when BRD is not frozen. Success is **Effort honesty + pin-complete kernel** — not product-doc section coverage.
 
 ## What
 
-Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution), feature deltas, WWAS AC, selection status, slice freeze (`execute-slice.yaml`), research, and technical challenge (pre-mortem + red-team). Discover (ES→MRD→BRD + business-case) is `rr-discovery`. Cascade `.md` persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
+Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution; Plan-owned tech + global UX baseline), feature deltas (mechanism, Effort drivers, UX-shape), WWAS AC, selection status, slice freeze (`execute-slice.yaml`), research, and technical challenge (pre-mortem + red-team). Discover (ES→MRD→BRD + business-case) is `rr-discovery`. Cascade `.md` persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
 
 **Explicitly no traditional sprints** (no capacity/velocity theater). Sequencing language: **slice / phase / selected requirements**. Release/version bundling of frozen slices is a later Plan add-on — not this skill’s inventiveness.
 
-**Out of scope:** Execute / ship-check / ticket writing — future.
+**Out of scope:** Execute / ship-check / ticket writing — future. Execute starts fused code+test from the kernel; no separate tech-planning step in Plan.
 
 ## Actions
 
@@ -21,7 +21,7 @@ Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution), featu
 | `setup` | docs/ framework bootstrap | Shared setup |
 | `prd` | Compose PRD + standing Plan path | Entry gate passed |
 | `change` | Patch PRD / delta / AC section | `--change` + section + target |
-| `freeze-slice` | Mint `execute-slice.yaml` + stamp slice | Selected requirements + smell-clean AC |
+| `freeze-slice` | Mint `execute-slice.yaml` + stamp slice | Selected requirements + smell-clean AC + Effort drivers |
 | `research` | Cited findings on existing docs | Post-compose |
 | `challenge` | Technical pre-mortem + red-team | Prefer Plan targets; compact parent summary |
 
@@ -44,13 +44,14 @@ Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution), featu
 
 ## Philosophy
 
+- **Honest Effort** — Dual-lens sitting; `_effort_:` only with same-sitting Decision + Effort drivers (UX cost drivers when UI-facing)
+- **Buildable handoff** — Constraints cite deltas; pins + `delta_paths` exist; draft ≠ missing architecture
 - **Entry gate** — Frozen BRD + valid `business-case.yaml`
 - **Full scope honesty + thin selection** — `_status_:` never deletes the requirement table
 - **Spine + deltas + slice kernel** — small standing contracts beat fat PRD dumps to Execute
-- **Dual-lens founder** — product + architecture in one sitting
 - **Anti-triggers** — Discover flags → `rr-discovery`; sprint language → slice selection
 
-## UX
+## Invoke chrome
 
 ### Invoke
 
@@ -99,7 +100,7 @@ Session-state + status stamps written. **Next Up:** after slice freeze → Execu
 ## Constraints
 
 - **Invoke:** Auto — no `disable-model-invocation`; ambient WHEN description is enough
-- **Gates:** Entry gate (frozen BRD + handoff); humanize before cascade `.md` persist; Effort requires architecture this pass; smell-fail blocks freeze
+- **Gates:** Entry gate (frozen BRD + handoff); humanize before cascade `.md` persist; Effort requires architecture + Effort drivers this pass; smell-fail / hollow kernel blocks freeze
 - **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
 - **Eval-first:** Fix FAIL audit ids only; preserve Plan outcome (no redesign)
 

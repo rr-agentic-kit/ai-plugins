@@ -9,7 +9,7 @@ description: Flag-driven Plan — requirements, spine, slice freeze from frozen 
 
 ## Purpose
 
-Produce **Plan** artifacts from a **frozen business case**: full feature requirement sets, scored backlog, standing architecture spine (+ constitution), per-feature deltas, WWAS AC, and compact slice freeze for future Execute. Discover (ES→MRD→BRD + `business-case.yaml`) is owned by `rr-discovery`. This skill owns Plan Q&A and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
+Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sitting yields **honest RICE Effort** (cost drivers in spine/delta — tech and/or UX) and a **buildable slice kernel** (`execute-slice.yaml`) so future Execute starts fused code+test without inventing stack, mechanism, or cost-driving UX shape. Artifacts include full feature requirement sets, scored backlog, standing architecture spine (+ constitution), per-feature deltas, WWAS AC, and compact freeze. Success is Effort honesty + pin-complete kernel — **not** product-doc section coverage. Discover (ES→MRD→BRD + `business-case.yaml`) is owned by `rr-discovery`. This skill owns Plan Q&A and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
 
 ## When to use
 

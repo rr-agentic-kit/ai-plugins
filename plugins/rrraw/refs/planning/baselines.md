@@ -301,11 +301,13 @@ Compose does not increment anything. After Gate 6+7 pass for a level **or** afte
 Primary Plan freeze unit is a **selected requirement slice**, not the whole PRD table.
 
 1. Smell-gate AC (`req-smell` + WWAS) pass or explicit hold.
-2. Same-sitting architecture exists for selected capabilities (spine and/or feature deltas); architecture rev may be `draft`.
-3. Write/overwrite `docs/rr/{track}/plan/execute-slice.yaml` (5-field kernel + pins) — [output-formats.md](output-formats.md).
+2. Same-sitting architecture exists for selected capabilities (spine and/or feature deltas) with **Decision** + **Effort drivers**; UI-facing needs **UX-shape** (or `n/a` + reason). Architecture rev may be `draft` — **draft ≠ missing** Decision/drivers.
+3. Write/overwrite `docs/rr/{track}/plan/execute-slice.yaml` (5-field kernel + pins; Constraints cite delta/spine obligations; `delta_paths` must exist) — [output-formats.md](output-formats.md).
 4. Stamp `plan/status.yaml` `slice:` with requirement ids + kernel path; do **not** shrink/delete deferred requirement rows.
-5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is.
+5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is. Execute starts fused code+test from the kernel — no separate tech-planning step.
 6. Whole-PRD freeze remains optional structure lock only — not the default handoff to Execute.
+
+Refuse freeze when Effort lacks drivers, UI-facing selected features lack UX-shape, or Constraints only restate product goals. See Plan `skills/rr-planner/refs/execute-handoff.md`.
 
 Major/minor (`track`, `next`) only on confirm — never on this mint. Challenge attestation is not a freeze gate.
 

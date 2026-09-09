@@ -4,7 +4,7 @@
 
 **Load when:** Writing or revising `docs/rr/{track}/plan/architecture.md`, `constitution.md`, or `docs/rr/{track}/plan/deltas/<feature-id>.md`.
 
-**Does not:** Replace the decision-ledger `r-*` graph. Does not invent a second audit trail (no BMAD memlog).
+**Does not:** Replace the decision-ledger `r-*` graph. Does not invent a second audit trail (no BMAD memlog). Does not mandate a full effort matrix / SWOT on every leaf.
 
 ## Record shape (minimum)
 
@@ -13,7 +13,9 @@
 | **Context** | yes | Why a decision is needed now |
 | **Decision** | yes | The choice in one or two sentences |
 | **Consequences** | yes | What follows (good and bad) |
-| **Rejections** | yes when alternatives existed | Options considered and why rejected — stop re-proposal loops |
+| **Rejections** | yes when alternatives existed | Options considered and why rejected — stop re-proposal loops. Optional one-line **effort hint** per option when Effort would differ (no mandatory matrix) |
+| **Effort drivers** | when feature has `_effort_:` | 2–5 bullets naming cost drivers — [feature-delta.md](doc-standards/feature-delta.md) |
+| **UX-shape** | UI-facing features before freeze; else `n/a` + reason | Interaction pattern / flow / cost-relevant states — not pixels |
 | **Integration points** | when relevant | Boundaries touched |
 | **Data-model delta** | when relevant | Schema/entity change vs standing spine |
 
@@ -36,5 +38,6 @@ Feature deltas: [doc-standards/feature-delta.md](doc-standards/feature-delta.md)
 ## Done-when
 
 - Context / Decision / Consequences present
-- Rejections recorded when alternatives were debated
+- Rejections recorded when alternatives were debated (optional effort hint per option when ranking differed)
+- Effort drivers + UX-shape present where feature-delta rules require them
 - No silent edit of an accepted ADR

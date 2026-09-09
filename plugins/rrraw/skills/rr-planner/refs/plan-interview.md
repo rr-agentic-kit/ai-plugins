@@ -4,7 +4,7 @@
 
 **Load when:** Plan compose/change after entry gate and posture; every Q&A cycle for Plan.
 
-**Does not:** Re-run Discover ideation/viability. Does not use sprint ceremony. Does not “fill PRD §N” as UX.
+**Does not:** Re-run Discover ideation/viability. Does not use sprint ceremony. Does not “fill PRD §N” as interview chrome.
 
 ## Audience
 
@@ -31,9 +31,9 @@ objective → capability → story → feature → full requirement set (P1–P3
 2. Name capabilities that deliver objectives.
 3. Stories: outcome form default — `As [persona], I can… so that…`. Optional **job story** body for B2B/situation-heavy: `When… I want… so I can…` — not a second backlog.
 4. Features: RICE; stories: RIC ([prioritization-lens.md](prioritization-lens.md)).
-5. **Hard stop:** [system-design.md](system-design.md) same-sitting rule (+ [adr-lite.md](adr-lite.md) when ADR shape applies).
+5. **Hard stop:** [system-design.md](system-design.md) same-sitting rule — Decision + **Effort drivers** (+ UX-shape when UI-facing); [adr-lite.md](adr-lite.md) when ADR shape applies. Refuse Effort without drivers.
 6. Capture the **full** requirement set; select build-now with `_status_:` — never delete deferred rows.
-7. Narrowing UX: talk capability/cost — never “fill PRD §6.”
+7. Narrowing interview: talk capability/cost drivers — never “fill PRD §6.”
 
 ## Question discipline
 

@@ -106,7 +106,7 @@ Do not apply one ranking system to the whole cascade. No 1–5. **No P-tags exce
 
 ### Effort provenance (PRD features)
 
-`_effort_:` is real only when an architecture decision for that capability exists **in the same Plan pass** (standing spine update and/or `docs/rr/{track}/plan/deltas/<feature-id>.md`). Refuse Effort-without-architecture. Fibonacci remains a relative size, not sprint capacity.
+`_effort_:` is real only when an architecture decision for that capability exists **in the same Plan pass** (standing spine update and/or `docs/rr/{track}/plan/deltas/<feature-id>.md`) **and** that same-sitting entry cites **Effort drivers** (2–5 bullets naming what made Effort = N — tech and/or UX cost drivers). UI-facing features also need **UX-shape** (or explicit `n/a` + reason for pure backend) before Effort is trustworthy for ranking. Refuse Effort-without-architecture. Refuse Effort unless delta/spine cites Effort drivers. Happy-Path / coding-only Effort is invalid. Fibonacci remains a relative size, not sprint capacity. See Plan `skills/rr-planner/refs/system-design.md` and `skills/rr-planner/refs/doc-standards/feature-delta.md`.
 
 ## Spec (agreement axis)
 

@@ -1,6 +1,6 @@
 # challenge-method
 
-**Owner:** Plan technical challenge — pre-mortem **and** assumption red-team — for spine, feature deltas, and AC.
+**Owner:** Plan technical challenge — pre-mortem **and** assumption red-team — for spine, feature deltas, and AC. Attacks hollow Effort and altitude misfile.
 
 **Load when:** `--challenge` / `--review` on Plan targets (`prd`, `architecture`, deltas), stage-exit technical row, or `depth: deep` appends challenge. Challenge agent **must** load this ref for Plan targets (`refs/planning/contracts.md`).
 
@@ -30,7 +30,7 @@ Assume the **slice / standing design failed** in production. Work backward:
 **Steelman, then attack** load-bearing claims in spine + deltas + AC:
 
 1. Steelman the current technical plan in one short paragraph.
-2. Attack: boundaries, data model, failure modes, observability of AC, same-sitting Effort honesty.
+2. Attack: boundaries, data model, failure modes, observability of AC, same-sitting Effort honesty (**Effort drivers** cited? Happy-Path?), cost-relevant UX states, altitude misfile.
 3. Rank attacks the same way.
 4. Cap **3–5 kill-assumptions** — evidence × by-when × flip.
 
@@ -38,10 +38,11 @@ Assume the **slice / standing design failed** in production. Work backward:
 
 | Target | Look for |
 |--------|----------|
-| Spine | Soft invariants, missing `Prevents`, stack dump posing as spine |
-| Feature delta | Restated spine, silent edit of accepted ADR, missing rejections |
-| WWAS AC | Vague verbs, loopholes, unobservable acceptance ([req-smell.md](req-smell.md)) |
-| Selection | Slice that deleted deferred requirements; Effort without architecture ([system-design.md](system-design.md)) |
+| Spine | Soft invariants, missing `Prevents`, stack dump posing as spine, UX baseline dumped as component catalog |
+| Feature delta | Restated spine, silent edit of accepted ADR, missing rejections, missing **Effort drivers**, missing cost-relevant states / UX-shape on UI-facing |
+| WWAS AC | Vague verbs, loopholes, unobservable acceptance ([req-smell.md](req-smell.md)); AC written as test code |
+| Selection / Effort | Slice that deleted deferred requirements; Effort without architecture; **Happy-Path Effort** (coding-only / no UX or integration drivers); Fibonacci filled after product talk only |
+| Altitude misfile | Mechanism parked in PRD; AC as tests; Plan inventing pixels; Execute expected to pick wizard vs form or new integration boundary |
 
 ## Parent summary contract
 
@@ -60,5 +61,6 @@ Do not paste the full report into the fused sitting chat.
 ## Done-when
 
 - Both methods available; at least one run unless user explicitly scopes to one
+- Happy-Path Effort, missing cost-relevant states, and altitude misfile checked when applicable
 - ≤5 kill-assumptions with cheapest probes
 - `parent_summary` compact; full report on disk

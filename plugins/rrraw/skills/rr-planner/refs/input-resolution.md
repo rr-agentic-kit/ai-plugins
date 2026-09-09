@@ -216,6 +216,6 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 | `UNSUPPORTED_DEPTH` | Depth not allowed |
 | `OUT_OF_SCOPE` | Discover / Execute / release-plan inventiveness / When-not-to-use |
 | `PLAN_ENTRY_REFUSED` | Frozen BRD + handoff missing |
-| `SLICE_REFUSED` | Smell-fail / Effort-without-architecture / shrink-full-set |
+| `SLICE_REFUSED` | Smell-fail / Effort-without-architecture / Effort without drivers / UX-shape missing on UI-facing / shrink-full-set |
 
 Error shape: `refs/planning/contracts.md` `PhaseError`.

@@ -19,6 +19,8 @@ from .constants import (
     DISCOVERY_STEMS,
     DOC_STEMS,
     DOCS_ROOT_NAME,
+    EXECUTE_SLICE_NAME,
+    EXECUTE_SLICE_REQUIRED_FIELDS,
     FRONTMATTER_KEYS,
     FRONTMATTER_RE,
     LEGACY_DOC_STEMS,
@@ -1054,6 +1056,124 @@ def check_business_case(planning_dir: Path) -> list[Issue]:
                     key,
                 )
             )
+    return issues
+
+
+def check_execute_slice(planning_dir: Path) -> list[Issue]:
+    """Validate execute-slice.yaml when present (required fields + delta_paths exist).
+
+    Absent file is OK — not every plan dir has a frozen slice. Judgment owns
+    smell/WWAS; static owns hollow/broken kernel paths only.
+    """
+    path = planning_dir / EXECUTE_SLICE_NAME
+    if not path.is_file():
+        return []
+    try:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return [
+            Issue.error(
+                "EXECUTE_SLICE_PARSE",
+                f"{EXECUTE_SLICE_NAME} is not valid YAML: {exc}",
+            )
+        ]
+    if not isinstance(payload, dict):
+        return [
+            Issue.error(
+                "EXECUTE_SLICE_SHAPE",
+                f"{EXECUTE_SLICE_NAME} must be a mapping",
+            )
+        ]
+    issues: list[Issue] = []
+    missing = sorted(EXECUTE_SLICE_REQUIRED_FIELDS - set(payload))
+    if missing:
+        issues.append(
+            Issue.error(
+                "EXECUTE_SLICE_FIELDS",
+                f"{EXECUTE_SLICE_NAME} missing required fields: {', '.join(missing)}",
+            )
+        )
+    for key in ("why", "success_signal", "slice_id"):
+        value = payload.get(key)
+        if key in payload and (
+            value is None or (isinstance(value, str) and not value.strip())
+        ):
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_EMPTY",
+                    f"{EXECUTE_SLICE_NAME} field '{key}' must be non-empty",
+                    key,
+                )
+            )
+    pins = payload.get("pins")
+    if "pins" in payload and not isinstance(pins, dict):
+        issues.append(
+            Issue.error(
+                "EXECUTE_SLICE_PINS",
+                f"{EXECUTE_SLICE_NAME} pins must be a mapping",
+                "pins",
+            )
+        )
+        return issues
+    if isinstance(pins, dict):
+        delta_paths = pins.get("delta_paths")
+        if delta_paths is None:
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_PINS",
+                    f"{EXECUTE_SLICE_NAME} pins.delta_paths is required",
+                    "pins.delta_paths",
+                )
+            )
+        elif not isinstance(delta_paths, list):
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_PINS",
+                    f"{EXECUTE_SLICE_NAME} pins.delta_paths must be a list",
+                    "pins.delta_paths",
+                )
+            )
+        else:
+            plan_root = planning_dir.resolve()
+            for raw in delta_paths:
+                if not isinstance(raw, str) or not raw.strip():
+                    issues.append(
+                        Issue.error(
+                            "EXECUTE_SLICE_DELTA_PATH",
+                            f"{EXECUTE_SLICE_NAME} pins.delta_paths "
+                            "entry must be a non-empty string",
+                            "pins.delta_paths",
+                        )
+                    )
+                    continue
+                rel = Path(raw)
+                if rel.is_absolute() or ".." in rel.parts:
+                    issues.append(
+                        Issue.error(
+                            "EXECUTE_SLICE_DELTA_PATH",
+                            f"{EXECUTE_SLICE_NAME} delta path must be "
+                            f"relative under plan dir: {raw}",
+                            raw,
+                        )
+                    )
+                    continue
+                candidate = (planning_dir / rel).resolve()
+                if not candidate.is_relative_to(plan_root):
+                    issues.append(
+                        Issue.error(
+                            "EXECUTE_SLICE_DELTA_PATH",
+                            f"{EXECUTE_SLICE_NAME} delta path escapes plan dir: {raw}",
+                            raw,
+                        )
+                    )
+                elif not candidate.is_file():
+                    issues.append(
+                        Issue.error(
+                            "EXECUTE_SLICE_DELTA_PATH",
+                            f"{EXECUTE_SLICE_NAME} delta path does not exist: {raw}",
+                            raw,
+                        )
+                    )
     return issues
 
 

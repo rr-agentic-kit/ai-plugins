@@ -56,7 +56,7 @@ Persist **factors only** — composed `(R×I×C)/E` score is **not stored**.
 | **Reach** | ✓ | ✓ | 10–100% of a **named** target — state the denominator |
 | **Impact** | ✓ | ✓ | `0.25` Minimal · `0.5` Low · `1` Medium · `2` High · `3` Massive |
 | **Confidence** | ✓ | ✓ | `low`→0.5 · `medium`→0.8 · `high`→1.0 |
-| **Effort** | ✓ | — | Fibonacci `1, 2, 3, 5, 8, 13` on **features only** — **refuse** without same-sitting architecture (spine and/or feature delta) |
+| **Effort** | ✓ | — | Fibonacci `1, 2, 3, 5, 8, 13` on **features only** — **refuse** without same-sitting architecture (spine and/or feature delta) that cites **Effort drivers**; UI-facing also needs UX-shape (or `n/a` + reason) |
 
 Stories score **RIC** (no Effort). Features score full **RICE**. Goals use `primary`/`support` only. Requirement leaves use P1–P3. Out-of-scope items get no RICE factors. Framework choice: `skills/rr-planner/refs/prioritization-lens.md`.
 
@@ -102,7 +102,7 @@ Follow `skills/rr-planner/refs/plan-interview.md`: objective → capability → 
 - [ ] Product overview links to executive-summary vision
 - [ ] Every BRD objective has at least one product goal
 - [ ] User stories are outcome-oriented (fail: implementation detail)
-- [ ] Features have RICE factors (or explicit `—` while `idea`/`draft`) with Effort only after architecture pass
+- [ ] Features have RICE factors (or explicit `—` while `idea`/`draft`) with Effort only after architecture pass that cites Effort drivers (UX cost drivers when UI-facing)
 - [ ] Requirement leaves have P1–P3; selection via `_status_` without shrinking the set
 - [ ] WWAS AC smell-clean (or holds) before slice freeze
 - [ ] Every PRD item has cross-doc parent ≥1 ES **or** ≥1 BRD

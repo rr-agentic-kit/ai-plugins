@@ -103,3 +103,70 @@ def test_business_case_missing_fields(tmp_path: Path) -> None:
     )
     issues = vp.check_business_case(tmp_path)
     assert "BUSINESS_CASE_FIELDS" in error_codes(issues)
+
+
+MINIMAL_EXECUTE_SLICE: dict = {
+    "track": "0.1",
+    "docs": "0.1.7",
+    "product": "0.1.0?",
+    "slice_id": "slice-001",
+    "why": "Guest checkout without account friction",
+    "capabilities": ["Guest may pay without account"],
+    "constraints": ["PCI vault via existing payment adapter (deltas/PRD-3.md)"],
+    "non_goals": ["Loyalty rewrite"],
+    "success_signal": "Guest completes payment without creating an account",
+    "pins": {
+        "requirement_ids": ["PRD-3.1"],
+        "parents": ["PRD-3"],
+        "delta_paths": ["deltas/PRD-3.md"],
+        "architecture_rev": "draft",
+        "ac_refs": ["prd.md § Guest checkout AC"],
+    },
+}
+
+
+def test_execute_slice_absent_is_ok(tmp_path: Path) -> None:
+    write_planning(tmp_path, VALID_FILES)
+    assert error_codes(vp.check_execute_slice(tmp_path)) == set()
+
+
+def test_execute_slice_missing_fields(tmp_path: Path) -> None:
+    write_planning(tmp_path, VALID_FILES)
+    (tmp_path / vp.EXECUTE_SLICE_NAME).write_text("why: only\n", encoding="utf-8")
+    issues = vp.check_execute_slice(tmp_path)
+    assert "EXECUTE_SLICE_FIELDS" in error_codes(issues)
+
+
+def test_execute_slice_missing_delta_file(tmp_path: Path) -> None:
+    write_planning(tmp_path, VALID_FILES)
+    (tmp_path / vp.EXECUTE_SLICE_NAME).write_text(
+        yaml.safe_dump(MINIMAL_EXECUTE_SLICE, sort_keys=False),
+        encoding="utf-8",
+    )
+    issues = vp.check_execute_slice(tmp_path)
+    assert "EXECUTE_SLICE_DELTA_PATH" in error_codes(issues)
+
+
+def test_execute_slice_passes_with_delta_file(tmp_path: Path) -> None:
+    write_planning(tmp_path, VALID_FILES)
+    deltas = tmp_path / "deltas"
+    deltas.mkdir()
+    (deltas / "PRD-3.md").write_text("# delta\n", encoding="utf-8")
+    (tmp_path / vp.EXECUTE_SLICE_NAME).write_text(
+        yaml.safe_dump(MINIMAL_EXECUTE_SLICE, sort_keys=False),
+        encoding="utf-8",
+    )
+    assert error_codes(vp.check_execute_slice(tmp_path)) == set()
+
+
+def test_execute_slice_rejects_path_escape(tmp_path: Path) -> None:
+    write_planning(tmp_path, VALID_FILES)
+    bad = dict(MINIMAL_EXECUTE_SLICE)
+    bad["pins"] = dict(MINIMAL_EXECUTE_SLICE["pins"])
+    bad["pins"]["delta_paths"] = ["../secret.md"]
+    (tmp_path / vp.EXECUTE_SLICE_NAME).write_text(
+        yaml.safe_dump(bad, sort_keys=False),
+        encoding="utf-8",
+    )
+    issues = vp.check_execute_slice(tmp_path)
+    assert "EXECUTE_SLICE_DELTA_PATH" in error_codes(issues)
