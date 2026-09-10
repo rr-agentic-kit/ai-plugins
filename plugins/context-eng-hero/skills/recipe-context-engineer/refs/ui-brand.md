@@ -7,9 +7,8 @@ Visual patterns for user-facing Context Engineer output. Orchestrators @-referen
 Use for major action transitions. Banner rules are **26** `━` characters wide.
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━
- CE ► {STAGE NAME}
-━━━━━━━━━━━━━━━━━━━━━━━━━━
+### CE ► {STAGE NAME}
+------------------
 ```
 
 **Stage names (uppercase):**
@@ -58,7 +57,7 @@ Adjust duration hint to match the operation. Always use the `◆` prefix.
 After each action completes, show what the skill will do next—**no slash copy-paste required**. The skill proceeds via **AskQuestion** or continues directly when the user already chose. Separators are **31** `─` characters wide.
 
 ```
-───────────────────────────────
+------------------
 
 ## ▶ Next Up
 
@@ -66,13 +65,13 @@ After each action completes, show what the skill will do next—**no slash copy-
 
 {What happens when the user picks an option—or that you will continue after their answer}
 
-───────────────────────────────
+------------------
 
 **Also available:**
 - {alternative 1} — description
 - {alternative 2} — description
 
-───────────────────────────────
+------------------
 ```
 
 Gate option labels come from `gate-prompts.md`; do not invent slash commands as the only path forward.
@@ -84,15 +83,13 @@ Gate option labels come from `gate-prompts.md`; do not invent slash commands as 
 User decision required. **31-character** inner width between `║` borders.
 
 ```
-╔═══════════════════════════════╗
-║  CHECKPOINT: {Type}║
-╚═══════════════════════════════╝
+###  CHECKPOINT: {Type}║
+------------------
 
 {Content}
 
-───────────────────────────────
 → {ACTION PROMPT}
-───────────────────────────────
+------------------
 ```
 
 **Types:**
@@ -114,26 +111,25 @@ Wrap all prose inside checkpoint boxes, Next Up blocks, and liveness messages at
 **Worked example — wrapped checkpoint body:**
 
 ```
-╔═══════════════════════════════╗
-║  CHECKPOINT: Decision Required║
-╚═══════════════════════════════╝
+
+==> CHECKPOINT: Decision Required
+------------------
 
 Approve writes to 3 files
 under skills/recipe-context-
 engineer/refs/actions/.
 
-───────────────────────────────
+------------------
 → Choose an option below
-───────────────────────────────
+------------------
 ```
 
 **Worked example — wrapped checkpoint header:**
 
 ```
-╔═══════════════════════════════╗
-║  CHECKPOINT: Verification║
+==> CHECKPOINT: Verification║
 ║  Required║
-╚═══════════════════════════════╝
+------------------
 
 Confirm before applying
 changes to plugin.json.

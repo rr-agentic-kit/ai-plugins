@@ -43,6 +43,8 @@ Assume the **slice / standing design failed** in production. Work backward:
 | WWAS AC | Vague verbs, loopholes, unobservable acceptance ([req-smell.md](req-smell.md)); AC written as test code |
 | Selection / Effort | Slice that deleted deferred requirements; Effort without architecture; **Happy-Path Effort** (coding-only / no UX or integration drivers); Fibonacci filled after product talk only |
 | Altitude misfile | Mechanism parked in PRD; AC as tests; Plan inventing pixels; Execute expected to pick wizard vs form or new integration boundary |
+| Grant / access axes | **Axis conflation** — invite / register-tenant / session login / IdP SSO / mailbox OAuth collapsed into one access model ([domain-routing.md](domain-routing.md)) |
+| Nature expectations | **Missed nature expectations** — reflection owed vs what landed ([nature-expectation-packs.md](nature-expectation-packs.md)); not “table row unchecked.” Elicit gaps or kill-assumption |
 
 ## Parent summary contract
 
@@ -62,5 +64,6 @@ Do not paste the full report into the fused sitting chat.
 
 - Both methods available; at least one run unless user explicitly scopes to one
 - Happy-Path Effort, missing cost-relevant states, and altitude misfile checked when applicable
+- Grant/access-axis conflation and missed nature expectations (reflection owed vs landed) probed when nature surfaces apply
 - ≤5 kill-assumptions with cheapest probes
 - `parent_summary` compact; full report on disk

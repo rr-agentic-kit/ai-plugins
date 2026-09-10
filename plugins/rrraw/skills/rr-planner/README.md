@@ -48,8 +48,8 @@ Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution; Plan-o
 - **Buildable handoff** — Constraints cite deltas; pins + `delta_paths` exist; draft ≠ missing architecture
 - **Entry gate** — Frozen BRD + valid `business-case.yaml`
 - **Full scope honesty + thin selection** — `_status_:` never deletes the requirement table
+- **Nature reflection** — Reflect on product nature → derive expectations for this project → elicit; do not wait for a founder dump or dump a universal checklist
 - **Spine + deltas + slice kernel** — small standing contracts beat fat PRD dumps to Execute
-- **Anti-triggers** — Discover flags → `rr-discovery`; sprint language → slice selection
 
 ## Invoke chrome
 
@@ -85,6 +85,7 @@ Session-state + status stamps written. **Next Up:** after slice freeze → Execu
 | Domain routing | [refs/domain-routing.md](refs/domain-routing.md) |
 | Blind spots | [refs/blind-spots.md](refs/blind-spots.md) |
 | Coach / Fast interview | [refs/plan-interview.md](refs/plan-interview.md) |
+| Nature expectation method | [refs/nature-expectation-packs.md](refs/nature-expectation-packs.md) |
 | RICE / RIC / on-demand lenses | [refs/prioritization-lens.md](refs/prioritization-lens.md) |
 | Same-sitting system design | [refs/system-design.md](refs/system-design.md) |
 | ADR-lite / supersede | [refs/adr-lite.md](refs/adr-lite.md) |

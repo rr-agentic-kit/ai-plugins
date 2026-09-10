@@ -62,12 +62,13 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | `refs/planning/setup.md` / `refs/planning/baselines.md` / `refs/planning/agent-config.md` | Setup; **version law** (freeze / open-next / ship); sync |
 | [cascade.md](refs/cascade.md) / [project-posture.md](refs/project-posture.md) | Plan body |
 | [plan-interview.md](refs/plan-interview.md) / [prioritization-lens.md](refs/prioritization-lens.md) / [system-design.md](refs/system-design.md) | Interview + score |
+| [nature-expectation-packs.md](refs/nature-expectation-packs.md) | Interview / nature reflection (reflect → derive → elicit; not a pack fire-table) |
 | [doc-standards/prd.md](refs/doc-standards/prd.md) / architecture / constitution / feature-delta | Compose standing + PRD |
 | [req-smell.md](refs/req-smell.md) / [execute-handoff.md](refs/execute-handoff.md) | Pre-freeze / slice freeze |
 | [challenge-method.md](refs/challenge-method.md) / [blind-spots.md](refs/blind-spots.md) | Challenge / stage-exit |
 | [goal-anchor.md](refs/goal-anchor.md) / [expert-panel.md](refs/expert-panel.md) | Plan pass / Gate 2; Gate 7 / resume viability |
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A; Plan level entry |
-| [domain-routing.md](refs/domain-routing.md) | Challenge / blind-spot domain placement |
+| [domain-routing.md](refs/domain-routing.md) | Challenge / blind-spot domain placement; access-axis placement |
 | `skills/rr-discovery/refs/compose-prose.md` | Every cascade `.md` persist |
 | `skills/rr-discovery/refs/business-case-handoff.md` | Entry gate |
 | `refs/planning/contracts.md` | Before any `Task` |

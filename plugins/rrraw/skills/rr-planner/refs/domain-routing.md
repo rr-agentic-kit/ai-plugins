@@ -54,6 +54,20 @@ After user approval, place items and tags per the table. Do not persist the tabl
 
 **Promotion test:** channel/tech detail defaults to Plan. Promotes to ES **only** when it is itself a hard external constraint.
 
+## Example 4 — Access / identity axes
+
+Keep axes **separate**. Do not merge invite / register-tenant / session login / IdP SSO / mailbox OAuth into one “access” Decision. Nature reflection + anti-merge: [nature-expectation-packs.md](nature-expectation-packs.md).
+
+| Decision | executive-summary | brd | prd | architecture / delta |
+|----------|-------------------|-----|-----|----------------------|
+| **Invite** | Constraint if invite-only beachhead | Approver rules for who may invite | Invite AC + WWAS | Invite token / expiry / accept mechanism in delta |
+| **Register-tenant** | Constraint if org self-serve is success-critical | Tenant onboarding rules | Register-tenant AC (≠ invite) | Tenant provisioning mechanism in delta |
+| **Session login** | Mode policy if anonymous vs login matters | Auth obligation if contractual | Login / session AC | Session / credential mechanism in delta |
+| **IdP / SSO** | Constraint when federation is a hard buyer gate | Enterprise IdP commitment rules | SSO path AC (≠ local login) | IdP integration + mapping failure in spine/delta |
+| **Mailbox OAuth** | Constraint when inbox connect is the product bet | Data-access / consent rules | Mailbox connect AC (≠ user login) | OAuth grant / revoke / scope in delta |
+
+**Skill rule:** Product AC and WWAS on PRD per axis. Mechanism **per axis** in delta/spine — not one conflated Decision. Challenge flags grant/access-axis conflation ([challenge-method.md](challenge-method.md)).
+
 ## After approval
 
 1. Mint or refile items per the approved table.

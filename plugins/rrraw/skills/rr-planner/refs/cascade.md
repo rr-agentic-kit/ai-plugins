@@ -56,7 +56,7 @@ Orchestration owns the skill (SKILL Procedure step 4). For `prd` / `change` / `f
 | Entry | Re-decision sweep (`refs/planning/decision-ledger.md`); [note-sessions.md](note-sessions.md) sidecar; handoff summary; then Pre-Plan posture above |
 | Standing | Spine (+ constitution per mode); feature deltas when scoring ([system-design.md](system-design.md), [adr-lite.md](adr-lite.md), [architecture.md](doc-standards/architecture.md), [feature-delta.md](doc-standards/feature-delta.md)) |
 | Interview / score | [plan-interview.md](plan-interview.md) → [prioritization-lens.md](prioritization-lens.md); Effort gated by [system-design.md](system-design.md); mint ledger rationale on ranked leaves; after Q&A → notes + raw-history; reflect → [proactivity.md](proactivity.md) |
-| Requirements / select | Full P1–P3 set; `_status_:` only — never shrink the table |
+| Requirements / select | Full P1–P3 set retained (`_status_:` only — never shrink the table). **Thin select:** prefer a buildable kernel subset and shorter Plan cycles over doc-only breadth; defer the rest with status — do not delete rows or invent a “docs-complete” slice ([execute-handoff.md](execute-handoff.md)) |
 | Compose | Compose `Task` (`doc_type: prd` only) → **mandatory** `skills/rr-discovery/refs/compose-prose.md`; clarification loop (`refs/planning/contracts.md`); dirty challenge attestation when clean (`refs/planning/baselines.md`) |
 | Exit | WWAS + [req-smell.md](req-smell.md); optional tech challenge (inject Plan [challenge-method.md](challenge-method.md); compact `parent_summary`); [execute-handoff.md](execute-handoff.md) slice freeze; whole-PRD freeze = optional structure lock only |
 

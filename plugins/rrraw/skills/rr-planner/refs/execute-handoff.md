@@ -32,6 +32,16 @@ Stamp `plan/status.yaml` `slice:` (`refs/planning/baselines.md`).
 
 Execute starts fused code+test from this kernel — **no separate tech-planning step**. Obligation break → existing classify-the-change / unfreeze.
 
+## Thin selection at freeze
+
+Prefer a **buildable kernel** over a wide selected set that only looks complete on paper. Shorter Plan cycles are fine when:
+
+- Selected leaves have Decision + Effort drivers (+ UX-shape when UI-facing)
+- Deferred work stays on the full P1–P3 table (`_status_:`) and is named in **Non-goals**
+- Kernel stays pin-complete — refuse **doc-only** slices that lack Decision / Effort drivers / UX-shape
+
+Thin ≠ hollow. Narrow selection + honest defer beats breadth without mechanism.
+
 ## Fail freeze when
 
 | Condition | Action |
@@ -43,6 +53,7 @@ Execute starts fused code+test from this kernel — **no separate tech-planning 
 | Empty `delta_paths` for a selected capability that needs mechanism | Refuse |
 | Constraints that only restate product goals (no delta/spine obligations) | Refuse |
 | Slice shrinks/deletes the full requirement table | Refuse — selection is `_status_:` only |
+| Doc-only / hollow thin slice (selected without Decision / Effort drivers / UX-shape) | Refuse — thin kernel must still be pin-complete |
 | Product AC written as test code | Refuse — AC stays WWAS product pass/fail |
 | Market re-debate | Route to `rr-discovery` |
 

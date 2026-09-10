@@ -42,10 +42,12 @@ Refuse Effort-without-architecture. Refuse Effort unless the same-sitting delta/
 3. What must never happen (`Prevents`)?
 4. What UX cost drivers apply (wizard vs form, permission/empty/error states) — or `n/a` why?
 5. What is deferred / out of this slice?
+6. **Auth / access specialization:** when nature reflection ([nature-expectation-packs.md](nature-expectation-packs.md)) surfaces access axes, which are in play (invite / register-tenant / session login / IdP / mailbox OAuth)? Mechanism + Effort drivers **per axis** in delta/spine — a **merged access model** fails altitude honesty ([domain-routing.md](domain-routing.md)).
 
 ## Anti-patterns
 
 - Happy-Path Effort (coding-only; ignore UX or integration cost drivers)
+- **Merged access model** — one Decision that collapses invite ≠ register-tenant ≠ login ≠ IdP ≠ mailbox OAuth; fails cost-driver and altitude honesty
 - Restating the full spine inside a feature delta
 - Routing Plan AC to `tech.md`
 - Effort as a PM guess with no system judgment / no Effort drivers cite
