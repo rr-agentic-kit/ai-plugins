@@ -111,7 +111,7 @@ After learn handover is written (or chat-only draft accepted).
 - **header:** "Next"
 - **options:** Incorporate now | Revise topics | Done for now
 - **Route map:**
-  - Incorporate now → **fix** if all approved topics preserve outcome; **redesign** if any topic changes outcome/audience/capabilities; pass `LEARN-HANDOVER.md` (or chat handover) as failure/delta source
+  - Incorporate now → **fix** if all approved topics preserve outcome; **redesign** if any topic changes outcome/audience/capabilities; pass user-project `LEARN-HANDOVER.*` (or chat handover) as failure/delta source; edit **plugin source** only
   - Revise topics → return to **learn-3-topics**; re-gate **approve-learn-topics**
   - Done for now → end with **Next Up** block only; note handover path if written
 

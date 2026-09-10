@@ -21,8 +21,8 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 
 ### Step 1: `learn-1-bind`
 
-- **Outcome:** Target skill and miss source are bound.
-- **Done when:** Target skill path resolved; miss source = this chat’s run (default) and/or user problem statement per `learn-intake.md`; optional problem-statement overlay noted; banner `CE ► LEARN` per `ui-brand.md`.
+- **Outcome:** Target skill and miss source are bound; **three path roles** resolved per `learn-intake.md`.
+- **Done when:** (1) **Read-from** path = readable `SKILL.md` (source or cache OK **read-only** for investigation); (2) **Write-handover** path = **user project** (`docs/rr/LEARN-HANDOVER.<skill>.md` when `docs/rr/` exists, else project-root); (3) **Absorb-into** path = **plugin source** checkout only (never `~/.claude/plugins/cache/**` or other installed runtime copies); (4) miss source = this chat’s run (default) and/or user problem statement; banner `CE ► LEARN` per `ui-brand.md`. If absorb-into unclear → AskQuestion once (source path / describe location).
 
 ### Step 2: `learn-2-investigate`
 
@@ -36,8 +36,8 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 
 ### Step 4: `learn-4-handover`
 
-- **Outcome:** Lean handover from **approved** topics only.
-- **Done when:** Handover filled from `templates/learn-handover.template.md`; write `LEARN-HANDOVER.md` beside target `SKILL.md`. If path not writable → chat-only draft + one path AskQuestion; then stop or write to user path. No full chat paste.
+- **Outcome:** Lean handover from **approved** topics only, written in the **user project**.
+- **Done when:** Handover filled from `templates/learn-handover.template.md`; write under the **user project** (prefer `docs/rr/LEARN-HANDOVER.<skill-name>.md` when `docs/rr/` exists, else project-root `LEARN-HANDOVER.<skill-name>.md`). **Target** + **Incorporate hint** list **absorb-into (plugin source)** paths — not cache. **Stop-rule:** never write handover or absorb edits under `~/.claude/plugins/cache/**` / installed runtime skill trees. If user-project path unwritable → chat-only draft + one path AskQuestion. No full chat paste.
 
 ### Step 5: `learn-5-close`
 
@@ -56,7 +56,8 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 
 ## Stop
 
-- Learn **never** edits the target skill definition.
+- Learn **never** edits the target skill definition (absorb via **fix** / **redesign** on **plugin source** only).
+- Learn **never** writes into runtime/cache/installed skill copies — handover → **user project**; absorb → **source**.
 - No bible-sized handover: target + miss + approved table + non-goals + fix-vs-redesign hint only.
 - No live run evidence (and no problem statement) → wrong action (use audit/fix). Painful-but-“successful” runs still count as live run evidence.
 - Creating a new artifact → **create** / **extract**, not learn.

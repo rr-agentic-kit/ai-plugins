@@ -23,4 +23,4 @@ Used by **Action: redesign** step 1. Intake proceeds with stated assumptions per
 
 ## Stop
 
-Do not treat redesign as "fix all old audit FAILs." Old FAILs may disappear or new ones may appear—recommend post-write audit in output. After absorb from learn handover: recommend delete `LEARN-HANDOVER.md` + re-audit/test.
+Do not treat redesign as "fix all old audit FAILs." Old FAILs may disappear or new ones may appear—recommend post-write audit in output. After absorb from learn handover: recommend delete user-project `LEARN-HANDOVER.*` + re-audit/test on **plugin source** (never cache).

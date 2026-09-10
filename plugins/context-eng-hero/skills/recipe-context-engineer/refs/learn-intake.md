@@ -4,7 +4,12 @@ Used by **Action: learn** step 1. Intake proceeds with stated assumptions per `q
 
 ## Done-when for investigate (before `learn-2-investigate` completes)
 
-- Plugin-relative **path** to the target skill definition (`SKILL.md` or skill folder).
+- **Three path roles** (do not collapse):
+  | Role | Meaning | Typical location |
+  |------|---------|------------------|
+  | **Read-from** | Skill definition to investigate | Plugin **source** preferred; cache/runtime OK **read-only** |
+  | **Write-handover** | Where `LEARN-HANDOVER.*` is persisted | **User project** (`docs/rr/LEARN-HANDOVER.<skill>.md` or project root) |
+  | **Absorb-into** | Where fix/redesign edits land | **Plugin source** checkout only — never `~/.claude/plugins/cache/**` |
 - **Miss source** (one or more):
   - This chat’s **run** (default)—failed steps, human patches, **and/or** friction signals (excess serial tools/Reads, invent-vs-procedure), or
   - User **problem statement** (seeded description of what went wrong / what they added manually / where the run hurt).
@@ -13,7 +18,7 @@ Used by **Action: learn** step 1. Intake proceeds with stated assumptions per `q
 
 Use when path or miss is unclear:
 
-1. **Target skill path?** — paste path / describe location (same pattern as `questioning.md` Missing path).
+1. **Target skill?** — paste path / describe location (same pattern as `questioning.md` Missing path). Prefer binding **source** for absorb-into; if user only has cache path, Ask once for source checkout.
 2. **Miss overlay?** — use this chat only / add a short problem statement / both.
 3. **Failed action id?** — if multiple actions ran; narrow which procedure missed.
 

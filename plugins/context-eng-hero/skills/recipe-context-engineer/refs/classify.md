@@ -39,8 +39,8 @@ Templates: `templates/skill.template.md` (Skill or Skill+Ref), `templates/ref-fi
 | Audit verdict FAIL | **fix** + audit report |
 | Test probe FAIL, same contract | **fix** + test report |
 | Live run miss (patch or friction) on existing skill | **learn** → then **fix** or **redesign** from handover |
-| Learn handover (approved topics preserve outcome) | **fix** + `LEARN-HANDOVER.md` |
-| Learn handover (any topic changes outcome/audience/capabilities) | **redesign** + `LEARN-HANDOVER.md` |
+| Learn handover (approved topics preserve outcome) | **fix** + user-project `LEARN-HANDOVER.*` → **plugin source** |
+| Learn handover (any topic changes outcome/audience/capabilities) | **redesign** + user-project `LEARN-HANDOVER.*` → **plugin source** |
 | Test FAIL / user story = wrong capability or outcome | **redesign** |
 | User: add step, remove gate, change audience | **redesign** |
 | User: wording, typo, violates own stop rule | **fix** |

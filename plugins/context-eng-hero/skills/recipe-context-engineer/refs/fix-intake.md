@@ -4,7 +4,7 @@ Used by **Action: fix** step 1. Intake proceeds with stated assumptions per `que
 
 ## Done-when for apply (before `fix-2-plan` completes)
 
-- Plugin-relative **path** to the definition file.
+- Plugin-relative **path** to the definition file — from learn handover Target/touch list must resolve to **plugin source** (reject cache/install paths).
 - **Failure source** (one or more):
   - Prior **audit** report with every FAIL id (critical, major, minor), or
   - Prior **test** report with probe FAIL ids tied to the same contract, or
@@ -29,4 +29,4 @@ Use when the user did not supply an audit/test/learn report and intent is unclea
 
 Each FAIL id, approved learn topic id, or symptom must map to one concrete edit before step 2 (`fix-2-plan`) completes.
 
-**Eval-first:** Fix only what FAILs require; do not thicken with anticipated rules. Re-run **test** after fix when probes exist. After absorb from learn handover: recommend delete `LEARN-HANDOVER.md` + re-audit/test.
+**Eval-first:** Fix only what FAILs require; do not thicken with anticipated rules. Re-run **test** after fix when probes exist. After absorb from learn handover: recommend delete user-project `LEARN-HANDOVER.*` + re-audit/test on **plugin source** (never cache).

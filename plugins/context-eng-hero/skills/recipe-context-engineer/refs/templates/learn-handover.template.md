@@ -1,13 +1,16 @@
 # Learn handover template
 
-Emit at **learn-4-handover** from **approved** topics only. Write as `LEARN-HANDOVER.md` beside the target `SKILL.md` (or chat-only if write fails). Ephemeral—do not marketplace-ship; delete after absorb.
+Emit at **learn-4-handover** from **approved** topics only. Write under the **user project** (prefer `docs/rr/LEARN-HANDOVER.<skill-name>.md` when `docs/rr/` exists, else project-root `LEARN-HANDOVER.<skill-name>.md`). Ephemeral—do not marketplace-ship; delete from the **user project** after absorb into **plugin source**.
+
+**Anti-trigger:** Do **not** write beside runtime/cache `SKILL.md` (`~/.claude/plugins/cache/**` or installed copies).
 
 ```markdown
 # LEARN-HANDOVER
 
 ## Target
-- Path: `<plugin-relative/SKILL.md>`
+- Path: `<plugin-source absolute or repo-relative/SKILL.md>` (**plugin source** — not cache)
 - Type: skill | Skill+Ref
+- Runtime/cache copies: **read-only** — never write or absorb there
 
 ## Miss
 <≤3 sentences: what failed, what the human covered manually, and/or run friction (serial tools/Reads, invent-vs-procedure)>
@@ -24,13 +27,14 @@ Emit at **learn-4-handover** from **approved** topics only. Write as `LEARN-HAND
 ## Non-goals
 - No project-domain rules (generic skill behavior only)
 - <what learn/absorb must not change>
+- Do not edit `~/.claude/plugins/cache/**` copies
 
 ## Incorporate hint
 - Mode: **fix** | **redesign**
-- Touch list: `<paths to edit>`
+- Touch list: `<plugin-source paths to edit>`
 
 ---
-Ephemeral. Do not ship in marketplace. Delete after fix/redesign absorb.
+Ephemeral. Written in user project. Delete after fix/redesign absorb into **plugin source**.
 ```
 
-**Rules:** No full chat paste. No essay rationale sections. Approved table only—dropped classes stay out unless user forced them in.
+**Rules:** No full chat paste. No essay rationale sections. Approved table only—dropped classes stay out unless user forced them in. Handover file lives in the **user project**; absorb edits land only in **plugin source**.

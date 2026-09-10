@@ -22,7 +22,7 @@ Platform: commands cannot execute other commands (`chat-orchestration.md`).
 | After create / fix / redesign write | Audit again, run behavior test, or done |
 | After redesign write | Re-audit the same path |
 | After learn handover | Incorporate with this handover (fix or redesign per hint), revise topics, or done |
-| After absorb from learn handover | Delete `LEARN-HANDOVER.md`; re-audit / re-test |
+| After absorb from learn handover | Delete user-project `LEARN-HANDOVER.*` (not cache); re-audit / re-test on **plugin source** |
 
 ## Action close steps
 
