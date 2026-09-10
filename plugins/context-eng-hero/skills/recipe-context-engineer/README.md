@@ -28,6 +28,7 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 | audit | Static + rubric report (no edits) | Check quality without changing files |
 | fix | Minimal edits for existing intent | Audit or test FAIL; same outcome and scope |
 | redesign | Change outcome/scope + write gates | Wrong capability, audience, or outcome |
+| learn | Approved gap package from a live run miss—patch or friction (no skill edits) | Live run miss (patch or friction); fold learning back via fix/redesign |
 | test | Behavior probe report | Verify agent behavior against prompts |
 | diff | Two-path tradeoff summary | Compare two approaches or paths |
 | design | Inline write from classify/clarify | Classify/clarify done; user requests file write this turn |
@@ -37,19 +38,21 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 ### Use when
 
 - Picking or narrowing artifact type (including Skill+Ref and ref file)
-- Auditing, fixing, creating, extracting, testing, or comparing a scoped definition
+- Auditing, fixing, creating, extracting, testing, comparing, or learning from a live run miss (patch or friction) on a scoped definition
 - Clarifying outcome, audience, and failure modes before authoring
 - Generating or updating a skill README from an existing `SKILL.md` (**extract**)
+- Packaging gaps after a live run miss (patch or friction) so fix/redesign can absorb without re-deriving the miss (**learn**)
 
 ### Avoid when
 
 - Ad-hoc production code review with no artifact path
-- Ambient "audit everything" without a declared target file
+- Ambient "audit everything" or "improve this skill" without a declared target or live miss
 - Repo-wide exploration without a scoped question
 
 ## Philosophy
 
 - **Eval-first** — thicken from observed audit/test FAILs, not anticipated rules
+- **Live-miss → learn → absorb** — diagnose existing skill gaps from a live run miss (patch or friction); fix/redesign folds the handover in
 - **Scoped-only** — one declared artifact path per session; never ambient repo review
 - **Spec/executor split** — README = human spec; `SKILL.md` = Procedure and action refs
 - **Gates-before-write** — static → reflection → pre-ship → approve before any file write

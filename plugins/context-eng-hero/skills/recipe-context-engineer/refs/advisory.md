@@ -1,6 +1,6 @@
 # Advisory (design partner)
 
-Loaded in the **Advise** orchestration step and after **Gather** in Clarify. Run for **create**, **design**, **extract**, **fix**, and **redesign**—skip for **audit**, **test**, and **diff** (diagnosis-only).
+Loaded in the **Advise** orchestration step and after **Gather** in Clarify. Run for **create**, **design**, **extract**, **fix**, and **redesign**—skip for **audit**, **test**, **diff**, and **learn** (diagnosis-only).
 
 ## Eval-first authoring
 
@@ -118,4 +118,4 @@ Call out before writing (do not silently author past these):
 ## When to skip
 
 - User message already addresses every item in the catalog for the detected type → skip Advise silently (0 gaps)
-- Action is audit, test, or diff → Advise not loaded
+- Action is audit, test, diff, or learn → Advise not loaded

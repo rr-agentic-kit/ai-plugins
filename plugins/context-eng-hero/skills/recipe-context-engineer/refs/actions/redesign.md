@@ -19,6 +19,7 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 | `templates/<type>.template.md` (per `classify.md`) | `redesign-3-apply` |
 | `chat-orchestration.md` | `redesign-2-plan` (workflows) |
 | Prior diff report | `redesign-1-clarify` if supplied |
+| Prior learn handover (`LEARN-HANDOVER.md` or chat) | `redesign-1-clarify` if supplied |
 | `shared-write-gates.md` | `redesign-4-gates` |
 | `gate-prompts.md`, `ui-brand.md`, `close-contract.md` | `redesign-5-close` |
 

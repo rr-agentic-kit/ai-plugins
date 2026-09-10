@@ -43,7 +43,7 @@
   |----------------|------------------------|
   | **Why** | Purpose; audience from advisory |
   | **What** (+ `### Verification`) | Domain, types, boundaries; static + rubric + probe concepts |
-  | **Actions** | SKILL **Actions** table (id, outcome); **Pick when** from `classify.md` routing |
+  | **Actions** | SKILL **Actions** table (id, outcome); **Pick when** from `classify.md` routing (includes **learn** when present) |
   | **When → Use when** | SKILL **When to use** |
   | **When → Avoid when** | SKILL **When not to use** (dedupe What out-of-scope) |
   | **Philosophy** | Eval-first, scoped-only, gates from advisory + Constraints facts |

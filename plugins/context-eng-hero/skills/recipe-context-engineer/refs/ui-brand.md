@@ -19,6 +19,7 @@ Use for major action transitions. Banner rules are **26** `━` characters wide.
 - `CREATE`
 - `EXTRACT`
 - `REDESIGN`
+- `LEARN`
 - `TEST`
 - `DIFF`
 - `DESIGN`

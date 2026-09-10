@@ -19,6 +19,7 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 | `template-required-map.md` | `fix-3-apply` |
 | `templates/<type>.template.md` (per `classify.md`) | `fix-3-apply` |
 | Prior audit or test report | `fix-1-read` if supplied |
+| Prior learn handover (`LEARN-HANDOVER.md` or chat) | `fix-1-read` if supplied |
 | `shared-write-gates.md` | `fix-4-gates` |
 | `gate-prompts.md`, `close-contract.md` | `fix-5-close` |
 

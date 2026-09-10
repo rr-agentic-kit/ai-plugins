@@ -19,7 +19,8 @@ Used by **Action: redesign** step 1. Intake proceeds with stated assumptions per
 
 - Two versions to compare → run **diff** first; attach summary to plan.
 - Extract draft with **resolved** open questions → first production ship via redesign; polish-only → **fix**.
+- Prior **learn handover** when absorb-as implies outcome/audience/capability change → treat approved topics + Incorporate hint as the **delta brief** (same contract as a pasted delta).
 
 ## Stop
 
-Do not treat redesign as "fix all old audit FAILs." Old FAILs may disappear or new ones may appear—recommend post-write audit in output.
+Do not treat redesign as "fix all old audit FAILs." Old FAILs may disappear or new ones may appear—recommend post-write audit in output. After absorb from learn handover: recommend delete `LEARN-HANDOVER.md` + re-audit/test.
