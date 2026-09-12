@@ -610,11 +610,10 @@ def migrate_planning_shapes(planning_dir: Path) -> list[Issue]:
     return issues
 
 
-def migrate_exec_summary_stem(planning_dir: Path) -> list[Issue]:
-    """Rename legacy exec-summary.* → executive-summary.*; rewrite status.yaml keys."""
+def _rename_legacy_es_files(
+    planning_dir: Path, legacy: str, canonical: str
+) -> tuple[bool, list[Issue]]:
     issues: list[Issue] = []
-    legacy = "exec-summary"
-    canonical = "executive-summary"
     renamed = False
     for suffix in (".md", ".yaml", ".notes.yaml", ".challenge.report.md"):
         src = planning_dir / f"{legacy}{suffix}"
@@ -636,19 +635,35 @@ def migrate_exec_summary_stem(planning_dir: Path) -> list[Issue]:
         dst.write_text(text, encoding="utf-8")
         src.unlink()
         renamed = True
+    return renamed, issues
+
+
+def _rename_legacy_es_status(planning_dir: Path, legacy: str, canonical: str) -> bool:
     status_path = planning_dir / "status.yaml"
-    if status_path.is_file():
-        raw = status_path.read_text(encoding="utf-8")
-        if legacy in raw:
-            data = yaml.safe_load(raw)
-            if isinstance(data, dict):
-                changed = _rename_status_stem_keys(data, legacy, canonical)
-                if changed:
-                    status_path.write_text(
-                        yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
-                        encoding="utf-8",
-                    )
-                    renamed = True
+    if not status_path.is_file():
+        return False
+    raw = status_path.read_text(encoding="utf-8")
+    if legacy not in raw:
+        return False
+    data = yaml.safe_load(raw)
+    if not isinstance(data, dict):
+        return False
+    if not _rename_status_stem_keys(data, legacy, canonical):
+        return False
+    status_path.write_text(
+        yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+    )
+    return True
+
+
+def migrate_exec_summary_stem(planning_dir: Path) -> list[Issue]:
+    """Rename legacy exec-summary.* → executive-summary.*; rewrite status.yaml keys."""
+    legacy = "exec-summary"
+    canonical = "executive-summary"
+    renamed, issues = _rename_legacy_es_files(planning_dir, legacy, canonical)
+    if _rename_legacy_es_status(planning_dir, legacy, canonical):
+        renamed = True
     if renamed:
         issues.append(
             Issue.warn(

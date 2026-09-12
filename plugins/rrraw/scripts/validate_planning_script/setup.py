@@ -48,6 +48,9 @@ from .workspace import (
     write_status_yaml,
 )
 
+_MSG_NO_CASCADE_DOCS = "no cascade docs"
+_MSG_ALREADY_CANONICAL = "already canonical"
+
 
 def parse_agent_config(text: str | None = None) -> tuple[int, str, str]:
     raw = text if text is not None else AGENT_CONFIG_PATH.read_text(encoding="utf-8")
@@ -256,7 +259,7 @@ def setup_cascade_format(phase_dir: Path) -> tuple[str, str]:
         return "failed", f"{phase_dir} is not a directory"
     stems = stems_for_dir(phase_dir)
     if not has_cascade_docs(phase_dir, stems=stems):
-        return "ok", "no cascade docs"
+        return "ok", _MSG_NO_CASCADE_DOCS
     before = {
         path.name: path.read_bytes()
         for path in phase_dir.iterdir()
@@ -274,7 +277,7 @@ def setup_cascade_format(phase_dir: Path) -> tuple[str, str]:
     }
     if before != after:
         return "fixed", "rewrote list-meta/yaml to canonical md"
-    return "ok", "already canonical"
+    return "ok", _MSG_ALREADY_CANONICAL
 
 
 def setup_cascade_versioning(phase_dir: Path) -> tuple[str, str]:
@@ -287,7 +290,7 @@ def setup_cascade_versioning(phase_dir: Path) -> tuple[str, str]:
         if (phase_dir / f"{stem}.md").is_file()
     ]
     if not md_paths:
-        return "ok", "no cascade docs"
+        return "ok", _MSG_NO_CASCADE_DOCS
     status: dict[str, Any] | None = None
     status_path = find_status_path(phase_dir)
     if status_path is not None:
@@ -310,7 +313,7 @@ def setup_cascade_versioning(phase_dir: Path) -> tuple[str, str]:
         return "fixed", "dropped stub version / aligned with status"
     if "created" in outcomes:
         return "created", "inserted track/doc_rev/pins/created"
-    return "ok", "already canonical"
+    return "ok", _MSG_ALREADY_CANONICAL
 
 
 def setup_pr_validate_workflow(repo_root: Path) -> tuple[str, str]:
@@ -347,9 +350,9 @@ def _merge_cascade_outcomes(
         return "fixed", "rewrote or aligned cascade docs"
     if any(status == "created" for status, _ in outcomes):
         return "created", "inserted track/doc_rev/pins/created"
-    if all(msg == "no cascade docs" for _, msg in outcomes):
-        return "ok", "no cascade docs"
-    return "ok", "already canonical"
+    if all(msg == _MSG_NO_CASCADE_DOCS for _, msg in outcomes):
+        return "ok", _MSG_NO_CASCADE_DOCS
+    return "ok", _MSG_ALREADY_CANONICAL
 
 
 def run_setup(docs: Path, repo_root: Path) -> int:

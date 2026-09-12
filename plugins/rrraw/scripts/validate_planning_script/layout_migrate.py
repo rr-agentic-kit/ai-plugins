@@ -30,6 +30,8 @@ from .workspace import (
     track_phase_dir,
 )
 
+_MSG_ALREADY_MIGRATED = "already migrated"
+
 
 def _track_from_status_file(path: Path) -> str | None:
     if not path.is_file():
@@ -92,7 +94,7 @@ def _move_path(src: Path, dest: Path, moves: list[str]) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists():
         if src.is_dir() and dest.is_dir():
-            for child in list(src.iterdir()):
+            for child in tuple(src.iterdir()):
                 _move_path(child, dest / child.name, moves)
             with contextlib.suppress(OSError):
                 src.rmdir()
@@ -115,7 +117,7 @@ def _move_phase_track_subdirs(phase_src: Path, phase: str, moves: list[str]) -> 
     """``docs/{phase}/{next}/`` → ``docs/rr/{next}/{phase}/``."""
     if not phase_src.is_dir():
         return
-    for child in list(phase_src.iterdir()):
+    for child in tuple(phase_src.iterdir()):
         if child.is_dir() and TRACK_DIR_RE.fullmatch(child.name):
             dest = track_phase_dir(phase_src.parent, child.name, phase)
             _move_path(child, dest, moves)
@@ -130,11 +132,64 @@ def _move_phase_current(
         return None
     dest = track_phase_dir(docs, track, phase)
     dest.mkdir(parents=True, exist_ok=True)
-    for child in list(src.iterdir()):
+    for child in tuple(src.iterdir()):
         _move_path(child, dest / child.name, moves)
     with contextlib.suppress(OSError):
         src.rmdir()
     return dest if dest.is_dir() else None
+
+
+_SHARED_FLAT_NAMES = frozenset(
+    {
+        "items.json",
+        "session-state.json",
+        "decision-ledger.yaml",
+        "business-case.yaml",
+        STATUS_NAME,
+        "raw-history",
+    }
+)
+
+
+def _dest_for_legacy_flat_child(
+    child: Path,
+    *,
+    docs: Path,
+    discovery_dest: Path,
+    plan_dest: Path,
+    has_discovery_doc: bool,
+    has_plan_doc: bool,
+) -> Path:
+    """Choose destination for one legacy flat child (parking / phase / shared)."""
+    name = child.name
+    if name in PARKING_NAMES:
+        return rr_root(docs) / name
+    if TRACK_DIR_RE.fullmatch(name) and child.is_dir():
+        return track_phase_dir(docs, name, DISCOVERY_DIR)
+    if name in PLAN_STANDING_NAMES or name.startswith("architecture."):
+        return plan_dest / name
+    if name.endswith(".challenge.report.md"):
+        report_stem = name[: -len(".challenge.report.md")]
+        can = canonicalize_doc_stem(report_stem)
+        if can in PLAN_STEMS or report_stem in {"architecture", "constitution"}:
+            return plan_dest / name
+        return discovery_dest / name
+    if name.endswith(".notes.yaml"):
+        note_stem = name[: -len(".notes.yaml")]
+        can = canonicalize_doc_stem(note_stem)
+        return (plan_dest if can in PLAN_STEMS else discovery_dest) / name
+    stem = child.stem if child.is_file() else name
+    can = canonicalize_doc_stem(stem)
+    if can in PLAN_STEMS:
+        return plan_dest / name
+    if can in DISCOVERY_STEMS or stem in LEGACY_DOC_STEMS:
+        return discovery_dest / name
+    if name in _SHARED_FLAT_NAMES:
+        dest_dir = (
+            discovery_dest if has_discovery_doc or not has_plan_doc else plan_dest
+        )
+        return dest_dir / name
+    return discovery_dest / name
 
 
 def _migrate_legacy_flat(
@@ -156,59 +211,19 @@ def _migrate_legacy_flat(
         for stem in PLAN_STEMS
     ) or any((flat / name).exists() for name in PLAN_STANDING_NAMES)
 
-    shared = {
-        "items.json",
-        "session-state.json",
-        "decision-ledger.yaml",
-        "business-case.yaml",
-        STATUS_NAME,
-        "raw-history",
-    }
-
-    for child in list(flat.iterdir()):
-        name = child.name
-        if name in PARKING_NAMES:
-            _move_path(child, rr_root(docs) / name, moves)
-            continue
-        if TRACK_DIR_RE.fullmatch(name) and child.is_dir():
-            dest = track_phase_dir(docs, name, DISCOVERY_DIR)
-            _move_path(child, dest, moves)
+    for child in tuple(flat.iterdir()):
+        was_track_dir = bool(TRACK_DIR_RE.fullmatch(child.name) and child.is_dir())
+        dest = _dest_for_legacy_flat_child(
+            child,
+            docs=docs,
+            discovery_dest=discovery_dest,
+            plan_dest=plan_dest,
+            has_discovery_doc=has_discovery_doc,
+            has_plan_doc=has_plan_doc,
+        )
+        _move_path(child, dest, moves)
+        if was_track_dir:
             targets.append(dest)
-            continue
-        if name in PLAN_STANDING_NAMES or name.startswith("architecture."):
-            _move_path(child, plan_dest / name, moves)
-            continue
-        if name.endswith(".challenge.report.md"):
-            report_stem = name[: -len(".challenge.report.md")]
-            can = canonicalize_doc_stem(report_stem)
-            dest_dir = (
-                plan_dest
-                if can in PLAN_STEMS or report_stem in {"architecture", "constitution"}
-                else discovery_dest
-            )
-            _move_path(child, dest_dir / name, moves)
-            continue
-        if name.endswith(".notes.yaml"):
-            note_stem = name[: -len(".notes.yaml")]
-            can = canonicalize_doc_stem(note_stem)
-            dest_dir = plan_dest if can in PLAN_STEMS else discovery_dest
-            _move_path(child, dest_dir / name, moves)
-            continue
-        stem = child.stem if child.is_file() else name
-        can = canonicalize_doc_stem(stem)
-        if can in PLAN_STEMS:
-            _move_path(child, plan_dest / name, moves)
-            continue
-        if can in DISCOVERY_STEMS or stem in LEGACY_DOC_STEMS:
-            _move_path(child, discovery_dest / name, moves)
-            continue
-        if name in shared:
-            dest_dir = (
-                discovery_dest if has_discovery_doc or not has_plan_doc else plan_dest
-            )
-            _move_path(child, dest_dir / name, moves)
-            continue
-        _move_path(child, discovery_dest / name, moves)
 
     with contextlib.suppress(OSError):
         flat.rmdir()
@@ -221,6 +236,37 @@ def _migrate_legacy_flat(
     return targets
 
 
+def _migrate_phase_first(docs: Path, track: str, moves: list[str]) -> list[Path]:
+    targets: list[Path] = []
+    for phase in PHASE_DIRS:
+        phase_src = docs / phase
+        if not phase_src.is_dir():
+            continue
+        _move_phase_track_subdirs(phase_src, phase, moves)
+        dest = _move_phase_current(docs, phase, track, moves)
+        if dest is not None:
+            targets.append(dest)
+    _move_parking(docs, moves)
+    return targets
+
+
+def _migrate_flat_or_parking(
+    docs: Path, track: str, moves: list[str]
+) -> tuple[list[Path], tuple[str, str] | None]:
+    """Legacy flat migrate, or parking-only early exit."""
+    flat = _legacy_flat_dir(docs)
+    if flat is not None:
+        targets = _migrate_legacy_flat(docs, flat, track, moves)
+        _move_parking(docs, moves)
+        return targets, None
+    _move_parking(docs, moves)
+    if not moves and _is_migrated(docs):
+        return [], ("ok", _MSG_ALREADY_MIGRATED)
+    if not moves:
+        return [], ("ok", "nothing to migrate")
+    return [], None
+
+
 def migrate_docs_layout(docs: Path) -> tuple[str, str]:
     """Detect legacy layouts and move into ``docs/rr/``. Idempotent."""
     leftovers = _has_phase_first(docs) or _legacy_flat_dir(docs) is not None
@@ -229,39 +275,23 @@ def migrate_docs_layout(docs: Path) -> tuple[str, str]:
         _move_parking(docs, moves)
         if moves:
             return "fixed", "; ".join(moves)
-        return "ok", "already migrated"
+        return "ok", _MSG_ALREADY_MIGRATED
 
-    moves = []
-    targets: list[Path] = []
+    moves: list[str] = []
     track = resolve_migrate_track(docs)
     rr_root(docs).mkdir(parents=True, exist_ok=True)
 
     if _has_phase_first(docs):
-        for phase in PHASE_DIRS:
-            phase_src = docs / phase
-            if not phase_src.is_dir():
-                continue
-            _move_phase_track_subdirs(phase_src, phase, moves)
-            dest = _move_phase_current(docs, phase, track, moves)
-            if dest is not None:
-                targets.append(dest)
-        _move_parking(docs, moves)
+        targets = _migrate_phase_first(docs, track, moves)
     else:
-        flat = _legacy_flat_dir(docs)
-        if flat is not None:
-            targets.extend(_migrate_legacy_flat(docs, flat, track, moves))
-            _move_parking(docs, moves)
-        else:
-            _move_parking(docs, moves)
-            if not moves and _is_migrated(docs):
-                return "ok", "already migrated"
-            if not moves:
-                return "ok", "nothing to migrate"
+        targets, early = _migrate_flat_or_parking(docs, track, moves)
+        if early is not None:
+            return early
 
     for phase_dir in targets:
         if phase_dir.is_dir():
             rewrite_planning_dir(phase_dir, empty_ok=True)
 
     if not moves:
-        return "ok", "already migrated"
+        return "ok", _MSG_ALREADY_MIGRATED
     return "fixed", "; ".join(moves)

@@ -41,6 +41,9 @@ from .constants import (
 )
 from .models import Issue, Item
 
+_UNFROZEN_REV = "0.1.0?"
+_PINS_DELTA_PATHS = "pins.delta_paths"
+
 
 def find_repo_root(start: Path) -> Path:
     for candidate in (start.resolve(), *start.resolve().parents):
@@ -205,8 +208,8 @@ def default_rrr_status(
         "claude_config_version": injection_version,
         "track": "0.1",
         "phase": phase,
-        "product": "0.1.0?",
-        "docs": "0.1.0?",
+        "product": _UNFROZEN_REV,
+        "docs": _UNFROZEN_REV,
         "discovery_complete": False,
         "docs_shipped": False,
         "product_status": "?",
@@ -406,8 +409,8 @@ def default_unfrozen_status(
     data: dict[str, Any] = {
         "claude_config_version": injection_version,
         "track": "0.1",
-        "product": "0.1.0?",
-        "docs": "0.1.0?",
+        "product": _UNFROZEN_REV,
+        "docs": _UNFROZEN_REV,
         "next": None,
         "docs_shipped": False,
         "product_status": "?",
@@ -1059,6 +1062,106 @@ def check_business_case(planning_dir: Path) -> list[Issue]:
     return issues
 
 
+def _check_execute_slice_empty_fields(payload: dict[str, Any]) -> list[Issue]:
+    issues: list[Issue] = []
+    for key in ("why", "success_signal", "slice_id"):
+        value = payload.get(key)
+        if key in payload and (
+            value is None or (isinstance(value, str) and not value.strip())
+        ):
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_EMPTY",
+                    f"{EXECUTE_SLICE_NAME} field '{key}' must be non-empty",
+                    key,
+                )
+            )
+    return issues
+
+
+def _check_execute_slice_delta_paths(
+    delta_paths: list[Any], planning_dir: Path
+) -> list[Issue]:
+    issues: list[Issue] = []
+    plan_root = planning_dir.resolve()
+    for raw in delta_paths:
+        if not isinstance(raw, str) or not raw.strip():
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_DELTA_PATH",
+                    f"{EXECUTE_SLICE_NAME} {_PINS_DELTA_PATHS} "
+                    "entry must be a non-empty string",
+                    _PINS_DELTA_PATHS,
+                )
+            )
+            continue
+        rel = Path(raw)
+        if rel.is_absolute() or ".." in rel.parts:
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_DELTA_PATH",
+                    f"{EXECUTE_SLICE_NAME} delta path must be "
+                    f"relative under plan dir: {raw}",
+                    raw,
+                )
+            )
+            continue
+        candidate = (planning_dir / rel).resolve()
+        if not candidate.is_relative_to(plan_root):
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_DELTA_PATH",
+                    f"{EXECUTE_SLICE_NAME} delta path escapes plan dir: {raw}",
+                    raw,
+                )
+            )
+        elif not candidate.is_file():
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_DELTA_PATH",
+                    f"{EXECUTE_SLICE_NAME} delta path does not exist: {raw}",
+                    raw,
+                )
+            )
+    return issues
+
+
+def _check_execute_slice_pins(
+    pins: Any, planning_dir: Path, *, pins_present: bool
+) -> list[Issue]:
+    if pins_present and not isinstance(pins, dict):
+        return [
+            Issue.error(
+                "EXECUTE_SLICE_PINS",
+                f"{EXECUTE_SLICE_NAME} pins must be a mapping",
+                "pins",
+            )
+        ]
+    if not isinstance(pins, dict):
+        return []
+    issues: list[Issue] = []
+    delta_paths = pins.get("delta_paths")
+    if delta_paths is None:
+        issues.append(
+            Issue.error(
+                "EXECUTE_SLICE_PINS",
+                f"{EXECUTE_SLICE_NAME} {_PINS_DELTA_PATHS} is required",
+                _PINS_DELTA_PATHS,
+            )
+        )
+    elif not isinstance(delta_paths, list):
+        issues.append(
+            Issue.error(
+                "EXECUTE_SLICE_PINS",
+                f"{EXECUTE_SLICE_NAME} {_PINS_DELTA_PATHS} must be a list",
+                _PINS_DELTA_PATHS,
+            )
+        )
+    else:
+        issues.extend(_check_execute_slice_delta_paths(delta_paths, planning_dir))
+    return issues
+
+
 def check_execute_slice(planning_dir: Path) -> list[Issue]:
     """Validate execute-slice.yaml when present (required fields + delta_paths exist).
 
@@ -1093,88 +1196,24 @@ def check_execute_slice(planning_dir: Path) -> list[Issue]:
                 f"{EXECUTE_SLICE_NAME} missing required fields: {', '.join(missing)}",
             )
         )
-    for key in ("why", "success_signal", "slice_id"):
-        value = payload.get(key)
-        if key in payload and (
-            value is None or (isinstance(value, str) and not value.strip())
-        ):
-            issues.append(
-                Issue.error(
-                    "EXECUTE_SLICE_EMPTY",
-                    f"{EXECUTE_SLICE_NAME} field '{key}' must be non-empty",
-                    key,
-                )
-            )
-    pins = payload.get("pins")
-    if "pins" in payload and not isinstance(pins, dict):
-        issues.append(
-            Issue.error(
-                "EXECUTE_SLICE_PINS",
-                f"{EXECUTE_SLICE_NAME} pins must be a mapping",
-                "pins",
-            )
-        )
-        return issues
-    if isinstance(pins, dict):
-        delta_paths = pins.get("delta_paths")
-        if delta_paths is None:
-            issues.append(
-                Issue.error(
-                    "EXECUTE_SLICE_PINS",
-                    f"{EXECUTE_SLICE_NAME} pins.delta_paths is required",
-                    "pins.delta_paths",
-                )
-            )
-        elif not isinstance(delta_paths, list):
-            issues.append(
-                Issue.error(
-                    "EXECUTE_SLICE_PINS",
-                    f"{EXECUTE_SLICE_NAME} pins.delta_paths must be a list",
-                    "pins.delta_paths",
-                )
-            )
-        else:
-            plan_root = planning_dir.resolve()
-            for raw in delta_paths:
-                if not isinstance(raw, str) or not raw.strip():
-                    issues.append(
-                        Issue.error(
-                            "EXECUTE_SLICE_DELTA_PATH",
-                            f"{EXECUTE_SLICE_NAME} pins.delta_paths "
-                            "entry must be a non-empty string",
-                            "pins.delta_paths",
-                        )
-                    )
-                    continue
-                rel = Path(raw)
-                if rel.is_absolute() or ".." in rel.parts:
-                    issues.append(
-                        Issue.error(
-                            "EXECUTE_SLICE_DELTA_PATH",
-                            f"{EXECUTE_SLICE_NAME} delta path must be "
-                            f"relative under plan dir: {raw}",
-                            raw,
-                        )
-                    )
-                    continue
-                candidate = (planning_dir / rel).resolve()
-                if not candidate.is_relative_to(plan_root):
-                    issues.append(
-                        Issue.error(
-                            "EXECUTE_SLICE_DELTA_PATH",
-                            f"{EXECUTE_SLICE_NAME} delta path escapes plan dir: {raw}",
-                            raw,
-                        )
-                    )
-                elif not candidate.is_file():
-                    issues.append(
-                        Issue.error(
-                            "EXECUTE_SLICE_DELTA_PATH",
-                            f"{EXECUTE_SLICE_NAME} delta path does not exist: {raw}",
-                            raw,
-                        )
-                    )
+    issues.extend(_check_execute_slice_empty_fields(payload))
+    pins_issues = _check_execute_slice_pins(
+        payload.get("pins"), planning_dir, pins_present="pins" in payload
+    )
+    issues.extend(pins_issues)
     return issues
+
+
+def _discovery_brd_frozen(discovery: Path) -> bool:
+    status_path = find_phase_status_path(discovery)
+    if status_path is None:
+        return False
+    status, _ = load_status(status_path)
+    if status is None:
+        return False
+    levels = _levels_for_dir(status, discovery)
+    brd_row = levels.get("brd")
+    return isinstance(brd_row, dict) and is_frozen_rev(brd_row.get("rev"))
 
 
 def check_plan_entry(planning_dir: Path) -> list[Issue]:
@@ -1189,26 +1228,17 @@ def check_plan_entry(planning_dir: Path) -> list[Issue]:
     discovery = discovery_dir_for(planning_dir)
     if frozen is None and discovery is not None:
         frozen = _load_frozen_levels(discovery)
-    if frozen is None or "brd" not in frozen:
-        # Also accept discovery status with frozen BRD rev
-        brd_frozen = False
-        if discovery is not None:
-            status_path = find_phase_status_path(discovery)
-            if status_path is not None:
-                status, _ = load_status(status_path)
-                if status is not None:
-                    levels = _levels_for_dir(status, discovery)
-                    brd_row = levels.get("brd")
-                    if isinstance(brd_row, dict) and is_frozen_rev(brd_row.get("rev")):
-                        brd_frozen = True
-        if not brd_frozen:
-            issues.append(
-                Issue.error(
-                    "PLAN_ENTRY_BRD",
-                    "Plan entry requires brd in session_state.frozen_levels "
-                    "(run rr-discovery freeze first)",
-                )
+    brd_ok = frozen is not None and "brd" in frozen
+    if not brd_ok and discovery is not None:
+        brd_ok = _discovery_brd_frozen(discovery)
+    if not brd_ok:
+        issues.append(
+            Issue.error(
+                "PLAN_ENTRY_BRD",
+                "Plan entry requires brd in session_state.frozen_levels "
+                "(run rr-discovery freeze first)",
             )
+        )
     issues.extend(check_business_case(planning_dir))
     return issues
 

@@ -56,6 +56,48 @@ def _docs_from_phase(planning_dir: Path, repo: Path) -> Path:
     return docs_root(repo)
 
 
+def _resolve_docs(args: argparse.Namespace, repo: Path, planning_dir: Path) -> Path:
+    if args.docs_root is not None:
+        return docs_root(repo, override=args.docs_root)
+    return _docs_from_phase(planning_dir, repo)
+
+
+def _run_setup(args: argparse.Namespace) -> int:
+    start = args.planning_dir or args.docs_root or Path.cwd()
+    repo = args.repo_root or find_repo_root(start)
+    docs = (
+        docs_root(repo, override=args.docs_root)
+        if args.docs_root is not None
+        else docs_root(repo)
+    )
+    if (
+        args.planning_dir is not None
+        and args.planning_dir.name == "plans"
+        and args.docs_root is None
+    ):
+        print(
+            "note\tok\t--setup no longer takes a plans-dir; "
+            f"using {docs} (legacy docs/plans/ migrates via layout migrate)",
+            flush=True,
+        )
+    return run_setup(docs, repo)
+
+
+def _run_sync_rewrite(args: argparse.Namespace) -> int | None:
+    """Optional sync/rewrite; return exit code on failure, else None."""
+    if args.sync_agent_config:
+        repo = args.repo_root or find_repo_root(args.planning_dir)
+        docs = _resolve_docs(args, repo, args.planning_dir)
+        sync_issues = sync_agent_injection(docs, repo, force=True)
+        if _print_issues(sync_issues):
+            return 1
+    if args.rewrite:
+        rewrite_issues = rewrite_planning_dir(args.planning_dir)
+        if _print_issues(rewrite_issues):
+            return 1
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     require_python()
     parser = argparse.ArgumentParser(
@@ -126,24 +168,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--schema", type=Path, default=SCHEMA_PATH)
     args = parser.parse_args(argv)
     if args.setup:
-        start = args.planning_dir or args.docs_root or Path.cwd()
-        repo = args.repo_root or find_repo_root(start)
-        docs = (
-            docs_root(repo, override=args.docs_root)
-            if args.docs_root is not None
-            else docs_root(repo)
-        )
-        if (
-            args.planning_dir is not None
-            and args.planning_dir.name == "plans"
-            and args.docs_root is None
-        ):
-            print(
-                "note\tok\t--setup no longer takes a plans-dir; "
-                f"using {docs} (legacy docs/plans/ migrates via layout migrate)",
-                flush=True,
-            )
-        return run_setup(docs, repo)
+        return _run_setup(args)
     if args.planning_dir is None:
         parser.error("planning_dir is required unless --setup")
     if not args.planning_dir.is_dir():
@@ -153,20 +178,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if not args.schema.is_file():
         print(f"WARN [SCHEMA_MISSING]: {args.schema} not found", file=sys.stderr)
-    if args.sync_agent_config:
-        repo = args.repo_root or find_repo_root(args.planning_dir)
-        docs = (
-            docs_root(repo, override=args.docs_root)
-            if args.docs_root is not None
-            else _docs_from_phase(args.planning_dir, repo)
-        )
-        sync_issues = sync_agent_injection(docs, repo, force=True)
-        if _print_issues(sync_issues):
-            return 1
-    if args.rewrite:
-        rewrite_issues = rewrite_planning_dir(args.planning_dir)
-        if _print_issues(rewrite_issues):
-            return 1
+    early = _run_sync_rewrite(args)
+    if early is not None:
+        return early
     has_cascade = has_cascade_docs(args.planning_dir)
     if args.sync_agent_config and not args.rewrite and not has_cascade:
         print("OK")

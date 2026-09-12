@@ -24,6 +24,32 @@ from .parse import parse_planning_dir
 from .workspace import check_baselines, check_execute_slice, check_plan_entry
 
 
+def _check_json_priority_methods(json_rows: list[dict[str, Any]]) -> list[Issue]:
+    issues: list[Issue] = []
+    for row in json_rows:
+        if "priority_method" not in row:
+            issues.append(
+                Issue.error(
+                    "MISSING_KEY",
+                    "json item missing priority_method",
+                    str(row.get("id", "")),
+                )
+            )
+            continue
+        doc = str(row.get("doc", ""))
+        if doc not in DOC_METHOD:
+            continue
+        if row.get("priority_method") != DOC_METHOD[doc]:
+            issues.append(
+                Issue.error(
+                    "PRIORITY_METHOD",
+                    f"priority_method must be {DOC_METHOD[doc]} for {doc}",
+                    str(row.get("id", "")),
+                )
+            )
+    return issues
+
+
 def validate_dir(
     planning_dir: Path,
     *,
@@ -59,25 +85,7 @@ def validate_dir(
         issues.extend(check_plan_entry(planning_dir))
     if json_rows:
         issues.extend(check_drift(md_items, json_rows))
-        for row in json_rows:
-            if "priority_method" not in row:
-                issues.append(
-                    Issue.error(
-                        "MISSING_KEY",
-                        "json item missing priority_method",
-                        str(row.get("id", "")),
-                    )
-                )
-            elif row.get("priority_method") != DOC_METHOD.get(str(row.get("doc", ""))):
-                doc = str(row.get("doc", ""))
-                if doc in DOC_METHOD and row.get("priority_method") != DOC_METHOD[doc]:
-                    issues.append(
-                        Issue.error(
-                            "PRIORITY_METHOD",
-                            f"priority_method must be {DOC_METHOD[doc]} for {doc}",
-                            str(row.get("id", "")),
-                        )
-                    )
+        issues.extend(_check_json_priority_methods(json_rows))
     return issues
 
 
