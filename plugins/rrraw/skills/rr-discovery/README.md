@@ -20,7 +20,7 @@ Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`
 | `discover` | Cascade through BRD + freeze handoff | New or continue Discover (interview) |
 | `from-code` | Reverse compose ES→MRD→BRD at `code-extraction` | Existing product source; no freeze until shaped to `draft` |
 | `change` | Patch frozen Discover stem | `--change` + section + target on ES/MRD/BRD |
-| `challenge` | Pre-mortem / red-team report | Existing Discover docs |
+| `challenge` | Pre-mortem / red-team report (**standard**; add `deep` for exhaustive) | Existing Discover docs |
 
 `--resume` is a **selector** (continue checkpoint), not a primary action — [input-resolution.md](refs/input-resolution.md).
 
@@ -41,15 +41,19 @@ Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`
 ## Philosophy
 
 - **Hard freeze** — Plan refuses entry without frozen BRD + valid `business-case.yaml`; `code-extraction` blocks freeze
+- **Layered scrutiny** — Auto-reflection → smells → `--challenge` (standard) → `--challenge deep` (`refs/planning/challenge-layers.md`); smell-clean ≠ challenged
 - **No fabricated TAM** — `hold` / `vague` beat fake precision (including from-code reverse)
 - **Humanize** — Cascade prose is not AI-slop; machine files skip humanize
 - **Anti-triggers** — Features/RICE/launch calendars park to Plan or notes
+- **Backward-chain** — When MRD/BRD cannot support the goal given parents, challenge upstream (MRD↔ES, BRD↔MRD) — do not bury as HOLD
 
 ## UX
 
+Process-ownership (user is not process-owner): [`../../INTENT.md`](../../INTENT.md) UX. Skill-local chrome below.
+
 ### Invoke
 
-Flags (`--setup` / `--discover` / `--from-code` / `--challenge` / …) or clear Discover NL; bare invoke never silent-rediscovers.
+Flags (`--setup` / `--discover` / `--from-code` / `--challenge` / `--challenge deep` / …) or clear Discover NL; bare invoke never silent-rediscovers.
 
 ### Intake
 
@@ -57,17 +61,17 @@ Status-first (summary → phase status + session-state); resolve emits payload b
 
 ### Clarify
 
-**Interview discover:** AskQuestion on vague posture/domain, binding panel `hold`, or missing freeze fields — do not invent.
+**Interview discover:** AskQuestion on vague posture/domain, binding panel `hold`, missing freeze fields, or **risk-accept** — do not invent.
 
 **From-code:** contradictions / mutually exclusive readings / blocking coherence only — not a polish interview. Cap stays `questions_per_cycle`.
 
 ### Output
 
-Cascade stems + handoff on BRD freeze; from-code stems stay `maturity: code-extraction` until shape/resume; challenge reports when requested; machine files skip humanize.
+Cascade stems + handoff on BRD freeze; from-code stems stay `maturity: code-extraction` until shape/resume; challenge reports when standard/deep requested; machine files skip humanize.
 
 ### Close
 
-Session-state + status stamps written. **Next Up:** after freeze → Plan (`rr-planner`); after from-code → shape/resume (promote to `draft`) or `--challenge`.
+Session-state + status stamps written. **Next Up** per `refs/planning/progress.md`: after freeze → Plan (`rr-planner`) only when standard challenge clear or risk-accept for load-bearing stems; after from-code → shape/resume (promote to `draft`) or `--challenge`. Do not incentivize skip.
 
 ## Technique refs
 

@@ -4,9 +4,18 @@
 
 **Load when:** `--challenge` / `--review` on discovery stems (`executive-summary`, `mrd`, `brd`), or `depth: deep` appends challenge after cascade compose. The **discovery challenge agent loads this ref**. Plan/PRD challenge keeps its own allowlist; do not apply PRD failure-mode lenses here unless the target doc is in scope.
 
+**Layers:** `refs/planning/challenge-layers.md`. Bare `--challenge` = **standard** (relevant load-bearing claims). `--challenge deep` = exhaustive. Auto-reflection / Gate 6 smells are **not** this pass. Do **not** call user `--challenge` “the deep pass.”
+
 **Complements:** Blind-spot taxonomy in [blind-spots.md](blind-spots.md) (category scan). This ref owns **how** to attack strategy and kill criteria — not the full taxonomy table.
 
 **Does not:** auto-unfreeze, mint versions, invent TAM, or rewrite cascade docs without skill compose. Findings persist as `{stem}.challenge.report.md`; skill stamps `status.yaml` challenge attestation (`refs/planning/baselines.md`).
+
+## Depth modes
+
+| Mode | How selected | Coverage | Attestation when clean |
+|------|--------------|----------|------------------------|
+| **standard** | `--challenge` / `--review` default; skill pre-freeze suggest | All **relevant** load-bearing claims (premises, segment, metric teeth, kill criteria) | `clean-shallow` (`depth: shallow`) |
+| **deep** | Explicit `deep` / `--challenge deep` / discover `depth: deep` chain | Every detail / exhaustive | `clean-deep` (`depth: deep`) |
 
 ## Pre-mortem
 
@@ -37,6 +46,8 @@ Every Tiger needs a named owner disposition: experiment, constraint, non-goal, p
 4. Prefer attacks that flip `viability_verdict` or a Must objective — not editorial nitpicks.
 
 Seat pressure may reuse expert-panel personas ([expert-panel.md](expert-panel.md)); challenge agent does not re-run full Gate 7 unless findings are premise-critical — then escalate to skill for re-sit.
+
+Standard may stop after relevant load-bearing claims. Deep continues until exhaustive coverage of attack surfaces.
 
 ## Timebox / kill criteria
 
@@ -76,11 +87,13 @@ Do not claim `clean-shallow` / `clean-deep` in the report body — skill stamps 
 | Premise-critical | Escalate Gate 7 / re-decision queue |
 | Doc gap | Re-compose affected level after user confirm |
 | Metric decorative / missing kill criteria | Block discovery_complete until fixed or `open_holds` |
+| Upstream mismatch | Backward-chain challenge (MRD↔ES, BRD↔MRD) — do not bury as HOLD |
 | PRD-shaped detail | Park to notes / Plan — out of discovery challenge scope |
 
 ## Done-when
 
 - This ref loaded by challenge agent for discovery targets
+- Mode honored (standard vs deep); attestation stamp matches
 - Steelman present; classifications complete
 - Top risks ranked; kill criteria stated or explicit `hold`
 - Report path returned to skill for persist + attestation stamp

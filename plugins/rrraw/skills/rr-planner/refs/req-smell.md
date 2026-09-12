@@ -4,7 +4,9 @@
 
 **Load when:** `ac-smell` todo; pre-freeze gate; challenge targeting AC.
 
-**Does not:** Replace product judgment. Does not author test code. Fail freeze until cleaned or explicit hold.
+**Layer:** Smells tier — always-on, fast, inline/gate table. **Not** `--challenge` (`refs/planning/challenge-layers.md`). Smell-clean ≠ freeze-ready.
+
+**Does not:** Replace product judgment. Does not author test code. Fail freeze until cleaned or explicit hold. Does not satisfy standard challenge for freeze-suggest.
 
 ## WWAS shape (required)
 
@@ -27,9 +29,10 @@ Acceptance = **Why** / **What** / observable **Acceptance** — product pass/fai
 
 1. Scan selected requirement leaves + AC for the slice.
 2. Any smell → block freeze **or** record explicit `hold` assumption with user confirm.
-3. Challenge may re-run this checklist ([challenge-method.md](challenge-method.md)).
+3. Challenge may re-run this checklist ([challenge-method.md](challenge-method.md)) — that is a separate layer.
 
 ## Done-when
 
 - Zero open smells on freeze candidates, or documented holds
 - WWAS shape present on freeze-bound AC
+- Caller does **not** treat smell-clean as standard challenge clear

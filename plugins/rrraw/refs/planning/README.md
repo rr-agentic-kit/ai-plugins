@@ -5,6 +5,7 @@
 | Ref | Role |
 |-----|------|
 | [baselines.md](baselines.md) | **Version law** — track, docs/product patches, pins, unlock, ship ceremony, rejected patterns |
+| [challenge-layers.md](challenge-layers.md) | Challenge tiers, freeze-suggest, risk-accept, solid-subset advance |
 | [setup.md](setup.md) | `--setup` bootstrap + **PR-scoped** `validate_planning` wire |
 | [output-formats.md](output-formats.md) | Layout, status, handoff YAML shapes |
 | [project-lexicon.md](project-lexicon.md) | Host `docs/GLOSSARY.md` + `ACRONYMS.md` silent harvest |
@@ -12,8 +13,10 @@
 | [contracts.md](contracts.md) | Task agent contracts |
 | [success-criteria.md](success-criteria.md) | Static + judgment gates |
 | [decision-ledger.md](decision-ledger.md) | Rationale / evidence ledger |
-| [progress.md](progress.md) | Verifying phrases |
+| [progress.md](progress.md) | Verifying phrases + Next Up / risk-accept close |
 | [doc-standards/](doc-standards/) | Item schema (identity — not SemVer) |
+
+Plugin Spec (process-ownership UX): [`INTENT.md`](../../INTENT.md).
 
 ## Versioning ownership
 

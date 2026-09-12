@@ -43,3 +43,4 @@ Caching, logging, audit trail, metrics/observability, and siblings of that class
 - No silent axis conflation across invite / register-tenant / login / IdP / mailbox OAuth when those axes are in play
 - Silent omission / waiting-for-dump / blind checklist dump all fail
 - Method SoT is this file only — interview / domain / challenge link + check
+- **Freeze enforcement:** unmet Done-when (no explicit per-axis HOLD) → Fail freeze ([execute-handoff.md](execute-handoff.md)) — not interview-intent only

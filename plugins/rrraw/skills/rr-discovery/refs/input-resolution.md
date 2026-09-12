@@ -137,9 +137,18 @@ Explicit `--output-dir` skips this fallback.
 |-------|-------------------|
 | `shallow` | Executive-summary only — **no** PRD skip path, **no** MRD/BRD auto-include |
 | `standard` | Full discovery cascade (ES → MRD → BRD) with standard gates |
-| `deep` | Full discovery cascade + mandatory challenge pass (`chain` += `challenge`) |
+| `deep` | Full discovery cascade + mandatory challenge pass at **deep** layer (`chain` += `challenge`; `challenge_depth: deep`) |
 
 There is no discovery path that writes PRD by skipping middle levels.
+
+### Challenge depth
+
+| Signal | `challenge_depth` | Attestation when clean |
+|--------|-------------------|------------------------|
+| `--challenge` / `--review` without `deep` | `standard` | `clean-shallow` |
+| `--challenge deep` / discover `depth: deep` chain / NL “deep challenge” | `deep` | `clean-deep` |
+
+Parse `deep` as a challenge mode — bare `--challenge` is **standard**, not deep. Layers: `refs/planning/challenge-layers.md`.
 
 ### Input normalization
 
@@ -247,6 +256,7 @@ Classify patch vs redirect-to-next vs open-next vs unfreeze per `--change` above
   "output_dir": "{PROJECT_ROOT}/docs/rr/0.1/discovery/",
   "format": "md",
   "depth": "standard",
+  "challenge_depth": "standard",
   "question_mode": "ask",
   "resume": false,
   "route": "from-0",
@@ -284,7 +294,7 @@ Never emit `prd` in discovery `cascade_levels`.
 |---------|-------------------------------------------|
 | `shallow` | `["executive-summary"]` only |
 | `standard` | all three |
-| `deep` | all three; for `discover` only, `chain` appends `challenge` — **`from-code` never auto-appends challenge** |
+| `deep` | all three; for `discover` only, `chain` appends `challenge` with `challenge_depth: deep` — **`from-code` never auto-appends challenge** |
 
 ### `chain` expansion
 
@@ -292,7 +302,7 @@ Never emit `prd` in discovery `cascade_levels`.
 |----------|-----------------|
 | `discover` | `["discover", "compose"]` per level; after BRD freeze → handoff ([business-case-handoff.md](business-case-handoff.md)) |
 | `from-code` | `["from-code", "compose"]` — **no** auto challenge; **no** freeze-handoff in this chain ([from-code.md](from-code.md)) |
-| `challenge` | `["challenge"]` |
+| `challenge` | `["challenge"]` — mode from `challenge_depth` (default **standard**) |
 | `setup` | `["setup"]` |
 | single-level focus | `["discover", "compose"]` for specified levels |
 | `change` | `["discover", "compose"]` for `cascade_levels` (patch / lock-target / unfreeze as classified) |

@@ -95,3 +95,5 @@ claude --plugin-dir ./plugins/rrraw
 - Claude Code: `.claude-plugin/plugin.json`
 
 Both use `name: rrraw` matching the directory name under `plugins/`.
+
+Plugin Spec (Why / What / When / Philosophy / UX / Constraints): [INTENT.md](INTENT.md).

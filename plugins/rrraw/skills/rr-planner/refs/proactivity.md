@@ -39,6 +39,8 @@ Lightweight devil's-advocate during Plan — not the full `--challenge` agent:
 | Sprint / capacity language | Refuse; reframe as slice selection. |
 | Coach/Fast not offered this session | Offer once ([plan-interview.md](plan-interview.md)). |
 | Seat blocks | Conduct protocol (expert-panel). |
+| About to suggest freeze after smell-clean | **Block suggest** until standard challenge clear or risk-accept — "Does this still move [goal_ref] likelihood? Standard challenge clear? Any standing red flag / Discover-reopen open?" ([goal-anchor.md](goal-anchor.md), [execute-handoff.md](execute-handoff.md), `refs/planning/challenge-layers.md`) |
+| Auto-reflection at phase transition | Run standing self-challenge ([goal-anchor.md](goal-anchor.md)); never skip because checklist advanced |
 
 ## Exploration rules
 
@@ -68,7 +70,7 @@ Runs **after** stage-exit (Gate 6), Gate 7, and `refs/planning/success-criteria.
 **Block** when ledger open-queue / binding `hold`/`kill` fires. Advisory `hold` at PRD does not block if user accepted it.
 
 1. Run the sweep (trigger 4).
-2. **One pass** over remaining gaps (missing non-goal, smell-fail AC without hold, Effort-without-architecture, compose `sections_incomplete`, open queue).
+2. **One pass** over remaining gaps (missing non-goal, smell-fail AC without hold, Effort-without-architecture, compose `sections_incomplete`, open queue, **standing red flag / Discover-reopen candidate open**, **auto-reflection not run this transition**).
 3. Surface at most a handful of questions; user may accept **non-viability** gaps.
 4. **Max one fix cycle** — re-compose once if user supplies fixes.
 5. Then skill writes `session-state.json` only.

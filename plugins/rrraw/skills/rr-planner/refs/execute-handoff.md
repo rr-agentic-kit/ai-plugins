@@ -8,7 +8,11 @@
 
 ## Success metric (north-star)
 
-After freeze, a future Execute agent can start **fused code+test** without inventing stack, feature mechanism, or cost-driving UX shape — and RICE Effort that selected this slice was not inflated by Happy-Path Effort. Pass = Effort honesty + pin-complete kernel. Fail = section-coverage theater.
+After freeze, a future Execute agent can start **fused code+test** without inventing stack, feature mechanism, or cost-driving UX shape — and RICE Effort that selected this slice was not inflated by Happy-Path Effort. Pin-complete kernel + Effort honesty are **necessary** pass conditions for the mint itself.
+
+**Plan success** (skill north-star) is broader: the Plan raises the odds the builder reaches the frozen Discover objective / OMTM. Freeze is allowed only when further Plan work stops moving that likelihood **and** no open standing red flag / Discover-reopen blocks it.
+
+**Anti-trigger:** Smell-clean ≠ freeze-ready. Clearing the Fail-freeze table alone does not mean offer freeze as Next-Up. Freeze **auto-suggest** requires **standard** challenge clear or risk-accept (`refs/planning/challenge-layers.md`).
 
 ## Freeze unit
 
@@ -56,18 +60,26 @@ Thin ≠ hollow. Narrow selection + honest defer beats breadth without mechanism
 | Doc-only / hollow thin slice (selected without Decision / Effort drivers / UX-shape) | Refuse — thin kernel must still be pin-complete |
 | Product AC written as test code | Refuse — AC stays WWAS product pass/fail |
 | Market re-debate | Route to `rr-discovery` |
+| Standing red flag / Discover-reopen candidate open, no founder accept | Refuse / AskQuestion — do not freeze over open flags ([note-sessions.md](note-sessions.md)) |
+| In-scope nature-expectation Done-when unmet, no explicit per-axis HOLD | Refuse — [nature-expectation-packs.md](nature-expectation-packs.md) |
+| Standard challenge not clear and no risk-accept | **Quality veto** — do not auto-suggest freeze; AskQuestion for standard challenge or risk-accept (`dirty-accepted`) |
+| User demands freeze over open quality debt | Refuse unless risk-accept AskQuestion completes |
 
 ## Draft ≠ missing
 
 Architecture spine may be `architecture_rev: draft` on freeze. That does **not** mean “no architecture.” Block when selected capabilities lack Decision + Effort drivers (and UX-shape when UI-facing). Quiet unfreeze while refining standing layer is forbidden — use conscious unfreeze / lock-target paths.
 
+## Solid-subset advance
+
+Plan body may proceed citing a **solid subset** of draft Discover when the skill judges that subset load-bearing-stable. **Mint** slice / structure lock still requires frozen BRD + handoff (entry gate / `PARENT_UNFROZEN`). On upstream Discover change, skill auto-marks Plan impact — `refs/planning/challenge-layers.md`.
+
 ## Next Up
 
-Future **Execute** consumes the kernel. No Execute skill in this redesign. Future **release/version** grouping may reference frozen slices — not designed here.
+Future **Execute** consumes the kernel. No Execute skill in this redesign. Future **release/version** grouping may reference frozen slices — not designed here. Close habits: `refs/planning/progress.md`.
 
 ## Done-when
 
 - Kernel five fields + version stamps (`track` / `docs` / `product`) + pins present; `delta_paths` resolve to files
 - Constraints cite delta/spine obligations (mechanism + UX-shape when UI-facing)
 - `slice:` stamped; deferred requirements still on PRD
-- Fail conditions not violated
+- Fail conditions not violated; freeze-suggest respected standard-clear or risk-accept

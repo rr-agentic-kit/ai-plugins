@@ -4,7 +4,7 @@ Flag-driven **Plan**: honest Effort + buildable slice handoff from a frozen `bus
 
 ## Why
 
-Specify what to build after Discover proved the bet — with system judgment in the same sitting so RICE Effort is trustworthy and Execute does not invent mechanism or cost-driving UX shape. Refuse Effort-without-architecture, Effort without cost-driver cites, requirement-table shrink-to-ship, smell-fail AC, sprint ceremony, and silent PRD inventiveness when BRD is not frozen. Success is **Effort honesty + pin-complete kernel** — not product-doc section coverage.
+Specify what to build after Discover proved the bet — with system judgment in the same sitting so RICE Effort is trustworthy and Execute does not invent mechanism or cost-driving UX shape. Refuse Effort-without-architecture, Effort without cost-driver cites, requirement-table shrink-to-ship, smell-fail AC, sprint ceremony, and silent PRD inventiveness when BRD is not frozen. **Success** = raises the odds the builder reaches the frozen Discover objective / OMTM — Effort honesty + pin-complete kernel are necessary preconditions, not the finish line. Freeze only when further Plan work stops moving that likelihood and no open standing red flag / Discover-reopen blocks it — **not** product-doc section coverage or smell-clean ceremony.
 
 ## What
 
@@ -23,7 +23,7 @@ Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution; Plan-o
 | `change` | Patch PRD / delta / AC section | `--change` + section + target |
 | `freeze-slice` | Mint `execute-slice.yaml` + stamp slice | Selected requirements + smell-clean AC + Effort drivers |
 | `research` | Cited findings on existing docs | Post-compose |
-| `challenge` | Technical pre-mortem + red-team | Prefer Plan targets; compact parent summary |
+| `challenge` | Technical pre-mortem + red-team (**standard**; add `deep` for exhaustive) | Prefer Plan targets; compact parent summary |
 
 `--resume` is a **selector** (continue Plan checkpoint), not a primary action — [input-resolution.md](refs/input-resolution.md).
 
@@ -44,34 +44,36 @@ Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution; Plan-o
 
 ## Philosophy
 
+- **Goal-likelihood over ceremony** — Plan succeeds when it raises builder→Discover-objective odds; freeze is a gate when marginal Plan work stops moving that likelihood — not the north-star
+- **Layered scrutiny** — Auto-reflection → smells → `--challenge` (standard) → `--challenge deep` (`refs/planning/challenge-layers.md`); smell-clean ≠ challenged
 - **Honest Effort** — Dual-lens sitting; `_effort_:` only with same-sitting Decision + Effort drivers (UX cost drivers when UI-facing)
-- **Buildable handoff** — Constraints cite deltas; pins + `delta_paths` exist; draft ≠ missing architecture
-- **Entry gate** — Frozen BRD + valid `business-case.yaml`
-- **Full scope honesty + thin selection** — `_status_:` never deletes the requirement table
+- **Buildable handoff** — Constraints cite deltas; pins + `delta_paths` exist; draft ≠ missing architecture; spine + deltas beat fat PRD dumps
+- **Full scope honesty + thin selection** — `_status_:` never deletes the requirement table; entry gate = frozen BRD + valid `business-case.yaml`
 - **Nature reflection** — Reflect on product nature → derive expectations for this project → elicit; do not wait for a founder dump or dump a universal checklist
-- **Spine + deltas + slice kernel** — small standing contracts beat fat PRD dumps to Execute
 
-## Invoke chrome
+## UX
+
+Process-ownership (user is not process-owner): [`../../INTENT.md`](../../INTENT.md) UX. Skill-local chrome below.
 
 ### Invoke
 
-Flags (`--setup` / `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / …) or clear Plan NL; bare invoke never silent-composes without entry gate.
+Flags (`--setup` / `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--challenge deep` / …) or clear Plan NL; bare invoke never silent-composes without entry gate.
 
 ### Intake
 
-Status-first (`rrr-status` → `docs/plan/status.yaml` + session-state); resolve emits payload before Plan body. Entry gate also reads discovery freeze + handoff.
+Status-first (`rrr-status` → `docs/plan/status.yaml` + session-state); resolve emits payload before Plan body. Entry gate also reads discovery freeze + handoff. Solid-subset Plan body on draft Discover allowed when cited subset is load-bearing-stable — freeze mint still needs frozen parents ([input-resolution.md](refs/input-resolution.md)).
 
 ### Clarify
 
-AskQuestion on entry-gate fail, vague posture/`domain_context`, binding panel `hold`, smell-fail AC, or missing freeze fields — do not invent. Cap stays `questions_per_cycle`.
+AskQuestion on entry-gate fail, vague posture/`domain_context`, binding panel `hold`, smell-fail AC, missing freeze fields, or **risk-accept** — do not invent. Cap stays `questions_per_cycle`.
 
 ### Output
 
-PRD + standing spine/deltas + WWAS AC + selection status; slice freeze kernel when requested; research/challenge reports; cascade prose only after humanize.
+PRD + standing spine/deltas + WWAS AC + selection status; slice freeze kernel when requested; research/challenge reports (standard/deep only); cascade prose only after humanize.
 
 ### Close
 
-Session-state + status stamps written. **Next Up:** after slice freeze → Execute (future); after compose → research/challenge or freeze-slice.
+Session-state + status stamps written. **Next Up** per `refs/planning/progress.md`: offer slice freeze only after standard challenge clear (or risk-accept) + auto-reflection / red-flag / Discover-reopen check ([cascade.md](refs/cascade.md), [execute-handoff.md](refs/execute-handoff.md)); after freeze → Execute (future); after compose → research/challenge or goal-likelihood gap work — **not** freeze-by-default after smell-clean. Do not incentivize skip.
 
 ## Technique index
 

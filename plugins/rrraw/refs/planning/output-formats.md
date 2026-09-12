@@ -203,7 +203,7 @@ Append-only: never rewrite prior turns. Create `raw-history/` on first Q&A. If t
 
 Summary + detail. Skill-only writers. Schema and mint rules: [baselines.md](baselines.md). Summary lives in `{PROJECT_ROOT}/docs/`; detail in `{PROJECT_ROOT}/docs/{discovery|plan}/` even when cascade docs fork to `{phase}/{next}/`.
 
-On first `--setup` / first compose: mint summary defaults + phase detail (`track: "0.1"`, `product`/`docs` as `0.1.0?`, `next: null`, phase stems `rev: "?"`, `challenge: {}`, `next_challenge: {}`, `claude_config_version` from [agent-config.md](agent-config.md), phase `mint_hash` computed). On freeze / lock-target / confirmed major-minor: mint phase detail per baselines, recompute `mint_hash`, refresh summary (`phase`, `discovery_complete`, `summary` line). After compose persist: dirty that doc’s `challenge.status` when it was `clean-shallow`, `clean-deep`, or `dirty-accepted`. After challenge persist: stamp per-doc `challenge:` from findings. Compose never writes these files. Scripts never increment `track`. `challenge` is not a validator FAIL.
+On first `--setup` / first compose: mint summary defaults + phase detail (`track: "0.1"`, `product`/`docs` as `0.1.0?`, `next: null`, phase stems `rev: "?"`, `challenge: {}`, `next_challenge: {}`, `claude_config_version` from [agent-config.md](agent-config.md), phase `mint_hash` computed). On freeze / lock-target / confirmed major-minor: mint phase detail per baselines, recompute `mint_hash`, refresh summary (`phase`, `discovery_complete`, `summary` line). After compose persist: dirty that doc’s `challenge.status` when it was `clean-shallow`, `clean-deep`, legacy `clean`, or `dirty-accepted`. After challenge persist: stamp per-doc `challenge:` from findings (standard → `clean-shallow`; deep → `clean-deep`). Risk-accept AskQuestion → `dirty-accepted`. Compose never writes these files. Scripts never increment `track`. `challenge` is not a validator FAIL. Freeze **suggest** policy: [challenge-layers.md](challenge-layers.md).
 
 Validator input for mechanical codes only (`PARENT_UNFROZEN`, `STALE_PIN`, `REV_WHILE_OPEN`, `HAND_BUMP`) — **phase detail only**. Plan validation loads Discovery status for parent BRD pins. Summary is not pin input.
 
@@ -296,7 +296,7 @@ One global file at `{PROJECT_ROOT}/docs/later.md`. Create on first user-deferred
 
 ## Challenge report (per-doc worklist)
 
-One file per cascade stem: `{output_dir}/{stem}.challenge.report.md` (e.g. `executive-summary.challenge.report.md`). Overwrite **only that stem's file** on each challenge persist for that doc — latest scan replaces that doc's worklist; addressed = absent from that file. Do not keep finding-id history or `open_ids` in `status.yaml` (per-run `bs-001` is not stable). Each finding’s `doc` stem drives per-doc `challenge.status` and Address-now routing; keep `doc_ref` for humans. Skill persists from findings JSON; the challenge agent does not write it. Stamp `depth: shallow | deep` in frontmatter (must match `status.yaml` `challenge.<stem>.depth`).
+One file per cascade stem: `{output_dir}/{stem}.challenge.report.md` (e.g. `executive-summary.challenge.report.md`). Overwrite **only that stem's file** on each challenge persist for that doc — latest scan replaces that doc's worklist; addressed = absent from that file. Do not keep finding-id history or `open_ids` in `status.yaml` (per-run `bs-001` is not stable). Each finding’s `doc` stem drives per-doc `challenge.status` and Address-now routing; keep `doc_ref` for humans. Skill persists from findings JSON; the challenge agent does not write it. Stamp `depth: shallow | deep` in frontmatter (must match `status.yaml` `challenge.<stem>.depth`). Mode map: `shallow` = **standard** challenge; `deep` = `--challenge deep` — [challenge-layers.md](challenge-layers.md). Auto-reflection never writes this file.
 
 Challenge runs exactly one doc per invocation. Parallel address switches docs but processes one report at a time.
 
@@ -401,8 +401,8 @@ After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/co
 
 | Source | `final_status` |
 |--------|----------------|
-| All levels `ok`, success-criteria pass (static script + judgment); queue empty; no binding `hold`/`kill`; no `viability_stale`; challenge all `clean-shallow`, `clean-deep`, or `dirty-accepted` | `ok` |
-| User stopped mid-session, accepted partial gaps, or leftover challenge `dirty` (not accepted) at chain exit | `partial` |
+| All levels `ok`, success-criteria pass (static script + judgment); queue empty; no binding `hold`/`kill`; no `viability_stale`; challenge all `clean-shallow`, `clean-deep`, legacy `clean`, or `dirty-accepted` (risk-accept) | `ok` |
+| User stopped mid-session, accepted partial gaps, or leftover challenge `dirty` (not risk-accepted) at chain exit | `partial` |
 | Binding `hold`, unresolved `kill`, or open re-decision queue | `blocked` |
 | Input-resolution error or unrecoverable agent failure | `failed` |
 
@@ -414,7 +414,7 @@ After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/co
 4. Append a raw-history turn after every Q&A; do not wait for stage-exit. Skill owns `raw-history/`.
 5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars; prune: `skills/rr-planner/refs/note-sessions.md`. Next-track notes while `next` is open go to that track's sidecar, not `future.md`.
 6. Research and challenge reports are standalone `.md` files, not merged into cascade docs. Skill persists those reports from findings JSON. Challenge overwrites `{stem}.challenge.report.md` for the challenged stem only (worklist, not history).
-7. Compose writes human cascade docs (`{level}.md` only). Document bodies never travel through chat. Research/challenge still return findings JSON. Compose does not write `status.yaml` / `agent.plan.md` / `future.md`. After compose persist, the skill dirties that doc’s `challenge.status` when it was `clean-shallow`, `clean-deep`, or `dirty-accepted`.
+7. Compose writes human cascade docs (`{level}.md` only). Document bodies never travel through chat. Research/challenge still return findings JSON. Compose does not write `status.yaml` / `agent.plan.md` / `future.md`. After compose persist, the skill dirties that doc’s `challenge.status` when it was `clean-shallow`, `clean-deep`, legacy `clean`, or `dirty-accepted`.
 8. After compose Task: parse slim receipt → if clarifications, ask and re-invoke → else read `items.json` to refresh `item_registry` → Gate 3 static ([success-criteria.md](success-criteria.md)). FAIL blocks `final_status: ok`. Sidecars, `future.md`, and `agent.plan.md` are not validator input.
 9. Pause skips pre-save (`skills/rr-planner/refs/proactivity.md`). Freeze is a `frozen_levels` update plus a docs-patch mint in phase `status.yaml` (+ summary refresh), not a second write of the doc (`skills/rr-planner/refs/cascade.md`, [baselines.md](baselines.md)).
 10. First compose: write phase `status.yaml`, refresh `rrr-status.yaml`, emit `docs/rr/agent.plan.md`, sync the one-liner on existing root SoT, set `claude_config_version` ([agent-config.md](agent-config.md)).

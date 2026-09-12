@@ -137,6 +137,19 @@ Pause / resume: keep remaining sidecars. Do not re-ask notes already in `level_f
 
 Freeze: a level cannot freeze while leftover `partial` notes exist unless discarded or completed. Happy path after freeze: this level's sidecar is gone.
 
+## Standing red flags
+
+Distinct from parked off-level notes. **Standing red flags** are goal-likelihood risks that must survive sessions until founder explicitly closes them.
+
+| Rule | Detail |
+|------|--------|
+| Persist | `session_state.standing_red_flags[]` (and optionally glance `docs/rr/future.md`) — not only chat memory |
+| Resurface | On Plan resume, every goal re-anchor ([goal-anchor.md](goal-anchor.md)), and pre-freeze |
+| Close | Only with explicit founder confirmation — never silently as “accepted residual” |
+| Freeze | Open flag without founder accept → Fail freeze ([execute-handoff.md](execute-handoff.md)); do not offer freeze as Next-Up ([cascade.md](cascade.md)) |
+
+Discover-reopen candidates use the same persistence/resurface rules until routed or founder-accepted.
+
 ## Rules
 
 `Gate N` is exclusive to [cascade.md](cascade.md). This table does not number cascade gates.

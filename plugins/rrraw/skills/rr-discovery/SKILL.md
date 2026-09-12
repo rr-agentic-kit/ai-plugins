@@ -48,18 +48,18 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 
 3. **discover** — Load [project-posture.md](refs/project-posture.md) (includes `domain_context`). Done: that ref's persist condition.
    - **Ideation gate** — If problem space without concrete idea → load [ideation.md](refs/ideation.md) before L1 compose; else skip. Persist OST/assumptions/pretotype when produced (humanize session artifacts via [compose-prose.md](refs/compose-prose.md)). **Skip entirely when `action` is `from-code`.**
-   - For each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md). Mark `level-<n>` on entry, `sweep` after re-decision sweep, `premise` after ES premise test (skip on later levels), `compose` after compose `Task`, `humanize` after [compose-prose.md](refs/compose-prose.md), `stage-exit` after Gate 6, `verdict` after Gate 7.
+   - For each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md). Before marking any level todo `completed`, run [goal-anchor.md](refs/goal-anchor.md) **Standing self-challenge** (auto-reflection — `refs/planning/challenge-layers.md`). Mark `level-<n>` on entry, `sweep` after re-decision sweep, `premise` after ES premise test (skip on later levels), `compose` after compose `Task`, `humanize` after [compose-prose.md](refs/compose-prose.md), `stage-exit` after Gate 6, `verdict` after Gate 7.
    - After compose draft: **mandatory** [compose-prose.md](refs/compose-prose.md) before treating persist complete.
    - On-demand: [interview-method.md](refs/interview-method.md), [strategy-lenses.md](refs/strategy-lenses.md), [gtm-framing.md](refs/gtm-framing.md).
    - Done: last listed level frozen. After BRD freeze → step 5. **Not for `from-code`** — see 3a.
 
 3a. **from-code** — Load [from-code.md](refs/from-code.md) after posture. Research codebase (`--input` root or `PROJECT_ROOT`); persist `from_code_evidence`; compose stems with `maturity: code-extraction`; ask **contradictions only**; stop without freeze. On later `--resume` / continue-shaping that edits toward normal Discover: promote maturity → `draft`, then enter step 3 discover chain (gates/freeze as interview-sourced).
 
-4. **challenge** — Load `refs/planning/contracts.md`, [challenge-method.md](refs/challenge-method.md), [blind-spots.md](refs/blind-spots.md), `refs/planning/decision-ledger.md`. `Task` challenge agent for **exactly one** ES/MRD/BRD stem; **inject** `challenge-method.md` path into the Task prompt. Persist `{stem}.challenge.report.md` (humanize prose body). Stamp `docs/rr/{track}/discovery/status.yaml` challenge per `refs/planning/baselines.md`. Completes `write`.
+4. **challenge** — Load `refs/planning/contracts.md`, [challenge-method.md](refs/challenge-method.md), [blind-spots.md](refs/blind-spots.md), `refs/planning/decision-ledger.md`, `refs/planning/challenge-layers.md`. `Task` challenge agent for **exactly one** ES/MRD/BRD stem; **inject** `challenge-method.md` path into the Task prompt. Default depth = **standard**; `deep` only when explicit. Persist `{stem}.challenge.report.md` (humanize prose body). Stamp `docs/rr/{track}/discovery/status.yaml` challenge per `refs/planning/baselines.md`. Completes `write`.
 
-5. **freeze-handoff** (after BRD Gates 1–7) — Load [business-case-handoff.md](refs/business-case-handoff.md). **Refuse** while any stem is `maturity: code-extraction`. Mint freeze, write `business-case.yaml`, stamp detail + summary (`discovery_complete`, `phase`, `summary` line), require conditional artifacts if techniques ran. Fail freeze on missing required fields or decorative metrics. **Next Up:** Plan (`rr-planner`).
+5. **freeze-handoff** (after BRD Gates 1–7) — Load [business-case-handoff.md](refs/business-case-handoff.md). **Refuse** while any stem is `maturity: code-extraction`. Mint freeze, write `business-case.yaml`, stamp detail + summary (`discovery_complete`, `phase`, `summary` line), require conditional artifacts if techniques ran. Fail freeze on missing required fields or decorative metrics. **Auto-suggest** Plan Next Up only after standard challenge clear or risk-accept (`refs/planning/challenge-layers.md`, `refs/planning/progress.md`).
 
-6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + phase `status.yaml` + refresh `rrr-status.yaml` per `refs/planning/output-formats.md`. Done: session-state + statuses written.
+6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + phase `status.yaml` + refresh `rrr-status.yaml` per `refs/planning/output-formats.md`. Next Up habits: `refs/planning/progress.md`. Done: session-state + statuses written.
 
 ## Shared refs (load on demand)
 
@@ -67,6 +67,7 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 |-----|------|
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
 | `refs/planning/progress.md` | Every invocation |
+| `refs/planning/challenge-layers.md` | Challenge / freeze-suggest / auto-reflection |
 | `refs/planning/setup.md` | `action: setup`; resolve rewrite/sync |
 | `refs/planning/baselines.md` | **Version law** — resolve; freeze; challenge stamp; open-next; ship |
 | [cascade.md](refs/cascade.md) | Discover-path actions |
@@ -77,9 +78,9 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 | `refs/planning/project-lexicon.md` | After compose-prose / from-code research persist |
 | [business-case-handoff.md](refs/business-case-handoff.md) | BRD freeze → Plan handoff |
 | `refs/doc-standards/<level>.md` | Composing that level |
-| [goal-anchor.md](refs/goal-anchor.md) / [expert-panel.md](refs/expert-panel.md) | Discovery pass / Gate 7 |
+| [goal-anchor.md](refs/goal-anchor.md) / [expert-panel.md](refs/expert-panel.md) | Discovery pass / Gate 7; auto-reflection |
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A; level entry |
-| [challenge-method.md](refs/challenge-method.md) | `--challenge` / `depth: deep` |
+| [challenge-method.md](refs/challenge-method.md) | `--challenge` / `--challenge deep` |
 | `refs/planning/contracts.md` | Before any subagent `Task` |
 
 Shared planning package: plugin `refs/planning/` (link there directly — no skill stubs). Versioning SoT is `refs/planning/baselines.md` only — do not copy into this skill tree. Future Execute loads the same file.

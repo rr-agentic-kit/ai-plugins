@@ -53,6 +53,7 @@ flowchart TD
 2. **No orphan items** — `refs/planning/doc-standards/item-schema.md`; verified by `validate_planning.sh`.
 3. **Explicit narrowing** — record narrowing as a decision in `session-state.json`.
 4. **Unknown vs off-level** — [note-sessions.md](note-sessions.md). Feature/RICE detail → Plan notes, not Discover Musts.
+5. **Backward-chain challenge** — If current parents cannot support the real goal (wrong premises, metric drift, obligation lies), challenge **upstream** (MRD↔ES, BRD↔MRD) — do not bury as HOLD (`refs/planning/challenge-layers.md`, [goal-anchor.md](goal-anchor.md)).
 
 ## Per-level cycle
 
@@ -61,7 +62,7 @@ Orchestration owns the skill (SKILL Procedure step 3 / 3a). For each level in `c
 | Phase | Variant (this level) |
 |-------|----------------------|
 | Load | `doc-standards/<level>.md` + item-schema |
-| Entry | Sweep; [note-sessions.md](note-sessions.md) sidecar; [goal-anchor.md](goal-anchor.md) for the pass |
+| Entry | Sweep; [note-sessions.md](note-sessions.md) sidecar; [goal-anchor.md](goal-anchor.md) for the pass **including auto-reflection** before advance |
 | Discover | Inherited facts; **ES only** premise ([expert-panel.md](expert-panel.md)); gaps → notes/`raw-history`; reflect → [proactivity.md](proactivity.md); [strategy-lenses.md](strategy-lenses.md) / [gtm-framing.md](gtm-framing.md) on demand. From-code: seed from evidence; skip polish interview. |
 | Compose | Compose (`refs/planning/contracts.md`) → [compose-prose.md](compose-prose.md); Gate 3 static |
 | Exit | Gate 6 → Gate 7 → freeze **only if** `maturity ≠ code-extraction`. After **BRD** pass with draft+ maturity → SKILL `freeze-handoff` (step 5). From-code: stop after compose + contradiction drain. |
@@ -73,11 +74,11 @@ Stop / resume: SKILL step 3 Stop bullet. Resume that shapes `code-extraction` do
 | Gate | Owner | Done when |
 |------|-------|-----------|
 | 1 Section coverage | this file | Every required section has a resolved fact or explicit assumption `blocking: false` |
-| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | Disambiguation protocol complete; no blocking unclear/ambiguous input ([goal-anchor.md](goal-anchor.md) §§ Unclear vs ambiguous, Disambiguation protocol) |
+| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | Disambiguation protocol complete; **Standing self-challenge (auto-reflection)** at level transitions; no blocking unclear/ambiguous input |
 | 3 Inheritance integrity | `refs/planning/success-criteria.md` | Static script + judgment list |
 | 4 Compose acceptance | [compose-prose.md](compose-prose.md) | Compose ok/accepted partial **and** humanize claim check passed |
 | 5 Proactivity | [proactivity.md](proactivity.md) | `standard`/`deep` discovery-time stop |
-| 6 Stage-exit | [blind-spots.md](blind-spots.md) | ES/MRD/BRD row only (`in_scope` + `inherit_check`) |
+| 6 Stage-exit | [blind-spots.md](blind-spots.md) | ES/MRD/BRD row only (`in_scope` + `inherit_check`) — smells tier, not `--challenge` |
 | 7 Viability | [expert-panel.md](expert-panel.md) | Binding at ES/MRD; advisory at BRD |
 
 ## Freeze and remap
@@ -85,24 +86,29 @@ Stop / resume: SKILL step 3 Stop bullet. Resume that shapes `code-extraction` do
 | Event | Rule |
 |-------|------|
 | First compose of a level | Dense sibling IDs. Frontmatter `doc_rev: "?"`. From-code: also `maturity: code-extraction`. |
-| Cascade gates pass | Add level to `frozen_levels` **only if** maturity ≠ `code-extraction`. Mint `status.yaml` per `refs/planning/baselines.md`. Freeze does **not** wait on challenge-clean. |
+| Cascade gates pass | Add level to `frozen_levels` **only if** maturity ≠ `code-extraction`. Mint `status.yaml` per `refs/planning/baselines.md`. Mechanical mint does **not** wait on challenge-clean (CI). Skill **auto-suggest** freeze/Plan Next Up waits on standard-clear or risk-accept (`refs/planning/challenge-layers.md`). |
 | BRD gates pass (`proceed` / `proceed-with-conditions`) | SKILL step 5 (`freeze-handoff`) — [business-case-handoff.md](business-case-handoff.md). Blocked while any stem is `code-extraction`. |
 | Gate 7 `hold` / `pivot` / `kill` | Do **not** mint `discovery_complete`. Follow [business-case-handoff.md](business-case-handoff.md) / expert-panel ladder. |
 | Later insert on frozen level | Append next integer. |
 | Explicit re-compose of frozen level | Allowed; humanize via rewrite path; remap children. |
 | `--resume` | Continue from `item_registry` / checkpoint. Promote `code-extraction` → `draft` on continue-shape. |
-| `--change` | Section + target; skill classifies patch vs redirect. |
+| `--change` | Section + target; skill classifies patch vs redirect; obligation break → dirty + downstream impact. |
 
 ## Advancing vs stopping
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass; queue empty; maturity ≠ `code-extraction` | Freeze; mint docs patch; advance (or SKILL `freeze-handoff` after BRD) |
+| All gates pass; queue empty; maturity ≠ `code-extraction`; **and** auto-reflection clear; **and** standard challenge clear **or** risk-accept for load-bearing stems | Skill may **auto-suggest** freeze; mint docs patch; advance (or SKILL `freeze-handoff` after BRD) |
+| Smell / gates-clean alone | **Anti-trigger:** not freeze-suggest-ready — run standard challenge or risk-accept |
+| Open quality debt, user says freeze | **Quality veto** — refuse unless risk-accept AskQuestion → `dirty-accepted` |
 | From-code compose done; contradictions drained/held | Stop at `code-extraction` — no freeze |
 | Pending clarifications / gate gaps | Surface question → re-discover / re-compose |
 | Gate 7 `hold` / `pivot` / `kill` | Verdict ladder — no discovery_complete |
 | Open re-decision queue | Drain before freeze |
+| Upstream cannot support goal | Backward-chain challenge (MRD↔ES, BRD↔MRD) — do not bury as HOLD |
 | User pause | SKILL step 3 Stop — checkpoint; skip pre-save |
+
+Next Up close habits: `refs/planning/progress.md`. Process-ownership: [`INTENT.md`](../../../INTENT.md) UX.
 
 ## Session state
 

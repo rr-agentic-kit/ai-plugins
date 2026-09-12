@@ -32,7 +32,7 @@ objective → capability → story → feature → full requirement set (P1–P3
 3. Stories: outcome form default — `As [persona], I can… so that…`. Optional **job story** body for B2B/situation-heavy: `When… I want… so I can…` — not a second backlog.
 4. Features: RICE; stories: RIC ([prioritization-lens.md](prioritization-lens.md)).
 5. **Hard stop:** [system-design.md](system-design.md) same-sitting rule — Decision + **Effort drivers** (+ UX-shape when UI-facing); [adr-lite.md](adr-lite.md) when ADR shape applies. Refuse Effort without drivers. Access axes stay separate mechanisms ([domain-routing.md](domain-routing.md)).
-6. Capture the **full** requirement set; select build-now with `_status_:` — never delete deferred rows.
+6. Capture the **full** requirement set; select build-now with `_status_:` — never delete deferred rows. **Before select:** confirm nature-expectation Done-when met (or explicit per-axis HOLD) — unmet expectations must not wait until freeze to surface ([nature-expectation-packs.md](nature-expectation-packs.md), [execute-handoff.md](execute-handoff.md)).
 7. Narrowing interview: talk capability/cost drivers — never “fill PRD §6.”
 
 ## Question discipline

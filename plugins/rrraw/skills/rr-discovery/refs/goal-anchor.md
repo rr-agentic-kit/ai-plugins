@@ -2,7 +2,7 @@
 
 **Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format. Reason-graph concerns (evidence, `flips_when`, burial, re-decision queue) live in `refs/planning/decision-ledger.md` — this ref does not own them.
 
-**Load when:** Entire discovery pass at every cascade level (always-on). Not a trigger. Also on parent/child fact conflict, posture confirm, and off-level owner ambiguity.
+**Load when:** Entire discovery pass at every cascade level (always-on). Not a trigger. Standing self-challenge (**auto-reflection** layer — `refs/planning/challenge-layers.md`) at every level transition. Also on parent/child fact conflict, posture confirm, and off-level owner ambiguity.
 
 Unclear and ambiguous user statements are **blocking**. Do not record them as facts, and do not treat an unresolved guess as a true assumption, until the protocol below completes or the user explicitly accepts an `assumption` with `blocking` set.
 
@@ -69,7 +69,18 @@ At each level transition and after major decisions:
 
 1. Restate the user's **primary goal** from executive-summary vision/problem **prose**. Cite a ranked metric as `goal_ref` (`ES-*`).
 2. Show how the current level's work serves that goal in one sentence.
-3. If current facts drift from goal → surface misalignment via question.
+3. If current facts drift from goal → surface misalignment via question. When misalignment traces to an **upstream Discover stem** (MRD vs ES, BRD vs MRD), name a ranked **backward-chain** reopen and challenge upstream — do not bury as HOLD (`refs/planning/challenge-layers.md`).
+
+## Standing self-challenge (auto-reflection)
+
+At **every** Discover level transition (before marking a level todo `completed`, advancing, or offering freeze) — not only on conflict or major decisions. This **is** the auto-reflection layer (`refs/planning/challenge-layers.md`) — continuous, no formal report.
+
+1. Ask: does continuing **this exact step, as written**, still serve the real goal for **this real scenario** — or has something diverged that the fixed procedure did not anticipate?
+2. If yes (still serves) → proceed; record a one-line reflection when non-obvious (auto-close when alternatives unlikely).
+3. If no / uncertain → stop advancing: AskQuestion, scoped `--challenge` (**standard**), or upstream reopen — do not execute the next hard-coded step because the checklist says so. Two+ plausible alternatives → AskQuestion required.
+4. Open binding holds / viability stale always count as “uncertain” until founder accept or route.
+
+This is **not** user-invoked `--challenge` and **not** stage-exit smells. When auto-reflection finds load-bearing mismatch, escalate to standard challenge or backward-chain.
 
 ## Conflict resolution
 

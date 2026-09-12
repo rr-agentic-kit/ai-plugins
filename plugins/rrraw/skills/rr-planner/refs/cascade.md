@@ -45,6 +45,7 @@ flowchart TD
 3. **Explicit narrowing** — record as a decision in `session-state.json`.
 4. **Unknown vs off-level** — [note-sessions.md](note-sessions.md). Market/viability reopen → park and route to `rr-discovery`.
 5. **Selection ≠ shrink** — `_status_:` only; never delete deferred requirements to “match the slice.”
+6. **Backward-chain challenge** — If current parents cannot support builder→Discover-objective (wrong Musts, Cost vs WWAS drift, obligation lies), Plan must challenge Discover: emit ranked Plan→Discover reopen candidates and route `ask-discover` — do not silent-unfreeze or bury as Plan-only HOLD ([goal-anchor.md](goal-anchor.md)).
 
 ## Per-level cycle
 
@@ -67,13 +68,13 @@ Stop / resume: leave drafts on disk; checkpoint `session-state.json` with `check
 | Gate | Owner | Done when |
 |------|-------|-----------|
 | 1 Section coverage | this file | Required PRD sections resolved or assumed `blocking: false` |
-| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | That ref's conditions |
+| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | That ref's conditions **including Standing self-challenge (auto-reflection)** at phase transitions |
 | 3 Inheritance integrity | `refs/planning/success-criteria.md` | Static + judgment |
 | 4 Compose acceptance | contracts + prd standard | Compose ok/accepted partial; humanize done |
 | 5 Proactivity | [proactivity.md](proactivity.md) | Dual-lens; Effort gated per [system-design.md](system-design.md) |
 | 6 Stage-exit | [blind-spots.md](blind-spots.md) | Technical-plan row; premise-critical → Gate 7 |
 | 7 Viability | [expert-panel.md](expert-panel.md) | Advisory weight vs Discover binding — still required |
-| Slice | [execute-handoff.md](execute-handoff.md) + req-smell | Kernel mint; selection intact |
+| Slice | [execute-handoff.md](execute-handoff.md) + req-smell + challenge-layers | Kernel mint; selection intact; freeze-suggest = standard-clear or risk-accept |
 
 ## Freeze and remap
 
@@ -92,11 +93,17 @@ Unlock / patch-only-current: `refs/planning/baselines.md`.
 
 | Condition | Action |
 |-----------|--------|
-| Smell-clean (or holds); architecture present; selection intact | Slice freeze; mint kernel |
+| Smell-clean (or holds); architecture present; selection intact; **and** auto-reflection clear; **and** no open standing red flag / Discover-reopen (or founder accept); **and** nature Done-when met or per-axis HOLD; **and** standard challenge clear **or** risk-accept ([execute-handoff.md](execute-handoff.md), `refs/planning/challenge-layers.md`) | Skill may **auto-suggest** slice freeze; mint kernel on confirm |
+| Standing red flag / Discover-reopen open | Do **not** offer freeze as Next-Up; route `ask-discover` or record founder accept ([note-sessions.md](note-sessions.md)) |
+| Smell-clean alone | **Anti-trigger:** not freeze-ready — run auto-reflection + standard challenge (or risk-accept) first |
+| Open quality debt, user says freeze | **Quality veto** — refuse unless risk-accept AskQuestion → `dirty-accepted` |
+| Draft Discover / solid subset | Work advance allowed when cited subset load-bearing-stable; freeze mint still needs frozen parents |
 | Pending clarifications or gate gaps | Surface question → re-compose |
 | Gate 7 `hold` / `pivot` / `kill` | expert-panel verdict ladder |
 | Sprint/capacity language | Refuse; reframe as slice selection |
 | Market/viability reopen | Route to `rr-discovery` — do not silent-unfreeze Discover |
+
+Next Up close habits: `refs/planning/progress.md`. Process-ownership: [`INTENT.md`](../../../INTENT.md) UX.
 
 ## Session state
 

@@ -20,4 +20,5 @@
 | SOM | Serviceable Obtainable Market | Market sizing |
 | SoT | Source of Truth | Version / freeze law |
 | ADR | Architecture Decision Record | Spine / constitution adjacent |
-| DoR | Definition of Ready | Slice / execute readiness |
+| OMTM | One Metric That Matters | Discover north-star metric for goal-likelihood |
+| INTENT | Plugin Spec file (`INTENT.md`) | Process-ownership UX SoT — not README overview |

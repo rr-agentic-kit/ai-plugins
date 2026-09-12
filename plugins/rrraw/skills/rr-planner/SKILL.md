@@ -1,6 +1,6 @@
 ---
 name: rr-planner
-description: Flag-driven Plan — requirements, spine, slice freeze from frozen business-case. After Discover freeze; setup/challenge/freeze-slice. Market work → rr-discovery.
+description: Flag-driven Plan — goal-likelihood for Discover OMTM via honest Effort + slice kernel. After Discover freeze; setup/challenge/freeze-slice. Market→rr-discovery.
 ---
 
 # rr-planner
@@ -9,7 +9,7 @@ description: Flag-driven Plan — requirements, spine, slice freeze from frozen 
 
 ## Purpose
 
-Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sitting yields **honest RICE Effort** (cost drivers in spine/delta — tech and/or UX) and a **buildable slice kernel** (`execute-slice.yaml`) so future Execute starts fused code+test without inventing stack, mechanism, or cost-driving UX shape. Artifacts include full feature requirement sets, scored backlog, standing architecture spine (+ constitution), per-feature deltas, WWAS AC, and compact freeze. Success is Effort honesty + pin-complete kernel — **not** product-doc section coverage. Discover (ES→MRD→BRD + `business-case.yaml`) is owned by `rr-discovery`. This skill owns Plan Q&A and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
+Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sitting yields **honest RICE Effort** (cost drivers in spine/delta — tech and/or UX) and a **buildable slice kernel** (`execute-slice.yaml`) so future Execute starts fused code+test without inventing stack, mechanism, or cost-driving UX shape. Artifacts include full feature requirement sets, scored backlog, standing architecture spine (+ constitution), per-feature deltas, WWAS AC, and compact freeze. **Success** = raises the odds the builder reaches the frozen Discover objective / OMTM — Effort honesty + pin-complete kernel are **necessary preconditions**, not the finish line. Freeze only when further Plan work stops moving that likelihood **and** no open standing red flag / Discover-reopen blocks it — **not** product-doc section coverage or smell-clean ceremony. Discover (ES→MRD→BRD + `business-case.yaml`) is owned by `rr-discovery`. This skill owns Plan Q&A and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
 
 ## When to use
 
@@ -47,11 +47,11 @@ Phrases: `refs/planning/progress.md` on every invocation.
 
 3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
 
-4. **Plan body** — Load [cascade.md](refs/cascade.md). For `prd` / `change` / `freeze-slice`: run Pre-Plan posture → Level order → Per-level cycle as that ref directs. Mark `posture`, `standing`, `interview`, `score-architect`, `requirements`, `select`, `ac-smell`, `tech-challenge?`, `slice-freeze`, `compose`/`humanize` as cascade phases complete. Done: that ref's Advancing vs stopping conditions or pause checkpoint.
+4. **Plan body** — Load [cascade.md](refs/cascade.md). For `prd` / `change` / `freeze-slice`: run Pre-Plan posture → Level order → Per-level cycle as that ref directs. Before marking any phase todo `completed`, run [goal-anchor.md](refs/goal-anchor.md) **Standing self-challenge** (auto-reflection layer — `refs/planning/challenge-layers.md`). Mark `posture`, `standing`, `interview`, `score-architect`, `requirements`, `select`, `ac-smell`, `tech-challenge?`, `slice-freeze`, `compose`/`humanize` as cascade phases complete. Done: that ref's Advancing vs stopping conditions or pause checkpoint.
 
-5. **research / challenge** — Load `refs/planning/contracts.md`. Research: [research-method.md](refs/research-method.md). Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method). Persist reports per `refs/planning/output-formats.md`. Completes `write`.
+5. **research / challenge** — Load `refs/planning/contracts.md`. Research: [research-method.md](refs/research-method.md). Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md` + `refs/planning/challenge-layers.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method). Default depth = **standard**; `deep` only when explicit. Persist reports per `refs/planning/output-formats.md`. Completes `write`.
 
-6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + `docs/rr/{track}/plan/status.yaml` + refresh `rrr-status.yaml`. First compose: emit `docs/rr/agent.plan.md` + sync root SoT. Done: session-state + statuses written.
+6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + `docs/rr/{track}/plan/status.yaml` + refresh `rrr-status.yaml`. First compose: emit `docs/rr/agent.plan.md` + sync root SoT. Next Up / freeze-suggest: `refs/planning/progress.md` + `refs/planning/challenge-layers.md`. Done: session-state + statuses written.
 
 ## Shared refs (load on demand)
 
@@ -59,6 +59,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 |-----|------|
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
 | `refs/planning/progress.md` | Every invocation |
+| `refs/planning/challenge-layers.md` | Challenge / freeze-suggest / auto-reflection |
 | `refs/planning/setup.md` / `refs/planning/baselines.md` / `refs/planning/agent-config.md` | Setup; **version law** (freeze / open-next / ship); sync |
 | [cascade.md](refs/cascade.md) / [project-posture.md](refs/project-posture.md) | Plan body |
 | [plan-interview.md](refs/plan-interview.md) / [prioritization-lens.md](refs/prioritization-lens.md) / [system-design.md](refs/system-design.md) | Interview + score |

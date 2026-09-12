@@ -130,8 +130,8 @@ levels:
 next_levels: {}           # populated iff next is set; same per-doc shape
 challenge:                # current track; next_challenge mirrors next_levels
   prd:
-    status: dirty         # dirty | clean-shallow | clean-deep | dirty-accepted
-    depth: deep           # shallow | deep; last scan depth; null if never scanned
+    status: dirty         # dirty | clean-shallow | clean-deep | dirty-accepted (risk-accept)
+    depth: deep           # shallow (=standard) | deep; last scan depth; null if never scanned
     scanned_digest: "sha256:..."  # items.json records hash; null if never scanned
 next_challenge: {}
 ```
@@ -158,26 +158,34 @@ Skill writes phase detail on first compose, freeze / lock-target / confirmed maj
 
 ### Challenge attestation
 
-Four-state per stem. Absent row = never scanned = `dirty`. `dirty-accepted` applies to **this digest only**. `status.yaml` `challenge:` is the only aggregate — no `challenge-index.yaml`.
+Four-state per stem. Absent row = never scanned = `dirty`. `dirty-accepted` = **risk-accept** for **this digest only**. `status.yaml` `challenge:` is the only aggregate — no `challenge-index.yaml`. Layer contract: [challenge-layers.md](challenge-layers.md). Process-ownership UX: [INTENT.md](../../INTENT.md) UX.
 
 | `status` | Meaning |
 |----------|---------|
 | `dirty` | Never scanned, digest moved, or last scan had findings — not accepted |
-| `clean-shallow` | Last **shallow** scan had zero open findings for this doc **and** `scanned_digest == levels.<doc>.digest` |
-| `clean-deep` | Last **deep** scan had zero open findings for this doc **and** `scanned_digest == levels.<doc>.digest` |
-| `dirty-accepted` | User explicitly closed this snapshot without a `clean-*` scan |
+| `clean-shallow` | Last **standard** challenge (`depth: shallow` legacy name) had zero open findings for this doc **and** `scanned_digest == levels.<doc>.digest` |
+| `clean-deep` | Last **deep** challenge had zero open findings for this doc **and** `scanned_digest == levels.<doc>.digest` |
+| `dirty-accepted` | User completed **risk-accept** AskQuestion for this snapshot without a `clean-*` scan |
 
-`clean-*` means "last scan of this digest found nothing open" — not "doc finished." Freeze stays independent of challenge status.
+`clean-*` means "last scan of this digest found nothing open" — not "doc finished."
 
-Each row also stores `depth: shallow | deep` from the last scan. Stamp the same `depth` in `{stem}.challenge.report.md` frontmatter.
+| Mode | Flag | Stamp when clean |
+|------|------|------------------|
+| standard | `--challenge` (default) | `clean-shallow` |
+| deep | `--challenge deep` | `clean-deep` |
+
+Legacy helper may write `clean` — treat as standard-clear for skill freeze-suggest. Each row also stores `depth: shallow | deep` from the last scan. Stamp the same `depth` in `{stem}.challenge.report.md` frontmatter.
+
+**CI vs skill suggest:** Mint freeze mechanical gates stay independent of attestation (never a validator FAIL). **Skill auto-suggest freeze** requires standard-clear (`clean-shallow` / legacy `clean`) or risk-accept (`dirty-accepted`) for the freeze unit’s load-bearing stems — [challenge-layers.md](challenge-layers.md). Quality veto: no freeze-by-user-say-so over open quality debt without risk-accept.
 
 Invalidation (skill, not compose, not the challenge agent):
 
-- After compose persist of a doc: if that doc’s `challenge.status` is `clean-shallow`, `clean-deep`, or `dirty-accepted` → set `dirty`. Dirtiness fans out to the edited doc only — dual-stub partners stay `dirty` until their own address pass.
+- After compose persist of a doc: if that doc’s `challenge.status` is `clean-shallow`, `clean-deep`, `clean` (legacy), or `dirty-accepted` → set `dirty`. Dirtiness fans out to the edited doc only — dual-stub partners stay `dirty` until their own address pass.
 - After freeze mint: if `levels.<doc>.digest` ≠ `challenge.<doc>.scanned_digest` → `dirty`.
-- Stamp after challenge persist: `clean-shallow` or `clean-deep` iff no findings for that stem, `scanned_digest` recorded from the live digest, and `depth` matches the run.
+- Stamp after challenge persist: `clean-shallow` or `clean-deep` iff no findings for that stem, `scanned_digest` recorded from the live digest, and `depth` matches the run (standard → shallow; deep → deep).
+- **Obligation-breaking upstream edit** (path 2 below): after conscious unfreeze or redirect, dirty challenge on the edited stem **and** skill-mark downstream impact for review (do not rely on the user to remember).
 
-Do not store `open_ids` in status (per-run `bs-001` is not stable). Challenge is post-freeze attestation — Gates 1–7 do not wait on it.
+Do not store `open_ids` in status (per-run `bs-001` is not stable). Challenge attestation is not a Gate 1–7 wait — but freeze **suggest** waits on standard-clear or risk-accept.
 
 ### `viability_stale` (session-state)
 
@@ -313,26 +321,35 @@ Primary Plan freeze unit is a **selected requirement slice**, not the whole PRD 
 
 Refuse freeze when Effort lacks drivers, UI-facing selected features lack UX-shape, or Constraints only restate product goals. See Plan `skills/rr-planner/refs/execute-handoff.md`.
 
-Major/minor (`track`, `next`) only on confirm — never on this mint. Challenge attestation is not a freeze gate.
+Major/minor (`track`, `next`) only on confirm — never on this mint. Challenge attestation is not a **CI** freeze gate. Skill **auto-suggest** freeze still requires standard-clear or risk-accept ([challenge-layers.md](challenge-layers.md)).
+
+### Work advance vs freeze mint
+
+| Move | Allowed when |
+|------|----------------|
+| **Work advance** on draft upstream | Skill judges the **cited solid subset** load-bearing-stable; continue child body work |
+| **Mint** frozen child / handoff / slice | Parent frozen (`PARENT_UNFROZEN`); mechanical Fail-freeze table; suggest policy as above |
+
+Draft upstream does not unlock pin mint. On upstream change after work advance, skill auto-marks downstream impact — [INTENT.md](../../INTENT.md) UX.
 
 ## Upstream change: three paths
 
 `--change` or parent freeze while children exist:
 
 1. **Frozen children, no obligation change** → lock-target bump: parent `rev`++, new digest, docs patch++, product patch unchanged, children **stay frozen**, refresh their pins to the new parent digest.
-2. **Frozen children, obligations break** → conscious unfreeze (ask). If the change is minor+ **and** `next` exists → redirect; do not unfreeze 0.1.
-3. **Children already `?`** → compose the child; re-pin on freeze. Child freeze still requires parent frozen (CI: `PARENT_UNFROZEN`).
+2. **Frozen children, obligations break** → conscious unfreeze (ask). If the change is minor+ **and** `next` exists → redirect; do not unfreeze 0.1. Skill dirties challenge on the edited stem and **marks downstream impact** for review (fan-out obligation).
+3. **Children already `?`** → compose the child; re-pin on freeze. Child freeze still requires parent frozen (CI: `PARENT_UNFROZEN`). Work advance on solid subset may precede freeze.
 
 ```mermaid
 flowchart TD
   up["Upstream freeze or --change"] --> frozenChild{"Child frozen?"}
-  frozenChild -->|no rev ?| justDo["Compose child; re-pin"]
+  frozenChild -->|no rev ?| justDo["Compose child; re-pin; impact if solid-subset advanced"]
   frozenChild -->|yes| impact{"Obligations change?"}
   impact -->|no| bump["Lock-target bump; stay frozen"]
   impact -->|yes| nextOpen{"Next track open and this is minor+?"}
   nextOpen -->|yes| redirect["Skill refuse; point at next or future.md"]
   nextOpen -->|no| ask["Ask: unfreeze and rework?"]
-  ask -->|accept| open["Conscious unfreeze to ?"]
+  ask -->|accept| open["Conscious unfreeze to ?; dirty + downstream impact"]
   ask -->|refuse| abort["Parent cannot freeze"]
 ```
 

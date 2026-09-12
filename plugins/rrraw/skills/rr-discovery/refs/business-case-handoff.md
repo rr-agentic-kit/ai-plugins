@@ -14,7 +14,7 @@ After **BRD** completes Gates 1–7 with verdict `proceed` or `proceed-with-cond
 2. Write `{output_dir}/business-case.yaml` with required fields below.
 3. Stamp `status.yaml` / session: `discovery_complete: true` (and digest pins as baselines require).
 4. Require conditional artifacts on disk if those techniques ran ([ideation.md](ideation.md), [interview-method.md](interview-method.md)).
-5. **Next Up:** Plan (`rr-planner`) — do not compose PRD inside Discover.
+5. **Next Up:** Plan (`rr-planner`) — do not compose PRD inside Discover. Skill **auto-suggests** Plan only when load-bearing stems are standard-clear or risk-accepted (`refs/planning/challenge-layers.md`, `refs/planning/progress.md`). Quality veto: no freeze-by-say-so over open challenge debt without risk-accept.
 
 If Gate 7 is `hold` / `pivot` / `kill` → **do not** mint `discovery_complete`. Follow expert-panel verdict ladder.
 

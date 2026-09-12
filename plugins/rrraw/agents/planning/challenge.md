@@ -42,23 +42,26 @@ Required context:
 - **Caller method ref** (orchestrator injects path in PhaseInput / Task prompt):
   - Discover (`executive-summary` \| `mrd` \| `brd`): load `skills/rr-discovery/refs/challenge-method.md` — pre-mortem (Tigers / Paper-Tigers / Elephants) + strategy red-team
   - Plan (`prd` \| architecture / deltas / AC): load `skills/rr-planner/refs/challenge-method.md` — technical pre-mortem **and** assumption red-team; target = spine + deltas + AC; cap 3–5 kill-assumptions
+- **Depth mode** from payload (`challenge_depth` or `depth`): **standard** (default) = relevant load-bearing claims; **deep** = exhaustive. Map: `refs/planning/challenge-layers.md`. Soft escalation (optional review Task) only on `deep` or heavy cull.
 - Load caller skill `refs/blind-spots.md` (Discover: `skills/rr-discovery/…`; Plan: `skills/rr-planner/…`) for taxonomy, applicability **union**, `fix_action` fences, specialized finding shapes, and severity rules
 - Load `refs/planning/decision-ledger.md` for the reason-graph scan and re-litigation guard (T6-5)
 - Load caller `refs/expert-panel.md` / `refs/project-posture.md` / `refs/note-sessions.md` as available
 - Load `refs/planning/doc-standards/item-schema.md` for judgment checks (atomic split, inflated rank, status/priority enums)
 - Load `refs/planning/contracts.md` § challenge for output schema (incl. `parent_summary`)
+- Load `refs/planning/challenge-layers.md` for mode coverage bounds (standard vs deep)
 
 ## Execution
 
 1. Read `payload.static_validation`. Static vs judgment: `refs/planning/success-criteria.md`.
 2. Resolve target doc from `PhaseInput.level`. If missing or ambiguous → `status: failed` with `clarifications_needed[]` listing doc options.
 3. Load the target doc and supporting context. Scan **only the target doc** against the **union** of the blind-spot taxonomy (judgment). Follow caller `blind-spots.md` Challenge union rules and `fix_action` fences.
-4. **Method overlay (mandatory when method ref injected):** apply caller `challenge-method.md`:
+4. **Method overlay (mandatory when method ref injected):** apply caller `challenge-method.md` at the resolved **depth mode** (standard vs deep):
    - Steelman the current strategy/plan in one short paragraph
    - Pre-mortem failure narratives → classify Tiger / Paper-Tiger / Elephant → rank
    - Red-team attacks ranked the same way (Plan: technical load-bearing claims)
    - Attach kill criteria / cheapest probes for top items (evidence × by-when × flip); Plan cap 3–5
    - Map method findings onto blind-spot category ids when applicable
+   - **standard:** stop after relevant load-bearing claims for the target; **deep:** continue until exhaustive coverage of method surfaces
 5. For major decisions with single option → produce comparison table with alternatives.
 6. Apply devil's-advocate prompts systematically. Respect per-lens × per-level allowed `fix_action` values.
 7. Classify each finding by severity: `critical` | `high` | `medium` | `low`. Set routing fields on every finding:
@@ -87,7 +90,7 @@ Required context:
 
 ## Soft escalation
 
-Default: self-check only. On `deep` depth or heavy cull, the orchestrator **may** spawn a one-shot review Task — optional, not required.
+Default: self-check only. On **deep** mode or heavy cull, the orchestrator **may** spawn a one-shot review Task — optional, not required. Standard mode does not require soft escalation.
 
 ## Dual-stub write
 

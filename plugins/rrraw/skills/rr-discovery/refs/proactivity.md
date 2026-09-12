@@ -31,6 +31,8 @@ Lightweight devil's-advocate during discovery — not the full `--challenge` age
 | Happy-path only | "What is the primary failure mode?" |
 | Market / economic claim without evidence | Classify and run the evidence loop ([expert-panel.md](expert-panel.md)). Do not defer TAM/SAM/SOM to research when `premise-critical`. |
 | Seat blocks | Conduct protocol ([expert-panel.md](expert-panel.md)). |
+| About to suggest freeze after gates-clean | **Block suggest** until standard challenge clear or risk-accept — "Standard challenge clear for load-bearing stems? Any upstream reopen open?" (`refs/planning/challenge-layers.md`, [business-case-handoff.md](business-case-handoff.md)) |
+| Auto-reflection at level transition | Run standing self-challenge ([goal-anchor.md](goal-anchor.md)); never skip because checklist advanced |
 
 ## Exploration rules
 
@@ -66,7 +68,7 @@ Runs **after** stage-exit blind-spots (Gate 6), Gate 7 viability, and `refs/plan
 This is thinner than discovery-time Gate 5 and does **not** re-run the blind-spot taxonomy:
 
 1. Run the sweep (trigger 4).
-2. **One pass** over remaining gaps and obvious improvements (missing non-goal, unmeasurable metric, unaccepted `blocking` assumption, compose `sections_incomplete`, open queue, binding `hold`).
+2. **One pass** over remaining gaps and obvious improvements (missing non-goal, unmeasurable metric, unaccepted `blocking` assumption, compose `sections_incomplete`, open queue, binding `hold`, **auto-reflection not run this transition**).
 3. Surface at most a handful of questions; user may accept **non-viability** gaps. User may not silently accept an open queue or binding `hold`/`kill` — drain, pivot, or confirm kill with a revival trigger.
 4. **Max one fix cycle** — re-compose affected levels once if the user supplies fixes (compose overwrites files). Do not loop.
 5. Then skill writes `session-state.json` only.

@@ -96,8 +96,21 @@ Same once-announce fallback as Discover: prefer `docs/rr/{track}/plan/`; if only
 | Value | Plan behavior |
 |-------|---------------|
 | `shallow` | Gates light; research/challenge optional |
-| `standard` | Full Plan gates + smell before freeze |
-| `deep` | + research + technical challenge (Plan challenge-method) |
+| `standard` | Full Plan gates + smell before freeze; challenge default = **standard** layer |
+| `deep` | + research + technical challenge at **deep** layer (exhaustive) |
+
+### Challenge depth
+
+| Signal | `challenge_depth` | Attestation when clean |
+|--------|-------------------|------------------------|
+| `--challenge` / `--review` without `deep` | `standard` | `clean-shallow` |
+| `--challenge deep` / `--depth deep` with challenge in chain / NL “deep challenge” | `deep` | `clean-deep` |
+
+Parse `deep` as a challenge mode, not “`--challenge` means deep.” Layers: `refs/planning/challenge-layers.md`.
+
+### Solid-subset Plan body
+
+Entry gate still requires frozen BRD + handoff for **freeze mint** and default compose. Skill may allow **Plan body work** citing a draft Discover solid subset when that subset is load-bearing-stable — stamp impact obligations; do not mint frozen pins against unfrozen parents (`PARENT_UNFROZEN`). On Discover upstream change, auto-mark Plan downstream impact.
 
 ## NL intent fallback
 
@@ -162,8 +175,9 @@ Load `docs/rr/rrr-status.yaml` (fall back to legacy `docs/rrr-status.yaml`), the
 
 Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 
-1. Frozen BRD + valid `business-case.yaml`
-2. On fail → `PLAN_ENTRY_REFUSED` (AskQuestion: migrate brownfield | run `rr-discovery` | abort)
+1. Frozen BRD + valid `business-case.yaml` — **required to mint** freeze / handoff pins
+2. On fail → `PLAN_ENTRY_REFUSED` for freeze-slice and default silent compose. For exploratory Plan body on a **solid subset** of draft Discover: AskQuestion confirm subset + impact tracking — do not invent frozen pins
+3. On hard fail (no path) → AskQuestion: migrate brownfield | run `rr-discovery` | abort
 
 ## Normalized payload schema
 
@@ -174,6 +188,7 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
   "output_dir": "{PROJECT_ROOT}/docs/rr/0.1/plan/",
   "format": "md",
   "depth": "standard",
+  "challenge_depth": "standard",
   "question_mode": "ask",
   "resume": false,
   "route": "continue-prd",
@@ -198,9 +213,9 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 | `prd` / `change` | `["prd"]` | `["compose"]` (+ humanize by skill) |
 | `freeze-slice` | `[]` | `["slice-freeze"]` |
 | `research` | `[]` | `["research"]` |
-| `challenge` | `[]` | `["challenge"]` |
+| `challenge` | `[]` | `["challenge"]` — mode from `challenge_depth` |
 | `setup` | `[]` | `["setup"]` |
-| `depth: deep` | — | append `research`, `challenge` after compose when applicable |
+| `depth: deep` | — | append `research`, `challenge` after compose when applicable; set `challenge_depth: deep` |
 
 ## Deterministic errors
 
