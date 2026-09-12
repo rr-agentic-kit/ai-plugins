@@ -27,12 +27,12 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 ### Step 2: `learn-2-investigate`
 
 - **Outcome:** Gaps classified against on-disk procedure—not chat vibes alone.
-- **Done when:** Effort bar below completed (including **behavior curiosity** + **genericness** filter); manual interventions and run-friction signals mapped to procedure loci; each candidate classified `skill_gap` \| `preference_oneoff` \| `env_tool` \| `already_covered`.
+- **Done when:** Effort bar below completed (including **behavior curiosity**, **genericness**, **layer-split**, and **mechanism-completeness**); manual interventions and run-friction signals mapped to procedure loci; each candidate classified `skill_gap` \| `preference_oneoff` \| `env_tool` \| `already_covered`.
 
 ### Step 3: `learn-3-topics`
 
 - **Outcome:** Capped topics report ready for human gate.
-- **Done when:** Topics report emitted from `templates/learn-topics.template.md` (≤7 topics; only `skill_gap` default-selected); **approve-learn-topics** gate (approve / edit / drop / abort).
+- **Done when:** Topics report emitted from `templates/learn-topics.template.md` (≤7 topics; only `skill_gap` default-selected); **adequacy probe** passed or gaps added/dropped with reason (see effort bar §9); **approve-learn-topics** gate (approve / edit / drop / abort).
 
 ### Step 4: `learn-4-handover`
 
@@ -49,15 +49,18 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 1. Resolve and Read the target `SKILL.md` (and sibling README if present for When/What mismatch only).
 2. For the action(s) that failed or showed friction: Read every ref named in that action’s Ref index (and SKILL Ref index entries those steps require). Do **not** skim SKILL alone.
 3. Reconstruct intended step sequence vs chat: what the agent skipped, invented, or what the human patched.
-4. **Behavior curiosity (tool/read budget):** Reconstruct which Reads/tools the procedure forced vs what the agent actually did—over-read, serial where Ref index co-names peers, round-trips that one step could batch. Candidate absorb shapes: `batch` (parallel tool/Task coalesce in procedure step text), `read-budget` (fewer staged Loads / merge co-named refs into one step instruction), or existing `step` / `stop-rule` / `ref` when procedure text is the locus. Point absorb at procedure step text / Ref index—do **not** teach slash-command chaining (`chat-orchestration.md`).
-5. **Genericness gate:** Ask “Would this change help the next project with different domain files?” No → `preference_oneoff`. Yes + procedure locus → `skill_gap`.
-6. Drop `already_covered` and default-deselect `preference_oneoff` / `env_tool` (still list under Auto-dropped).
-7. Cap **7** topics; merge related gaps; each topic needs evidence + skill locus + absorb shape (`step` \| `stop-rule` \| `ref` \| `anti-trigger` \| `probe` \| `readme-when` \| `batch` \| `read-budget`).
+4. **Layer-split (founder/human corrections):** Before merging into topics, split multi-clause corrections into layers — (1) **outcome/success**, (2) **standing mechanism/reflex**, (3) **persistence/session**, (4) **stop-rule/anti-trigger**. Each non-empty layer → a candidate topic **or** an Auto-dropped row with explicit reason. Do **not** collapse a mechanism layer into Purpose/README prose alone.
+5. **Behavior curiosity (tool/read budget):** Reconstruct which Reads/tools the procedure forced vs what the agent actually did—over-read, serial where Ref index co-names peers, round-trips that one step could batch. Candidate absorb shapes: `batch` (parallel tool/Task coalesce in procedure step text), `read-budget` (fewer staged Loads / merge co-named refs into one step instruction), or existing `step` / `stop-rule` / `ref` when procedure text is the locus. Point absorb at procedure step text / Ref index—do **not** teach slash-command chaining (`chat-orchestration.md`).
+6. **Genericness gate:** Ask “Would this change help the next project with different domain files?” No → `preference_oneoff`. Yes + procedure locus → `skill_gap`.
+7. Drop `already_covered` and default-deselect `preference_oneoff` / `env_tool` (still list under Auto-dropped).
+8. **Mechanism-completeness:** For each `skill_gap` that changes outcome, success metric, north-star, or Purpose language, require a companion absorb that forces runtime behavior (`step` \| `stop-rule` \| `probe` \| `anti-trigger`) — or mark the topic incomplete and add the companion. Purpose/README-only is **not** enough unless Auto-dropped states “prose-only OK” + reason.
+9. Cap **7** topics; merge related gaps; each topic needs evidence + skill locus + absorb shape (`step` \| `stop-rule` \| `ref` \| `anti-trigger` \| `probe` \| `readme-when` \| `batch` \| `read-budget`). **Anti-trigger:** when under the cap, prefer dropping a duplicate outcome row over dropping the **only** mechanism companion (`step`/`probe`/`stop-rule`/`anti-trigger`) for an outcome/redesign topic.
+10. **Adequacy probe (before approve-learn-topics):** Ask once — “Would absorb of *only* these selected topics still miss an operational nuance the founder/human named?” If yes → add a topic or list under Auto-dropped with reason. Do not present a philosophy-only package as complete.
 
 ## Stop
 
 - Learn **never** edits the target skill definition (absorb via **fix** / **redesign** on **plugin source** only).
 - Learn **never** writes into runtime/cache/installed skill copies — handover → **user project**; absorb → **source**.
-- No bible-sized handover: target + miss + approved table + non-goals + fix-vs-redesign hint only.
+- No bible-sized handover: target + miss + approved table + non-goals + fix-vs-redesign hint only — **but** lean must not erase mechanism layers (effort bar §4, §8, §9).
 - No live run evidence (and no problem statement) → wrong action (use audit/fix). Painful-but-“successful” runs still count as live run evidence.
 - Creating a new artifact → **create** / **extract**, not learn.

@@ -26,6 +26,8 @@ Emit at **learn-3-topics**. Cap **7** topics. Only `skill_gap` rows default-sele
 
 ## Checkpoint
 
+**Adequacy probe (required before ask):** Would absorb of *only* the selected topics still miss an operational nuance the founder/human named? If yes → add topic or Auto-drop with reason — do not ship philosophy-only as complete.
+
 Approve selected topics / edit (reselect, rewrite locus) / drop topic / abort learn.
 ```
 

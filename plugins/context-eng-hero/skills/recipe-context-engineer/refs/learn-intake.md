@@ -31,3 +31,7 @@ Use when path or miss is unclear:
 ## Mapping rule
 
 Miss source must be bound before step 2 (`learn-2-investigate`) completes. Evidence = run behavior or problem statement—do not invent FAILs without that evidence. User may edit auto-topics later at the approve gate.
+
+## Investigate done-when extras (layer-split)
+
+When miss evidence includes founder/human teaching or multi-clause corrections, investigation is incomplete until effort-bar **layer-split** and **mechanism-completeness** in `refs/actions/learn.md` have been applied — outcome reframe alone is not enough.
