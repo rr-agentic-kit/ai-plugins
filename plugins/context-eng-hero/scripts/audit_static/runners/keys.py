@@ -12,7 +12,14 @@ _REQUIRED_KEYS: dict[str, list[str]] = {
 
 
 def run_keys(ctx: AuditContext) -> list[CheckResult]:
-    if ctx.artifact_type in {"workflow", "skill-readme", "ref-file", "unknown"}:
+    if ctx.artifact_type in {
+        "workflow",
+        "skill-readme",
+        "ref-file",
+        "acronyms",
+        "glossary",
+        "unknown",
+    }:
         return []
     keys = _REQUIRED_KEYS.get(ctx.artifact_type, [])
     missing = [

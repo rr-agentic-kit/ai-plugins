@@ -85,3 +85,21 @@ Sibling `skills/<name>/README.md`. Frontmatter optional. Static requires **Why**
 | **Notes** | `skill-ref.readme.spec` |
 | No Procedure echo | `SPEC_DEFINITION_DRIFT` (judgment + pre-ship 2.4) |
 | No paths above Notes | `skill-ref.readme.spec` |
+
+## ACRONYMS (`templates/acronyms.template.md`)
+
+Plugin root (or skill sibling). Always required; empty table or `None yet` OK.
+
+| Marker / section | Rubric id(s) |
+|------------------|--------------|
+| H1 + table | `static.acronyms.present`, `static.acronyms.shape`, `skill.acronyms.present` |
+| Domain rows / coverage | `skill.acronyms.coverage` (judgment); pre-ship 2.5 |
+
+## GLOSSARY (`templates/glossary.template.md`)
+
+Same placement as ACRONYMS. Always required; empty table or `None yet` OK.
+
+| Marker / section | Rubric id(s) |
+|------------------|--------------|
+| H1 + table | `static.glossary.present`, `static.glossary.shape`, `skill.glossary.present` |
+| Overloaded-term coverage | `skill.glossary.coverage` (judgment); pre-ship 2.6 |

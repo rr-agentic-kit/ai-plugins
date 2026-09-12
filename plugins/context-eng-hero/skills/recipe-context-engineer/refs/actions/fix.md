@@ -15,6 +15,9 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 | `instruction-design.md` | `fix-2-plan` |
 | `skill-invocation.md` | `fix-3-apply` (skills) |
 | `readme-spec.md` | `fix-3-apply` (skill folders) |
+| `lexicon-spec.md` | `fix-2-plan`, `fix-3-apply` (`acronyms.*` / `glossary.*` FAILs) |
+| `templates/acronyms.template.md` | `fix-3-apply` (missing/wrong ACRONYMS.md) |
+| `templates/glossary.template.md` | `fix-3-apply` (missing/wrong GLOSSARY.md) |
 | `helper-cli.md` | `fix-3-apply` (when `scripts/`) |
 | `template-required-map.md` | `fix-3-apply` |
 | `templates/<type>.template.md` (per `classify.md`) | `fix-3-apply` |
@@ -34,12 +37,12 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 ### Step 2: `fix-2-plan`
 
 - **Outcome:** Minimal diff plan addresses **every** listed FAIL or mapped symptom.
-- **Done when:** Each failed check id maps to a concrete edit; `fix-intake.md` done-when satisfied; no unrelated refactors; eval-first minimum scope.
+- **Done when:** Each failed check id maps to a concrete edit; `fix-intake.md` done-when satisfied; no unrelated refactors; eval-first minimum scope; `acronyms.*` / `glossary.*` / `static.acronyms.*` / `static.glossary.*` FAILs map to create/update of the failing companion file(s) per `lexicon-spec.md`.
 
 ### Step 3: `fix-3-apply`
 
 - **Outcome:** Edits applied to draft.
-- **Done when:** All planned fixes applied in memory or working copy.
+- **Done when:** All planned fixes applied in memory or working copy—including lexicon companion creates/updates when those ids failed.
 
 ### Step 4: `fix-4-gates`
 

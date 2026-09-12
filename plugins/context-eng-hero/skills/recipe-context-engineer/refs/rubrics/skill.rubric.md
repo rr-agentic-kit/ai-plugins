@@ -34,3 +34,7 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | `skill.noise.signal-ratio` | minor | No paragraph is generic encouragement only (“be helpful”, “best practices”) without a testable constraint |
 | `skill.orchestration.todo-mapping` | minor | Multi-step **Procedure** tells author to use TodoWrite for verifiable steps, or states single-shot N/A in one line |
 | `skill.refs.load-efficiency` | minor | Files in this artifact's **Load** list do not duplicate each other's content; no ref is a strict subset of another co-loaded ref |
+| `skill.acronyms.present` | minor | `ACRONYMS.md` exists at resolved path per `lexicon-spec.md` (plugin root or skill sibling); H1 + table shape |
+| `skill.acronyms.coverage` | minor | Domain acronyms used in the artifact/pack have expansions in `ACRONYMS.md` (skip ubiquitous HTTP/JSON/URL unless redefined); wrong expansions FAIL |
+| `skill.glossary.present` | minor | `GLOSSARY.md` exists at resolved path; H1 + table with Term + Meaning columns |
+| `skill.glossary.coverage` | minor | Overloaded terms used with a plugin-specific sense are defined in `GLOSSARY.md`; wrong or missing sense FAIL |

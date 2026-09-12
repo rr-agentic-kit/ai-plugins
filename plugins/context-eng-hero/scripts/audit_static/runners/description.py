@@ -5,7 +5,14 @@ from audit_static.report import check
 
 
 def run_description(ctx: AuditContext) -> list[CheckResult]:
-    if ctx.artifact_type in {"workflow", "skill-readme", "ref-file", "unknown"}:
+    if ctx.artifact_type in {
+        "workflow",
+        "skill-readme",
+        "ref-file",
+        "acronyms",
+        "glossary",
+        "unknown",
+    }:
         return []
 
     desc = (ctx.fm or {}).get("description", "")

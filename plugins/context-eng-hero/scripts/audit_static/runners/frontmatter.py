@@ -5,7 +5,9 @@ from audit_static.report import check
 
 FM_DELIMITERS = "static.frontmatter.delimiters"
 FM_PARSEABLE = "static.frontmatter.parseable"
-_OPTIONAL_FM_TYPES = frozenset({"workflow", "skill-readme", "ref-file", "unknown"})
+_OPTIONAL_FM_TYPES = frozenset(
+    {"workflow", "skill-readme", "ref-file", "acronyms", "glossary", "unknown"}
+)
 
 
 def run_frontmatter(ctx: AuditContext) -> list[CheckResult]:

@@ -44,3 +44,11 @@ def test_ref_file_shallow():
 
 def test_ref_file_nested_doc_standards():
     assert m.detect_type(Path("skills/x/refs/doc-standards/es.md")) == "ref-file"
+
+
+def test_acronyms_path():
+    assert m.detect_type(Path("ACRONYMS.md")) == "acronyms"
+
+
+def test_glossary_path():
+    assert m.detect_type(Path("GLOSSARY.md")) == "glossary"

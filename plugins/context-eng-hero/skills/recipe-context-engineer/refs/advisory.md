@@ -37,6 +37,15 @@ Skills that ship to humans need a sibling **README** per `readme-spec.md`—crea
 
 Do **not** clone legacy Goals/Scope/Audience/When-to-use section scripts. Do **not** paste Procedure into README.
 
+## Lexicon companions (always required)
+
+Plugins (and standalone skills) need `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md`—even with zero entries. Placement: plugin root when `.cursor-plugin/` or `.claude-plugin/` exists; else sibling to `SKILL.md`. Harvest on create/design/redesign/extract; **fix** repairs `acronyms.*` / `glossary.*` FAILs.
+
+| File | Holds |
+|------|-------|
+| `ACRONYMS.md` | Short forms → expansion (domain jargon; skip ubiquitous HTTP/JSON/URL unless redefined) |
+| `GLOSSARY.md` | Overloaded terms with canonical plugin sense |
+
 ## Hidden-requirements catalog
 
 Check before authoring. Surface gaps the user did not mention; do not re-ask what they already answered.
@@ -51,6 +60,7 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **Invoke mode** — Auto / Slash-or-parent / Background chosen before drafting `description` and flags (`refs/skill-invocation.md`)
 - **Scripts folder** — If `scripts/` exists: agent **runs** helpers via shell; do not paste script bodies into SKILL (`refs/helper-cli.md`)
 - **README** — Sibling spec with Why/What/When; does not restate Procedure (`refs/readme-spec.md`)
+- **ACRONYMS + GLOSSARY** — Both companions at resolved path; table shape; harvest domain jargon (`refs/lexicon-spec.md`)
 
 **Skill+Ref additional:**
 

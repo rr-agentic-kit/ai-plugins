@@ -30,3 +30,7 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 | `skill-ref.readme.philosophy` | minor | **Philosophy** present when skill has eval-first, gates, or methodology; 3–6 principle bullets, no prose blocks |
 | `skill-ref.readme.ux` | minor | **UX** present when skill has clarify loops, gates, or multi-step close; `###` subsections (Invoke, Intake, Clarify, Output, Close) each ≤2 lines |
 | `skill-ref.readme.design-notes` | minor | **Design notes** present only when ≥2 non-obvious product tradeoffs exist; no process meta |
+| `skill.acronyms.present` | minor | Pack has `ACRONYMS.md` at plugin root (or skill sibling if standalone) per `lexicon-spec.md` |
+| `skill.acronyms.coverage` | minor | Domain acronyms in SKILL/refs appear in `ACRONYMS.md` with correct expansions |
+| `skill.glossary.present` | minor | Pack has `GLOSSARY.md` at resolved path |
+| `skill.glossary.coverage` | minor | Overloaded plugin terms in SKILL/refs have canonical senses in `GLOSSARY.md` |

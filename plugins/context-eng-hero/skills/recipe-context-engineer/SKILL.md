@@ -55,6 +55,9 @@ Every invocation follows this loop. Compress steps only when the user message al
 | `refs/skill-invocation.md` | Authoring skills |
 | `refs/readme-spec.md` | Skill folder README (bidirectional spec) |
 | `refs/templates/readme.template.md` | Extract/create skill README |
+| `refs/lexicon-spec.md` | Plugin/skill ACRONYMS + GLOSSARY companions |
+| `refs/templates/acronyms.template.md` | Create/harvest ACRONYMS.md |
+| `refs/templates/glossary.template.md` | Create/harvest GLOSSARY.md |
 | `refs/helper-cli.md` | Target has `scripts/` |
 | `refs/template-required-map.md` | Drafting; reflection evidence |
 | `refs/rubrics/` | Type judgment rubrics (audit, reflection) |

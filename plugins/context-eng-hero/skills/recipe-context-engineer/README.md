@@ -12,6 +12,7 @@ Plugin teams ship skills, commands, rules, agents, and workflows that other engi
 
 - **Artifact types:** Skill, Skill+Ref, ref file, command, agent, rule, workflow
 - **Human spec:** Sibling `README.md` holds Why/What/When; `SKILL.md` holds Procedure (bidirectional per `refs/readme-spec.md`)
+- **Lexicon:** Plugin-root `ACRONYMS.md` + `GLOSSARY.md` (always required; harvest on create/design/redesign/extract per `refs/lexicon-spec.md`)
 
 **Out of scope:** Production application code; repo-wide review without a declared artifact path.
 
@@ -95,6 +96,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 | **Write gates** | Static → pre-write reflection → pre-ship → approve-revise-abort |
 | **Paths** | Plugin-relative only; no `..` or absolute paths in authored content |
 | **README ↔ SKILL** | README = spec; SKILL = executor. Extract derives README from SKILL constraints, not Procedure paste |
+| **Lexicon** | `ACRONYMS.md` + `GLOSSARY.md` at plugin root (or skill sibling if standalone); harvest jargon; empty tables allowed |
 | **Clarify caps** | Path unresolvable after 2 AskQuestion rounds → stop; action unresolvable after 1 → default design-assist |
 | **Write gate cap** | FAIL after 2 revision cycles → draft-only in chat |
 

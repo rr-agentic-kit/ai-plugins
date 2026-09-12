@@ -14,6 +14,9 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 | `frontmatter-schemas.md` | `redesign-2-plan`, `redesign-3-apply` |
 | `skill-invocation.md` | `redesign-3-apply` (skills) |
 | `readme-spec.md` | `redesign-3-apply` (skill folders) |
+| `lexicon-spec.md` | `redesign-3-apply` (ACRONYMS + GLOSSARY) |
+| `templates/acronyms.template.md` | `redesign-3-apply` (ACRONYMS.md) |
+| `templates/glossary.template.md` | `redesign-3-apply` (GLOSSARY.md) |
 | `helper-cli.md` | `redesign-3-apply` (when `scripts/`) |
 | `template-required-map.md` | `redesign-3-apply` |
 | `templates/<type>.template.md` (per `classify.md`) | `redesign-3-apply` |
@@ -38,7 +41,7 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 ### Step 3: `redesign-3-apply`
 
 - **Outcome:** Redesigned draft applied.
-- **Done when:** All planned edits applied in memory or working copy.
+- **Done when:** All planned edits applied in memory or working copy; harvest new/changed jargon into `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md` (ensure both exist at resolved path).
 
 ### Step 4: `redesign-4-gates`
 
