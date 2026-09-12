@@ -39,6 +39,7 @@ class Item:
     kind: str
     spec: str
     status: str | None = None
+    priority: str | None = None
     tag: str | None = None
     goal_type: str | None = None
     reach: str | None = None
@@ -80,6 +81,8 @@ class Item:
         }
         if self.status is not None:
             record["status"] = self.status
+        if self.priority is not None:
+            record["priority"] = self.priority
         if self.tag is not None:
             record["tag"] = self.tag
         if self.supersedes:

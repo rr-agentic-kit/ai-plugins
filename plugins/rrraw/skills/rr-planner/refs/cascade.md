@@ -1,116 +1,110 @@
 # cascade
 
-**Owner:** Top-down level order, inheritance/narrowing rules, freeze/remap, and per-level completion gates.
+**Owner:** Plan level order, inheritance/narrowing, freeze/remap, per-level cycle variants and gates. Orchestration is SKILL Procedure step 4. Discover cascade (ES→MRD→BRD + business-case) is owned by `rr-discovery`.
 
-## Pre-cascade: project posture
+## Entry gate (before Plan)
 
-Before exec-summary, run [project-posture.md](project-posture.md). Done: that ref's persist condition.
+SoT: [input-resolution.md](input-resolution.md) Entry gate (frozen BRD + `business-case.yaml`; brownfield = one AskQuestion). Do not restate conditions here.
 
-## Level order
+## Pre-Plan: posture
 
-Fixed sequence — never skip a level in `standard`/`deep` depth (`shallow` trims per [input-resolution.md](input-resolution.md)):
+Before minting PRD / standing structure, run [project-posture.md](project-posture.md) **PRD-shape + `arch_doc_mode`** (existence/commitment already confirmed in Discover). Offer Coach/Fast once ([plan-interview.md](plan-interview.md)). Do not re-run Discover posture/ideation.
+
+## Level order (Plan)
 
 ```
-1. exec-summary  — posture, vision, problem, why
-2. mrd           — market context
-3. brd           — business requirements
-4. prd           — product requirements
+standing architecture (+ constitution) → PRD (full requirements) → select → AC smell → challenge? → slice freeze
 ```
 
-Item identity, parent walk, spec/status: [doc-standards/item-schema.md](doc-standards/item-schema.md). Freeze/remap: this file. Mechanism-level detail (shalls, AC, integration points, NFR mechanism, error-handling specifics, requirement-explosion overflow) appends to `{PROJECT_ROOT}/docs/plans/tech.md` — not a cascade doc ([output-formats.md](output-formats.md)).
+Parents are frozen Discover docs — do not recompose them in Plan. Item identity: `refs/planning/doc-standards/item-schema.md`. Standing docs: [architecture.md](doc-standards/architecture.md), [feature-delta.md](doc-standards/feature-delta.md).
 
 ```mermaid
 flowchart TD
-  ES["ES-n"] --> MRD["MRD-n.m"]
-  MRD --> BRD["BRD-n.m"]
-  BRD --> PRD["PRD-n.m"]
+  BC["business-case.yaml"] --> Gate["Entry gate"]
+  Gate --> Posture["PRD-shape + arch_doc_mode"]
+  Posture --> Standing["architecture spine +/- constitution"]
+  Standing --> Interview["interview + score/architect"]
+  Interview --> FullReq["full requirements P1-P3"]
+  FullReq --> Select["status selected subset"]
+  Select --> Smell["WWAS + req-smell"]
+  Smell --> Challenge["tech challenge?"]
+  Challenge --> Slice["slice freeze + execute-slice.yaml"]
 ```
 
 ## Inheritance model
 
-Each level **inherits** all resolved facts from levels above and **narrows** scope:
-
-| Level | Inherits from | Narrows to |
-|-------|---------------|------------|
-| exec-summary | user input, conversation, confirmed `project_posture` | strategic vision, problem framing, and posture |
-| mrd | exec-summary | market segments, competitors, trends relevant to vision |
-| brd | exec-summary + mrd | business objectives, stakeholders, constraints |
-| prd | exec-summary + mrd + brd | product capabilities, user outcomes, priorities |
+| Artifact | Inherits from | Narrows to |
+|----------|---------------|------------|
+| prd | Frozen ES + MRD + BRD + handoff | Capabilities, full requirements, WWAS AC, selection |
+| architecture / deltas | Discover constraints + PRD capabilities | Invariants + feature mechanism |
 
 ### Inheritance rules
 
-1. **No contradiction** — child facts must align with parent facts. Conflict → [goal-anchor.md](goal-anchor.md) + question (per `question_mode`).
-2. **No orphan items** — parent walk and cross-doc previous-level-only: [doc-standards/item-schema.md](doc-standards/item-schema.md). Verified by `validate_planning.sh` (Gate 3 + [success-criteria.md](success-criteria.md) static).
-3. **Explicit narrowing** — when a parent fact is too broad for the child level, record the narrowing as a decision in `session-state.json`.
-4. **Unknown vs off-level** — details not yet known *at this level* are `assumptions[]` or `open_questions[]`, not silently invented. Off-level content: [note-sessions.md](note-sessions.md). Mechanism-level detail that surfaces during PRD (or any level) appends to `tech.md`; deferred topics the user wants to revisit append to `later.md` ([output-formats.md](output-formats.md)).
+1. **No contradiction** — Plan facts align with frozen parents and handoff. Conflict → [goal-anchor.md](goal-anchor.md).
+2. **No orphan items** — item-schema; verified by `validate_planning.sh`.
+3. **Explicit narrowing** — record as a decision in `session-state.json`.
+4. **Unknown vs off-level** — [note-sessions.md](note-sessions.md). Market/viability reopen → park and route to `rr-discovery`.
+5. **Selection ≠ shrink** — `_status_:` only; never delete deferred requirements to “match the slice.”
+6. **Backward-chain challenge** — If current parents cannot support builder→Discover-objective (wrong Musts, Cost vs WWAS drift, obligation lies), Plan must challenge Discover: emit ranked Plan→Discover reopen candidates and route `ask-discover` — do not silent-unfreeze or bury as Plan-only HOLD ([goal-anchor.md](goal-anchor.md)).
 
-## Per-level discovery flow (skill-inline)
+## Per-level cycle
 
-For each level in `cascade_levels`:
+Orchestration owns the skill (SKILL Procedure step 4). For `prd` / `change` / `freeze-slice`, apply only Plan-variant work:
 
-1. Load `doc-standards/<level>.md` and [doc-standards/item-schema.md](doc-standards/item-schema.md). Extract required sections; claims are items (prose overviews stay unnumbered).
-2. On level entry: re-decision sweep ([decision-ledger.md](decision-ledger.md) trigger 2); then sidecar load ([note-sessions.md](note-sessions.md)). Do not start new questions until parked notes are addressed or kept as still-unclear.
-3. Load [goal-anchor.md](goal-anchor.md) for the entire discovery pass.
-4. Present inherited facts (brief). **Exec-summary only:** premise test ([expert-panel.md](expert-panel.md)) after posture + `domain_context`.
-5. Ask for gaps in required sections. New items: [doc-standards/item-schema.md](doc-standards/item-schema.md) spec defaults. Mint the ledger rationale when a ranked-leaf decision is made ([decision-ledger.md](decision-ledger.md)).
-6. After every Q&A: [note-sessions.md](note-sessions.md) + append `raw-history/{UTC}.yaml`. After every evidence round: [expert-panel.md](expert-panel.md) evidence loop + sweep (trigger 1). On reflect trigger → [proactivity.md](proactivity.md) (Gate 5; `standard`/`deep` only). PRD after shape is set: run PRD-shape reflection ([project-posture.md](project-posture.md)) once before Gate 6.
-7. Accumulate `level_facts` (include `Rationale` ids for ranked leaves). Compose consumes notes for this `doc_type` only.
-8. Invoke compose ([contracts.md](contracts.md)). Confirm overwrite **before first compose** if files exist from a prior run; intra-session re-compose overwrites without asking. After persist: prune ([note-sessions.md](note-sessions.md)). If that doc’s `challenge.status` is `clean-shallow`, `clean-deep`, or `dirty-accepted`, skill sets it `dirty` ([baselines.md](baselines.md)). Compose does not write `status.yaml`.
-9. Clarification loop ([contracts.md](contracts.md)). Append raw-history on each answer before re-invoke.
-10. Refresh `item_registry` from `items.json`. Gate 3 static ([success-criteria.md](success-criteria.md)).
-11. Gate 6 then Gate 7 (table below). On Gate pass: **freeze** this level (Freeze and remap) — `frozen_levels` in session-state **and** a docs-patch mint in `status.yaml` ([baselines.md](baselines.md)). Compose does not increment track/patch/rev.
+| Phase | Variant (Plan) |
+|-------|----------------|
+| Load | [prd.md](doc-standards/prd.md) + item-schema + [plan-interview.md](plan-interview.md) |
+| Entry | Re-decision sweep (`refs/planning/decision-ledger.md`); [note-sessions.md](note-sessions.md) sidecar; handoff summary; then Pre-Plan posture above |
+| Standing | Spine (+ constitution per mode); feature deltas when scoring ([system-design.md](system-design.md), [adr-lite.md](adr-lite.md), [architecture.md](doc-standards/architecture.md), [feature-delta.md](doc-standards/feature-delta.md)) |
+| Interview / score | [plan-interview.md](plan-interview.md) → [prioritization-lens.md](prioritization-lens.md); Effort gated by [system-design.md](system-design.md); mint ledger rationale on ranked leaves; after Q&A → notes + raw-history; reflect → [proactivity.md](proactivity.md) |
+| Requirements / select | Full P1–P3 set retained (`_status_:` only — never shrink the table). **Thin select:** prefer a buildable kernel subset and shorter Plan cycles over doc-only breadth; defer the rest with status — do not delete rows or invent a “docs-complete” slice ([execute-handoff.md](execute-handoff.md)) |
+| Compose | Compose `Task` (`doc_type: prd` only) → **mandatory** `skills/rr-discovery/refs/compose-prose.md`; clarification loop (`refs/planning/contracts.md`); dirty challenge attestation when clean (`refs/planning/baselines.md`) |
+| Exit | WWAS + [req-smell.md](req-smell.md); optional tech challenge (inject Plan [challenge-method.md](challenge-method.md); compact `parent_summary`); [execute-handoff.md](execute-handoff.md) slice freeze; whole-PRD freeze = optional structure lock only |
 
-## Stop and resume
-
-User may stop at any point ("stop", "pause", "done for now", etc.):
-
-1. Leave composed files on disk, including the current unfrozen level (drafts until freeze). Do not rewrite cascade docs. Do not run pre-save reflection.
-2. Checkpoint full `session-state.json` to `--output-dir` ([output-formats.md](output-formats.md)). Do not prune sidecars on pause ([note-sessions.md](note-sessions.md) owns prune).
-3. Set `checkpoint.status: paused` with `current_level` and `pending_clarifications`.
-
-To resume: `rr-planner --resume --output-dir <same-dir>` (or NL "continue planning"). Load checkpoint; sweep (trigger 3); append Q&A to `raw_history_path`; pick up at `current_level`. Remap uses `item_registry`. Ledger summary: [decision-ledger.md](decision-ledger.md). Output-dir defaults and old-dir fallback: [input-resolution.md](input-resolution.md).
+Stop / resume: leave drafts on disk; checkpoint `session-state.json` with `checkpoint.status: paused`. Resume: `rr-planner --resume --output-dir <same-dir>`. Do not rewrite Discover docs.
 
 ## Per-level completion gates
 
-A level is **complete** only when all gates pass. Freeze/advance: Advancing vs stopping.
-
 | Gate | Owner | Done when |
 |------|-------|-----------|
-| 1 Section coverage | this file | Every required section in the matching doc-standard has a resolved fact or explicit assumption `blocking: false` |
-| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | That ref's level-complete conditions; Q&A for this level is in raw-history YAML |
-| 3 Inheritance integrity | [success-criteria.md](success-criteria.md) | Static: `validate_planning.sh`. Judgment: that ref's compose/challenge list |
-| 4 Compose acceptance | [contracts.md](contracts.md) + doc-standard | Compose `status: ok` or user-accepted `partial`; written doc passes done-when; `item_registry` refreshed from `items.json` |
-| 5 Proactivity | [proactivity.md](proactivity.md) | `standard`/`deep` only: that ref's discovery-time stop. Pre-save is not this gate |
-| 6 Stage-exit | [blind-spots.md](blind-spots.md) | That ref's skill-inline stage-exit rules. Premise-critical findings escalate into Gate 7 |
-| 7 Viability | [expert-panel.md](expert-panel.md) | That ref's Gate 7 persist |
+| 1 Section coverage | this file | Required PRD sections resolved or assumed `blocking: false` |
+| 2 Goal anchor | [goal-anchor.md](goal-anchor.md) | That ref's conditions **including Standing self-challenge (auto-reflection)** at phase transitions |
+| 3 Inheritance integrity | `refs/planning/success-criteria.md` | Static + judgment |
+| 4 Compose acceptance | contracts + prd standard | Compose ok/accepted partial; humanize done |
+| 5 Proactivity | [proactivity.md](proactivity.md) | Dual-lens; Effort gated per [system-design.md](system-design.md) |
+| 6 Stage-exit | [blind-spots.md](blind-spots.md) | Technical-plan row; premise-critical → Gate 7 |
+| 7 Viability | [expert-panel.md](expert-panel.md) | Advisory weight vs Discover binding — still required |
+| Slice | [execute-handoff.md](execute-handoff.md) + req-smell + challenge-layers | Kernel mint; selection intact; freeze-suggest = standard-clear or risk-accept |
 
 ## Freeze and remap
 
 | Event | Rule |
 |-------|------|
-| First compose of a level | Mint dense sibling IDs (`1, 2, 3` / `n.1, n.2`). Frontmatter `doc_rev: "?"`. |
-| Cascade gates pass for that level | Add level to `frozen_levels`. IDs freeze. Skill mints `status.yaml`: `rev` `?` → `1` (or lock-target ++), write digest, docs patch++, product patch unchanged, recompute `mint_hash`. If `levels.<doc>.digest` ≠ `challenge.<doc>.scanned_digest` → `dirty`. Freeze does **not** wait on challenge-clean. Major/minor (`track` / `next`) **only** after explicit confirm — never on this mint. |
-| Later insert on a frozen level | Append next integer. Do not renumber existing ids. |
-| Explicit re-compose of a frozen level | Allowed. Compose rewrites child-doc `parent:` and `items.json` in the same invocation so downstream items do not point at vanished parents. Skill refreshes `item_registry` from `items.json`. Obligation-preserving → lock-target (stay frozen, refresh child pins). Obligations break → ask to unfreeze; if minor+ and `next` exists → redirect ([baselines.md](baselines.md)). |
-| `--resume` | Load `item_registry`; continue minting from max sibling index on frozen levels. |
-| `--change` | Section + target. Skill classifies patch vs redirect-to-next vs open-next vs unfreeze. Not CI. |
+| First compose of PRD | Mint dense sibling IDs. Frontmatter `doc_rev: "?"`. |
+| Slice freeze | Primary handoff — `execute-slice.yaml` + `slice:` stamp; architecture may be `draft`. |
+| Whole-PRD structure lock | Optional — add `prd` to `frozen_levels` + docs-patch mint. |
+| Later insert on frozen PRD | Append next integer. Do not renumber. |
+| Explicit re-compose | Allowed with remap; obligation-preserving → lock-target. |
+| `--change` | Section + target. Skill classifies patch vs redirect vs open-next vs unfreeze. |
 
-Unlock / patch-only-current are **skill stops** in [baselines.md](baselines.md), not validator FAILs. `agent.plan.md` only refuses non-patch version work and loads this skill. While `next` is open, current accepts patches only.
-
-Opening a next major.minor (after confirm): set `status.yaml.next`, create `docs/plans/{next}/`, keep `status.yaml` / `agent.plan.md` / `future.md` at `docs/plans/`. Offer to promote matching `future.md` sections — never auto-promote. If that folder already exists, new notes for that track go to `{level}.notes.yaml` there, not `future.md`.
+Unlock / patch-only-current: `refs/planning/baselines.md`.
 
 ## Advancing vs stopping
 
 | Condition | Action |
 |-----------|--------|
-| All gates pass (including Gate 6 and Gate 7 `proceed` / `proceed-with-conditions`); no leftover `partial` notes; re-decision queue empty | Freeze level; mint docs patch in `status.yaml`; dirty challenge attestation if digest moved; advance to next cascade level |
-| Pending clarifications or gate gaps | Surface question → re-discover or re-compose (no round cap) |
-| Gate 7 verdict is `hold` / `pivot` / `kill` | [expert-panel.md](expert-panel.md) verdict ladder (freeze/advance column) |
-| Open re-decision queue | Drain (keep / postpone / kill / revive) before freeze |
-| User says done for level | Accept current state **unless** binding `hold`/`kill` or open queue; else advance or checkpoint per user intent |
-| User requests stop / pause | Checkpoint `session-state.json`; leave files already on disk; skip pre-save; exit cleanly |
-| `--resume` | Load checkpoint; sweep; append raw-history; continue from `current_level` |
+| Smell-clean (or holds); architecture present; selection intact; **and** auto-reflection clear; **and** no open standing red flag / Discover-reopen (or founder accept); **and** nature Done-when met or per-axis HOLD; **and** standard challenge clear **or** risk-accept ([execute-handoff.md](execute-handoff.md), `refs/planning/challenge-layers.md`) | Skill may **auto-suggest** slice freeze; mint kernel on confirm |
+| Standing red flag / Discover-reopen open | Do **not** offer freeze as Next-Up; route `ask-discover` or record founder accept ([note-sessions.md](note-sessions.md)) |
+| Smell-clean alone | **Anti-trigger:** not freeze-ready — run auto-reflection + standard challenge (or risk-accept) first |
+| Open quality debt, user says freeze | **Quality veto** — refuse unless risk-accept AskQuestion → `dirty-accepted` |
+| Draft Discover / solid subset | Work advance allowed when cited subset load-bearing-stable; freeze mint still needs frozen parents |
+| Pending clarifications or gate gaps | Surface question → re-compose |
+| Gate 7 `hold` / `pivot` / `kill` | expert-panel verdict ladder |
+| Sprint/capacity language | Refuse; reframe as slice selection |
+| Market/viability reopen | Route to `rr-discovery` — do not silent-unfreeze Discover |
+
+Next Up close habits: `refs/planning/progress.md`. Process-ownership: [`INTENT.md`](../../../INTENT.md) UX.
 
 ## Session state
 
-Persist and schema: [output-formats.md](output-formats.md) `session-state.json`. Skill updates `level_facts`, `item_registry` (from `items.json` after compose), `frozen_levels`, `project_posture` (including `domain_context`), `viability[]`, `note_sessions`, and `composed_docs` paths across levels. Skill writes `decision-ledger.yaml` and `status.yaml` ([baselines.md](baselines.md)), including challenge attestation (compose persist dirties; freeze mint dirties on digest mismatch). Checkpoint on stop and after each level freeze (`raw_history_path` required once Q&A has started). Compose writes cascade docs and `items.json`. Compose does not write `status.yaml`.
+Persist: `refs/planning/output-formats.md`. Skill updates `level_facts`, `item_registry`, `frozen_levels`, `composed_docs`, ledger, `status.yaml` (incl. `slice:`). Compose writes `prd.md` + `items.json`; skill owns standing docs mint paths and slice kernel.

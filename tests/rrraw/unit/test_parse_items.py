@@ -23,7 +23,7 @@ def test_parse_unranked_em_dash():
 ## ES-1: Competitive window
 _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 """
-    items, _ = vp.parse_markdown(text, "exec-summary.md")
+    items, _ = vp.parse_markdown(text, "executive-summary.md")
     leaf = items[0]
     assert leaf.parent is None
     assert leaf.moscow is None
@@ -50,15 +50,35 @@ _parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active 
     assert "MALFORMED_META" not in error_codes(issues)
     leaf = items[0]
     assert leaf.status == "in_progress | shipped"
+    assert "INVALID_VALUE" in error_codes(issues)
 
 
 def test_unknown_metadata_key():
     text = """\
 ## ES-1: Vision
-_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: — | _priority_: P0
+_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: — | _foo_: bar
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "UNKNOWN_KEY" in error_codes(issues)
+
+
+def test_priority_on_es_unknown_value_or_scope():
+    text = """\
+## ES-1: Vision
+_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: Must | _priority_: P0
+"""
+    items, issues = vp.parse_markdown(text, "executive-summary.md")
+    assert "INVALID_VALUE" in error_codes(issues)
+    scope = vp.check_required_fields(items)
+    # P0 fails enum before scope; valid P1 on ES still fails scope
+    text_p1 = """\
+## ES-1: Vision
+_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: Must | _priority_: P1
+"""
+    items_p1, parse_issues = vp.parse_markdown(text_p1, "executive-summary.md")
+    assert not error_codes(parse_issues)
+    assert "PRIORITY_SCOPE" in error_codes(vp.check_required_fields(items_p1))
+    _ = scope
 
 
 def test_missing_required_key():
@@ -66,7 +86,7 @@ def test_missing_required_key():
 ## ES-1: Vision
 _kind_: leaf | _spec_: idea | _moscow_: —
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "MISSING_KEY" in error_codes(issues)
 
 
@@ -75,7 +95,7 @@ def test_malformed_meta_line():
 ## ES-1: Vision
 Parent: none
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "MALFORMED_META" in error_codes(issues)
 
 
@@ -87,7 +107,7 @@ def test_stale_list_meta():
 - **Spec:** idea
 - **MoSCoW:** —
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "STALE_FORMAT" in error_codes(issues)
 
 
@@ -98,7 +118,7 @@ _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 
 Vision without quotes.
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "BODY_NOT_BLOCKQUOTE" in error_codes(issues)
 
 
@@ -123,7 +143,7 @@ def test_parse_missing_metadata_line():
     text = """\
 ## ES-1: Vision
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md")
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
     assert "MALFORMED_META" in error_codes(issues)
 
 
@@ -134,9 +154,9 @@ def test_parse_list_meta_unknown_key():
 - **Kind:** leaf
 - **Spec:** idea
 - **MoSCoW:** —
-- **Priority:** P0
+- **Foo:** bar
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md", migrate=True)
+    _, issues = vp.parse_markdown(text, "executive-summary.md", migrate=True)
     assert "UNKNOWN_KEY" in error_codes(issues)
 
 
@@ -149,5 +169,5 @@ def test_parse_list_meta_duplicate_key():
 - **Spec:** idea
 - **MoSCoW:** —
 """
-    _, issues = vp.parse_markdown(text, "exec-summary.md", migrate=True)
+    _, issues = vp.parse_markdown(text, "executive-summary.md", migrate=True)
     assert "DUPLICATE_KEY" in error_codes(issues)

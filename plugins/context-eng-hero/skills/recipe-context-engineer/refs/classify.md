@@ -8,7 +8,7 @@ Pick the **narrowest** type. Load at orchestration step 2 and action classify st
 |------|------|
 | **Skill** | Reusable procedure or policy; single SKILL.md, no sibling `refs/` pack |
 | **Skill+Ref** | Base SKILL.md + `refs/` (or `references/`) loaded per progressive disclosure—variant or deep-dive refs |
-| **Ref file** | Standalone `refs/*.md` (or `references/*.md`) loaded by a parent skill—must stand alone |
+| **Ref file** | Skill-private `refs/*.md` (or `references/*.md`) — not an entry point; loaded because parent SKILL / action Ref index names it |
 | **Command** | Named slash entry with fixed input/output contract |
 | **Agent** | Role with tools, boundaries, and stop conditions |
 | **Rule** | Always-on or glob-scoped constraint |
@@ -38,6 +38,9 @@ Templates: `templates/skill.template.md` (Skill or Skill+Ref), `templates/ref-fi
 |--------|--------|
 | Audit verdict FAIL | **fix** + audit report |
 | Test probe FAIL, same contract | **fix** + test report |
+| Live run miss (patch or friction) on existing skill | **learn** → then **fix** or **redesign** from handover |
+| Learn handover (approved topics preserve outcome) | **fix** + user-project `LEARN-HANDOVER.*` → **plugin source** |
+| Learn handover (any topic changes outcome/audience/capabilities) | **redesign** + user-project `LEARN-HANDOVER.*` → **plugin source** |
 | Test FAIL / user story = wrong capability or outcome | **redesign** |
 | User: add step, remove gate, change audience | **redesign** |
 | User: wording, typo, violates own stop rule | **fix** |

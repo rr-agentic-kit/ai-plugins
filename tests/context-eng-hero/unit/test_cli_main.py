@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 from audit_static.cli import _resolve_relative_path, main
+from conftest import _ensure_lexicon_companions
 
 _VALID_SKILL = """\
 ---
@@ -86,6 +87,7 @@ def test_main_markdown_exit_zero_when_all_checks_pass(
 ) -> None:
     rel = "skills/lone-skill/SKILL.md"
     _write_skill(tmp_path, "lone-skill", _VALID_SKILL)
+    _ensure_lexicon_companions(tmp_path)
     monkeypatch.setattr(sys, "argv", ["audit_static", str(tmp_path), rel])
     code = main()
     captured = capsys.readouterr()
@@ -99,6 +101,7 @@ def test_main_json_format(
 ) -> None:
     rel = "skills/lone-skill/SKILL.md"
     _write_skill(tmp_path, "lone-skill", _VALID_SKILL)
+    _ensure_lexicon_companions(tmp_path)
     monkeypatch.setattr(
         sys, "argv", ["audit_static", str(tmp_path), rel, "--format", "json"]
     )

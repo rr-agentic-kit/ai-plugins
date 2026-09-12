@@ -1,8 +1,8 @@
 # goal-anchor
 
-**Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format. Reason-graph concerns (evidence, `flips_when`, burial, re-decision queue) live in [decision-ledger.md](decision-ledger.md) — this ref does not own them.
+**Owner:** Disambiguate vague input, clarify-before-assume, nuance capture, goal re-anchoring, and decision/assumption log format. Reason-graph concerns (evidence, `flips_when`, burial, re-decision queue) live in `refs/planning/decision-ledger.md` — this ref does not own them.
 
-**Load when:** Entire discovery pass at every cascade level (always-on). Not a trigger. Also on parent/child fact conflict, posture confirm, and off-level owner ambiguity.
+**Load when:** Entire Plan pass at every Plan level (always-on). Not a trigger. Standing self-challenge (**auto-reflection** layer — `refs/planning/challenge-layers.md`) at every phase transition. Also on parent/child fact conflict, posture confirm, and off-level owner ambiguity.
 
 Unclear and ambiguous user statements are **blocking**. Do not record them as facts, and do not treat an unresolved guess as a true assumption, until the protocol below completes or the user explicitly accepts an `assumption` with `blocking` set.
 
@@ -26,11 +26,11 @@ When input is unclear or ambiguous:
    - `text` → numbered options inline in chat; user replies in conversation
 4. **Capture nuance** — If user picks "other" or adds qualifiers, record full text, not just the label.
 5. **Re-anchor** — After resolution, restate the decision tied to the user's stated goal.
-6. **Append history** — After every Q&A turn, append to `raw-history/{UTC}.yaml` ([output-formats.md](output-formats.md)).
+6. **Append history** — After every Q&A turn, append to `raw-history/{UTC}.yaml` (`refs/planning/output-formats.md`).
 
 Do not proceed to compose (and do not freeze the level) until blocking clarifications are resolved or explicitly accepted.
 
-Static vs judgment: [success-criteria.md](success-criteria.md). This ref owns judgment only (vague input, conflict, nuance).
+Static vs judgment: `refs/planning/success-criteria.md`. This ref owns judgment only (vague input, conflict, nuance).
 
 ## Clarify-before-assume
 
@@ -58,7 +58,7 @@ Preserve in `decisions[]` or `level_facts`:
 - Scope boundaries ("only enterprise tier", "not mobile")
 - Temporal qualifiers ("by Q3", "after migration")
 - Conditional behavior ("if SSO enabled")
-- Priority signals (MoSCoW / Kano / triad class — never P0/P1/P2)
+- Priority signals (MoSCoW / Kano / RICE / **P1–P3 on PRD requirement leaves only** — never P-tags elsewhere)
 - Negative requirements ("must NOT store PII")
 
 Flattening nuance into generic statements is a gate failure.
@@ -67,9 +67,21 @@ Flattening nuance into generic statements is a gate failure.
 
 At each level transition and after major decisions:
 
-1. Restate the user's **primary goal** from exec-summary vision/problem **prose**. Cite a ranked metric as `goal_ref` (`ES-*`).
+1. Restate the user's **primary goal** from executive-summary vision/problem **prose**. Cite a ranked metric as `goal_ref` (`ES-*`).
 2. Show how the current level's work serves that goal in one sentence.
-3. If current facts drift from goal → surface misalignment via question.
+3. If current facts drift from goal → surface misalignment via question. When misalignment traces to a **frozen Discover-level Must / metric / OMTM**, name a ranked **Plan→Discover reopen** candidate and route `ask-discover` — do not silent-unfreeze or treat as Plan-only WWAS trim ([cascade.md](cascade.md) Inheritance rule 6).
+4. Resurface any **standing red flags** ([note-sessions.md](note-sessions.md)) — never leave them silent across re-anchors.
+
+## Standing self-challenge (auto-reflection)
+
+At **every** Plan phase transition (before marking a phase todo `completed`, advancing, or offering freeze) — not only on conflict or major decisions. This **is** the auto-reflection layer (`refs/planning/challenge-layers.md`) — continuous, no formal report.
+
+1. Ask: does continuing **this exact step, as written**, still serve the real goal for **this real scenario** — or has something diverged that the fixed procedure did not anticipate?
+2. If yes (still serves) → proceed; record a one-line reflection when non-obvious (auto-close when alternatives unlikely).
+3. If no / uncertain → stop advancing: AskQuestion, scoped `--challenge` (**standard**), or Plan→Discover reopen — do not execute the next hard-coded step because the checklist says so. Two+ plausible alternatives → AskQuestion required.
+4. Open standing red flags and Discover-reopen candidates always count as “uncertain” until founder accept or route.
+
+This is **not** user-invoked `--challenge` and **not** smells ([req-smell.md](req-smell.md)). When auto-reflection finds load-bearing mismatch, escalate to standard challenge or upstream reopen.
 
 ## Conflict resolution
 
@@ -135,7 +147,7 @@ Do not copy `flips_when`, evidence claims, or graveyard snapshots into this log.
 | Confirm | `AskQuestion` confirm | "Confirm: [statement] — yes/no?" |
 | Free-text follow-up | `AskQuestion` with Other | "Or describe in your own words:" |
 
-After each answer: append raw-history YAML, then update the decision/assumption log in session state, then continue discovery. Off-level answers: classify owner first ([note-sessions.md](note-sessions.md)); `type: note_routed` when parked.
+After each answer: append raw-history YAML, then update the decision/assumption log in session state, then continue the current Plan phase. Off-level answers: classify owner first ([note-sessions.md](note-sessions.md)); `type: note_routed` when parked.
 
 Posture confirm: `type: project_posture`, `user_confirmed: true`. New Must after `signed_v1`: `type: scope_change` or reject — [project-posture.md](project-posture.md).
 

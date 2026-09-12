@@ -1,6 +1,8 @@
-# humanize skill
+# rr-humanize skill
 
 Isolated experiment: readability and human voice for **generate** and **rewrite** of technical prose. No slash command, no plugin docs wiring.
+
+**Does not** load planning version law (`refs/planning/baselines.md`) — prose pass only; no track/patch/freeze.
 
 ## Goals
 
@@ -11,7 +13,7 @@ Isolated experiment: readability and human voice for **generate** and **rewrite*
 
 ## Scope / limits
 
-- Skill tree only: `skills/docs/humanize/`. No edits to `docs/`, `refs/commands.md`, `COMPONENT-SPECS.md`, `USAGE.md`, plugin README, or `plugin.json`.
+- Skill tree only: `skills/docs/rr-humanize/`. No edits to `docs/`, `refs/commands.md`, `COMPONENT-SPECS.md`, `USAGE.md`, plugin README, or `plugin.json`.
 - No detector scores, GPTZero/Turnitin, homoglyphs, disfluency injection, or invented specificity.
 - Atlassia `humanizer` stays Jira-only; this pack is general docs/README/MR prose.
 - Helper CLI: `scan`, `apply-safe`, `suggest-register` only — not full rewrite, generate, or markdown wipe.
@@ -64,9 +66,9 @@ Never a third call in the same action.
 From plugin root (or absolute path):
 
 ```bash
-python3 skills/docs/humanize/scripts/cli.py scan [path]
-python3 skills/docs/humanize/scripts/cli.py apply-safe [--dry-run] [path]
-python3 skills/docs/humanize/scripts/cli.py suggest-register [path]
+python3 skills/docs/rr-humanize/scripts/cli.py scan [path]
+python3 skills/docs/rr-humanize/scripts/cli.py apply-safe [--dry-run] [path]
+python3 skills/docs/rr-humanize/scripts/cli.py suggest-register [path]
 ```
 
 Stdin when path omitted. One JSON envelope on stdout — see `scripts/README.md`.
@@ -74,7 +76,7 @@ Stdin when path omitted. One JSON envelope on stdout — see `scripts/README.md`
 ## File structure
 
 ```
-humanize/
+rr-humanize/
   README.md          # this plan spec
   SKILL.md           # router
   refs/              # generate, rewrite, readability, lexicon, register, params

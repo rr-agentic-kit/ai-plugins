@@ -7,9 +7,9 @@ Stdlib-only helper for mechanical detect/replace. **Stdout:** one JSON object pe
 From plugin root (or absolute path):
 
 ```bash
-python3 skills/docs/humanize/scripts/cli.py scan [path]
-python3 skills/docs/humanize/scripts/cli.py apply-safe [--dry-run] [path]
-python3 skills/docs/humanize/scripts/cli.py suggest-register [path]
+python3 skills/docs/rr-humanize/scripts/cli.py scan [path]
+python3 skills/docs/rr-humanize/scripts/cli.py apply-safe [--dry-run] [path]
+python3 skills/docs/rr-humanize/scripts/cli.py suggest-register [path]
 ```
 
 Omit `path` to read stdin. Exit `0` on success; `1` on failure; `2` on usage (argparse).
@@ -44,7 +44,7 @@ Helper CLI rules: [`../../../context/context-engineer/refs/helper-cli.md`](../..
 ## Tests
 
 ```bash
-python3 -m unittest discover -s skills/docs/humanize/scripts/tests -p 'test_*.py'
+python3 -m unittest discover -s skills/docs/rr-humanize/scripts/tests -p 'test_*.py'
 ```
 
 From plugin root. Fixtures live under `scripts/tests/fixtures/`.

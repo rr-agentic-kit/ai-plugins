@@ -27,9 +27,11 @@ from .constants import (
     MOSCOW_VALUES,
     NULL_SENTINELS,
     PREFIX_TO_DOC,
+    PRIORITY_VALUES,
     RATIONALE_RE,
     REQUIRED_KEYS,
     SPEC_VALUES,
+    STATUS_VALUES,
     YAML_KEY_MAP,
     YAML_SKIP_KEYS,
 )
@@ -448,6 +450,8 @@ def _validate_item_enums(
         item_id, meta, "confidence", CONFIDENCE_VALUES, "confidence", issues
     )
     _validate_enum_field(item_id, meta, "effort", EFFORT_VALUES, "effort", issues)
+    _validate_enum_field(item_id, meta, "status", STATUS_VALUES, "status", issues)
+    _validate_enum_field(item_id, meta, "priority", PRIORITY_VALUES, "priority", issues)
 
 
 def _optional_meta_value(meta: dict[str, str], key: str) -> str | None:
@@ -473,6 +477,7 @@ def _item_from_meta(
     spec = meta.get("spec", "")
     parent = _optional_meta_value(meta, "parent")
     status = _optional_meta_value(meta, "status")
+    priority = _optional_meta_value(meta, "priority")
     tag = _optional_meta_value(meta, "tag")
     moscow = _optional_meta_value(meta, "moscow")
     kano = _optional_meta_value(meta, "kano")
@@ -501,6 +506,7 @@ def _item_from_meta(
         kind=kind,
         spec=spec,
         status=status,
+        priority=priority,
         tag=tag,
         goal_type=goal_type,
         reach=reach,

@@ -7,7 +7,7 @@ Principles for **skills**, **commands**, **agents**, **rules**, **workflows**, *
 - **Signal**: constraints the agent cannot infer (policy, gates, exact formats, stop rules).
 - **Noise**: generic encouragement, repeated restatements, prose that duplicates co-loaded refs.
 
-Cut noise until every paragraph changes behavior or discovery. If a ref's **Load** chain includes file X, do not restate X's constraints in the loading file.
+Cut noise until every paragraph changes behavior or discovery. If parent SKILL / action Ref index co-loads file X with this ref, do not restate X's constraints here.
 
 ## Forcing function
 
@@ -21,7 +21,7 @@ When work spans verifiable steps: action commands → **TodoWrite** with ids fro
 |-------|--------|
 | **Skill** | Judgment, classification, reusable procedure, progressive disclosure |
 | **Skill+Ref** | Invariant procedure in SKILL; variant/detail in `refs/`—one hop |
-| **Ref file** | Standalone constraints for one subtask; **Load** back to parent |
+| **Ref file** | Skill-private constraints for one subtask; loaded via parent SKILL / action Ref index |
 | **Command** | Slash contract: inputs, delegation to skill **Action**, output shape |
 | **Refs (orchestrator)** | Templates, rubrics, checklists—Read at the step that branches |
 

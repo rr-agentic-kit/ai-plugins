@@ -330,6 +330,17 @@ def test_run_sections_unknown_artifact_type_returns_empty(tmp_path: Path) -> Non
     assert run_sections(ctx) == []
 
 
+def test_run_sections_ref_file_returns_empty(tmp_path: Path) -> None:
+    rel = _write_artifact(
+        tmp_path,
+        "skills/test-skill/refs/topic.md",
+        "# Topic\n\nUnique constraints; no Purpose/Load/Content.\n",
+    )
+    ctx = _load(tmp_path, rel)
+    assert ctx.artifact_type == "ref-file"
+    assert run_sections(ctx) == []
+
+
 def test_sibling_skill_missing_skips_orchestrator_actions(tmp_path: Path) -> None:
     rel = _write_artifact(
         tmp_path,

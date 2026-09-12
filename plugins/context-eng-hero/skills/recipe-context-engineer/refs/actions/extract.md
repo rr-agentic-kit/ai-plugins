@@ -13,6 +13,9 @@
 | `skill-invocation.md` | `extract-3-draft` (skills) |
 | `readme-spec.md` | `extract-3-draft` (skill folders) |
 | `templates/readme.template.md` | `extract-3-draft` (skill README output) |
+| `lexicon-spec.md` | `extract-3-draft` (ACRONYMS + GLOSSARY harvest) |
+| `templates/acronyms.template.md` | `extract-3-draft` (ACRONYMS.md) |
+| `templates/glossary.template.md` | `extract-3-draft` (GLOSSARY.md) |
 | `helper-cli.md` | `extract-3-draft` (when `scripts/`) |
 | `template-required-map.md` | `extract-3-draft` |
 | `templates/<type>.template.md` (per `classify.md`) | `extract-3-draft` |
@@ -37,13 +40,14 @@
 - **Outcome:** Template-shaped **minimum** draft produced (eval-first).
 - **Done when:** All template sections filled or gaps explicitly marked; only constraints justified by source or observed FAIL—no anticipated thickening; workflow includes `todo_id` if applicable.
 - **Skill README** (output `skills/<name>/README.md`): Read `SKILL.md` + progressive-disclosure refs for **constraints** (invoke mode, gates, eval-first, paths)—**not** to dump **Procedure** or Load chains. Fill `templates/readme.template.md` per `readme-spec.md` scannable section model and clarity rules. Provenance lists source paths (`SKILL.md`, ref paths used) + assumptions + open questions.
+- **Lexicon harvest** (when writing skill/plugin artifacts): Scan draft + co-loaded refs; merge domain acronyms into `ACRONYMS.md` and overloaded terms into `GLOSSARY.md` at resolved path per `lexicon-spec.md`. Create empty companions if missing.
 - **README section map (extract):**
 
   | README section | Source in SKILL / refs |
   |----------------|------------------------|
   | **Why** | Purpose; audience from advisory |
   | **What** (+ `### Verification`) | Domain, types, boundaries; static + rubric + probe concepts |
-  | **Actions** | SKILL **Actions** table (id, outcome); **Pick when** from `classify.md` routing |
+  | **Actions** | SKILL **Actions** table (id, outcome); **Pick when** from `classify.md` routing (includes **learn** when present) |
   | **When → Use when** | SKILL **When to use** |
   | **When → Avoid when** | SKILL **When not to use** (dedupe What out-of-scope) |
   | **Philosophy** | Eval-first, scoped-only, gates from advisory + Constraints facts |

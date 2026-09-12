@@ -52,7 +52,7 @@ def test_parse_inline_meta_unknown_key():
 
 
 def test_parse_yaml_empty_doc():
-    items, issues = vp.parse_yaml_doc("", "exec-summary.yaml")
+    items, issues = vp.parse_yaml_doc("", "executive-summary.yaml")
     assert items == []
     assert issues == []
 
@@ -62,7 +62,7 @@ def test_parse_yaml_item_not_mapping():
 items:
   ES-1: not-a-mapping
 """
-    items, issues = vp.parse_yaml_doc(yaml_text, "exec-summary.yaml")
+    items, issues = vp.parse_yaml_doc(yaml_text, "executive-summary.yaml")
     assert items == []
     assert "INVALID_YAML" in error_codes(issues)
 
@@ -78,12 +78,12 @@ items:
     Spec: idea
     MoSCoW: —
 """
-    _, issues = vp.parse_yaml_doc(yaml_text, "exec-summary.yaml")
+    _, issues = vp.parse_yaml_doc(yaml_text, "executive-summary.yaml")
     assert "UNKNOWN_KEY" in error_codes(issues)
 
 
 def test_parse_yaml_invalid_root():
-    items, issues = vp.parse_yaml_doc("- just a list\n", "exec-summary.yaml")
+    items, issues = vp.parse_yaml_doc("- just a list\n", "executive-summary.yaml")
     assert items == []
     assert "INVALID_YAML" in error_codes(issues)
 
@@ -98,6 +98,6 @@ items:
     Spec: idea
     MoSCoW: —
 """
-    items, issues = vp.parse_yaml_doc(yaml_text, "exec-summary.yaml")
+    items, issues = vp.parse_yaml_doc(yaml_text, "executive-summary.yaml")
     assert items == []
     assert "INVALID_ID" in error_codes(issues)

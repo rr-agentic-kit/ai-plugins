@@ -12,17 +12,37 @@ from typing import Any
 import yaml
 
 from .constants import (
+    BUSINESS_CASE_NAME,
+    BUSINESS_CASE_REQUIRED_FIELDS,
     CHALLENGE_KEYS,
+    DISCOVERY_DIR,
+    DISCOVERY_STEMS,
     DOC_STEMS,
+    DOCS_ROOT_NAME,
+    EXECUTE_SLICE_NAME,
+    EXECUTE_SLICE_REQUIRED_FIELDS,
     FRONTMATTER_KEYS,
     FRONTMATTER_RE,
+    LEGACY_DOC_STEMS,
+    LEGACY_PLANS_DIR,
+    MATURITY_VALUES,
     PARENT_DOC,
+    PHASE_DIRS,
+    PLAN_DIR,
+    PLAN_STEMS,
+    RR_DIR,
+    RRR_STATUS_NAME,
     STATUS_NAME,
     STUB_FRONTMATTER_KEYS,
+    TASKS_DIR,
     TRACK_DIR_RE,
+    canonicalize_doc_stem,
     matches_created_ts,
 )
 from .models import Issue, Item
+
+_UNFROZEN_REV = "0.1.0?"
+_PINS_DELTA_PATHS = "pins.delta_paths"
 
 
 def find_repo_root(start: Path) -> Path:
@@ -61,20 +81,141 @@ def challenge_report_path(planning_dir: Path, stem: str) -> Path:
     return planning_doc_path(planning_dir, stem, suffix=".challenge.report.md")
 
 
-def plans_root(planning_dir: Path) -> Path:
-    if (planning_dir / STATUS_NAME).is_file():
-        return planning_dir
-    if (
-        TRACK_DIR_RE.fullmatch(planning_dir.name)
-        and (planning_dir.parent / STATUS_NAME).is_file()
-    ):
-        return planning_dir.parent
+def docs_root(repo_root: Path, *, override: Path | None = None) -> Path:
+    if override is not None:
+        return resolve_within_root(override, repo_root)
+    return resolve_within_root(repo_root / DOCS_ROOT_NAME, repo_root)
+
+
+def rr_root(docs: Path) -> Path:
+    """``docs/rr/`` — rrraw-owned tree (parking + versioned phase dirs)."""
+    return docs / RR_DIR
+
+
+def tasks_dir(docs: Path) -> Path:
+    """``docs/rr/tasks/`` — reserved global task tree (not CoW'd on open-next)."""
+    return rr_root(docs) / TASKS_DIR
+
+
+def rrr_status_path(docs: Path) -> Path:
+    """Canonical summary path: ``docs/rr/rrr-status.yaml``."""
+    return rr_root(docs) / RRR_STATUS_NAME
+
+
+def track_phase_dir(docs: Path, track: str, phase: str) -> Path:
+    """``docs/rr/{track}/{phase}/`` (phase is ``discovery`` or ``plan``)."""
+    return rr_root(docs) / track / phase
+
+
+def find_rrr_status_path(docs: Path) -> Path | None:
+    """Prefer ``docs/rr/rrr-status.yaml``; else legacy ``docs/rrr-status.yaml``."""
+    for path in (rrr_status_path(docs), docs / RRR_STATUS_NAME):
+        if path.is_file():
+            return path
+    return None
+
+
+def current_track(docs: Path) -> str:
+    """Track from rrr-status (new or legacy path); default ``0.1``."""
+    path = find_rrr_status_path(docs)
+    if path is not None:
+        data, _ = load_status(path)
+        if data is not None:
+            raw = data.get("track")
+            if raw is not None and str(raw).strip():
+                return str(raw).strip()
+    return "0.1"
+
+
+def phase_root(planning_dir: Path) -> Path:
+    """Phase directory that owns ``status.yaml`` (``discovery/`` or ``plan/``).
+
+    Walks up until ``status.yaml`` exists. Under version-first layout the phase
+    parent is a track dir matching ``TRACK_DIR_RE``. Accepts legacy
+    ``docs/plans/`` and phase-first ``docs/{phase}/`` when those still have a
+    local status.yaml.
+    """
+    current = planning_dir.resolve()
+    for candidate in (current, *current.parents):
+        if (candidate / STATUS_NAME).is_file():
+            return candidate
     return planning_dir
 
 
-def find_status_path(planning_dir: Path) -> Path | None:
-    path = plans_root(planning_dir) / STATUS_NAME
+def plans_root(planning_dir: Path) -> Path:
+    """Alias for :func:`phase_root` (legacy name kept for callers/tests)."""
+    return phase_root(planning_dir)
+
+
+def track_for_phase(planning_dir: Path) -> str | None:
+    """Track dir name when phase lives under ``docs/rr/{track}/{phase}/``."""
+    root = phase_root(planning_dir)
+    parent = root.parent
+    if TRACK_DIR_RE.fullmatch(parent.name):
+        return parent.name
+    return None
+
+
+def find_phase_status_path(phase_dir: Path) -> Path | None:
+    path = phase_root(phase_dir) / STATUS_NAME
     return path if path.is_file() else None
+
+
+def find_status_path(planning_dir: Path) -> Path | None:
+    return find_phase_status_path(planning_dir)
+
+
+def phase_name(planning_dir: Path) -> str | None:
+    root = phase_root(planning_dir)
+    if root.name in PHASE_DIRS:
+        return root.name
+    if root.name == LEGACY_PLANS_DIR:
+        return LEGACY_PLANS_DIR
+    return None
+
+
+def stems_for_dir(planning_dir: Path) -> tuple[str, ...]:
+    name = phase_name(planning_dir)
+    if name == DISCOVERY_DIR:
+        return DISCOVERY_STEMS
+    if name == PLAN_DIR:
+        return PLAN_STEMS
+    return DOC_STEMS
+
+
+def discovery_dir_for(planning_dir: Path) -> Path | None:
+    """Sibling discovery phase under the same track (or legacy phase-first).
+
+    Version-first: ``docs/rr/{track}/plan`` → ``docs/rr/{track}/discovery``.
+    Legacy phase-first: ``docs/plan`` → ``docs/discovery`` (migration window).
+    """
+    root = phase_root(planning_dir)
+    if root.name == PLAN_DIR:
+        candidate = root.parent / DISCOVERY_DIR
+        return candidate if candidate.is_dir() else None
+    if root.name == DISCOVERY_DIR:
+        return root
+    return None
+
+
+def default_rrr_status(
+    injection_version: int,
+    *,
+    phase: str = "discovery",
+    summary: str = "Discovering — not started",
+) -> dict[str, Any]:
+    return {
+        "claude_config_version": injection_version,
+        "track": "0.1",
+        "phase": phase,
+        "product": _UNFROZEN_REV,
+        "docs": _UNFROZEN_REV,
+        "discovery_complete": False,
+        "docs_shipped": False,
+        "product_status": "?",
+        "next": None,
+        "summary": summary,
+    }
 
 
 def load_status(path: Path) -> tuple[dict[str, Any] | None, list[Issue]]:
@@ -155,6 +296,7 @@ def _frontmatter_for_doc(stem: str, status: dict[str, Any] | None) -> dict[str, 
     track = "0.1"
     rev: Any = "?"
     pins: dict[str, Any] = {}
+    maturity: str | None = None
     if status is not None:
         raw_track = status.get("track")
         if raw_track is not None and str(raw_track).strip():
@@ -167,12 +309,18 @@ def _frontmatter_for_doc(stem: str, status: dict[str, Any] | None) -> dict[str, 
         if is_frozen_rev(status_rev):
             rev = status_rev
         pins = _frontmatter_pins(stem, levels)
-    return {
+        raw_maturity = row.get("maturity")
+        if isinstance(raw_maturity, str) and raw_maturity in MATURITY_VALUES:
+            maturity = raw_maturity
+    result: dict[str, Any] = {
         "doc_type": stem,
         "track": track,
         "doc_rev": rev,
         "pins": pins,
     }
+    if maturity is not None:
+        result["maturity"] = maturity
+    return result
 
 
 def dump_frontmatter(fm: dict[str, Any]) -> str:
@@ -186,6 +334,9 @@ def dump_frontmatter(fm: dict[str, Any]) -> str:
         lines.append(f"doc_rev: {rev}")
     else:
         lines.append('doc_rev: "?"')
+    maturity = fm.get("maturity")
+    if isinstance(maturity, str) and maturity in MATURITY_VALUES:
+        lines.append(f"maturity: {maturity}")
     pins = fm.get("pins") if isinstance(fm.get("pins"), dict) else {}
     if not pins:
         lines.append("pins: {}")
@@ -211,6 +362,13 @@ def ensure_doc_frontmatter(
     missing_required = any(key not in old_fm for key in FRONTMATTER_KEYS)
     built = _frontmatter_for_doc(stem, status)
     new_fm = {**built, "created": _preserve_created(old_fm.get("created"))}
+    old_maturity = old_fm.get("maturity")
+    if (
+        "maturity" not in new_fm
+        and isinstance(old_maturity, str)
+        and old_maturity in MATURITY_VALUES
+    ):
+        new_fm["maturity"] = old_maturity
     new_text = dump_frontmatter(new_fm) + body
     new_text = _normalize_md(new_text)
     if new_text == _normalize_md(text):
@@ -229,23 +387,30 @@ def ensure_doc_frontmatter(
     return new_text, "fixed"
 
 
-def has_cascade_docs(planning_dir: Path) -> bool:
+def has_cascade_docs(
+    planning_dir: Path, *, stems: tuple[str, ...] | None = None
+) -> bool:
+    allowed = stems if stems is not None else stems_for_dir(planning_dir)
+    check = (*allowed, *LEGACY_DOC_STEMS.keys())
     return any(
         (planning_dir / f"{stem}.md").is_file()
         or (planning_dir / f"{stem}.yaml").is_file()
-        for stem in DOC_STEMS
+        for stem in check
     )
 
 
-def default_unfrozen_status(injection_version: int) -> dict[str, Any]:
+def default_unfrozen_status(
+    injection_version: int, *, stems: tuple[str, ...] | None = None
+) -> dict[str, Any]:
+    level_stems = stems if stems is not None else DOC_STEMS
     levels: dict[str, Any] = {
-        doc: {"rev": "?", "digest": None, "pins": {}} for doc in DOC_STEMS
+        doc: {"rev": "?", "digest": None, "pins": {}} for doc in level_stems
     }
     data: dict[str, Any] = {
         "claude_config_version": injection_version,
         "track": "0.1",
-        "product": "0.1.0?",
-        "docs": "0.1.0?",
+        "product": _UNFROZEN_REV,
+        "docs": _UNFROZEN_REV,
         "next": None,
         "docs_shipped": False,
         "product_status": "?",
@@ -294,11 +459,14 @@ def _fill_status_levels(data: dict[str, Any], defaults: dict[str, Any]) -> bool:
 
 
 def fill_status_missing(
-    data: dict[str, Any], injection_version: int
+    data: dict[str, Any],
+    injection_version: int,
+    *,
+    stems: tuple[str, ...] | None = None,
 ) -> tuple[bool, bool]:
     payload_changed = False
     meta_changed = False
-    defaults = default_unfrozen_status(injection_version)
+    defaults = default_unfrozen_status(injection_version, stems=stems)
     payload_changed |= _fill_status_payload(data, defaults)
     if "product_status" not in data:
         data["product_status"] = defaults["product_status"]
@@ -314,9 +482,24 @@ def fill_status_missing(
     return payload_changed, meta_changed
 
 
-def load_doc_frontmatter(planning_dir: Path) -> dict[str, dict[str, Any]]:
+def fill_rrr_status_missing(data: dict[str, Any], injection_version: int) -> bool:
+    defaults = default_rrr_status(injection_version)
+    changed = False
+    for key, value in defaults.items():
+        if key not in data:
+            data[key] = value
+            changed = True
+    if data.get("claude_config_version") != injection_version:
+        data["claude_config_version"] = injection_version
+        changed = True
+    return changed
+
+
+def load_doc_frontmatter(
+    planning_dir: Path, *, stems: tuple[str, ...] | None = None
+) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
-    for doc in DOC_STEMS:
+    for doc in stems if stems is not None else stems_for_dir(planning_dir):
         path = planning_dir / f"{doc}.md"
         if path.is_file():
             result[doc] = parse_frontmatter(path.read_text(encoding="utf-8"))
@@ -416,8 +599,9 @@ def challenge_doc_stem(value: Any) -> str | None:
     token = value.strip().split()[0]
     if token.endswith(".md"):
         token = token[:-3]
-    if token in DOC_STEMS:
-        return token
+    canonical = canonicalize_doc_stem(token)
+    if canonical in DOC_STEMS:
+        return canonical
     return None
 
 
@@ -559,23 +743,6 @@ def _load_frozen_levels(planning_dir: Path) -> list[str] | None:
     return [str(item) for item in frozen]
 
 
-def _check_doc_baseline(
-    doc: str,
-    levels: dict[str, Any],
-    frozen_levels: list[str] | None,
-    frontmatter: dict[str, dict[str, Any]],
-    items: list[Item],
-) -> list[Issue]:
-    issues: list[Issue] = []
-    raw = levels.get(doc)
-    row = raw if isinstance(raw, dict) else {}
-    rev = row.get("rev")
-    issues.extend(_check_frozen_rev_state(doc, rev, frozen_levels))
-    issues.extend(_check_frontmatter_rev(doc, frontmatter, rev))
-    issues.extend(_check_parent_pin(doc, rev, row, levels, items))
-    return issues
-
-
 def _check_frozen_rev_state(
     doc: str, rev: Any, frozen_levels: list[str] | None
 ) -> list[Issue]:
@@ -605,12 +772,160 @@ def _check_frontmatter_rev(
     return []
 
 
+def _check_maturity(
+    doc: str,
+    levels: dict[str, Any],
+    frontmatter: dict[str, dict[str, Any]],
+    rev: Any,
+) -> list[Issue]:
+    """Validate optional doc maturity; refuse freeze while code-extraction."""
+    issues: list[Issue] = []
+    raw = levels.get(doc)
+    row = raw if isinstance(raw, dict) else {}
+    status_mat = row.get("maturity")
+    fm_mat = frontmatter.get(doc, {}).get("maturity")
+    for label, value in (("status", status_mat), ("frontmatter", fm_mat)):
+        if value is None:
+            continue
+        if not isinstance(value, str) or value not in MATURITY_VALUES:
+            issues.append(
+                Issue.error(
+                    "INVALID_MATURITY",
+                    f"{doc} {label} maturity {value!r} not in "
+                    f"{sorted(MATURITY_VALUES)}",
+                    doc,
+                )
+            )
+    effective = fm_mat if fm_mat is not None else status_mat
+    if effective == "code-extraction" and is_frozen_rev(rev):
+        issues.append(
+            Issue.error(
+                "CODE_EXTRACTION_FROZEN",
+                f"{doc} maturity is code-extraction — freeze/rev mint blocked",
+                doc,
+            )
+        )
+    fm_rev = frontmatter.get(doc, {}).get("doc_rev")
+    if effective == "code-extraction" and is_frozen_rev(fm_rev):
+        issues.append(
+            Issue.error(
+                "CODE_EXTRACTION_FROZEN",
+                f"{doc} frontmatter doc_rev frozen while maturity is "
+                "code-extraction",
+                doc,
+            )
+        )
+    return issues
+
+
+def _load_parent_items(planning_dir: Path, parent: str) -> list[Item]:
+    """Items for parent digest — local dir first, else discovery sibling items.json."""
+    local_md = planning_dir / f"{parent}.md"
+    if local_md.is_file():
+        from .parse import parse_markdown
+
+        items, _ = parse_markdown(
+            local_md.read_text(encoding="utf-8"), local_md.name, migrate=True
+        )
+        return items
+    discovery = discovery_dir_for(planning_dir)
+    if discovery is None:
+        return []
+    items_path = discovery / "items.json"
+    if not items_path.is_file():
+        discovery_md = discovery / f"{parent}.md"
+        if discovery_md.is_file():
+            from .parse import parse_markdown
+
+            items, _ = parse_markdown(
+                discovery_md.read_text(encoding="utf-8"),
+                discovery_md.name,
+                migrate=True,
+            )
+            return items
+        return []
+    try:
+        payload = json.loads(items_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(payload, dict):
+        return []
+    raw_items = payload.get("items")
+    if not isinstance(raw_items, list):
+        return []
+    result: list[Item] = []
+    for row in raw_items:
+        if not isinstance(row, dict) or row.get("doc") != parent:
+            continue
+        item_id = row.get("id")
+        if not isinstance(item_id, str):
+            continue
+        prefix = item_id.split("-", 1)[0]
+        result.append(
+            Item(
+                id=item_id,
+                title=str(row.get("title", "")),
+                prefix=prefix,
+                doc=parent,
+                parent=row.get("parent"),
+                kind=str(row.get("kind", "leaf")),
+                spec=str(row.get("spec", "draft")),
+                status=row.get("status"),
+                priority=row.get("priority"),
+                tag=row.get("tag"),
+                goal_type=row.get("goal_type"),
+                reach=row.get("reach"),
+                impact=row.get("impact"),
+                confidence=row.get("confidence"),
+                effort=row.get("effort"),
+                moscow=row.get("moscow"),
+                kano=row.get("kano"),
+                supersedes=row.get("supersedes"),
+                superseded_by=row.get("superseded_by"),
+                rationale=row.get("rationale"),
+                source_file=str(items_path),
+                raw_keys=set(),
+                raw_meta={},
+            )
+        )
+    return result
+
+
+def _merged_levels_for_pins(
+    planning_dir: Path, levels: dict[str, Any]
+) -> dict[str, Any]:
+    """Merge discovery status levels when Plan pins against BRD across dirs."""
+    merged = dict(levels)
+    parent_missing = [
+        parent
+        for doc, parent in PARENT_DOC.items()
+        if doc in stems_for_dir(planning_dir) and parent not in merged
+    ]
+    if not parent_missing:
+        return merged
+    discovery = discovery_dir_for(planning_dir)
+    if discovery is None or discovery == phase_root(planning_dir):
+        return merged
+    status_path = find_phase_status_path(discovery)
+    if status_path is None:
+        return merged
+    status, _ = load_status(status_path)
+    if status is None:
+        return merged
+    parent_levels = _levels_for_dir(status, discovery)
+    for name, row in parent_levels.items():
+        if name not in merged:
+            merged[name] = row
+    return merged
+
+
 def _check_parent_pin(
     doc: str,
     rev: Any,
     row: dict[str, Any],
     levels: dict[str, Any],
     items: list[Item],
+    planning_dir: Path,
 ) -> list[Issue]:
     parent = PARENT_DOC.get(doc)
     if parent is None or not is_frozen_rev(rev):
@@ -625,7 +940,10 @@ def _check_parent_pin(
                 doc,
             )
         ]
-    live_digest = compute_doc_digest(items, parent)
+    parent_items = [item for item in items if item.doc == parent]
+    if not parent_items:
+        parent_items = _load_parent_items(planning_dir, parent)
+    live_digest = compute_doc_digest(parent_items, parent)
     pins = row.get("pins") if isinstance(row.get("pins"), dict) else {}
     pin = pins.get(parent) if isinstance(pins, dict) else None
     pin_digest = pin.get("digest") if isinstance(pin, dict) else None
@@ -639,6 +957,25 @@ def _check_parent_pin(
             )
         ]
     return []
+
+
+def _check_doc_baseline(
+    doc: str,
+    levels: dict[str, Any],
+    frozen_levels: list[str] | None,
+    frontmatter: dict[str, dict[str, Any]],
+    items: list[Item],
+    planning_dir: Path,
+) -> list[Issue]:
+    issues: list[Issue] = []
+    raw = levels.get(doc)
+    row = raw if isinstance(raw, dict) else {}
+    rev = row.get("rev")
+    issues.extend(_check_frozen_rev_state(doc, rev, frozen_levels))
+    issues.extend(_check_frontmatter_rev(doc, frontmatter, rev))
+    issues.extend(_check_maturity(doc, levels, frontmatter, rev))
+    issues.extend(_check_parent_pin(doc, rev, row, levels, items, planning_dir))
+    return issues
 
 
 def check_baselines(planning_dir: Path, items: list[Item]) -> list[Issue]:
@@ -657,11 +994,254 @@ def check_baselines(planning_dir: Path, items: list[Item]) -> list[Issue]:
                 "frozen rev/pins/track changed without skill mint_hash",
             )
         )
-    levels = _levels_for_dir(status, planning_dir)
+    levels = _merged_levels_for_pins(
+        planning_dir, _levels_for_dir(status, planning_dir)
+    )
     frozen_levels = _load_frozen_levels(planning_dir)
     frontmatter = load_doc_frontmatter(planning_dir)
-    for doc in DOC_STEMS:
+    for doc in stems_for_dir(planning_dir):
         issues.extend(
-            _check_doc_baseline(doc, levels, frozen_levels, frontmatter, items)
+            _check_doc_baseline(
+                doc, levels, frozen_levels, frontmatter, items, planning_dir
+            )
         )
     return issues
+
+
+def check_business_case(planning_dir: Path) -> list[Issue]:
+    """Validate business-case.yaml shape when the file is present."""
+    path = planning_dir / BUSINESS_CASE_NAME
+    if not path.is_file():
+        discovery = discovery_dir_for(planning_dir)
+        if discovery is not None:
+            path = discovery / BUSINESS_CASE_NAME
+    if not path.is_file():
+        return [
+            Issue.error(
+                "MISSING_BUSINESS_CASE",
+                f"{BUSINESS_CASE_NAME} is required",
+            )
+        ]
+    try:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return [
+            Issue.error(
+                "BUSINESS_CASE_PARSE",
+                f"{BUSINESS_CASE_NAME} is not valid YAML: {exc}",
+            )
+        ]
+    if not isinstance(payload, dict):
+        return [
+            Issue.error(
+                "BUSINESS_CASE_SHAPE",
+                f"{BUSINESS_CASE_NAME} must be a mapping",
+            )
+        ]
+    issues: list[Issue] = []
+    missing = sorted(BUSINESS_CASE_REQUIRED_FIELDS - set(payload))
+    if missing:
+        issues.append(
+            Issue.error(
+                "BUSINESS_CASE_FIELDS",
+                f"{BUSINESS_CASE_NAME} missing required fields: {', '.join(missing)}",
+            )
+        )
+    for key in ("vision", "problem", "north_star", "viability_verdict"):
+        value = payload.get(key)
+        if key in payload and (
+            value is None or (isinstance(value, str) and not value.strip())
+        ):
+            issues.append(
+                Issue.error(
+                    "BUSINESS_CASE_EMPTY",
+                    f"{BUSINESS_CASE_NAME} field '{key}' must be non-empty",
+                    key,
+                )
+            )
+    return issues
+
+
+def _check_execute_slice_empty_fields(payload: dict[str, Any]) -> list[Issue]:
+    issues: list[Issue] = []
+    for key in ("why", "success_signal", "slice_id"):
+        value = payload.get(key)
+        if key in payload and (
+            value is None or (isinstance(value, str) and not value.strip())
+        ):
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_EMPTY",
+                    f"{EXECUTE_SLICE_NAME} field '{key}' must be non-empty",
+                    key,
+                )
+            )
+    return issues
+
+
+def _check_execute_slice_delta_paths(
+    delta_paths: list[Any], planning_dir: Path
+) -> list[Issue]:
+    issues: list[Issue] = []
+    plan_root = planning_dir.resolve()
+    for raw in delta_paths:
+        if not isinstance(raw, str) or not raw.strip():
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_DELTA_PATH",
+                    f"{EXECUTE_SLICE_NAME} {_PINS_DELTA_PATHS} "
+                    "entry must be a non-empty string",
+                    _PINS_DELTA_PATHS,
+                )
+            )
+            continue
+        rel = Path(raw)
+        if rel.is_absolute() or ".." in rel.parts:
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_DELTA_PATH",
+                    f"{EXECUTE_SLICE_NAME} delta path must be "
+                    f"relative under plan dir: {raw}",
+                    raw,
+                )
+            )
+            continue
+        candidate = (planning_dir / rel).resolve()
+        if not candidate.is_relative_to(plan_root):
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_DELTA_PATH",
+                    f"{EXECUTE_SLICE_NAME} delta path escapes plan dir: {raw}",
+                    raw,
+                )
+            )
+        elif not candidate.is_file():
+            issues.append(
+                Issue.error(
+                    "EXECUTE_SLICE_DELTA_PATH",
+                    f"{EXECUTE_SLICE_NAME} delta path does not exist: {raw}",
+                    raw,
+                )
+            )
+    return issues
+
+
+def _check_execute_slice_pins(
+    pins: Any, planning_dir: Path, *, pins_present: bool
+) -> list[Issue]:
+    if pins_present and not isinstance(pins, dict):
+        return [
+            Issue.error(
+                "EXECUTE_SLICE_PINS",
+                f"{EXECUTE_SLICE_NAME} pins must be a mapping",
+                "pins",
+            )
+        ]
+    if not isinstance(pins, dict):
+        return []
+    issues: list[Issue] = []
+    delta_paths = pins.get("delta_paths")
+    if delta_paths is None:
+        issues.append(
+            Issue.error(
+                "EXECUTE_SLICE_PINS",
+                f"{EXECUTE_SLICE_NAME} {_PINS_DELTA_PATHS} is required",
+                _PINS_DELTA_PATHS,
+            )
+        )
+    elif not isinstance(delta_paths, list):
+        issues.append(
+            Issue.error(
+                "EXECUTE_SLICE_PINS",
+                f"{EXECUTE_SLICE_NAME} {_PINS_DELTA_PATHS} must be a list",
+                _PINS_DELTA_PATHS,
+            )
+        )
+    else:
+        issues.extend(_check_execute_slice_delta_paths(delta_paths, planning_dir))
+    return issues
+
+
+def check_execute_slice(planning_dir: Path) -> list[Issue]:
+    """Validate execute-slice.yaml when present (required fields + delta_paths exist).
+
+    Absent file is OK — not every plan dir has a frozen slice. Judgment owns
+    smell/WWAS; static owns hollow/broken kernel paths only.
+    """
+    path = planning_dir / EXECUTE_SLICE_NAME
+    if not path.is_file():
+        return []
+    try:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return [
+            Issue.error(
+                "EXECUTE_SLICE_PARSE",
+                f"{EXECUTE_SLICE_NAME} is not valid YAML: {exc}",
+            )
+        ]
+    if not isinstance(payload, dict):
+        return [
+            Issue.error(
+                "EXECUTE_SLICE_SHAPE",
+                f"{EXECUTE_SLICE_NAME} must be a mapping",
+            )
+        ]
+    issues: list[Issue] = []
+    missing = sorted(EXECUTE_SLICE_REQUIRED_FIELDS - set(payload))
+    if missing:
+        issues.append(
+            Issue.error(
+                "EXECUTE_SLICE_FIELDS",
+                f"{EXECUTE_SLICE_NAME} missing required fields: {', '.join(missing)}",
+            )
+        )
+    issues.extend(_check_execute_slice_empty_fields(payload))
+    pins_issues = _check_execute_slice_pins(
+        payload.get("pins"), planning_dir, pins_present="pins" in payload
+    )
+    issues.extend(pins_issues)
+    return issues
+
+
+def _discovery_brd_frozen(discovery: Path) -> bool:
+    status_path = find_phase_status_path(discovery)
+    if status_path is None:
+        return False
+    status, _ = load_status(status_path)
+    if status is None:
+        return False
+    levels = _levels_for_dir(status, discovery)
+    brd_row = levels.get("brd")
+    return isinstance(brd_row, dict) and is_frozen_rev(brd_row.get("rev"))
+
+
+def check_plan_entry(planning_dir: Path) -> list[Issue]:
+    """Plan entry gate: frozen BRD + valid business-case.yaml.
+
+    Call when composing/changing PRD or when validating a dir that already
+    has ``prd.md``. Discovery-only dirs (ES+MRD+BRD, no PRD) skip this.
+    Looks in ``docs/discovery/`` when ``planning_dir`` is ``docs/plan/``.
+    """
+    issues: list[Issue] = []
+    frozen = _load_frozen_levels(planning_dir)
+    discovery = discovery_dir_for(planning_dir)
+    if frozen is None and discovery is not None:
+        frozen = _load_frozen_levels(discovery)
+    brd_ok = frozen is not None and "brd" in frozen
+    if not brd_ok and discovery is not None:
+        brd_ok = _discovery_brd_frozen(discovery)
+    if not brd_ok:
+        issues.append(
+            Issue.error(
+                "PLAN_ENTRY_BRD",
+                "Plan entry requires brd in session_state.frozen_levels "
+                "(run rr-discovery freeze first)",
+            )
+        )
+    issues.extend(check_business_case(planning_dir))
+    return issues
+
+
+def has_prd_doc(planning_dir: Path) -> bool:
+    return (planning_dir / "prd.md").is_file() or (planning_dir / "prd.yaml").is_file()

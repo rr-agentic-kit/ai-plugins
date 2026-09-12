@@ -1,7 +1,7 @@
 {
   "name": "rrraw",
-  "version": "0.0.4",
-  "description": "Flag-driven test excellence \u2014 assess, write, fix, and migrate tests via phase agents",
+  "version": "0.0.4-rc-9",
+  "description": "Discover (executive-summary\u2192BRD + business-case) + Plan (PRD+) + Test excellence \u2014 flag-driven phase agents",
   "license": "Unlicense",
   "author": {
     "name": "ai-plugins maintainers"

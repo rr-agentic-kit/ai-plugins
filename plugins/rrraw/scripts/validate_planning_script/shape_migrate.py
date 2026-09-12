@@ -592,7 +592,8 @@ def migrate_planning_shapes(planning_dir: Path) -> list[Issue]:
     issues: list[Issue] = []
     issues.extend(split_challenge_report(planning_dir))
     issues.extend(archive_frd_to_tech(planning_dir))
-    es_path = planning_dir / "exec-summary.md"
+    issues.extend(migrate_exec_summary_stem(planning_dir))
+    es_path = planning_dir / "executive-summary.md"
     if es_path.is_file():
         text = es_path.read_text(encoding="utf-8")
         migrated, migrate_issues = migrate_exec_summary_shape(text, es_path.name)
@@ -607,3 +608,88 @@ def migrate_planning_shapes(planning_dir: Path) -> list[Issue]:
             prd_path.write_text(migrated, encoding="utf-8")
         issues.extend(migrate_issues)
     return issues
+
+
+def _rename_legacy_es_files(
+    planning_dir: Path, legacy: str, canonical: str
+) -> tuple[bool, list[Issue]]:
+    issues: list[Issue] = []
+    renamed = False
+    for suffix in (".md", ".yaml", ".notes.yaml", ".challenge.report.md"):
+        src = planning_dir / f"{legacy}{suffix}"
+        dst = planning_dir / f"{canonical}{suffix}"
+        if not src.is_file():
+            continue
+        if dst.is_file():
+            issues.append(
+                Issue.warn(
+                    "MIGRATE_ES_STEM_COLLISION",
+                    f"both {src.name} and {dst.name} exist; left legacy file in place",
+                )
+            )
+            continue
+        text = src.read_text(encoding="utf-8")
+        if suffix in {".md", ".yaml"}:
+            text = text.replace(f"doc_type: {legacy}", f"doc_type: {canonical}")
+            text = text.replace(f"doc: {legacy}", f"doc: {canonical}")
+        dst.write_text(text, encoding="utf-8")
+        src.unlink()
+        renamed = True
+    return renamed, issues
+
+
+def _rename_legacy_es_status(planning_dir: Path, legacy: str, canonical: str) -> bool:
+    status_path = planning_dir / "status.yaml"
+    if not status_path.is_file():
+        return False
+    raw = status_path.read_text(encoding="utf-8")
+    if legacy not in raw:
+        return False
+    data = yaml.safe_load(raw)
+    if not isinstance(data, dict):
+        return False
+    if not _rename_status_stem_keys(data, legacy, canonical):
+        return False
+    status_path.write_text(
+        yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+    )
+    return True
+
+
+def migrate_exec_summary_stem(planning_dir: Path) -> list[Issue]:
+    """Rename legacy exec-summary.* → executive-summary.*; rewrite status.yaml keys."""
+    legacy = "exec-summary"
+    canonical = "executive-summary"
+    renamed, issues = _rename_legacy_es_files(planning_dir, legacy, canonical)
+    if _rename_legacy_es_status(planning_dir, legacy, canonical):
+        renamed = True
+    if renamed:
+        issues.append(
+            Issue.warn(
+                "MIGRATE_ES_STEM",
+                f"renamed {legacy} → {canonical} (files and/or status.yaml keys)",
+            )
+        )
+    return issues
+
+
+def _rename_status_stem_keys(data: dict, legacy: str, canonical: str) -> bool:
+    changed = False
+    for key in ("levels", "next_levels", "challenge", "next_challenge"):
+        block = data.get(key)
+        if not isinstance(block, dict) or legacy not in block:
+            continue
+        if canonical in block:
+            continue
+        block[canonical] = block.pop(legacy)
+        changed = True
+        # Rewrite pin keys that name the parent stem
+        for row in block.values():
+            if not isinstance(row, dict):
+                continue
+            pins = row.get("pins")
+            if isinstance(pins, dict) and legacy in pins:
+                pins[canonical] = pins.pop(legacy)
+                changed = True
+    return changed
