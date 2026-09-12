@@ -1,143 +1,116 @@
 # rr-planner
 
-Flag-driven software planning docs: progressive top-down discovery from vision through functional requirements, with compose, research, and challenge phases. No command files; NL + flag driven.
+Flag-driven **Plan**: honest Effort + buildable slice handoff from a frozen `business-case.yaml`. Human index only — runtime is [SKILL.md](SKILL.md) + [refs/](refs/).
 
-**Human index only.** Runtime policy is [SKILL.md](SKILL.md) + [refs/](refs/) — not this file.
+## Why
+
+Specify what to build after Discover proved the bet — with system judgment in the same sitting so RICE Effort is trustworthy and Execute does not invent mechanism or cost-driving UX shape. Refuse Effort-without-architecture, Effort without cost-driver cites, requirement-table shrink-to-ship, smell-fail AC, sprint ceremony, and silent PRD inventiveness when BRD is not frozen. **Success** = raises the odds the builder reaches the frozen Discover objective / OMTM — Effort honesty + pin-complete kernel are necessary preconditions, not the finish line. Freeze only when further Plan work stops moving that likelihood and no open standing red flag / Discover-reopen blocks it — **not** product-doc section coverage or smell-clean ceremony.
+
+## What
+
+Owns Plan Q&A, PRD compose/change, standing architecture (+ constitution; Plan-owned tech + global UX baseline), feature deltas (mechanism, Effort drivers, UX-shape), WWAS AC, selection status, slice freeze (`execute-slice.yaml`), research, and technical challenge (pre-mortem + red-team). Discover (ES→MRD→BRD + business-case) is `rr-discovery`. Cascade `.md` persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
+
+**Explicitly no traditional sprints** (no capacity/velocity theater). Sequencing language: **slice / phase / selected requirements**. Release/version bundling of frozen slices is a later Plan add-on — not this skill’s inventiveness.
+
+**Out of scope:** Execute / ship-check / ticket writing — future. Execute starts fused code+test from the kernel; no separate tech-planning step in Plan.
+
+## Actions
+
+| id | outcome | pick when |
+|----|---------|-----------|
+| `setup` | docs/ framework bootstrap | Shared setup |
+| `prd` | Compose PRD + standing Plan path | Entry gate passed |
+| `change` | Patch PRD / delta / AC section | `--change` + section + target |
+| `freeze-slice` | Mint `execute-slice.yaml` + stamp slice | Selected requirements + smell-clean AC + Effort drivers |
+| `research` | Cited findings on existing docs | Post-compose |
+| `challenge` | Technical pre-mortem + red-team (**standard**; add `deep` for exhaustive) | Prefer Plan targets; compact parent summary |
+
+`--resume` is a **selector** (continue Plan checkpoint), not a primary action — [input-resolution.md](refs/input-resolution.md).
+
+## When
+
+### Use when
+
+- Frozen BRD + `business-case.yaml` exist and you need Plan (`--prd`, `--change`, `--freeze-slice`)
+- Research or challenge **Plan** docs (`--research`, `--challenge`)
+- Shared `--setup` or continue a paused Plan session (`--resume` selector)
+
+### Avoid when
+
+- Problem, market, viability, ideation, beachhead → `rr-discovery`
+- Starting Plan without freeze + handoff (entry gate)
+- Asking for sprint planning / velocity as Plan process
+- Asking this skill to invent a release/version plan this pass
 
 ## Philosophy
 
-- **Progressive cascade** — Posture gate (including `domain_context`), then Exec summary → MRD → BRD → PRD; each level inherits and narrows the one above.
-- **Item contract** — Hierarchical `{DOC}-{n.m}` ids, immediate parent pointer, atomic leaves; ranking is per layer (MoSCoW on ES functional deliverables and BRD; Kano on MRD; RICE/RIC on PRD), not P0. MoSCoW *legend* follows project posture on BRD (Must is not always MVP). Spec vs PRD `status` are separate concerns. Ranked leaves carry a `_rationale_` pointer. Mechanism detail appends to `tech.md`.
-- **Goal-anchored** — Unclear and ambiguous statements are blocking; clarify before recording facts; every decision traces to stated goals. Reason-graph (evidence, `flips_when`, burial) lives in `decision-ledger.yaml`, not the decision log.
-- **Expert panel** — Seats argue both sides; a blocking seat owes an alternative. Verdict is a state (`proceed` … `kill`), not an exit. Binding at exec-summary and MRD; `market_type: internal` skips TAM.
-- **Decision ledger** — Items rest on rationales, rationales rest on evidence. Invalidation raises a re-decision queue; it never auto-flips status. Buried ids are reserved and never recycled.
-- **Off-level answers** — A feature mentioned during vision parks on the affected doc (`{level}.notes.yaml`), not as an exec-summary assumption. The sidecar is transient: gone when that doc's notes are resolved.
-- **Proactive discovery** — Premise test inside exec-summary; stage-exit blind-spots then Gate 7 viability before freeze; claim-class search budgets; write-time pre-save blocks on an open queue or unresolved binding `hold`/`kill`.
-- **Interactive discovery, non-interactive agents** — Skill owns question loops (`AskQuestion` by default, `--text-mode` for inline); compose persists `{level}.md` + `items.json` and returns a slim receipt; research/challenge return findings JSON.
-- **Stop and resume** — Pause anytime; state checkpoints to `session-state.json`; Q&A appends to `raw-history/`; `--resume` sweeps the ledger then continues. Confirmed posture is not re-asked. Durable versions live in `status.yaml` (shared track, independent patches) — not in the checkpoint.
-- **Pairing** — One load line on root agent SoT files points at `docs/plans/agent.plan.md`. Major/minor only via this skill after confirm. CI never mints or fails "this looks like a minor."
+- **Goal-likelihood over ceremony** — Plan succeeds when it raises builder→Discover-objective odds; freeze is a gate when marginal Plan work stops moving that likelihood — not the north-star
+- **Layered scrutiny** — Auto-reflection → smells → `--challenge` (standard) → `--challenge deep` (`refs/planning/challenge-layers.md`); smell-clean ≠ challenged
+- **Honest Effort** — Dual-lens sitting; `_effort_:` only with same-sitting Decision + Effort drivers (UX cost drivers when UI-facing)
+- **Buildable handoff** — Constraints cite deltas; pins + `delta_paths` exist; draft ≠ missing architecture; spine + deltas beat fat PRD dumps
+- **Full scope honesty + thin selection** — `_status_:` never deletes the requirement table; entry gate = frozen BRD + valid `business-case.yaml`
+- **Nature reflection** — Reflect on product nature → derive expectations for this project → elicit; do not wait for a founder dump or dump a universal checklist
 
-## How to run
+## UX
 
-One primary action flag + optional selectors. Explicit flags win on conflict ([refs/input-resolution.md](refs/input-resolution.md)).
+Process-ownership (user is not process-owner): [`../../INTENT.md`](../../INTENT.md) UX. Skill-local chrome below.
 
-| Selector | Values | Default |
-|----------|--------|---------|
-| `--input` | file or directory | conversation context |
-| `--output-dir` | directory path | `{PROJECT_ROOT}/docs/plans/` |
-| `--format` | `md` | `md` |
-| `--depth` | `shallow`, `standard`, `deep` | `standard` |
-| `--text-mode` | _(flag)_ | off — questions use `AskQuestion` |
-| `--resume` | _(flag)_ | off — load `session-state.json` from output-dir |
-| `--change` | _(flag)_ | off — requires `--section` + `--target` |
-| `--section` | item id / heading / section | required with `--change` |
-| `--target` | level and/or track | required with `--change` |
+### Invoke
 
-`PROJECT_ROOT` = git toplevel if available, else workspace root. `--output-dir` always wins. `--format yaml` and `--format json` are rejected (`UNSUPPORTED_FORMAT`). JSON on disk is only `items.json` (item graph) and `session-state.json` (resume / agent I/O). `status.yaml` is YAML project knowledge.
+Flags (`--setup` / `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--challenge deep` / …) or clear Plan NL; bare invoke never silent-composes without entry gate.
 
-## Common flows
+### Intake
 
-```
-rr-planner --setup
-```
-→ Bootstrap or repair `{PROJECT_ROOT}/docs/plans/`, `status.yaml`, `agent.plan.md`, and the root SoT load line. Does not start discover. First compose is the safety net if setup was skipped.
+Status-first (`rrr-status` → `docs/plan/status.yaml` + session-state); resolve emits payload before Plan body. Entry gate also reads discovery freeze + handoff. Solid-subset Plan body on draft Discover allowed when cited subset is load-bearing-stable — freeze mint still needs frozen parents ([input-resolution.md](refs/input-resolution.md)).
 
-```
-rr-planner --discover
-```
-→ Confirm project posture, then full top-down cascade with interactive discovery; writes all docs to `{PROJECT_ROOT}/docs/plans/`.
+### Clarify
 
-```
-rr-planner --prd --input "Build a team analytics dashboard for engineering managers"
-```
-→ Discovery + compose for exec-summary through PRD only.
+AskQuestion on entry-gate fail, vague posture/`domain_context`, binding panel `hold`, smell-fail AC, missing freeze fields, or **risk-accept** — do not invent. Cap stays `questions_per_cycle`.
 
-```
-rr-planner --research --output-dir docs/plans/
-```
-→ Post-composition market evaluation with cited findings.
+### Output
 
-```
-rr-planner --challenge --output-dir docs/plans/
-```
-→ Devil's-advocate review of existing planning docs (union of all blind-spot lenses).
+PRD + standing spine/deltas + WWAS AC + selection status; slice freeze kernel when requested; research/challenge reports (standard/deep only); cascade prose only after humanize.
 
-```
-rr-planner --discover --text-mode
-```
-→ Questions asked inline in chat instead of structured `AskQuestion` prompts.
+### Close
 
-```
-rr-planner --resume --output-dir docs/plans/
-```
-→ Continue a paused session from checkpoint. Q&A appends to the existing raw-history file.
+Session-state + status stamps written. **Next Up** per `refs/planning/progress.md`: offer slice freeze only after standard challenge clear (or risk-accept) + auto-reflection / red-flag / Discover-reopen check ([cascade.md](refs/cascade.md), [execute-handoff.md](refs/execute-handoff.md)); after freeze → Execute (future); after compose → research/challenge or goal-likelihood gap work — **not** freeze-by-default after smell-clean. Do not incentivize skip.
 
-```
-rr-planner --change --section checkout --target prd
-```
-→ Classify patch vs redirect-to-next vs open-next vs unfreeze; compose the affected level. While a next track is open, current accepts patches only.
+## Technique index
 
-```
-rr-planner --discover --depth deep
-```
-→ Full cascade + mandatory research + challenge pass.
+| Technique | Ref |
+|-----------|-----|
+| Cascade / Plan gates | [refs/cascade.md](refs/cascade.md) |
+| Project posture | [refs/project-posture.md](refs/project-posture.md) |
+| Goal anchor / clarify | [refs/goal-anchor.md](refs/goal-anchor.md) |
+| Note sessions | [refs/note-sessions.md](refs/note-sessions.md) |
+| Expert panel / Gate 7 | [refs/expert-panel.md](refs/expert-panel.md) |
+| Domain routing | [refs/domain-routing.md](refs/domain-routing.md) |
+| Blind spots | [refs/blind-spots.md](refs/blind-spots.md) |
+| Coach / Fast interview | [refs/plan-interview.md](refs/plan-interview.md) |
+| Nature expectation method | [refs/nature-expectation-packs.md](refs/nature-expectation-packs.md) |
+| RICE / RIC / on-demand lenses | [refs/prioritization-lens.md](refs/prioritization-lens.md) |
+| Same-sitting system design | [refs/system-design.md](refs/system-design.md) |
+| ADR-lite / supersede | [refs/adr-lite.md](refs/adr-lite.md) |
+| Architecture spine | [refs/doc-standards/architecture.md](refs/doc-standards/architecture.md) |
+| Constitution | [refs/doc-standards/constitution.md](refs/doc-standards/constitution.md) |
+| Feature deltas | [refs/doc-standards/feature-delta.md](refs/doc-standards/feature-delta.md) |
+| WWAS + smell gate | [refs/req-smell.md](refs/req-smell.md) |
+| Slice freeze kernel | [refs/execute-handoff.md](refs/execute-handoff.md) |
+| Technical challenge | [refs/challenge-method.md](refs/challenge-method.md) |
+| Research method | [refs/research-method.md](refs/research-method.md) |
+| Pre-save proactivity | [refs/proactivity.md](refs/proactivity.md) |
 
-## Output artifacts
+## Constraints
 
-Compose writes cascade docs and `items.json`. The skill asks clarifications and writes `session-state.json`, `status.yaml`, `agent.plan.md`, `decision-ledger.yaml`, `raw-history/`, and `{level}.notes.yaml` (transient; deleted when that level's notes are resolved). `future.md` is an optional inbox (not validator input).
+- **Invoke:** Auto — no `disable-model-invocation`; ambient WHEN description is enough
+- **Gates:** Entry gate (frozen BRD + handoff); humanize before cascade `.md` persist; Effort requires architecture + Effort drivers this pass; smell-fail / hollow kernel blocks freeze
+- **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
+- **Eval-first:** Fix FAIL audit ids only; preserve Plan outcome (no redesign)
 
-| File | Content |
-|------|---------|
-| `exec-summary.md` | Posture, vision, problem, why now |
-| `mrd.md` | Market context |
-| `brd.md` | Business requirements |
-| `prd.md` | Product requirements |
-| `tech.md` | Mechanism-level freeform capture (shalls, AC, integrations — not validator input) |
-| `later.md` | Deferred-topic parking lot (not validator input) |
-| `status.yaml` | Shared track, independent product/docs patches, per-doc rev/digest/pins, `claude_config_version` (skill-owned; validator mechanical codes only) |
-| `agent.plan.md` | Non-patch version tripwire + pointer self-heal; pairing SoT is this skill (not cascade input) |
-| `future.md` | Unassigned / beyond-next inbox (no ids; never auto-promote; not validator input) |
-| `{level}.notes.yaml` | Off-level answers parked on the affected doc (always YAML; not validator input; exists only while unresolved) |
-| `items.json` | Item graph / parent-child / spec / rationale ids (always written; validator target) |
-| `decision-ledger.yaml` | Evidence, rationales, graveyard, reserved ids, re-decision queue (skill-owned; validator input) |
-| `session-state.json` | Checkpoint for stop/resume (decisions, facts, `project_posture`, `viability`, `note_sessions`, `item_registry`, `raw_history_path`) |
-| `raw-history/{UTC}.yaml` | Verbatim Q&A turns (append-only; created on first question) |
-| `research-report.md` | Cited market findings (when research runs) |
-| `{stem}.challenge.report.md` | Per-doc blind-spot findings worklist (when `--challenge` runs that stem) |
+## Notes
 
-Cascade docs are `.md` only. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml`, `status.yaml`, and `{level}.notes.yaml` are always YAML. Ledger + `status.yaml` are validator input (`future.md` / `agent.plan.md` are not). `--format yaml` is `UNSUPPORTED_FORMAT`. When a next major.minor opens, cascade docs for that track live under `docs/plans/{next}/`; `status.yaml` / `agent.plan.md` / `future.md` stay at `docs/plans/`.
-
-## Troubleshooting
-
-- **Ambiguous action** — One primary flag per call; `--discover` and `--challenge` are mutually exclusive.
-- **Out of scope (`OUT_OF_SCOPE`)** — Implementation, code review, tickets, or skill-vs-command advice with no planning flag. Pass `--discover` if that work is the product to plan.
-- **Partial docs** — Say "stop" or "pause" to checkpoint; resume with `--resume`. Answer pending clarification questions to advance.
-- **Old `docs/planning/` checkpoint** — Resume uses it once, states the new default `docs/plans/`, and does not copy files. Pass `--output-dir` to keep the old path.
-- **Missing parent docs for challenge/research** — Run `--discover` first or point `--input` at existing docs.
-- **Traceability failures** — Re-run focused level (e.g. `--prd`) after fixing parent docs.
-- **Held session (`VIABILITY HOLD` / `blocked`)** — Binding `hold` names missing evidence in `viability[]` and the ledger. Do not treat the plan as accepted. Resume, satisfy the evidence bar or confirm `kill` with a revival trigger, then re-run pre-save.
-- **Revived item** — A killed id stays in `reserved_ids` / `graveyard`. Revival is a **new** id plus `type: revival` pointing at the snapshot. Compose will not recycle the buried number.
-- **`--format yaml` / `--format json`** — Not a plan format. Use `md` (default). Stale `{level}.yaml` cascade files are rewritten at resolve.
-- **Pairing / `HAND_BUMP`** — Do not edit `track` or frozen revs/pins in `status.yaml` by hand. Major/minor only via this skill after confirm. CI does not classify patch vs minor.
-
-## Further reading
-
-| Topic | Owner |
-|-------|-------|
-| Quick start | This file |
-| Routing and cascade | [SKILL.md](SKILL.md) |
-| Flag parsing / conflicts | [refs/input-resolution.md](refs/input-resolution.md) |
-| Bootstrap `--setup` | [refs/setup.md](refs/setup.md) |
-| Verifying phrases | [refs/progress.md](refs/progress.md) |
-| Track / patch / pins | [refs/baselines.md](refs/baselines.md) |
-| Root SoT one-liner | [refs/agent-config.md](refs/agent-config.md) |
-| Level order and gates | [refs/cascade.md](refs/cascade.md) |
-| Project posture / MoSCoW legend | [refs/project-posture.md](refs/project-posture.md) |
-| Expert panel / verdicts | [refs/expert-panel.md](refs/expert-panel.md) |
-| Decision ledger / reason graph | [refs/decision-ledger.md](refs/decision-ledger.md) |
-| Off-level answers | [refs/note-sessions.md](refs/note-sessions.md) |
-| Phase schemas | [refs/contracts.md](refs/contracts.md) |
-| Doc structures | [refs/doc-standards/](refs/doc-standards/) |
-| Item identity / rank / status | [refs/doc-standards/item-schema.md](refs/doc-standards/item-schema.md) |
-| Success gate | [refs/success-criteria.md](refs/success-criteria.md) |
-| Output adapters | [refs/output-formats.md](refs/output-formats.md) |
+- Selectors and depth: [refs/input-resolution.md](refs/input-resolution.md)
+- **Version law (Shared):** `refs/planning/baselines.md` — flow skills only; no skill-local version stubs. Non-loaders: humanize, git helpers, rr-test. Index: `refs/planning/README.md`
+- Shared ledger / items / setup: plugin `refs/planning/` (link there directly — no skill stubs)
+- Technique refs above are skill-local under `skills/rr-planner/refs/`
+- `docs/agent.plan.md` is tripwire only — refuse non-patch; route here or `rr-discovery`

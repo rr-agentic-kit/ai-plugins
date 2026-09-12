@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 VALID_FILES: dict[str, str] = {
-    "exec-summary.md": """\
+    "executive-summary.md": """\
 # Exec summary
 
 ## ES-1: Competitive window
@@ -45,8 +45,8 @@ _parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active 
 }
 
 VALID_YAML_FILES: dict[str, str] = {
-    "exec-summary.yaml": """\
-doc_type: exec-summary
+    "executive-summary.yaml": """\
+doc_type: executive-summary
 title: Exec summary
 items:
   ES-1:
@@ -193,7 +193,7 @@ re_decision_queue: []
 """
 
 RATIONALE_FILES: dict[str, str] = {
-    "exec-summary.md": """\
+    "executive-summary.md": """\
 # Exec summary
 
 ## ES-1: Competitive window
@@ -235,8 +235,8 @@ _parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active 
 }
 
 RATIONALE_YAML_FILES: dict[str, str] = {
-    "exec-summary.yaml": """\
-doc_type: exec-summary
+    "executive-summary.yaml": """\
+doc_type: executive-summary
 title: Exec summary
 items:
   ES-1:
@@ -313,7 +313,7 @@ items:
 }
 
 OLD_ES_FILES: dict[str, str] = {
-    "exec-summary.md": """\
+    "executive-summary.md": """\
 # Exec summary
 
 ## Vision
@@ -429,18 +429,18 @@ scanned_digest: sha256:deadbeef
 - **fix_level:** prd
 - **target_artifact:** doc
 
-## bs-002 — exec-summary (medium)
+## bs-002 — executive-summary (medium)
 
-- **doc:** exec-summary
-- **target_doc:** exec-summary
+- **doc:** executive-summary
+- **target_doc:** executive-summary
 - **severity:** medium
 - **category:** scope_misfiling
-- **doc_ref:** exec-summary.md § ES-3
+- **doc_ref:** executive-summary.md § ES-3
 - **finding:** Language support filed without metric teeth
 - **evidence:** ES-3 is Should without a success metric anchor
 - **recommendation:** Refile to functional deliverables or add metric
 - **fix_action:** refile
-- **fix_level:** exec-summary
+- **fix_level:** executive-summary
 - **target_artifact:** doc
 """
 

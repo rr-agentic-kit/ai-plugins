@@ -328,6 +328,10 @@ def _check_container_fields(item: Item) -> list[Issue]:
     issues: list[Issue] = []
     if item.status is not None:
         issues.append(Issue.error("STATUS_SCOPE", "status is PRD leaves only", item.id))
+    if item.priority is not None:
+        issues.append(
+            Issue.error("PRIORITY_SCOPE", "priority is PRD leaves only", item.id)
+        )
     if item.moscow is not None or item.kano is not None:
         issues.append(
             Issue.error("CONTAINER_RANK", "containers stay unmarked", item.id)
@@ -344,6 +348,10 @@ def check_required_fields(items: list[Item]) -> list[Issue]:
         if item.doc != "prd" and item.status is not None:
             issues.append(
                 Issue.error("STATUS_SCOPE", "status is PRD leaves only", item.id)
+            )
+        if item.doc != "prd" and item.priority is not None:
+            issues.append(
+                Issue.error("PRIORITY_SCOPE", "priority is PRD leaves only", item.id)
             )
     return issues
 
@@ -455,6 +463,7 @@ _DRIFT_KEYS = (
     "kind",
     "spec",
     "status",
+    "priority",
     "tag",
     "goal_type",
     "reach",

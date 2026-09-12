@@ -1,6 +1,6 @@
 ---
 name: rr-planner
-description: Flag-driven software planning docs — progressive top-down discovery (exec-summary → MRD → BRD → PRD), compose, research, and challenge. Use when producing exec-summary → PRD planning docs, bootstrapping docs/plans (--setup), resuming a checkpoint, or researching/challenging existing ones. Orchestrates phase agents under agents/planning/*; no command files.
+description: Flag-driven Plan — goal-likelihood for Discover OMTM via honest Effort + slice kernel. After Discover freeze; setup/challenge/freeze-slice. Market→rr-discovery.
 ---
 
 # rr-planner
@@ -9,85 +9,81 @@ description: Flag-driven software planning docs — progressive top-down discove
 
 ## Purpose
 
-Produce cascade planning docs (exec-summary → PRD) from flags and conversation. This skill owns question loops and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`.
+Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sitting yields **honest RICE Effort** (cost drivers in spine/delta — tech and/or UX) and a **buildable slice kernel** (`execute-slice.yaml`) so future Execute starts fused code+test without inventing stack, mechanism, or cost-driving UX shape. Artifacts include full feature requirement sets, scored backlog, standing architecture spine (+ constitution), per-feature deltas, WWAS AC, and compact freeze. **Success** = raises the odds the builder reaches the frozen Discover objective / OMTM — Effort honesty + pin-complete kernel are **necessary preconditions**, not the finish line. Freeze only when further Plan work stops moving that likelihood **and** no open standing red flag / Discover-reopen blocks it — **not** product-doc section coverage or smell-clean ceremony. Discover (ES→MRD→BRD + `business-case.yaml`) is owned by `rr-discovery`. This skill owns Plan Q&A and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
 
 ## When to use
 
-- Bootstrap or repair the plans directory (`--setup`) — does not start discover
-- Discover a product or plan (`--discover` / `--all`, or a cascade level flag)
-- Change a frozen or shipping track (`--change` with `--section` + `--target`)
-- Resume a paused session (`--resume`)
-- Research or challenge **existing** planning docs
+- Bootstrap or repair the docs framework (`--setup`) — does not start Plan
+- Compose or change PRD / standing Plan docs (`--prd`, `--change`) after Discover freeze
+- Select requirements and freeze a slice (`--freeze-slice` / NL)
+- Resume a paused Plan session (`--resume`)
+- Research or challenge **existing** Plan docs (PRD, architecture, deltas, AC)
 
 ## When not to use
 
-- Implementation, code review, or ticket writing that is not cascade planning
-- Artifact-type advice (skill vs command, process checklist) that is not a product to plan
+- Problem, market, viability, ideation, GTM framing, or BRD work → `rr-discovery`
+- Traditional sprint / capacity / velocity ceremony → refuse; reframe as slice selection
+- Release/version bundling of slices → deferred; do not invent those artifacts this pass
+- Implementation, Execute, ship-check, or ticket writing that is not cascade planning
 - Inventing docs to run research or challenge — those actions require existing docs ([input-resolution.md](refs/input-resolution.md))
-- Inventing a skip of parent cascade levels — level flags expand ancestors; `depth: shallow` is the only trim ([input-resolution.md](refs/input-resolution.md))
-
-Code/ticket work and artifact-type advice stop at resolve via `OUT_OF_SCOPE` unless a primary flag is present ([input-resolution.md](refs/input-resolution.md)).
+- Starting Plan without frozen BRD + `business-case.yaml` — [input-resolution.md](refs/input-resolution.md) Entry gate
 
 ## Procedure
 
-TodoWrite `merge: false` before step 1 with stable ids `resolve`, `posture`, `premise`, `level-<n>` (one per `payload.cascade_levels` entry), `sweep`, `compose`, `stage-exit`, `verdict`, `write`. Mark `completed` before advancing. Re-add `sweep`, `compose`, `stage-exit`, and `verdict` with `merge: true` when entering the next level. Omit `posture` / `premise` / `level-*` / `sweep` / `compose` / `stage-exit` / `verdict` when `action` is `research` or `challenge`. When `action` is `setup`: only `resolve`, `setup`.
+TodoWrite `merge: false` before step 1 with stable ids: `resolve` → `setup?` → `entry-gate` → `posture` → `standing` → `interview` → `score-architect` → `requirements` → `select` → `ac-smell` → `tech-challenge?` → `slice-freeze` → `compose`/`humanize` as needed → `write`. Mark `completed` before advancing. Omit Plan-body todos when `action` is `research` or `challenge` (only `resolve` → challenge/research → `write`). When `action` is `setup`: only `resolve`, `setup`. When `action` is `freeze-slice` with selection already done: `resolve` → `entry-gate` → `ac-smell` → `tech-challenge?` → `slice-freeze` → `write`.
 
-Phrases: [progress.md](refs/progress.md) on every invocation (`verifying <section>` then `<section> is created` / `is fixed` / `was ok` / `is failed`).
+Phrases: `refs/planning/progress.md` on every invocation.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md) (status-first pick from `docs/plans/status.yaml`). Normalize raw flags and NL into `NormalizedPayload`. If `output_dir` (or a cascade `--input` dir) already has cascade docs, print `verifying cascade format` and run `sh scripts/validate_planning.sh --rewrite <dir>` before any `Task` ([setup.md](refs/setup.md) section names). If `status.yaml` or `agent.plan.md` exists in the plans root — or this is first compose — print `verifying agent.plan.md` / `verifying root SoT load line` and sync injection: `sh scripts/validate_planning.sh --sync-agent-config --repo-root <PROJECT_ROOT> <plans-root>` ([agent-config.md](refs/agent-config.md)). Done: payload emitted; stale md/yaml rewritten; load line present on existing root SoT. Stop: that ref's deterministic errors; pairing stops in [baselines.md](refs/baselines.md) (skill classify — not validator FAILs).
-
-Branch on `payload.action`. Do not run the sibling primary path. Bare invoke never silent-rediscovers when plans already exist (`payload.route: ask`). `--setup` never starts discover.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Prefer `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--setup` / `--resume`. Discover flags/NL → stop and route to `rr-discovery`. Sprint/capacity/velocity → refuse and reframe as slice selection. Status-first: `docs/rr/rrr-status.yaml` then `docs/rr/{track}/plan/status.yaml` + session-state; entry gate also reads discovery detail. Rewrite/sync via `refs/planning/setup.md` / `refs/planning/agent-config.md`. Done: payload emitted.
 
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
-| `setup` | step 2 (completes `write`). Stop. Do not posture. | `setup` |
-| `discover`, `exec-summary`…`prd`, `change` | step 3, then step 5 | `posture`, `premise`, `level-*`, `sweep`, `compose`, `stage-exit`, `verdict`, `write` |
-| `research`, `challenge` | step 4 (completes `write`) | `write` only |
+| `setup` | step 2 (completes `write`). Stop. | `setup` |
+| `prd`, `change` | step 3 → Plan body → write | `entry-gate` through `write` as listed above |
+| `freeze-slice` | step 3 → ac-smell → challenge? → slice-freeze → write | as listed |
+| `research`, `challenge` | step 5 (completes `write`) | `write` only |
 
-If `payload.chain` includes `research` and/or `challenge`, run step 4 after step 3 (last level frozen; docs on disk) and before step 5. Do not start a second discover pass.
+2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start Plan compose. Default `output_dir` = `docs/rr/{track}/plan/`.
 
-2. **setup** — Load [setup.md](refs/setup.md). Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT> <plans-dir>`. For each TSV line, print the [progress.md](refs/progress.md) pair. Completes `write`. Done: that ref's done-when. Stop: any section `failed` (script exit non-zero). Do not start discover.
+3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
 
-3. **discover** — Load [project-posture.md](refs/project-posture.md) (includes `domain_context`). Done: that ref's persist condition. Then for each level in `payload.cascade_levels`, execute [cascade.md](refs/cascade.md). Mark `level-<n>` on entry, `sweep` after the re-decision sweep, `premise` after the exec-summary premise test (skip the id on later levels), `compose` after the compose `Task`, `stage-exit` after Gate 6, `verdict` after Gate 7. After compose persist: if that doc's `challenge.status` is `clean-shallow`, `clean-deep`, or `dirty-accepted`, set `dirty` ([baselines.md](refs/baselines.md)). When compose changes load-bearing ES facts (premises, verdict prose, consent/privacy constraints, named Musts), set `viability_stale: true` on binding ES/MRD levels. Freeze does not wait on challenge-clean. Done: last listed level frozen. Stop/pause: cascade.md.
+4. **Plan body** — Load [cascade.md](refs/cascade.md). For `prd` / `change` / `freeze-slice`: run Pre-Plan posture → Level order → Per-level cycle as that ref directs. Before marking any phase todo `completed`, run [goal-anchor.md](refs/goal-anchor.md) **Standing self-challenge** (auto-reflection layer — `refs/planning/challenge-layers.md`). Mark `posture`, `standing`, `interview`, `score-architect`, `requirements`, `select`, `ac-smell`, `tech-challenge?`, `slice-freeze`, `compose`/`humanize` as cascade phases complete. Done: that ref's Advancing vs stopping conditions or pause checkpoint.
 
-4. **research / challenge** — Load [contracts.md](refs/contracts.md). Research also loads [research-method.md](refs/research-method.md); challenge also loads [blind-spots.md](refs/blind-spots.md) and [decision-ledger.md](refs/decision-ledger.md). `Task` the matching agent. Research: agent returns when its iteration budget is exhausted (`ok`, or `partial` + `clarifications_needed`); skill may re-`Task` or stop when the user confirms done. Persist reports per [output-formats.md](refs/output-formats.md). Research persist completes `write`. Challenge: **exactly one doc** per invocation — if target unclear, AskQuestion with doc options. Depth is user-visible (`shallow` | `deep`); AskQuestion when unclear. Overwrite only `{stem}.challenge.report.md` for the challenged stem (stamp `depth` in frontmatter). Stamp `status.yaml` `challenge:` per [baselines.md](refs/baselines.md) — `clean-shallow` or `clean-deep` iff zero findings for that stem, `scanned_digest` from live digest, and `depth` recorded. `clean-*` means last scan of this digest found nothing open — not "doc finished." If any `dirty`: AskQuestion — **Address now** | **Accept residual (`dirty-accepted`)** | **Done for now** (leave `dirty`). **Address now** (one doc/report at a time; dual-stub partners stay `dirty` until their own pass): (1) **Assumption gate** — rank open assumptions by relevance (gates a Must / gates a success metric); surface top-ranked for confirm/reject; lock confirmed/rejected into the decision ledger (`a-*`/rationale) so later cycles do not re-derive them. (2) **Question filter** — two-part test before each AskQuestion batch: **level-fit** — reject if a locked routing rule already assigns the topic elsewhere (no importance exception); **impact** — among level-fit candidates, drop if every plausible answer leaves the open doc's Musts, success metrics, constraints, and non-goals unchanged. Tag each cycle `question_shape: exploratory | narrowing`. Ask at most `session_state.preferences.questions_per_cycle` questions per cycle (default **1**; set via `--questions-per-cycle N`, confirm-once — [input-resolution.md](refs/input-resolution.md)). No proactive `--discover prd` — work the current doc until done-when or the user explicitly switches. Re-enter discover/compose for the addressed stem → repeat until that stem is `clean-*`, user `dirty-accepted`, or user done-for-now. After `clean-*`: AskQuestion — **Re-challenge** (pick depth) | **Address another doc** | **Done**. No address-cycle cap. Do not treat a stale `proceed` as current when `viability_stale` is true — Gate 7 re-sit clears it. Freeze (Gates 1–7) does not wait on challenge-clean. `depth: deep` still chains challenge after last freeze. `final_status: ok` allowed with `dirty-accepted`; leftover `dirty` (not accepted) stays `partial` at chain exit. Challenge persist plus address-loop exit completes `write`. Done: per-doc report written; attestation stamped. Stop: input-resolution deterministic errors; contracts parsing policy.
+5. **research / challenge** — Load `refs/planning/contracts.md`. Research: [research-method.md](refs/research-method.md). Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md` + `refs/planning/challenge-layers.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method). Default depth = **standard**; `deep` only when explicit. Persist reports per `refs/planning/output-formats.md`. Completes `write`.
 
-5. **write** (discover/change only, after last freeze and any `payload.chain` phases) — Apply [success-criteria.md](refs/success-criteria.md), then pre-save reflection ([proactivity.md](refs/proactivity.md)), then persist `session-state.json` and `status.yaml` per [output-formats.md](refs/output-formats.md) / [baselines.md](refs/baselines.md). Print [progress.md](refs/progress.md) for `status.yaml` / `agent.plan.md` writes and freeze mint. On **first compose** into a repo: write `status.yaml`, write `agent.plan.md`, sync the one-liner into existing root agent SoT files, set `claude_config_version`. Leftover challenge `dirty` (not accepted) keeps `final_status: partial`. `dirty-accepted` does not block `ok`. Done: session-state + status written. Stop: contracts parsing policy.
-
-Load remaining refs on demand from **Shared refs**.
+6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + `docs/rr/{track}/plan/status.yaml` + refresh `rrr-status.yaml`. First compose: emit `docs/rr/agent.plan.md` + sync root SoT. Next Up / freeze-suggest: `refs/planning/progress.md` + `refs/planning/challenge-layers.md`. Done: session-state + statuses written.
 
 ## Shared refs (load on demand)
 
 | Ref | When |
 |-----|------|
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
-| [progress.md](refs/progress.md) | Every invocation |
-| [setup.md](refs/setup.md) | `action: setup`; resolve rewrite/sync (section names) |
-| [baselines.md](refs/baselines.md) | Every resolve; freeze / `--change` / open-next; first compose; challenge stamp |
-| [agent-config.md](refs/agent-config.md) | Resolve sync; first compose; `--setup`; `claude_config_version` lag |
-| [cascade.md](refs/cascade.md) | Discover-path actions (`discover`, `--change`, or a cascade level flag) |
-| [project-posture.md](refs/project-posture.md) | Discover start (pre-cascade); resume per that ref; PRD-shape reflection before minting structure |
-| [note-sessions.md](refs/note-sessions.md) | After every Q&A; on level entry; after compose persist |
-| [doc-standards/item-schema.md](refs/doc-standards/item-schema.md) | Discovering/composing any level |
-| `refs/doc-standards/<level>.md` | Discovering/composing that level only |
-| [goal-anchor.md](refs/goal-anchor.md) | Entire discovery pass (always-on); reason-graph is **not** this ref |
-| [expert-panel.md](refs/expert-panel.md) | ES premise test; Gate 7; evidence loop; `--resume` when viability/queue is open |
-| [decision-ledger.md](refs/decision-ledger.md) | Rationale mint; every sweep trigger; compose reads `reserved_ids`; challenge scan |
-| [proactivity.md](refs/proactivity.md) | Reflect/explore trigger during discovery; pre-save after last freeze |
-| [blind-spots.md](refs/blind-spots.md) | Stage-exit (this level's row); `--challenge` (union) |
-| [research-method.md](refs/research-method.md) | Research phase only |
-| [output-formats.md](refs/output-formats.md) | After compose; skill write of session-state / status.yaml / agent.plan.md / future.md / tech.md / later.md / raw-history / notes; first Q&A |
-| [success-criteria.md](refs/success-criteria.md) | Pre-freeze/accept gate |
-| [contracts.md](refs/contracts.md) | Before any subagent `Task` call |
+| `refs/planning/progress.md` | Every invocation |
+| `refs/planning/challenge-layers.md` | Challenge / freeze-suggest / auto-reflection |
+| `refs/planning/setup.md` / `refs/planning/baselines.md` / `refs/planning/agent-config.md` | Setup; **version law** (freeze / open-next / ship); sync |
+| [cascade.md](refs/cascade.md) / [project-posture.md](refs/project-posture.md) | Plan body |
+| [plan-interview.md](refs/plan-interview.md) / [prioritization-lens.md](refs/prioritization-lens.md) / [system-design.md](refs/system-design.md) | Interview + score |
+| [nature-expectation-packs.md](refs/nature-expectation-packs.md) | Interview / nature reflection (reflect → derive → elicit; not a pack fire-table) |
+| [doc-standards/prd.md](refs/doc-standards/prd.md) / architecture / constitution / feature-delta | Compose standing + PRD |
+| [req-smell.md](refs/req-smell.md) / [execute-handoff.md](refs/execute-handoff.md) | Pre-freeze / slice freeze |
+| [challenge-method.md](refs/challenge-method.md) / [blind-spots.md](refs/blind-spots.md) | Challenge / stage-exit |
+| [goal-anchor.md](refs/goal-anchor.md) / [expert-panel.md](refs/expert-panel.md) | Plan pass / Gate 2; Gate 7 / resume viability |
+| [note-sessions.md](refs/note-sessions.md) | After every Q&A; Plan level entry |
+| [domain-routing.md](refs/domain-routing.md) | Challenge / blind-spot domain placement; access-axis placement |
+| `skills/rr-discovery/refs/compose-prose.md` | Every cascade `.md` persist |
+| `refs/planning/project-lexicon.md` | After compose-prose (lexicon harvest) |
+| `skills/rr-discovery/refs/business-case-handoff.md` | Entry gate |
+| `refs/planning/contracts.md` | Before any `Task` |
+| Shared package | plugin `refs/planning/` (link there directly — no skill stubs). Versioning SoT: `refs/planning/baselines.md` only — future Execute loads the same file. |
 
-Phase-specific execution steps stay in `agents/planning/*` — skill does not duplicate agent execution steps.
+No matching technique ref → stop + AskQuestion; do not invent procedure.
 
 ## Agent delegation
 
-Invoke via `Task` with `PhaseInput` per [contracts.md](refs/contracts.md). Parse per that ref's parsing policy.
-
 | Agent | Path | Contract |
 |-------|------|----------|
-| compose | `agents/planning/compose.md` | [contracts § compose](refs/contracts.md) |
-| research | `agents/planning/research.md` | [contracts § research](refs/contracts.md) |
-| challenge | `agents/planning/challenge.md` | [contracts § challenge](refs/contracts.md) |
+| compose | `agents/planning/compose.md` | `refs/planning/contracts.md` — allowlist `prd` |
+| research | `agents/planning/research.md` | `refs/planning/contracts.md` |
+| challenge | `agents/planning/challenge.md` | `refs/planning/contracts.md` + Plan [challenge-method.md](refs/challenge-method.md) inject; compact `parent_summary` |
+
+Compose does **not** own humanize — skill runs `skills/rr-discovery/refs/compose-prose.md` after draft receipt.

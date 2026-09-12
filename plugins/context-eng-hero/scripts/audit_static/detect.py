@@ -6,8 +6,9 @@ from pathlib import Path
 def _detect_skill_type(parts: tuple[str, ...], name: str) -> str | None:
     if len(parts) >= 3 and parts[0] == "skills" and name == "readme.md":
         return "skill-readme"
+    # skills/<name>/refs/**/*.md  (incl. doc-standards/)
     if (
-        len(parts) == 4
+        len(parts) >= 4
         and parts[0] == "skills"
         and parts[2] in {"refs", "references"}
         and name.endswith(".md")
@@ -35,6 +36,10 @@ def _detect_markdown_type(parts: tuple[str, ...], name: str, stem: str) -> str |
 def detect_type(rel_path: Path) -> str:
     parts = rel_path.parts
     name = rel_path.name.lower()
+    if name == "acronyms.md":
+        return "acronyms"
+    if name == "glossary.md":
+        return "glossary"
     if skill_type := _detect_skill_type(parts, name):
         return skill_type
     if md_type := _detect_markdown_type(parts, name, rel_path.stem):

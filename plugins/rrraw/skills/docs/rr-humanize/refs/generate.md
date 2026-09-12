@@ -20,7 +20,7 @@ Never add names, numbers, dates, quotes, or claims not in source or brief.
 
 1. **Meaning lock** — List immutable facts from brief/sources (bullet list internal; do not invent).
 2. **Draft** — Apply `refs/readability.md` and `refs/register.md` when flags or tone unclear.
-3. **Optional scan** — `python3 skills/docs/humanize/scripts/cli.py scan` on draft (≤1 call). Load `refs/lexicon.md` only for judgment categories in `result.hits`.
+3. **Optional scan** — `python3 skills/docs/rr-humanize/scripts/cli.py scan` on draft (≤1 call). Load `refs/lexicon.md` only for judgment categories in `result.hits`.
 4. **Reshape** — Fix judgment hits; one substantive pass (reshape, not synonym-swap).
 5. **Claim check** — Every sentence traceable to brief/source; no added specificity (places, dates, interviewees).
 6. **Deliver** — Output draft only; no detector scores or meta commentary about "humanizing."

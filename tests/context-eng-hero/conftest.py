@@ -40,6 +40,28 @@ def audit():
     return audit_static
 
 
+def _ensure_lexicon_companions(dest: Path) -> None:
+    """Seed empty ACRONYMS/GLOSSARY so fixture trees satisfy presence checks."""
+    acronyms = dest / "ACRONYMS.md"
+    if not acronyms.is_file():
+        acronyms.write_text(
+            "# Acronyms\n\n"
+            "| Acronym | Expansion | Notes |\n"
+            "|---------|-----------|-------|\n"
+            "| None yet | — | — |\n",
+            encoding="utf-8",
+        )
+    glossary = dest / "GLOSSARY.md"
+    if not glossary.is_file():
+        glossary.write_text(
+            "# Glossary\n\n"
+            "| Term | Meaning (this plugin) | Not confused with | Notes |\n"
+            "|------|----------------------|-------------------|-------|\n"
+            "| None yet | — | — | — |\n",
+            encoding="utf-8",
+        )
+
+
 @pytest.fixture
 def mini_plugin(tmp_path: Path, fixtures_dir: Path):
     """Copy a fixture subtree to a temp plugin root."""
@@ -50,6 +72,7 @@ def mini_plugin(tmp_path: Path, fixtures_dir: Path):
             raise FileNotFoundError(src)
         dest = tmp_path / case_name
         shutil.copytree(src, dest)
+        _ensure_lexicon_companions(dest)
         return dest
 
     return _copy

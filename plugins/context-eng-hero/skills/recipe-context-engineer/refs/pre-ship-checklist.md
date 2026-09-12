@@ -25,6 +25,8 @@ For each item: **PASS** or **FAIL** with one line of evidence (quote or line ref
 | 2.2 | Skill `description` matches invoke mode (`skill-invocation.md`); no ambient action verbs when `disable-model-invocation: true` |
 | 2.3 | Paths in doc are relative; no `..` |
 | 2.4 | Skill README (if folder ships): has **Why**, **What**, **When** with `### Use when` and `### Avoid when`; orchestrator README has **Actions** table; no anti-trigger duplication across **What** and **Avoid when**; does not restate **Procedure** (`readme-spec.md`) |
+| 2.5 | `ACRONYMS.md` at resolved path (plugin root or skill sibling): exists; H1 + table with **Acronym** + **Expansion** columns (`lexicon-spec.md`) |
+| 2.6 | `GLOSSARY.md` at resolved path: exists; H1 + table with **Term** + **Meaning** columns (`lexicon-spec.md`) |
 
 ## 3. Contracts
 

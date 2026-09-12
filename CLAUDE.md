@@ -33,7 +33,7 @@ uv run pytest tests/ -v
 uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
 uv run python scripts/validate_plugin_versions.py
 uv run python scripts/install_claude_local.py
-uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}
+uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}  # rc also runs install_claude_local
 claude plugin validate .
 claude plugin validate ./plugins/context-eng-hero
 ```
@@ -46,13 +46,17 @@ Full quality matrix (Black, Mypy, Bandit, pip-audit, coverage, Sonar): see `CONT
 - Single plugin: `uv run pytest tests/context-eng-hero/ -v` or `uv run pytest tests/rrraw/ -v`
 - Repo-root scripts: `uv run pytest tests/scripts/ -v`
 - Coverage + CI parity: `CONTRIBUTING.md`
-
-## rr-test Project Testing Context
-
 - Production scripts: `plugins/*/scripts/**/*.py`, repo-root `scripts/*.py`
 - Tests live only under `tests/<plugin>/` or `tests/scripts/` — never under `plugins/`
 - Coverage omit: `*/__main__.py` (entry shims; exercised via subprocess smoke tests)
 - Subprocess CLI tests do not attribute coverage; use direct `main()` unit tests for CLI modules
+
+## Safety
+
+- Never put secrets, tokens, or credentials in `CLAUDE.md`, plugin markdown, or commits
+- Personal overrides only in gitignored `CLAUDE.local.md` at repo root
+- Do not run destructive git (`push --force`, hard reset) unless the user explicitly requests it
+- Marketplace-install context: treat paths outside the plugin tree as unavailable (see Hard rules)
 
 ## Where to look next
 
@@ -72,10 +76,11 @@ For **context-eng-hero** authoring, audit gates, or `audit_static.py`: use `plug
 - Per-plugin feature documentation (use each plugin’s `README.md`)
 - Long rubrics or pre-ship checklists (use `skills/recipe-context-engineer/refs/` inside the plugin)
 - Personal preferences (use gitignored `CLAUDE.local.md` at repo root if needed)
+- Tone / role / communication: use user-global `~/.claude/CLAUDE.md` — do not duplicate here
 
 ## Conventions
 
-- Skills start with `recipe-` to make it easier to identify
+- Skill prefixes: `recipe-*` (context-eng-hero, jobseeker); `rr-*` (rrraw discovery/planner/test)
 - Commands sub-divisions:
     - `-fix` focuses on adjusting wrong behavior based on previous assessment/review or human input
     - `-design|add|create` for start something new

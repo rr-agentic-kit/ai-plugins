@@ -63,8 +63,10 @@ def test_write_manifest_preserves_key_order(tmp_path: Path):
 
 
 def test_increment_local_keeps_plugin_manager_spelling():
+    assert bump.increment_local(Version("0.0.4")) == "0.0.4-rc-1"
     assert bump.increment_local(Version("0.0.2-beta-4")) == "0.0.2-beta-5"
     assert bump.increment_local(Version("0.0.2b4")) == "0.0.2-beta-5"
+    assert bump.increment_local(Version("0.0.4-rc-1")) == "0.0.4-rc-2"
 
 
 def test_rc_increments_local_prerelease(mini_repo, monkeypatch, capsys):
@@ -75,6 +77,7 @@ def test_rc_increments_local_prerelease(mini_repo, monkeypatch, capsys):
     monkeypatch.setattr(bump, "REPO_ROOT", root)
     calls: list[list[str]] = []
     monkeypatch.setattr(bump, "run_uv", lambda args, *, cwd: calls.append(list(args)))
+    monkeypatch.setattr(bump, "sync_claude_local", lambda _root: 0)
 
     assert bump.main(["rc"]) == 0
 
@@ -93,6 +96,7 @@ def test_rc_lifts_lagging_then_increments(mini_repo, monkeypatch, capsys):
     monkeypatch.setattr(bump, "REPO_ROOT", root)
     calls: list[list[str]] = []
     monkeypatch.setattr(bump, "run_uv", lambda args, *, cwd: calls.append(list(args)))
+    monkeypatch.setattr(bump, "sync_claude_local", lambda _root: 0)
 
     assert bump.main(["rc"]) == 0
 
@@ -103,11 +107,42 @@ def test_rc_lifts_lagging_then_increments(mini_repo, monkeypatch, capsys):
     assert "0.0.2-beta-4 => 0.0.2-beta-5" in out
 
 
-def test_rc_rejects_stable(mini_repo, monkeypatch):
+def test_rc_starts_prerelease_from_stable(mini_repo, monkeypatch, capsys):
+    root = mini_repo(pyproject_version="0.0.4", plugins={"foo": "0.0.4"})
+    monkeypatch.setattr(bump, "REPO_ROOT", root)
+    calls: list[list[str]] = []
+    monkeypatch.setattr(bump, "run_uv", lambda args, *, cwd: calls.append(list(args)))
+    syncs: list[Path] = []
+    monkeypatch.setattr(bump, "sync_claude_local", lambda repo: syncs.append(repo) or 0)
+
+    assert bump.main(["rc"]) == 0
+
+    assert calls == [["lock"]]
+    assert vp._read_pyproject_version(root / "pyproject.toml") == "0.0.4-rc-1"
+    assert set(_manifest_versions(root).values()) == {"0.0.4-rc-1"}
+    assert syncs == [root]
+    assert "0.0.4 => 0.0.4-rc-1" in capsys.readouterr().out
+
+
+def test_rc_propagates_sync_failure(mini_repo, monkeypatch):
+    root = mini_repo(pyproject_version="0.0.4", plugins={"foo": "0.0.4"})
+    monkeypatch.setattr(bump, "REPO_ROOT", root)
+    monkeypatch.setattr(bump, "run_uv", lambda *a, **k: None)
+    monkeypatch.setattr(bump, "sync_claude_local", lambda _root: 1)
+
+    assert bump.main(["rc"]) == 1
+    assert vp._read_pyproject_version(root / "pyproject.toml") == "0.0.4-rc-1"
+
+
+def test_patch_does_not_sync_claude(mini_repo, monkeypatch):
     root = mini_repo(pyproject_version="1.0.0", plugins={"foo": "1.0.0"})
-    monkeypatch.setattr(bump, "run_uv", lambda *a, **k: pytest.fail("uv must not run"))
-    with pytest.raises(SystemExit, match="local prerelease"):
-        bump.run_bump("rc", root)
+    monkeypatch.setattr(bump, "REPO_ROOT", root)
+    _install_fake_uv(monkeypatch, "1.0.1")
+    monkeypatch.setattr(
+        bump, "sync_claude_local", lambda *_a, **_k: pytest.fail("sync must not run")
+    )
+
+    assert bump.main(["patch"]) == 0
 
 
 def test_lagging_plugin_lifted_to_max_then_bumped(mini_repo, monkeypatch, capsys):

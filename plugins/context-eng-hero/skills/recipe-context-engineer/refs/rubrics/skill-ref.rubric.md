@@ -10,7 +10,7 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 
 | id | Severity | PASS when |
 |----|----------|-----------|
-| `skill-ref.protocol.load` | critical | SKILL **Progressive disclosure** names which ref loads for which subtask; one hop from SKILL (no ref→ref chains) |
+| `skill-ref.protocol.load` | critical | SKILL has **Progressive disclosure** *or* **Shared refs** *or* **Ref index** naming which ref for which step/action; one hop from that table (no sole-path ref→ref for required constraints) |
 | `skill-ref.protocol.fallback` | critical | SKILL states what to do when no matching ref exists (default behavior or stop) |
 | `skill-ref.layer.separation` | critical | Base SKILL holds invariant procedure; refs hold variant/context-specific divergence only |
 
@@ -18,8 +18,6 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 
 | id | Severity | PASS when |
 |----|----------|-----------|
-| `skill-ref.base.no-duplication` | major | SKILL body does not repeat constraints documented in co-loaded refs (cite both if FAIL) |
-| `skill-ref.refs.standalone` | major | Each ref in `refs/` passes `ref-file.*` standalone checks when read alone |
 | `skill-ref.refs.unique` | major | No two refs duplicate the same constraint without unique extension |
 
 ### Minor
@@ -32,3 +30,7 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 | `skill-ref.readme.philosophy` | minor | **Philosophy** present when skill has eval-first, gates, or methodology; 3–6 principle bullets, no prose blocks |
 | `skill-ref.readme.ux` | minor | **UX** present when skill has clarify loops, gates, or multi-step close; `###` subsections (Invoke, Intake, Clarify, Output, Close) each ≤2 lines |
 | `skill-ref.readme.design-notes` | minor | **Design notes** present only when ≥2 non-obvious product tradeoffs exist; no process meta |
+| `skill.acronyms.present` | minor | Pack has `ACRONYMS.md` at plugin root (or skill sibling if standalone) per `lexicon-spec.md` |
+| `skill.acronyms.coverage` | minor | Domain acronyms in SKILL/refs appear in `ACRONYMS.md` with correct expansions |
+| `skill.glossary.present` | minor | Pack has `GLOSSARY.md` at resolved path |
+| `skill.glossary.coverage` | minor | Overloaded plugin terms in SKILL/refs have canonical senses in `GLOSSARY.md` |

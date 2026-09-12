@@ -12,6 +12,7 @@ Plugin teams ship skills, commands, rules, agents, and workflows that other engi
 
 - **Artifact types:** Skill, Skill+Ref, ref file, command, agent, rule, workflow
 - **Human spec:** Sibling `README.md` holds Why/What/When; `SKILL.md` holds Procedure (bidirectional per `refs/readme-spec.md`)
+- **Lexicon:** Plugin-root `ACRONYMS.md` + `GLOSSARY.md` (always required; harvest on create/design/redesign/extract per `refs/lexicon-spec.md`)
 
 **Out of scope:** Production application code; repo-wide review without a declared artifact path.
 
@@ -28,6 +29,7 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 | audit | Static + rubric report (no edits) | Check quality without changing files |
 | fix | Minimal edits for existing intent | Audit or test FAIL; same outcome and scope |
 | redesign | Change outcome/scope + write gates | Wrong capability, audience, or outcome |
+| learn | Approved gap package from a live run miss—patch or friction (no skill edits) | Live run miss (patch or friction); fold learning back via fix/redesign |
 | test | Behavior probe report | Verify agent behavior against prompts |
 | diff | Two-path tradeoff summary | Compare two approaches or paths |
 | design | Inline write from classify/clarify | Classify/clarify done; user requests file write this turn |
@@ -37,19 +39,21 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 ### Use when
 
 - Picking or narrowing artifact type (including Skill+Ref and ref file)
-- Auditing, fixing, creating, extracting, testing, or comparing a scoped definition
+- Auditing, fixing, creating, extracting, testing, comparing, or learning from a live run miss (patch or friction) on a scoped definition
 - Clarifying outcome, audience, and failure modes before authoring
 - Generating or updating a skill README from an existing `SKILL.md` (**extract**)
+- Packaging gaps after a live run miss (patch or friction) so fix/redesign can absorb without re-deriving the miss (**learn**)
 
 ### Avoid when
 
 - Ad-hoc production code review with no artifact path
-- Ambient "audit everything" without a declared target file
+- Ambient "audit everything" or "improve this skill" without a declared target or live miss
 - Repo-wide exploration without a scoped question
 
 ## Philosophy
 
 - **Eval-first** — thicken from observed audit/test FAILs, not anticipated rules
+- **Live-miss → learn → absorb** — diagnose existing skill gaps from a live run miss (patch or friction); fix/redesign folds the handover in
 - **Scoped-only** — one declared artifact path per session; never ambient repo review
 - **Spec/executor split** — README = human spec; `SKILL.md` = Procedure and action refs
 - **Gates-before-write** — static → reflection → pre-ship → approve before any file write
@@ -92,6 +96,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 | **Write gates** | Static → pre-write reflection → pre-ship → approve-revise-abort |
 | **Paths** | Plugin-relative only; no `..` or absolute paths in authored content |
 | **README ↔ SKILL** | README = spec; SKILL = executor. Extract derives README from SKILL constraints, not Procedure paste |
+| **Lexicon** | `ACRONYMS.md` + `GLOSSARY.md` at plugin root (or skill sibling if standalone); harvest jargon; empty tables allowed |
 | **Clarify caps** | Path unresolvable after 2 AskQuestion rounds → stop; action unresolvable after 1 → default design-assist |
 | **Write gate cap** | FAIL after 2 revision cycles → draft-only in chat |
 

@@ -36,7 +36,7 @@ def test_rewrite_yaml_to_md(tmp_path: Path):
 
 
 def test_rewrite_list_meta_to_inline(tmp_path: Path):
-    files = {"exec-summary.md": """\
+    files = {"executive-summary.md": """\
 # Exec summary
 
 ## ES-1: Competitive window
@@ -49,7 +49,7 @@ Why now.
 """}
     write_planning(tmp_path, files)
     assert vp.main([str(tmp_path), "--rewrite"]) == 0
-    text = (tmp_path / "exec-summary.md").read_text(encoding="utf-8")
+    text = (tmp_path / "executive-summary.md").read_text(encoding="utf-8")
     assert "- **Parent:**" not in text
     assert "_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must" in text
     assert "> Why now." in text
@@ -59,7 +59,7 @@ Why now.
 
 
 def test_rewrite_does_not_inject_omitted_moscow(tmp_path: Path):
-    files = {"exec-summary.md": """\
+    files = {"executive-summary.md": """\
 # Exec summary
 
 ## ES-1: Competitive window
@@ -69,7 +69,7 @@ _parent_: — | _kind_: leaf | _spec_: idea
 """}
     write_planning(tmp_path, files)
     assert vp.main([str(tmp_path), "--rewrite"]) == 0
-    text = (tmp_path / "exec-summary.md").read_text(encoding="utf-8")
+    text = (tmp_path / "executive-summary.md").read_text(encoding="utf-8")
     assert "_moscow_:" not in text
     assert "_parent_: — | _kind_: leaf | _spec_: idea" in text
     issues = vp.validate_dir(tmp_path)
@@ -80,7 +80,7 @@ _parent_: — | _kind_: leaf | _spec_: idea
 
 def test_rewrite_preserves_prose_headings(tmp_path: Path):
     files = {
-        "exec-summary.md": """\
+        "executive-summary.md": """\
 # Exec summary
 
 ## Vision
@@ -127,7 +127,7 @@ _parent_: BRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active 
     }
     write_planning(tmp_path, files)
     assert vp.main([str(tmp_path), "--rewrite"]) == 0
-    es = (tmp_path / "exec-summary.md").read_text(encoding="utf-8")
+    es = (tmp_path / "executive-summary.md").read_text(encoding="utf-8")
     mrd = (tmp_path / "mrd.md").read_text(encoding="utf-8")
     brd = (tmp_path / "brd.md").read_text(encoding="utf-8")
     prd = (tmp_path / "prd.md").read_text(encoding="utf-8")
@@ -152,11 +152,11 @@ def test_mixed_dir_rewrites_yaml_away(tmp_path: Path):
 
 
 def test_rewrite_invalid_yaml_keeps_source(tmp_path: Path):
-    files = {"exec-summary.yaml": "- just a list\n"}
+    files = {"executive-summary.yaml": "- just a list\n"}
     write_planning(tmp_path, files)
     assert vp.main([str(tmp_path), "--rewrite"]) == 1
-    assert (tmp_path / "exec-summary.yaml").is_file()
-    assert not (tmp_path / "exec-summary.md").exists()
+    assert (tmp_path / "executive-summary.yaml").is_file()
+    assert not (tmp_path / "executive-summary.md").exists()
 
 
 def test_valid_rationale_round_trip_yaml_rewrite(tmp_path: Path):
@@ -175,7 +175,7 @@ def test_rewrite_migrates_old_exec_summary_shape(tmp_path: Path):
     issues = rewrite_planning_dir(tmp_path)
     assert not error_codes(issues)
     assert any(issue.code == "MIGRATE_ES_SHAPE" for issue in issues)
-    text = (tmp_path / "exec-summary.md").read_text(encoding="utf-8")
+    text = (tmp_path / "executive-summary.md").read_text(encoding="utf-8")
     assert "## Functional deliverables" in text
     assert "## ES-3: Multi-language support" in text
     assert "_moscow_: Should" in text
@@ -213,13 +213,13 @@ def test_rewrite_splits_monolithic_challenge_report(tmp_path: Path):
     assert result == 0
     assert not (tmp_path / "challenge-report.md").exists()
     prd_report = (tmp_path / "prd.challenge.report.md").read_text(encoding="utf-8")
-    es_report = (tmp_path / "exec-summary.challenge.report.md").read_text(
+    es_report = (tmp_path / "executive-summary.challenge.report.md").read_text(
         encoding="utf-8"
     )
     assert "doc: prd" in prd_report
     assert "## bs-001 (high)" in prd_report
     assert "No rollback strategy" in prd_report
-    assert "doc: exec-summary" in es_report
+    assert "doc: executive-summary" in es_report
     assert "## bs-002 (medium)" in es_report
     assert "Language support filed" in es_report
     assert "depth: deep" in prd_report

@@ -49,7 +49,7 @@ def test_reserved_ids_fill_numbering_gap():
         item("ES-3", parent=None, moscow="Must"),
     ]
     assert "NUMBERING" in error_codes(vp.check_numbering(items))
-    assert error_codes(vp.check_numbering(items, {"exec-summary": [2]})) == set()
+    assert error_codes(vp.check_numbering(items, {"executive-summary": [2]})) == set()
 
 
 def test_reserved_nested_slots():

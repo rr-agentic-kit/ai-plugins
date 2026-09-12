@@ -91,18 +91,47 @@ def test_accept_challenge_residual_sets_dirty_accepted() -> None:
 
 def test_ensure_doc_frontmatter_creates_missing_keys() -> None:
     text = "# Exec summary\n\nBody.\n"
-    new_text, outcome = ws.ensure_doc_frontmatter(text, "exec-summary", None)
+    new_text, outcome = ws.ensure_doc_frontmatter(text, "executive-summary", None)
     assert outcome == "created"
     assert new_text.startswith("---\n")
-    assert "doc_type: exec-summary" in new_text
+    assert "doc_type: executive-summary" in new_text
 
 
 def test_ensure_doc_frontmatter_ok_when_unchanged() -> None:
     status = ws.default_unfrozen_status(1)
-    text, _ = ws.ensure_doc_frontmatter("# Body\n", "exec-summary", status)
-    new_text, outcome = ws.ensure_doc_frontmatter(text, "exec-summary", status)
+    text, _ = ws.ensure_doc_frontmatter("# Body\n", "executive-summary", status)
+    new_text, outcome = ws.ensure_doc_frontmatter(text, "executive-summary", status)
     assert outcome == "ok"
     assert new_text == text
+
+
+def test_maturity_preserved_and_freeze_blocked() -> None:
+    status = ws.default_unfrozen_status(1, stems=("executive-summary",))
+    status["levels"]["executive-summary"]["maturity"] = "code-extraction"
+    text, outcome = ws.ensure_doc_frontmatter("# Body\n", "executive-summary", status)
+    assert "maturity: code-extraction" in text
+    assert outcome in {"created", "fixed", "ok"}
+    issues = ws._check_maturity(
+        "executive-summary",
+        status["levels"],
+        {"executive-summary": {"maturity": "code-extraction", "doc_rev": "?"}},
+        "?",
+    )
+    assert issues == []
+    frozen = ws._check_maturity(
+        "executive-summary",
+        {"executive-summary": {"maturity": "code-extraction", "rev": 1}},
+        {"executive-summary": {"maturity": "code-extraction"}},
+        1,
+    )
+    assert any(i.code == "CODE_EXTRACTION_FROZEN" for i in frozen)
+    bad = ws._check_maturity(
+        "executive-summary",
+        {"executive-summary": {"maturity": "ready"}},
+        {},
+        "?",
+    )
+    assert any(i.code == "INVALID_MATURITY" for i in bad)
 
 
 def test_frontmatter_pins_from_frozen_parent() -> None:
@@ -137,3 +166,48 @@ def test_load_frozen_levels_from_session_state(tmp_path: Path) -> None:
 def test_load_frozen_levels_invalid_json(tmp_path: Path) -> None:
     (tmp_path / "session-state.json").write_text("{bad", encoding="utf-8")
     assert ws._load_frozen_levels(tmp_path) is None
+
+
+def test_docs_root_and_rrr_status(tmp_path: Path) -> None:
+    docs = ws.docs_root(tmp_path)
+    assert docs == tmp_path / "docs"
+    assert ws.find_rrr_status_path(docs) is None
+    docs.mkdir()
+    path = docs / "rrr-status.yaml"
+    path.write_text("track: '0.1'\n", encoding="utf-8")
+    assert ws.find_rrr_status_path(docs) == path
+    rr = docs / "rr"
+    rr.mkdir()
+    modern = rr / "rrr-status.yaml"
+    modern.write_text("track: '0.2'\n", encoding="utf-8")
+    assert ws.find_rrr_status_path(docs) == modern
+    assert ws.current_track(docs) == "0.2"
+    summary = ws.default_rrr_status(1)
+    assert summary["phase"] == "discovery"
+    assert "levels" not in summary
+
+
+def test_discovery_dir_for_version_first(tmp_path: Path) -> None:
+    plan = tmp_path / "docs" / "rr" / "0.1" / "plan"
+    discovery = tmp_path / "docs" / "rr" / "0.1" / "discovery"
+    plan.mkdir(parents=True)
+    discovery.mkdir(parents=True)
+    (plan / "status.yaml").write_text("track: '0.1'\n", encoding="utf-8")
+    assert ws.discovery_dir_for(plan) == discovery
+    assert ws.phase_root(plan) == plan
+    assert ws.track_for_phase(plan) == "0.1"
+
+
+def test_stems_for_phase_dirs(tmp_path: Path) -> None:
+    discovery = tmp_path / "discovery"
+    plan = tmp_path / "plan"
+    discovery.mkdir()
+    plan.mkdir()
+    assert ws.stems_for_dir(discovery) == ("executive-summary", "mrd", "brd")
+    assert ws.stems_for_dir(plan) == ("prd",)
+    assert ws.stems_for_dir(tmp_path) == (
+        "executive-summary",
+        "mrd",
+        "brd",
+        "prd",
+    )

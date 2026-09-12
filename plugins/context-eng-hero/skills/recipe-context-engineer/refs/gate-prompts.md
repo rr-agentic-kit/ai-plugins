@@ -23,7 +23,7 @@ Skill intake when action is unclear (ambient invoke or vague request).
   - Audit it → **audit**
   - Fix or improve → if outcome change unclear, run **fix-vs-redesign** first; else **fix**
   - Create new → **create**
-  - Something else → infer from freeform (extract, test, diff, redesign, design assist) or one clarifying question
+  - Something else → infer from freeform (extract, test, diff, redesign, learn, design assist) or one clarifying question
 
 ---
 
@@ -38,6 +38,22 @@ When user wants changes but scope is ambiguous.
   - Wording only → **fix**
   - Change outcome → **redesign**
   - Not sure → one sentence each way; re-ask once if still ambiguous, then default **fix** for typos/format, **redesign** for new steps/gates/audience
+
+---
+
+## Pattern: approve-learn-topics
+
+After learn topics report is emitted (`learn-3-topics`).
+
+- **question:** "Approve these learn topics for handover?"
+- **header:** "Topics"
+- **options:** Approve selected | Edit topics | Abort learn
+- **Route map:**
+  - Approve selected → **learn-4-handover** with current selection
+  - Edit topics → user reselects / drops / rewrites locus; re-emit report; re-ask once
+  - Abort learn → no handover write; **Next Up** only
+
+Freeform escape maps to edit (describe override) or abort.
 
 ---
 
@@ -84,6 +100,20 @@ After fix completes (gates passed and file written, or user declined write).
   - Audit again → **audit**
   - Run behavior test → **test**
   - Done for now → end with **Next Up** block only
+
+---
+
+## Pattern: post-learn-routing
+
+After learn handover is written (or chat-only draft accepted).
+
+- **question:** "Learn package ready. What next?"
+- **header:** "Next"
+- **options:** Incorporate now | Revise topics | Done for now
+- **Route map:**
+  - Incorporate now → **fix** if all approved topics preserve outcome; **redesign** if any topic changes outcome/audience/capabilities; pass user-project `LEARN-HANDOVER.*` (or chat handover) as failure/delta source; edit **plugin source** only
+  - Revise topics → return to **learn-3-topics**; re-gate **approve-learn-topics**
+  - Done for now → end with **Next Up** block only; note handover path if written
 
 ---
 

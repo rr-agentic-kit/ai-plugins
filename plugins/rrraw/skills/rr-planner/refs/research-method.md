@@ -17,9 +17,9 @@ Research is a **distinct, later phase** — after docs are composed:
 | Area | Evaluate against |
 |------|------------------|
 | Competitive landscape | MRD competitors section, PRD differentiation |
-| Market sizing / trends | MRD segments, exec-summary "why now" |
-| Standards / regulations | BRD business rules, PRD NFRs (mechanism → `tech.md`) |
-| Technology landscape | `tech.md` integration points, architecture assumptions |
+| Market sizing / trends | MRD segments, executive-summary "why now" |
+| Standards / regulations | BRD business rules, PRD NFRs (mechanism → spine / feature delta) |
+| Technology landscape | Standing architecture + deltas; Discover may park early notes in `tech.md` |
 | Customer evidence | PRD personas **section**, MRD customer needs |
 
 ## Iterative research

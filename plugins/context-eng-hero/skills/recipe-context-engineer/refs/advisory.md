@@ -1,6 +1,6 @@
 # Advisory (design partner)
 
-Loaded in the **Advise** orchestration step and after **Gather** in Clarify. Run for **create**, **design**, **extract**, **fix**, and **redesign**—skip for **audit**, **test**, and **diff** (diagnosis-only).
+Loaded in the **Advise** orchestration step and after **Gather** in Clarify. Run for **create**, **design**, **extract**, **fix**, and **redesign**—skip for **audit**, **test**, **diff**, and **learn** (diagnosis-only).
 
 ## Eval-first authoring
 
@@ -37,6 +37,15 @@ Skills that ship to humans need a sibling **README** per `readme-spec.md`—crea
 
 Do **not** clone legacy Goals/Scope/Audience/When-to-use section scripts. Do **not** paste Procedure into README.
 
+## Lexicon companions (always required)
+
+Plugins (and standalone skills) need `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md`—even with zero entries. Placement: plugin root when `.cursor-plugin/` or `.claude-plugin/` exists; else sibling to `SKILL.md`. Harvest on create/design/redesign/extract; **fix** repairs `acronyms.*` / `glossary.*` FAILs.
+
+| File | Holds |
+|------|-------|
+| `ACRONYMS.md` | Short forms → expansion (domain jargon; skip ubiquitous HTTP/JSON/URL unless redefined) |
+| `GLOSSARY.md` | Overloaded terms with canonical plugin sense |
+
 ## Hidden-requirements catalog
 
 Check before authoring. Surface gaps the user did not mention; do not re-ask what they already answered.
@@ -51,19 +60,20 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **Invoke mode** — Auto / Slash-or-parent / Background chosen before drafting `description` and flags (`refs/skill-invocation.md`)
 - **Scripts folder** — If `scripts/` exists: agent **runs** helpers via shell; do not paste script bodies into SKILL (`refs/helper-cli.md`)
 - **README** — Sibling spec with Why/What/When; does not restate Procedure (`refs/readme-spec.md`)
+- **ACRONYMS + GLOSSARY** — Both companions at resolved path; table shape; harvest domain jargon (`refs/lexicon-spec.md`)
 
 **Skill+Ref additional:**
 
-- **Ref protocol** — Progressive disclosure names which ref for which subtask; fallback when no ref matches
+- **Ref protocol** — Progressive disclosure, Shared refs, or Ref index names which ref for which step/action; fallback when no ref matches
 - **Layer separation** — Invariant procedure in SKILL; variant/detail in refs only (`rubrics/skill-ref.rubric.md`)
-- **Ref standalone** — Each ref readable alone with **Purpose** + **Load** back to parent
+- **Unique refs** — Each ref adds constraints not duplicated across the pack
 
 ### Ref file
 
-- **Standalone purpose** — One falsifiable sentence without opening parent SKILL
+- **Unique value** — Body adds constraints not already in parent SKILL
 - **No base duplication** — Does not restate parent Procedure or Purpose
-- **Load path** — States parent skill and which step Read this file
-- **No ref chain** — Does not link to other refs for required context
+- **No sole-path ref chain** — Does not require another ref as the only way to get a constraint unless that peer is co-named by parent SKILL / action Ref index
+- **Layer boundary** — No invariant procedure / classify / orchestration that belongs in parent SKILL
 
 ### Command
 
@@ -118,4 +128,4 @@ Call out before writing (do not silently author past these):
 ## When to skip
 
 - User message already addresses every item in the catalog for the detected type → skip Advise silently (0 gaps)
-- Action is audit, test, or diff → Advise not loaded
+- Action is audit, test, diff, or learn → Advise not loaded

@@ -1,16 +1,8 @@
-# <!-- REQUIRED (ref-file.purpose.standalone): ref title -->
+# <!-- REQUIRED (ref-file.value): ref title -->
 
-## Purpose
+<!-- OPTIONAL: one line — Owned by / load via parent SKILL step or action Ref index -->
 
-<!-- REQUIRED (ref-file.purpose.standalone): one falsifiable sentence — value when read without the parent SKILL -->
-
-## Load
-
-<!-- REQUIRED (ref-file.load.path): parent skill section + step that Read this file; skill-relative path back to parent -->
-
-## Content
-
-<!-- REQUIRED (ref-file.standalone.value): constraints not duplicated in parent SKILL; no ref→ref links -->
+<!-- REQUIRED (ref-file.value): body constraints not already in parent SKILL; no sole-path ref→ref for required constraints unless peer is co-named by parent SKILL / action Ref index -->
 
 ## Anti-patterns
 

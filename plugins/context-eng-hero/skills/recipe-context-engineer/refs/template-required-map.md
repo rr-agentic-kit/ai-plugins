@@ -24,9 +24,9 @@ Same as Skill, plus audit `skill-ref.*` / `ref-file.*` rows when editing the pac
 
 | Marker / section | Rubric id(s) |
 |------------------|--------------|
-| **Purpose** (one sentence) | `ref-file.purpose.standalone` |
-| Body constraints | `ref-file.standalone.value`, `ref-file.no-base-duplication` |
-| **Load** (when parent loads this) | `ref-file.load.path` |
+| Title + body constraints | `ref-file.value`, `ref-file.no-base-duplication` |
+| Optional owned-by / load-via prose | (authoring aid only — not a static section check) |
+| No sole-path peer dependency | `ref-file.no-ref-chain` |
 
 ## Command
 
@@ -85,3 +85,21 @@ Sibling `skills/<name>/README.md`. Frontmatter optional. Static requires **Why**
 | **Notes** | `skill-ref.readme.spec` |
 | No Procedure echo | `SPEC_DEFINITION_DRIFT` (judgment + pre-ship 2.4) |
 | No paths above Notes | `skill-ref.readme.spec` |
+
+## ACRONYMS (`templates/acronyms.template.md`)
+
+Plugin root (or skill sibling). Always required; empty table or `None yet` OK.
+
+| Marker / section | Rubric id(s) |
+|------------------|--------------|
+| H1 + table | `static.acronyms.present`, `static.acronyms.shape`, `skill.acronyms.present` |
+| Domain rows / coverage | `skill.acronyms.coverage` (judgment); pre-ship 2.5 |
+
+## GLOSSARY (`templates/glossary.template.md`)
+
+Same placement as ACRONYMS. Always required; empty table or `None yet` OK.
+
+| Marker / section | Rubric id(s) |
+|------------------|--------------|
+| H1 + table | `static.glossary.present`, `static.glossary.shape`, `skill.glossary.present` |
+| Overloaded-term coverage | `skill.glossary.coverage` (judgment); pre-ship 2.6 |

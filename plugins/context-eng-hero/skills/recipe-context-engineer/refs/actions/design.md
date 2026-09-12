@@ -15,6 +15,9 @@ Conditional procedure when skill **Classify** + **Clarify** ends with writing a 
 | `skill-invocation.md` | `design-3-draft` (skills) |
 | `readme-spec.md` | `design-3-draft` (skill folders) |
 | `templates/readme.template.md` | `design-3-draft` (skill README) |
+| `lexicon-spec.md` | `design-3-draft` (ACRONYMS + GLOSSARY) |
+| `templates/acronyms.template.md` | `design-3-draft` (ACRONYMS.md) |
+| `templates/glossary.template.md` | `design-3-draft` (GLOSSARY.md) |
 | `helper-cli.md` | `design-3-draft` (when `scripts/`) |
 | `template-required-map.md` | `design-3-draft` |
 | `templates/<type>.template.md` (per `classify.md`) | `design-3-draft` |
@@ -44,7 +47,7 @@ If the user only wanted guidance, **AskQuestion**: finish here or run **create**
 
 - **Outcome:** Template-shaped draft at approved plugin-relative path.
 - **Done when:** Full draft in memory/working copy; markers replaced per `template-required-map.md`; eval-first minimum when FAIL list supplied.
-- **Skill folder draft order:** Same as **create**—README spec first if missing; `SKILL.md` from README when both ship. If write target is only README, use **extract** ingestion rules on existing `SKILL.md`.
+- **Skill folder draft order:** Same as **create**—README spec first if missing; `SKILL.md` from README when both ship; ensure `ACRONYMS.md` + `GLOSSARY.md` at resolved path per `lexicon-spec.md`. If write target is only README, use **extract** ingestion rules on existing `SKILL.md`.
 - **README ↔ SKILL derivation:** Same reconstructability map as **create** (`readme-spec.md` table). README-only write: follow **extract** section map. SKILL-only write from existing README: derive per create map—do not invent parallel spec.
 
 ### Step 4: `design-4-gates`

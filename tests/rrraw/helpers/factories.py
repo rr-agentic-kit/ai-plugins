@@ -143,6 +143,7 @@ def item(
     kind: str = "leaf",
     spec: str = "ready",
     status: str | None = None,
+    priority: str | None = None,
     tag: str | None = None,
     goal_type: str | None = None,
     reach: str | None = None,
@@ -165,6 +166,8 @@ def item(
     if raw_keys is None:
         if status is not None:
             keys.add("status")
+        if priority is not None:
+            keys.add("priority")
         if tag is not None:
             keys.add("tag")
         if goal_type is not None:
@@ -197,6 +200,7 @@ def item(
         kind=kind,
         spec=spec,
         status=status,
+        priority=priority,
         tag=tag,
         goal_type=goal_type,
         reach=reach,

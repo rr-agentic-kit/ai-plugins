@@ -51,6 +51,17 @@ No universal YAML schema; document:
 - **Delegation** table (which artifact handles which step)
 - **Per-step** output contracts
 
+## Ref file (`skills/<name>/refs/**/*.md`)
+
+Skill-private docs — **not** entry points. YAML frontmatter and `description` are **not** required (optional if present). No required `## Purpose` / `## Load` / `## Content` headings; body holds constraints loaded via parent SKILL routing.
+
+| Field / rule | Requirement |
+|--------------|-------------|
+| Frontmatter | Optional; if present, must be valid YAML between `---` |
+| `description` | Not required |
+| Body | Title + unique constraints; optional one-line owned-by / load-via prose (see `templates/ref-file.template.md`) |
+| Path | `skills/<name>/refs/` or `skills/<name>/references/` (any depth) |
+
 ## All types
 
 - Relative paths only; no `..`

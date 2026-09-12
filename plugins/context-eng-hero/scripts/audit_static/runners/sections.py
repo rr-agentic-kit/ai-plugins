@@ -26,7 +26,6 @@ _SECTION_MAP = {
     "agent": AGENT_SECTIONS,
     "rule": RULE_SECTIONS,
     "workflow": WORKFLOW_SECTIONS,
-    "ref-file": set(),  # handled by run_ref_file
 }
 
 _ACTIONS_SECTION_RE = re.compile(
@@ -66,6 +65,9 @@ def _is_orchestrator_skill(skill_text: str) -> bool:
 
 
 def run_sections(ctx: AuditContext) -> list[CheckResult]:
+    # ref-file: skill-private docs — no required ## headings (not mini-skills)
+    if ctx.artifact_type == "ref-file":
+        return []
     required_secs = _SECTION_MAP.get(ctx.artifact_type)
     if required_secs is None:
         return []

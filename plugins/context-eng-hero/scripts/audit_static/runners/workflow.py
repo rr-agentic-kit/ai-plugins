@@ -2,31 +2,10 @@ from __future__ import annotations
 
 import re
 
-from audit_static.headings import headings_present
 from audit_static.models import AuditContext, CheckResult
 from audit_static.report import check
 
-REF_FILE_SECTIONS = {"Purpose", "Load", "Content"}
 _TODO_ID_CELL = re.compile(r"`[a-z0-9][a-z0-9-]*`")
-
-
-def run_ref_file(ctx: AuditContext) -> list[CheckResult]:
-    if ctx.artifact_type != "ref-file":
-        return []
-    present = headings_present(ctx.body)
-    missing_secs = sorted(REF_FILE_SECTIONS - present)
-    return [
-        check(
-            "static.sections.required",
-            "critical",
-            not missing_secs,
-            (
-                "all required ## headings present"
-                if not missing_secs
-                else f"missing: {', '.join(missing_secs)}"
-            ),
-        )
-    ]
 
 
 def _todo_ids_from_steps_body(body: str) -> list[str]:

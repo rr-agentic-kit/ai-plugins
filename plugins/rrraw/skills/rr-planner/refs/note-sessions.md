@@ -2,9 +2,9 @@
 
 **Owner:** Classify off-level answers, park them on the **affected** document, and incorporate them when that level is current. Source of truth for park / deepen / apply **and** sidecar prune.
 
-**Load when:** After every user answer (and free-form volunteer) during discovery; on level entry (load sidecar into interview); after compose persist (prune); before Gate 4 / freeze.
+**Load when:** After every user answer (and free-form volunteer) during a Plan session; on Plan level entry (load sidecar into interview); after compose persist (prune); before Gate 4 / freeze.
 
-A PRD answer given during exec-summary must live on PRD, not as an ES assumption. Completing questions for a later doc ≠ composing or freezing that doc.
+A later-level answer given mid-PRD (or during standing-arch) must live on that owner doc, not as a current-level fact. Completing questions for a later doc ≠ composing or freezing that doc.
 
 ## Classify, then route
 
@@ -12,7 +12,7 @@ After every user answer, classify which cascade level owns it using that level's
 
 | Owner | Action |
 |-------|--------|
-| Same as `current_level` | Record on current discovery (`level_facts`) |
+| Same as `current_level` | Record on current Plan level (`level_facts`) |
 | Other level | Do **not** record as a current-level fact. Park, deepen, or apply (below). |
 | Ambiguous | Goal-anchor: "which document?" — [goal-anchor.md](goal-anchor.md) |
 
@@ -32,7 +32,7 @@ flowchart TD
 
 ## Where notes live
 
-Owned by the **affected** document, not a global inbox. Same write / load / unload for every cascade level (`exec-summary` … `prd`). `{level}` is the only variable — no ES/PRD special case.
+Owned by the **affected** document, not a global inbox. Same write / load / unload for every cascade level (`executive-summary` … `prd`). `{level}` is the only variable — no ES/PRD special case.
 
 | Event | Same rule for every `{level}.notes.yaml` |
 |-------|------------------------------------------|
@@ -41,7 +41,7 @@ Owned by the **affected** document, not a global inbox. Same write / load / unlo
 | Unload | After that level's compose persist: prune merged/discarded; delete the file if empty. Other levels' files untouched. |
 
 - Sidecar `{output-dir}/{level}.notes.yaml` — always YAML, like raw-history. Not selected by `--format`. Not an item. Not validator input. **File presence means unfinished notes.**
-- `future.md` is not a notes sidecar. Unassigned / beyond-next only ([output-formats.md](output-formats.md)). If `status.yaml.next` is already open, park notes for that track in `{level}.notes.yaml` under `docs/plans/{next}/` — do not duplicate into `future.md`.
+- `future.md` is not a notes sidecar. Unassigned / beyond-next only (`refs/planning/output-formats.md`). If `status.yaml.next` is already open, park notes for that track in `{level}.notes.yaml` under `docs/rr/{next}/plan/` — do not duplicate into `future.md`.
 - Mirror index in `session_state.note_sessions[level][]` for resume.
 - Do **not** inject parked prose into composed item headings (closed vocabulary / validator).
 
@@ -51,7 +51,7 @@ status: parked
 notes:
   - id: n-001
     captured_at: ISO-8601
-    captured_during: exec-summary
+    captured_during: executive-summary
     section: features
     text: "Guest checkout without account"
     completeness: partial   # or ready_to_incorporate
@@ -61,7 +61,7 @@ notes:
 
 | Field | Notes |
 |-------|-------|
-| `doc_type` | Cascade level that owns the note (`exec-summary` … `prd`) |
+| `doc_type` | Cascade level that owns the note (`executive-summary` … `prd`) |
 | `status` | Sidecar: `parked` only. No `incorporated` tombstone — delete resolved notes instead. |
 | `notes[].id` | `n-NNN` within that sidecar |
 | `captured_during` | `current_level` when captured |
@@ -79,7 +79,7 @@ notes:
       "id": "n-001",
       "sidecar": "prd.notes.yaml",
       "completeness": "partial",
-      "captured_during": "exec-summary"
+      "captured_during": "executive-summary"
     }
   ]
 }
@@ -99,7 +99,7 @@ Do not skip cascade: parent pointers still require the parent level to exist at 
 
 ## Interview on level entry
 
-When discovery enters a level, **before** new doc-standard questions:
+When Plan enters a level (`docs/rr/{track}/plan/` `current_level`), **before** new doc-standard questions:
 
 1. Load `{level}.notes.yaml` if present. Mandatory — not optional presentation.
 2. Walk every note:
@@ -137,6 +137,19 @@ Pause / resume: keep remaining sidecars. Do not re-ask notes already in `level_f
 
 Freeze: a level cannot freeze while leftover `partial` notes exist unless discarded or completed. Happy path after freeze: this level's sidecar is gone.
 
+## Standing red flags
+
+Distinct from parked off-level notes. **Standing red flags** are goal-likelihood risks that must survive sessions until founder explicitly closes them.
+
+| Rule | Detail |
+|------|--------|
+| Persist | `session_state.standing_red_flags[]` (and optionally glance `docs/rr/future.md`) — not only chat memory |
+| Resurface | On Plan resume, every goal re-anchor ([goal-anchor.md](goal-anchor.md)), and pre-freeze |
+| Close | Only with explicit founder confirmation — never silently as “accepted residual” |
+| Freeze | Open flag without founder accept → Fail freeze ([execute-handoff.md](execute-handoff.md)); do not offer freeze as Next-Up ([cascade.md](cascade.md)) |
+
+Discover-reopen candidates use the same persistence/resurface rules until routed or founder-accepted.
+
 ## Rules
 
 `Gate N` is exclusive to [cascade.md](cascade.md). This table does not number cascade gates.
@@ -151,7 +164,7 @@ Freeze: a level cannot freeze while leftover `partial` notes exist unless discar
 
 ## Failure modes this blocks
 
-- Mechanism detail recorded as exec-summary facts instead of `tech.md`
+- Mechanism detail recorded as executive-summary facts instead of `tech.md`
 - Losing a feature the user mentioned at the wrong time
 - Composing PRD before parents exist because the user volunteered a story
 - Re-asking the same content when the cascade finally reaches that level

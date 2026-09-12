@@ -49,13 +49,27 @@ When authoring a skill and mode is unclear:
 
 ## Missing failure source (fix)
 
-When user wants fix but supplied no audit/test report:
+When user wants fix but supplied no audit/test report / learn handover:
 
 - **AskQuestion**
   - **question:** "What should we fix against?"
   - **header:** "Source"
-  - **options:** Audit report | Test report | Symptom list
+  - **options:** Audit report | Test report | Learn handover | Symptom list
 - Then collect the chosen source in the next turn (paste report, or list symptoms)—one item at a time.
+
+## Missing skill path (learn)
+
+When action is learn and no plugin-relative skill path is known → same AskQuestion as **Missing path** above; do not proceed to investigate until path bound.
+
+## Optional problem-statement overlay (learn)
+
+When miss is thin in chat (thin patch **or** thin friction signal) or user wants to seed diagnosis:
+
+- **AskQuestion**
+  - **question:** "Add a short problem statement for this miss?"
+  - **header:** "Miss"
+  - **options:** This chat only | Add problem statement | Both
+- Route: chat-only → continue; add / both → one open-text capture, then bind as miss overlay per `learn-intake.md`.
 
 ## Contradiction detection
 

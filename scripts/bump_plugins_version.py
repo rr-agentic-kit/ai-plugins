@@ -16,6 +16,7 @@ _SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
+import install_claude_local as icl  # noqa: E402
 from validate_plugin_versions import (  # noqa: E402
     REPO_ROOT,
     _read_pyproject_version,
@@ -32,17 +33,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Lift every plugin manifest and pyproject.toml to the PEP 440 max "
-            "version, then increment. rc ticks local prerelease for plugin "
-            "managers; other kinds use uv --bump --frozen. Always ends with "
-            "uv lock so uv.lock records the new project version."
+            "version, then increment. rc starts or ticks a local prerelease "
+            "for plugin managers, then syncs Claude Code local plugins; other "
+            "kinds use uv --bump --frozen. Always ends with uv lock so "
+            "uv.lock records the new project version."
         ),
     )
     parser.add_argument(
         "kind",
         choices=KINDS,
         help=(
-            "Increment kind. rc ticks the local prerelease "
-            "(0.0.2-beta-4 → 0.0.2-beta-5) so plugin managers refresh. "
+            "Increment kind. rc starts or ticks a local prerelease "
+            "(0.0.4 → 0.0.4-rc-1, 0.0.2-beta-4 → 0.0.2-beta-5) so plugin "
+            "managers refresh, then runs install_claude_local. "
             "stable graduates a prerelease (0.0.2-beta-4 → 0.0.2)."
         ),
     )
@@ -60,17 +63,19 @@ def pep440_max(versions: dict[str, str]) -> Version:
 
 
 def increment_local(version: Version) -> str:
-    """Tick prerelease so Claude/Cursor cache a new version string."""
+    """Start or tick a prerelease so Claude/Cursor cache a new version string."""
     if version.pre is None:
-        raise SystemExit(
-            "rc increments a local prerelease so plugin managers pick up the "
-            f"update; {version} is stable — use patch, minor, or major"
-        )
+        return f"{version.base_version}-rc-1"
     letter, num = version.pre
     if not isinstance(num, int):
         raise SystemExit(f"cannot increment prerelease {version.pre}")
     name = _PRE_LABEL.get(str(letter), str(letter))
     return f"{version.base_version}-{name}-{num + 1}"
+
+
+def sync_claude_local(repo_root: Path) -> int:
+    print("sync: Claude local plugins")
+    return icl.main(repo_root)
 
 
 def write_pyproject_version(path: Path, version: str) -> None:
@@ -164,6 +169,8 @@ def main(argv: list[str] | None = None) -> int:
     except (json.JSONDecodeError, ValueError) as exc:
         print(f"bump_plugins_version: {exc}", file=sys.stderr)
         return 1
+    if args.kind == "rc":
+        return sync_claude_local(REPO_ROOT)
     return 0
 
 
