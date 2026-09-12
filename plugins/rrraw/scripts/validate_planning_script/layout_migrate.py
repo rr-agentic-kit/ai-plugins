@@ -151,6 +151,55 @@ _SHARED_FLAT_NAMES = frozenset(
 )
 
 
+def _plan_or_discovery_dest(
+    stem: str,
+    discovery_dest: Path,
+    plan_dest: Path,
+    *,
+    plan_extras: frozenset[str] = frozenset(),
+) -> Path:
+    """Map a doc stem to discovery vs plan destination dir."""
+    can = canonicalize_doc_stem(stem)
+    if can in PLAN_STEMS or stem in plan_extras:
+        return plan_dest
+    return discovery_dest
+
+
+def _dest_for_named_sidecar(
+    name: str, discovery_dest: Path, plan_dest: Path
+) -> Path | None:
+    """Destination for challenge-report / notes sidecars; else None."""
+    if name.endswith(".challenge.report.md"):
+        report_stem = name[: -len(".challenge.report.md")]
+        return (
+            _plan_or_discovery_dest(
+                report_stem,
+                discovery_dest,
+                plan_dest,
+                plan_extras=frozenset({"architecture", "constitution"}),
+            )
+            / name
+        )
+    if name.endswith(".notes.yaml"):
+        note_stem = name[: -len(".notes.yaml")]
+        return _plan_or_discovery_dest(note_stem, discovery_dest, plan_dest) / name
+    return None
+
+
+def _dest_for_shared_flat(
+    name: str,
+    *,
+    discovery_dest: Path,
+    plan_dest: Path,
+    has_discovery_doc: bool,
+    has_plan_doc: bool,
+) -> Path | None:
+    if name not in _SHARED_FLAT_NAMES:
+        return None
+    dest_dir = discovery_dest if has_discovery_doc or not has_plan_doc else plan_dest
+    return dest_dir / name
+
+
 def _dest_for_legacy_flat_child(
     child: Path,
     *,
@@ -168,27 +217,24 @@ def _dest_for_legacy_flat_child(
         return track_phase_dir(docs, name, DISCOVERY_DIR)
     if name in PLAN_STANDING_NAMES or name.startswith("architecture."):
         return plan_dest / name
-    if name.endswith(".challenge.report.md"):
-        report_stem = name[: -len(".challenge.report.md")]
-        can = canonicalize_doc_stem(report_stem)
-        if can in PLAN_STEMS or report_stem in {"architecture", "constitution"}:
-            return plan_dest / name
-        return discovery_dest / name
-    if name.endswith(".notes.yaml"):
-        note_stem = name[: -len(".notes.yaml")]
-        can = canonicalize_doc_stem(note_stem)
-        return (plan_dest if can in PLAN_STEMS else discovery_dest) / name
+    sidecar = _dest_for_named_sidecar(name, discovery_dest, plan_dest)
+    if sidecar is not None:
+        return sidecar
     stem = child.stem if child.is_file() else name
     can = canonicalize_doc_stem(stem)
     if can in PLAN_STEMS:
         return plan_dest / name
     if can in DISCOVERY_STEMS or stem in LEGACY_DOC_STEMS:
         return discovery_dest / name
-    if name in _SHARED_FLAT_NAMES:
-        dest_dir = (
-            discovery_dest if has_discovery_doc or not has_plan_doc else plan_dest
-        )
-        return dest_dir / name
+    shared = _dest_for_shared_flat(
+        name,
+        discovery_dest=discovery_dest,
+        plan_dest=plan_dest,
+        has_discovery_doc=has_discovery_doc,
+        has_plan_doc=has_plan_doc,
+    )
+    if shared is not None:
+        return shared
     return discovery_dest / name
 
 
@@ -269,15 +315,14 @@ def _migrate_flat_or_parking(
 
 def migrate_docs_layout(docs: Path) -> tuple[str, str]:
     """Detect legacy layouts and move into ``docs/rr/``. Idempotent."""
+    moves: list[str] = []
     leftovers = _has_phase_first(docs) or _legacy_flat_dir(docs) is not None
     if _is_migrated(docs) and not leftovers:
-        moves: list[str] = []
         _move_parking(docs, moves)
         if moves:
             return "fixed", "; ".join(moves)
         return "ok", _MSG_ALREADY_MIGRATED
 
-    moves: list[str] = []
     track = resolve_migrate_track(docs)
     rr_root(docs).mkdir(parents=True, exist_ok=True)
 
