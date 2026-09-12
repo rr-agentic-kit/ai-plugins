@@ -53,6 +53,11 @@ NONE_YET_GLOSSARY = """# Glossary
 | None yet | — | — | — |
 """
 
+_MINIMAL_SKILL = (
+    "---\nname: x\ndescription: d\n---\n\n"
+    "## Purpose\n\n## When to use\n\n## Procedure\n"
+)
+
 
 def test_detect_acronyms_and_glossary():
     assert m.detect_type(Path("ACRONYMS.md")) == "acronyms"
@@ -61,11 +66,7 @@ def test_detect_acronyms_and_glossary():
 
 
 def test_presence_fail_when_companions_missing(tmp_path: Path):
-    _write(
-        tmp_path,
-        "skills/x/SKILL.md",
-        "---\nname: x\ndescription: d\n---\n\n## Purpose\n\n## When to use\n\n## Procedure\n",
-    )
+    _write(tmp_path, "skills/x/SKILL.md", _MINIMAL_SKILL)
     ctx = _ctx(tmp_path, "skills/x/SKILL.md")
     results = _results_map(run_lexicon(ctx))
     assert results["static.acronyms.present"]["result"] == "FAIL"
@@ -75,11 +76,7 @@ def test_presence_fail_when_companions_missing(tmp_path: Path):
 def test_presence_pass_when_companions_exist(tmp_path: Path):
     _write(tmp_path, "ACRONYMS.md", EMPTY_ACRONYMS)
     _write(tmp_path, "GLOSSARY.md", EMPTY_GLOSSARY)
-    _write(
-        tmp_path,
-        "skills/x/SKILL.md",
-        "---\nname: x\ndescription: d\n---\n\n## Purpose\n\n## When to use\n\n## Procedure\n",
-    )
+    _write(tmp_path, "skills/x/SKILL.md", _MINIMAL_SKILL)
     ctx = _ctx(tmp_path, "skills/x/SKILL.md")
     results = _results_map(run_lexicon(ctx))
     assert results["static.acronyms.present"]["result"] == "PASS"
