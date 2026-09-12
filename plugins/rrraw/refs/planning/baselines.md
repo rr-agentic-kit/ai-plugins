@@ -206,32 +206,36 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
 **Default (version-first):** every track lives under `docs/rr/{track}/`. Discover cascade → `docs/rr/{track}/discovery/`; Plan → `docs/rr/{track}/plan/`. Parking + tripwire + summary live at `docs/rr/`. When a next major.minor opens, create `docs/rr/{next}/{phase}/` — **not** phase-subdir forks.
 
 ```
-{PROJECT_ROOT}/docs/rr/
-  rrr-status.yaml          # SUMMARY
-  agent.plan.md            # tripwire
-  future.md / tech.md / later.md
-  tasks/                   # reserved (global; not CoW on open-next)
-  0.1/
-    discovery/
-      status.yaml          # DETAIL — ES/MRD/BRD
-      session-state.json
-      executive-summary.md | mrd.md | brd.md
-      business-case.yaml
-      items.json | …
-    plan/
-      status.yaml          # DETAIL — PRD + optional slice
-      session-state.json
-      prd.md
-      architecture.md      # standing spine (invariants)
-      constitution.md      # optional; when arch_doc_mode: split
-      deltas/              # per-feature ADR-lite deltas
-        <feature-id>.md
-      execute-slice.yaml   # compact 5-field Execute kernel (on slice freeze)
-      …
-  0.2/                     # next track once opened
-    discovery/
-    plan/
+{PROJECT_ROOT}/docs/
+  GLOSSARY.md / ACRONYMS.md  # project domain lexicon (skill-owned; not under rr/; not validator)
+  rr/
+    rrr-status.yaml          # SUMMARY
+    agent.plan.md            # tripwire
+    future.md / tech.md / later.md
+    tasks/                   # reserved (global; not CoW on open-next)
+    0.1/
+      discovery/
+        status.yaml          # DETAIL — ES/MRD/BRD
+        session-state.json
+        executive-summary.md | mrd.md | brd.md
+        business-case.yaml
+        items.json | …
+      plan/
+        status.yaml          # DETAIL — PRD + optional slice
+        session-state.json
+        prd.md
+        architecture.md      # standing spine (invariants)
+        constitution.md      # optional; when arch_doc_mode: split
+        deltas/              # per-feature ADR-lite deltas
+          <feature-id>.md
+        execute-slice.yaml   # compact 5-field Execute kernel (on slice freeze)
+        …
+    0.2/                     # next track once opened
+      discovery/
+      plan/
 ```
+
+Project lexicon (`docs/GLOSSARY.md`, `docs/ACRONYMS.md`): skill-owned silent harvest — [project-lexicon.md](project-lexicon.md). Not parking, not cascade, not validator input.
 
 `--output-dir` for Discover next-track work is `{PROJECT_ROOT}/docs/rr/{next}/discovery/`; Plan → `docs/rr/{next}/plan/`. Validator pointed at a phase dir loads that phase’s `status.yaml` (walk-up). Plan pin checks load Discovery status across sibling phase dirs for BRD parent digests.
 
@@ -364,6 +368,10 @@ One global `{PROJECT_ROOT}/docs/later.md`. **Not validator input.** No item ids.
 |------|--|
 | Passive | Skill writes freely when the user defers a topic ("discuss later"). No periodic maintenance; no auto-incorporate. |
 | Distinct from notes | `{level}.notes.yaml` is active/addressed-then-deleted for off-level answers on a specific doc. `later.md` is a global parking lot. |
+
+## Project lexicon — `docs/GLOSSARY.md` + `docs/ACRONYMS.md`
+
+Host domain terms at `{PROJECT_ROOT}/docs/` (not under `docs/rr/`). Skill-owned (Discover + Plan). **Not validator input.** Silent create/merge only — [project-lexicon.md](project-lexicon.md). Distinct from `tech.md` / `later.md` / `future.md` parking.
 
 ## `agent.plan.md` contract
 

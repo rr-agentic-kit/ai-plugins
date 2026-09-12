@@ -34,6 +34,7 @@ claim check → persist .md
    - Paths relative to plugin root, e.g. `python3 skills/docs/rr-humanize/scripts/cli.py scan …` (follow humanize SKILL for exact invocation).
 4. **Claim check** — humanize must **not** invent TAM, metrics, Musts, stakeholders, or premises. Every sentence traces to draft/ledger/items — **including Human brief**. Structural IDs, YAML frontmatter, and `_key_:` lines are **out of scope** for lexicon wipe. Narrative prose **and** leaf `>` blockquote bodies are in scope (readable shalls; do not wipe rank enums or rationale tokens).
 5. **Persist** only after claim check passes. On failure → fix prose or AskQuestion; do not write invented specificity.
+6. **Lexicon harvest** (silent) — After persist succeeds, Load `refs/planning/project-lexicon.md`. Scan humanized prose + co-persisted item labels for new host-domain acronyms / overloaded terms → additive merge into `{PROJECT_ROOT}/docs/GLOSSARY.md` and `docs/ACRONYMS.md`. Never AskQuestion; never overwrite/delete rows; never mint empty files. Create files only on first successful merge.
 
 ## Machine files — skip humanize
 
@@ -65,7 +66,7 @@ Preserve hedges that encode real uncertainty (`hold`, `vague`) — firm tone mus
 | Actor | Responsibility |
 |-------|----------------|
 | Compose agent | Draft meaning-locked content + receipt |
-| Skill (Discover / Plan) | Load this ref; run humanize; claim check; write files; stamp status |
+| Skill (Discover / Plan) | Load this ref; run humanize; claim check; write files; lexicon harvest; stamp status |
 | Validator | Shape/IDs — not prose quality |
 
 If compose agent is asked to "humanize" → refuse; skill runs this gate.
@@ -85,4 +86,5 @@ If compose agent is asked to "humanize" → refuse; skill runs this gate.
 - CLI budget respected
 - Claim check clean
 - Cascade/session `.md` written; machine files untouched by humanize
+- Lexicon harvest run (or no-op when no new domain keys)
 - Compose agent never invoked humanize itself

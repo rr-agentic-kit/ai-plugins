@@ -10,48 +10,52 @@ Item records: [doc-standards/item-schema.md](doc-standards/item-schema.md). Sche
 
 Cascade docs write to `payload.output_dir` (Discover default `{PROJECT_ROOT}/docs/rr/{track}/discovery/`; Plan default `{PROJECT_ROOT}/docs/rr/{track}/plan/`; next-track → `{PROJECT_ROOT}/docs/rr/{next}/{phase}/`). Summary + parking **always** live under `{PROJECT_ROOT}/docs/rr/` (`rrr-status.yaml`, `agent.plan.md`, `future.md`, `tech.md`, `later.md`) — never a second `lines.yaml`. Reject writing operational detail (`levels`, digests, `challenge`, `mint_hash`) into `rrr-status.yaml`.
 
+Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_ROOT}/docs/ACRONYMS.md` — skill-owned, **not** under `docs/rr/`, **not** validator input, distinct from parking. Contract: [project-lexicon.md](project-lexicon.md).
+
 ```
-{PROJECT_ROOT}/docs/rr/
-  rrr-status.yaml                 # SUMMARY — phase/track/product/docs glance (not pin input)
-  agent.plan.md                   # non-patch tripwire (skill-owned; not cascade input)
-  future.md / tech.md / later.md  # parking (not validator input)
-  tasks/                          # reserved — tsk-{NNN}-{intent}/ (global; not CoW on open-next)
-  0.1/                            # current track (every track is version-first)
-    discovery/
-      status.yaml                 # DETAIL — ES/MRD/BRD revs/pins/challenge/mint_hash
-      session-state.json
-      executive-summary.md
-      mrd.md
-      brd.md
-      business-case.yaml          # Discover→Plan hard gate (skill-owned; not cascade stem)
-      assumptions.md              # conditional
-      opportunity-tree.md         # conditional
-      interview-synthesis.md      # conditional
-      pretotype-brief.md          # conditional
-      *.notes.yaml
-      items.json
-      decision-ledger.yaml
-      *.challenge.report.md
-      raw-history/
-    plan/
-      status.yaml                 # DETAIL — PRD + optional slice
-      session-state.json
-      prd.md
-      architecture.md             # standing spine (invariants-first)
-      constitution.md             # optional when arch_doc_mode: split
-      deltas/                     # per-feature ADR-lite
-        <feature-id>.md
-      execute-slice.yaml          # 5-field Execute kernel on slice freeze
-      research-report.md
-      prd.notes.yaml
-      items.json
-      decision-ledger.yaml
-      prd.challenge.report.md
-      architecture.challenge.report.md  # when challenging standing spine
-      raw-history/
-  0.2/                            # next track once opened (replaces phase-subdir forks)
-    discovery/
-    plan/
+{PROJECT_ROOT}/docs/
+  GLOSSARY.md / ACRONYMS.md         # project domain lexicon (skill-owned; not cascade / not validator)
+  rr/
+    rrr-status.yaml                 # SUMMARY — phase/track/product/docs glance (not pin input)
+    agent.plan.md                   # non-patch tripwire (skill-owned; not cascade input)
+    future.md / tech.md / later.md  # parking (not validator input)
+    tasks/                          # reserved — tsk-{NNN}-{intent}/ (global; not CoW on open-next)
+    0.1/                            # current track (every track is version-first)
+      discovery/
+        status.yaml                 # DETAIL — ES/MRD/BRD revs/pins/challenge/mint_hash
+        session-state.json
+        executive-summary.md
+        mrd.md
+        brd.md
+        business-case.yaml          # Discover→Plan hard gate (skill-owned; not cascade stem)
+        assumptions.md              # conditional
+        opportunity-tree.md         # conditional
+        interview-synthesis.md      # conditional
+        pretotype-brief.md          # conditional
+        *.notes.yaml
+        items.json
+        decision-ledger.yaml
+        *.challenge.report.md
+        raw-history/
+      plan/
+        status.yaml                 # DETAIL — PRD + optional slice
+        session-state.json
+        prd.md
+        architecture.md             # standing spine (invariants-first)
+        constitution.md             # optional when arch_doc_mode: split
+        deltas/                     # per-feature ADR-lite
+          <feature-id>.md
+        execute-slice.yaml          # 5-field Execute kernel on slice freeze
+        research-report.md
+        prd.notes.yaml
+        items.json
+        decision-ledger.yaml
+        prd.challenge.report.md
+        architecture.challenge.report.md  # when challenging standing spine
+        raw-history/
+    0.2/                            # next track once opened (replaces phase-subdir forks)
+      discovery/
+      plan/
 ```
 
 | Doc type | Filename |
@@ -75,6 +79,8 @@ Cascade docs write to `payload.output_dir` (Discover default `{PROJECT_ROOT}/doc
 | future inbox | `rr/future.md` (**not** validator input; no ids; no SEMVER) |
 | tech capture | `rr/tech.md` (**not** validator input; Discover parking only — Plan does not author AC/ADR here) |
 | later parking lot | `rr/later.md` (**not** validator input; no ids; passive; distinct from `{level}.notes.yaml`) |
+| project glossary | `docs/GLOSSARY.md` (skill-owned; **not** validator input; silent harvest — [project-lexicon.md](project-lexicon.md)) |
+| project acronyms | `docs/ACRONYMS.md` (skill-owned; **not** validator input; silent harvest — [project-lexicon.md](project-lexicon.md)) |
 | off-level notes | `{level}.notes.yaml` under the phase dir (always YAML; same write/load/delete for every level; exists only while unresolved) |
 | item graph | `{track}/{phase}/items.json` (always JSON) |
 | decision ledger | `{track}/{phase}/decision-ledger.yaml` (always YAML; skill-owned; validator input) |
@@ -90,7 +96,7 @@ Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. 
 
 Global under `docs/rr/tasks/` — **not** per-track folders. Naming: `tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md`. Frontmatter carries `track` for version metadata. **Never** copy-on-write when opening a next track. Out of validator scope for now (same class as `future.md`). Task authoring / Execute integration is a later pass.
 
-`--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` (`skills/rr-discovery/refs/input-resolution.md`). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and phase `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md`, `agent.plan.md`, `tech.md`, `later.md`, and `rrr-status.yaml` are **not validator cascade input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
+`--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` (`skills/rr-discovery/refs/input-resolution.md`). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and phase `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md`, `agent.plan.md`, `tech.md`, `later.md`, `docs/GLOSSARY.md`, `docs/ACRONYMS.md`, and `rrr-status.yaml` are **not validator cascade input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
 
 ## Markdown doc format
 
@@ -389,7 +395,7 @@ Required version stamps on every mint (from Discover phase status): `track`, `do
 
 ## Cascade prose persist
 
-After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing spine/constitution/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md).
+After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing spine/constitution/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md). After successful persist, skill runs silent lexicon harvest ([project-lexicon.md](project-lexicon.md)).
 
 ## Status merge
 

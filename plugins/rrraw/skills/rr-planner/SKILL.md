@@ -70,6 +70,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A; Plan level entry |
 | [domain-routing.md](refs/domain-routing.md) | Challenge / blind-spot domain placement; access-axis placement |
 | `skills/rr-discovery/refs/compose-prose.md` | Every cascade `.md` persist |
+| `refs/planning/project-lexicon.md` | After compose-prose (lexicon harvest) |
 | `skills/rr-discovery/refs/business-case-handoff.md` | Entry gate |
 | `refs/planning/contracts.md` | Before any `Task` |
 | Shared package | plugin `refs/planning/` (link there directly — no skill stubs). Versioning SoT: `refs/planning/baselines.md` only — future Execute loads the same file. |

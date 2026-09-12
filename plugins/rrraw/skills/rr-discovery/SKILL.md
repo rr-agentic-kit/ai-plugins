@@ -74,6 +74,7 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 | [from-code.md](refs/from-code.md) | `action: from-code` |
 | [ideation.md](refs/ideation.md) | Ideation gate / assumptions / pretotype (not from-code) |
 | [compose-prose.md](refs/compose-prose.md) | Every cascade `.md` persist |
+| `refs/planning/project-lexicon.md` | After compose-prose / from-code research persist |
 | [business-case-handoff.md](refs/business-case-handoff.md) | BRD freeze → Plan handoff |
 | `refs/doc-standards/<level>.md` | Composing that level |
 | [goal-anchor.md](refs/goal-anchor.md) / [expert-panel.md](refs/expert-panel.md) | Discovery pass / Gate 7 |

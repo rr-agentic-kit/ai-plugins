@@ -7,6 +7,7 @@
 | [baselines.md](baselines.md) | **Version law** — track, docs/product patches, pins, unlock, ship ceremony, rejected patterns |
 | [setup.md](setup.md) | `--setup` bootstrap + **PR-scoped** `validate_planning` wire |
 | [output-formats.md](output-formats.md) | Layout, status, handoff YAML shapes |
+| [project-lexicon.md](project-lexicon.md) | Host `docs/GLOSSARY.md` + `ACRONYMS.md` silent harvest |
 | [agent-config.md](agent-config.md) / [agent.plan.md](agent.plan.md) | Injection + tripwire template |
 | [contracts.md](contracts.md) | Task agent contracts |
 | [success-criteria.md](success-criteria.md) | Static + judgment gates |

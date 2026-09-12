@@ -35,6 +35,8 @@ Reflect before compose:
 
 Persist findings in `session_state.from_code_evidence` (`refs/planning/output-formats.md`). Cite that evidence in inheritance / compose facts where helpful.
 
+**Lexicon seed (silent):** After research persist, Load `refs/planning/project-lexicon.md`. Merge `from_code_evidence.domain_language` (and related domain strings) into `{PROJECT_ROOT}/docs/GLOSSARY.md` / `docs/ACRONYMS.md` with the same additive rules — before or with first compose. Never AskQuestion; create files only on first successful merge.
+
 ## Weak-OK policy
 
 - Do **not** invent TAM, buyer, ICP, beachhead, or competitive set from package/folder names.
@@ -80,6 +82,7 @@ Accepting reverse as-is without shaping leaves maturity at `code-extraction` (fr
 
 - Discover stems in `cascade_levels` written with `maturity: code-extraction`
 - `from_code_evidence` persisted
+- Domain lexicon seeded from `domain_language` when present (silent merge)
 - Contradiction queue drained or explicitly held
 - Session checkpoint written; **no** freeze / handoff
 
