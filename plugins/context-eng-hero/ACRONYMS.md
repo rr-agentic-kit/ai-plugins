@@ -15,3 +15,4 @@
 | PASS | Check passed | Static or judgment |
 | FAIL | Check failed | Static or judgment |
 | AMBIGUOUS | Judgment inconclusive | Needs human call |
+| SoT | Source of truth | Always-on body is `AGENTS.md`; Claude pointer is `CLAUDE.md` |

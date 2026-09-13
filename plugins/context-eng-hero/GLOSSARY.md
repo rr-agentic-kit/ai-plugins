@@ -15,3 +15,6 @@
 | Skill+Ref | Pack architecture: invariant procedure in SKILL; variants in refs | A skill that merely links docs | Rubric `skill-ref.*` |
 | draft-only | Deliver draft in chat; do not write final path | Incomplete WIP on disk | Write gate FAIL outcome |
 | eval-first | Author minimum that would pass observed FAIL; thicken later | Front-loaded research phase | Advisory default |
+| always-on | `AGENTS.md` (or user-global equivalent) loaded every session — ~90%-leverage only | Situational pack; full project docs | `recipe-static-memory` |
+| situational pack | Flat `.agents/{group}.md` depth loaded on Read trigger — never `@`-imported | Cursor `.agents/skills/`; CONTRIBUTING dump | Derive group names; zero packs OK |
+| inclusion bar | Keep only constraints that help or prevent mistakes in ~90%+ of chats | “Everything the user asked for”; project bible | Challenge failing requests on design/review/fix |
