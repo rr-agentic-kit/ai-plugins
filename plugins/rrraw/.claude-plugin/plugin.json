@@ -1,7 +1,7 @@
 {
   "name": "rrraw",
   "version": "0.0.4-rc-9",
-  "description": "Discover (executive-summary\u2192BRD + business-case) + Plan (PRD+) + Test excellence \u2014 flag-driven phase agents",
+  "description": "Discover (ES\u2192BRD + business-case) + Plan (PRD+) + build/test/review + local git + forge-agnostic CI",
   "license": "Unlicense",
   "author": {
     "name": "ai-plugins maintainers"

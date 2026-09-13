@@ -23,14 +23,18 @@
     {
       "name": "rrraw",
       "source": "plugins/rrraw",
-      "description": "Discover (executive-summary\u2192BRD + business-case) + Plan (PRD+) + Test excellence \u2014 flag-driven phase agents.",
+      "description": "Discover (ES\u2192BRD + business-case) + Plan (PRD+) + build/test/review + local git + forge-agnostic CI.",
       "category": "developer-tools",
       "keywords": [
         "discovery",
         "planning",
         "testing",
         "agents",
-        "quality"
+        "quality",
+        "build",
+        "review",
+        "git",
+        "ci"
       ]
     },
     {

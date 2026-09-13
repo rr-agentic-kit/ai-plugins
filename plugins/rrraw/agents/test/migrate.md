@@ -18,11 +18,11 @@ Required:
 3. Note `compatibility_notes` (API gaps, skipped cases).
 4. Rerun migrated tests; populate `rerun`.
 
-Verify and reassess gates: [determinism.md](../../skills/rr-test/refs/determinism.md).
+Verify and reassess gates: [determinism.md](../../skills/rr-builder/rr-tester/refs/determinism.md).
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § migrate.
+`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § migrate.
 
 ## Constraints
 

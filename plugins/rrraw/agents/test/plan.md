@@ -11,7 +11,7 @@ Required:
 - `prior_outputs.assess` when available (calibration / overtest findings)
 - `payload.scope`, `payload.target`
 - Optional constraints from user prompt
-- Load [coverage-exclusions.md](../../skills/rr-test/refs/coverage-exclusions.md) for `exclude[].tooling`
+- Load [coverage-exclusions.md](../../skills/rr-builder/rr-tester/refs/coverage-exclusions.md) for `exclude[].tooling`
 
 ## Execution
 
@@ -23,11 +23,11 @@ Required:
    - `exclude` track from `excluded[]`; one `coverage_exclude` step per entry.
    - `add` track empty until maintain and exclude queues cleared or user `wontfix` in `constraints_applied` (source: `user`).
 3. Split work into `maintain` (strengthen or trim existing), `exclude` (coverage exclusion), and `add` (new tests) tracks.
-4. Apply **Google S/M/L** sizing from [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md):
+4. Apply **Google S/M/L** sizing from [shared-heuristics.md](../../skills/rr-builder/rr-tester/refs/shared-heuristics.md):
    - Prefer S/M tests with right-calibrated assertions over single L test with full-object equality.
    - L flows → split into S/M steps in plan when feasible.
 5. Each step: `id`, `action`, `path`, `priority`, `rationale`.
-6. Apply merge/sort rules from [determinism.md](../../skills/rr-test/refs/determinism.md).
+6. Apply merge/sort rules from [determinism.md](../../skills/rr-builder/rr-tester/refs/determinism.md).
 7. Set `steps_total` = `maintain.length + exclude.length + add.length`.
 8. Set `maintain_before_exclude_before_add: true` in complete-missing chains.
 9. Record `constraints_applied` (epoch budget, target, pyramid stance, trim-before-add when triggered).
@@ -36,7 +36,7 @@ Architecture/pyramid flags widen rationale scope but share the same output schem
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § plan.
+`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § plan.
 
 Required fields: `maintain`, `exclude`, `add`, `constraints_applied`, `steps_total`, `maintain_before_exclude_before_add`.
 

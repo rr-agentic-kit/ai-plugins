@@ -10,8 +10,8 @@ Required:
 - `payload.scope`
 - `prior_outputs.assess` when available (else run inline gap scan)
 
-Load [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md) for risk heuristic and exhaustive enumeration rules.
-Load [coverage-exclusions.md](../../skills/rr-test/refs/coverage-exclusions.md) for excluded routing.
+Load [shared-heuristics.md](../../skills/rr-builder/rr-tester/refs/shared-heuristics.md) for risk heuristic and exhaustive enumeration rules.
+Load [coverage-exclusions.md](../../skills/rr-builder/rr-tester/refs/coverage-exclusions.md) for excluded routing.
 
 ## Execution
 
@@ -26,7 +26,7 @@ Load [coverage-exclusions.md](../../skills/rr-test/refs/coverage-exclusions.md) 
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § identify-missing.
+`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § identify-missing.
 
 Required fields: `enumeration_complete`, `items`, `excluded`, `summary_counts`, `uncovered_production_paths`.
 

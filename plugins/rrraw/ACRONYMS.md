@@ -22,3 +22,8 @@
 | ADR | Architecture Decision Record | Spine / constitution adjacent |
 | OMTM | One Metric That Matters | Discover north-star metric for goal-likelihood |
 | INTENT | Plugin Spec file (`INTENT.md`) | Process-ownership UX SoT — not README overview |
+| PR | Pull Request | GitHub forge ship unit; pair with MR |
+| MR | Merge Request | GitLab forge ship unit; pair with PR |
+| CPNNN | Coder Principles rule ID (`CP` + 3 digits) | Builder code-lane findings; e.g. `CP013` — not `CP-13` |
+| OWASP | Open Worldwide Application Security Project | Builder security lane Top 10 patterns |
+| ARNNN | Architecture review rule ID (`AR` + digits) | Builder code-lane architecture section; e.g. `AR004` |

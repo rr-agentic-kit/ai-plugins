@@ -18,7 +18,7 @@ Required:
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § perf-audit.
+`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § perf-audit.
 
 ## Constraints
 

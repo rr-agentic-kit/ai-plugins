@@ -10,7 +10,7 @@ Required:
 - `payload.write_mode` (`standard` | `test-data` | `parameterized`)
 - `prior_outputs.plan` when in chain, or direct scope/goal from payload
 - Optional `prior_outputs.assess` for calibration context (avoid repeating over-assertion patterns)
-- Load [coverage-exclusions.md](../../skills/rr-test/refs/coverage-exclusions.md) for exclude track execution
+- Load [coverage-exclusions.md](../../skills/rr-builder/rr-tester/refs/coverage-exclusions.md) for exclude track execution
 
 ## Execution
 
@@ -23,7 +23,7 @@ Required:
    - Record any skipped step in `steps_skipped[]` with `reason`; skipping without `wontfix` → `status: partial`.
 2. Implement plan steps or direct write goal for in-scope paths.
 3. Follow repo conventions (from CLAUDE.md section or detected layout).
-4. **Minimal-assertion tactics** per [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md):
+4. **Minimal-assertion tactics** per [shared-heuristics.md](../../skills/rr-builder/rr-tester/refs/shared-heuristics.md):
    - Assert observable outcomes for the behavior under test; match assertion depth to test role (unit vs integration vs E2E).
    - Avoid full-object deep equality when ≤3 fields define the contract.
    - No private API or internal snapshot assertions unless explicitly required by plan.
@@ -42,7 +42,7 @@ Required:
    - `spec_drift` — test asserts outdated contract vs production
    - `ai_hallucination` — references non-existent API
    - `over_coupled` — assertion binds to implementation detail
-7. Respect verify gate: [determinism.md](../../skills/rr-test/refs/determinism.md).
+7. Respect verify gate: [determinism.md](../../skills/rr-builder/rr-tester/refs/determinism.md).
 
 ### Oracle tactics (agent-local)
 
@@ -53,7 +53,7 @@ Required:
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § write.
+`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § write.
 
 Required fields: `changes`, `steps_completed`, `steps_skipped`, `execution`, `coverage_verify`, `oracle_check`, `validation_pipeline`, `write_mode`.
 

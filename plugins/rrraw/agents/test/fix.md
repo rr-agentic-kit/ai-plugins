@@ -16,15 +16,15 @@ Required:
 2. Apply minimal fixes per intent:
    - `fix-broken`: restore green suite
    - `refactor`: improve structure without behavior change
-   - `reduce-duplication`: dedupe per [shared-heuristics.md](../../skills/rr-test/refs/shared-heuristics.md) redundancy signals
+   - `reduce-duplication`: dedupe per [shared-heuristics.md](../../skills/rr-builder/rr-tester/refs/shared-heuristics.md) redundancy signals
 3. Rerun implicated tests; populate `rerun`.
 4. Document `risk_notes` for non-obvious changes.
 
-Verify gate: [determinism.md](../../skills/rr-test/refs/determinism.md).
+Verify gate: [determinism.md](../../skills/rr-builder/rr-tester/refs/determinism.md).
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-test/refs/contracts.md) § fix.
+`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § fix.
 
 ## Constraints
 

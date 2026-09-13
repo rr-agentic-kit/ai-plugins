@@ -24,7 +24,8 @@ Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sittin
 - Problem, market, viability, ideation, GTM framing, or BRD work → `rr-discovery`
 - Traditional sprint / capacity / velocity ceremony → refuse; reframe as slice selection
 - Release/version bundling of slices → deferred; do not invent those artifacts this pass
-- Implementation, Execute, ship-check, or ticket writing that is not cascade planning
+- Implementation, Execute, ship-check, code review, or ticket writing that is not cascade planning → **rr-builder**
+- Artifact-type advice (skill vs command, process checklist) that is not a product to plan
 - Inventing docs to run research or challenge — those actions require existing docs ([input-resolution.md](refs/input-resolution.md))
 - Starting Plan without frozen BRD + `business-case.yaml` — [input-resolution.md](refs/input-resolution.md) Entry gate
 
