@@ -76,7 +76,7 @@ Same as before: default `ask` + `questions_per_cycle: 1`; confirm-once persisten
 
 | Flag | Behavior |
 |------|----------|
-| `--resume` | Load `session-state.json`; continue Plan checkpoint; append Q&A. Route: `resume`. |
+| `--resume` | Project `session-state.json` via `scripts/session_state.sh view`; continue Plan checkpoint; append Q&A. Route: `resume`. Full-file `Read` of the checkpoint is a procedure fail. |
 | Auto-resume | NL “continue” / “resume” with checkpoint → treat as `--resume` |
 
 ### `--change` / slice select
@@ -156,7 +156,7 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 
 ## Status-first routing
 
-Load `docs/rr/rrr-status.yaml` (fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml` and `session-state.json`. Entry gate also reads discovery status + `business-case.yaml`.
+Load `docs/rr/rrr-status.yaml` (fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml`. For checkpoint: run `sh scripts/session_state.sh view --path {output_dir}/session-state.json` (preset `resume`) — **never** `Read` the whole `session-state.json` into context. Entry gate also reads discovery status + `business-case.yaml`. Missing file → treat as no checkpoint (`MISSING_CHECKPOINT` when `--resume`).
 
 | `payload.route` | When |
 |-----------------|------|

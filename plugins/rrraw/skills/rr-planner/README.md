@@ -61,7 +61,7 @@ Flags (`--setup` / `--prd` / `--change` / `--freeze-slice` / `--research` / `--c
 
 ### Intake
 
-Status-first (`rrr-status` → `docs/plan/status.yaml` + session-state); resolve emits payload before Plan body. Entry gate also reads discovery freeze + handoff. Solid-subset Plan body on draft Discover allowed when cited subset is load-bearing-stable — freeze mint still needs frozen parents ([input-resolution.md](refs/input-resolution.md)).
+Status-first (`rrr-status` → phase `status.yaml` + session-state **via** `scripts/session_state.sh view`); resolve emits payload before Plan body. Entry gate also reads discovery freeze + handoff. Solid-subset Plan body on draft Discover allowed when cited subset is load-bearing-stable — freeze mint still needs frozen parents ([input-resolution.md](refs/input-resolution.md)).
 
 ### Clarify
 

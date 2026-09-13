@@ -316,6 +316,22 @@ scanned_digest: "sha256:..."
 
 Written on **every stop** and after **each level completion**. Required for `--resume`. Internal only — not a human plan doc and **not** project knowledge (`status.yaml` is).
 
+### Layout decision (T5)
+
+**Keep one JSON file per phase dir** + **Python mutator/projector** (`scripts/session_state.sh`). Rejected for now: shard into many small files + raw `jq` — worse atomicity and migrate cost; context budget is solved by projection either way. Revisit shards only if projector round-trips become the bottleneck.
+
+### Access budget (stop-rule)
+
+| Do | Do not |
+|----|--------|
+| Run `sh scripts/session_state.sh view\|get\|… --path {output_dir}/session-state.json` | `Read` the whole `session-state.json` into agent context |
+| Parse one JSON stdout envelope | Invent ad-hoc full-file rewrite via editor tools |
+| Use mutator commands for append/patch | `dump --i-know` except rare offline debug |
+
+**Probe (resolve/resume done-when):** tool output includes a `view`/`get` projection (or mutator `ok: true`). A full-file `Read` of `session-state.json` is a **procedure fail**.
+
+Invoke contract: `scripts/session_state.README.md` (run scripts; do not load script source as docs).
+
 ```json
 {
   "metadata": {
@@ -365,7 +381,7 @@ Written on **every stop** and after **each level completion**. Required for `--r
 }
 ```
 
-`raw_history_path` is relative to `output_dir`. Resume loads this file, continues from `checkpoint.current_level`, and appends Q&A to that history file.
+`raw_history_path` is relative to `output_dir`. Resume loads this file **via the session-state CLI projection**, continues from `checkpoint.current_level`, and appends Q&A to that history file.
 
 `composed_docs`: `doc_type` → path relative to `output_dir`. Paths only — never document bodies. Do not stash compose output in session-state; compose writes immediately.
 
@@ -409,7 +425,7 @@ After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/co
 ## Adapter rules
 
 1. Overwrite confirm: `skills/rr-planner/refs/cascade.md` per-level discovery step 8. Skip the prompt when `--input` implied refresh.
-2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `viability[]`, `note_sessions`, `composed_docs` paths). Skill is the only writer of this file. Skill is also the only writer of `decision-ledger.yaml`, `status.yaml`, `agent.plan.md`, and `future.md`.
+2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `viability[]`, `note_sessions`, `composed_docs` paths). Skill is the only writer of this file — **via `scripts/session_state.sh` mutators** (or equivalent atomic JSON write), not full-file editor dumps into context. Skill is also the only writer of `decision-ledger.yaml`, `status.yaml`, `agent.plan.md`, and `future.md`.
 3. Compose writes/merges `items.json`. Skill reads it; skill does not write it. Compose reads `reserved_ids` from the ledger and never re-mints those ids. Compose writes frontmatter `track` / `doc_rev` / `pins`; skill mints `status.yaml` after freeze.
 4. Append a raw-history turn after every Q&A; do not wait for stage-exit. Skill owns `raw-history/`.
 5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars; prune: `skills/rr-planner/refs/note-sessions.md`. Next-track notes while `next` is open go to that track's sidecar, not `future.md`.

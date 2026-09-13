@@ -35,7 +35,7 @@ TodoWrite `merge: false` before step 1 with stable ids: `resolve` → `setup?` �
 
 Phrases: `refs/planning/progress.md` on every invocation.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Prefer `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--setup` / `--resume`. Discover flags/NL → stop and route to `rr-discovery`. Sprint/capacity/velocity → refuse and reframe as slice selection. Status-first: `docs/rr/rrr-status.yaml` then `docs/rr/{track}/plan/status.yaml` + session-state; entry gate also reads discovery detail. Rewrite/sync via `refs/planning/setup.md` / `refs/planning/agent-config.md`. Done: payload emitted.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Prefer `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--setup` / `--resume`. Discover flags/NL → stop and route to `rr-discovery`. Sprint/capacity/velocity → refuse and reframe as slice selection. Status-first: `docs/rr/rrr-status.yaml` then `docs/rr/{track}/plan/status.yaml` + **session-state via** `sh scripts/session_state.sh view --path {output_dir}/session-state.json` (never full-file `Read`). Entry gate also reads discovery detail. Rewrite/sync via `refs/planning/setup.md` / `refs/planning/agent-config.md`. Done: payload emitted; resume/status-first tool output includes a session-state projection.
 
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
@@ -52,7 +52,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 
 5. **research / challenge** — Load `refs/planning/contracts.md`. Research: [research-method.md](refs/research-method.md). Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md` + `refs/planning/challenge-layers.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method). Default depth = **standard**; `deep` only when explicit. Persist reports per `refs/planning/output-formats.md`. Completes `write`.
 
-6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + `docs/rr/{track}/plan/status.yaml` + refresh `rrr-status.yaml`. First compose: emit `docs/rr/agent.plan.md` + sync root SoT. Next Up / freeze-suggest: `refs/planning/progress.md` + `refs/planning/challenge-layers.md`. Done: session-state + statuses written.
+6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` **via** `scripts/session_state.sh` mutators + `docs/rr/{track}/plan/status.yaml` + refresh `rrr-status.yaml`. First compose: emit `docs/rr/agent.plan.md` + sync root SoT. Next Up / freeze-suggest: `refs/planning/progress.md` + `refs/planning/challenge-layers.md`. Done: session-state + statuses written (no full-file checkpoint `Read`).
 
 ## Shared refs (load on demand)
 
@@ -75,6 +75,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | `refs/planning/project-lexicon.md` | After compose-prose (lexicon harvest) |
 | `skills/rr-discovery/refs/business-case-handoff.md` | Entry gate |
 | `refs/planning/contracts.md` | Before any `Task` |
+| `scripts/session_state.README.md` | resolve / resume / write session-state (run CLI; do not load `.py`) |
 | Shared package | plugin `refs/planning/` (link there directly — no skill stubs). Versioning SoT: `refs/planning/baselines.md` only — future Execute loads the same file. |
 
 No matching technique ref → stop + AskQuestion; do not invent procedure.

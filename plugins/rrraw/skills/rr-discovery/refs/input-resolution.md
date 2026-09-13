@@ -93,7 +93,7 @@ Confirm-once (same pattern as [project-posture.md](project-posture.md)): on firs
 
 | Flag | Behavior |
 |------|----------|
-| `--resume` | Load `session-state.json` from `--output-dir`; continue from `checkpoint.current_level`; append Q&A to `raw_history_path`. Route: `resume`. |
+| `--resume` | Project `session-state.json` via `scripts/session_state.sh view` from `--output-dir`; continue from `checkpoint.current_level`; append Q&A to `raw_history_path`. Route: `resume`. Full-file `Read` of the checkpoint is a procedure fail. |
 | Auto-resume | If `session-state.json` exists in `--output-dir` and user says "continue" / "resume" in NL → treat as `--resume` |
 
 `--resume` = continue-open. It does not start `--change` and does not rediscover from 0.
@@ -231,7 +231,7 @@ NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` **seed** the [proj
 
 ## Status-first routing
 
-Load `docs/rr/rrr-status.yaml` (glance; fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml` (or `{PROJECT_ROOT}/docs/rr/{track}/discovery/status.yaml` when `output_dir` is a next-track phase dir) and `session-state.json`. Pick **one** route. Do not start posture until this pick is done.
+Load `docs/rr/rrr-status.yaml` (glance; fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml` (or `{PROJECT_ROOT}/docs/rr/{track}/discovery/status.yaml` when `output_dir` is a next-track phase dir). For checkpoint: run `sh scripts/session_state.sh view --path {output_dir}/session-state.json` (preset `resume`) — **never** `Read` the whole `session-state.json` into context. Pick **one** route. Do not start posture until this pick is done. Missing file → no checkpoint (`MISSING_CHECKPOINT` when `--resume`).
 
 | `payload.route` | When |
 |-----------------|------|

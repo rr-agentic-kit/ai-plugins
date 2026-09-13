@@ -33,7 +33,7 @@ TodoWrite `merge: false` before step 1 with stable ids `resolve`, `posture`, `id
 
 Phrases: `refs/planning/progress.md` on every invocation.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Accept legacy `--exec-summary` → `executive-summary`. No `--prd` / `--research` as primary. Status-first: read `docs/rr/rrr-status.yaml` then `docs/rr/{track}/discovery/status.yaml` + session-state. If cascade docs exist, rewrite via `sh scripts/validate_planning.sh --rewrite <dir>`. Sync agent config via `refs/planning/agent-config.md`. Done: payload emitted. Stop: that ref's deterministic errors.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Accept legacy `--exec-summary` → `executive-summary`. No `--prd` / `--research` as primary. Status-first: read `docs/rr/rrr-status.yaml` then `docs/rr/{track}/discovery/status.yaml` + **session-state via** `sh scripts/session_state.sh view --path {output_dir}/session-state.json` (never full-file `Read`). If cascade docs exist, rewrite via `sh scripts/validate_planning.sh --rewrite <dir>`. Sync agent config via `refs/planning/agent-config.md`. Done: payload emitted; resume/status-first tool output includes a session-state projection. Stop: that ref's deterministic errors.
 
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
@@ -59,7 +59,7 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 
 5. **freeze-handoff** (after BRD Gates 1–7) — Load [business-case-handoff.md](refs/business-case-handoff.md). **Refuse** while any stem is `maturity: code-extraction`. Mint freeze, write `business-case.yaml`, stamp detail + summary (`discovery_complete`, `phase`, `summary` line), require conditional artifacts if techniques ran. Fail freeze on missing required fields or decorative metrics. **Auto-suggest** Plan Next Up only after standard challenge clear or risk-accept (`refs/planning/challenge-layers.md`, `refs/planning/progress.md`).
 
-6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` + phase `status.yaml` + refresh `rrr-status.yaml` per `refs/planning/output-formats.md`. Next Up habits: `refs/planning/progress.md`. Done: session-state + statuses written.
+6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` **via** `scripts/session_state.sh` mutators + phase `status.yaml` + refresh `rrr-status.yaml` per `refs/planning/output-formats.md`. Next Up habits: `refs/planning/progress.md`. Done: session-state + statuses written (no full-file checkpoint `Read`).
 
 ## Shared refs (load on demand)
 
@@ -82,6 +82,7 @@ If `payload.chain` includes `challenge`, run step 4 after last freeze and before
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A; level entry |
 | [challenge-method.md](refs/challenge-method.md) | `--challenge` / `--challenge deep` |
 | `refs/planning/contracts.md` | Before any subagent `Task` |
+| `scripts/session_state.README.md` | resolve / resume / write session-state (run CLI; do not load `.py`) |
 
 Shared planning package: plugin `refs/planning/` (link there directly — no skill stubs). Versioning SoT is `refs/planning/baselines.md` only — do not copy into this skill tree. Future Execute loads the same file.
 
