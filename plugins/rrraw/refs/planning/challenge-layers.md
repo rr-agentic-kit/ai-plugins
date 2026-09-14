@@ -44,6 +44,8 @@ Legacy helper stamps may write `clean` — treat as standard-clear for freeze-su
 
 If only one alternative is above “unlikely,” skill may close with recorded reasoning. If two or more remain plausible → AskQuestion required. Never silent-pick among peers. Applies to both Discover and Plan.
 
+**Post-report probe:** After a challenge report persists, if a finding offers ≥2 plausible remediations (A\|B\|C table or peer alternatives) → AskQuestion ≤ `preferences.questions_per_cycle` **before absorb**. Never silent-apply the agent-preferred letter, then re-attest. Re-attest only after the absorb batch for that stem.
+
 ## Stop-rule: no challenge while queues are open
 
 Do **not** run `--challenge` / re-attest / challenge `Task` while either is true:
@@ -60,12 +62,12 @@ Before spawning a challenge `Task`, drain the open set in this order:
 1. **Auto-close** — assumption auto-close when only one plausible alternative
 2. **Reword** — clarify / tighten without a new AskQuestion when the gap is wording
 3. **AskQuestion** — ≤ `preferences.questions_per_cycle` per address cycle
-4. **Absorb batch** — apply remediations from answers / auto-closes into docs
+4. **Absorb batch** — apply remediations from answers / auto-closes into docs. **Batch:** multi-doc → parallel mutators / compose `Task`; session-state via `scripts/session_state.sh` only (**read-budget:** never full-file `Read` of `session-state.json`)
 5. **Then** — one challenge pass (standard or deep as resolved)
 
 ### Pre-Task probe
 
-Before challenge `Task`: open founder questions = 0 **and** remediation batch applied? If no → do not spawn challenge; Next Up = drain Qs / remediations ([progress.md](progress.md)).
+Before challenge `Task`: open founder questions = 0 **and** remediation batch applied **and** `status.yaml` digests + (when present) `slice.requirement_ids` match live files / `execute-slice.yaml` pins ([baselines.md](baselines.md) pre-challenge sync)? If no → do not spawn challenge; Next Up = drain Qs / remediations / sync ([progress.md](progress.md)).
 
 ## Freeze suggest (skill policy)
 
@@ -99,4 +101,6 @@ When the current level cannot support the real goal given parents, challenge **u
 - Freeze auto-suggest respects standard-clear or risk-accept
 - Attestation stamps match the mode map above
 - No challenge `Task` while `pending_clarifications` or open findings await absorb; cheaper-first ladder + pre-Task probe pass first
+- Post-report ≥2 alternatives → AskQuestion before absorb; never silent-pick among peers
+- Pre-challenge: digests + slice `requirement_ids` synced to live files
 - QPC never treated as challenge cadence

@@ -48,7 +48,7 @@ flowchart TD
 | `setup` | `resolve` → `setup` → stop |
 | `research` / `challenge` alone | `resolve` → research/challenge → `write` |
 | `freeze-slice` (selection already done) | `resolve` → `entry-gate` → `exit-gates` (smell) → `tech-challenge?` → `slice-freeze` → `write` |
-| `change` | Same spine, section-scoped; re-enter at affected phase, not full replay from posture unless redirect |
+| `change` | Same spine, section-scoped; re-enter at affected phase, not full replay from posture unless redirect. **Stop-rule:** any spine / PRD / delta prose persist → mandatory `compose-prose` humanize + dirty challenge attestation **before** any challenge `Task` |
 
 ## Entry gate (before Plan)
 

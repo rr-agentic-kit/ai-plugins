@@ -44,6 +44,7 @@ Skill owns the close offer. User supplies product judgment and **risk acceptance
 | Freeze auto-suggest | Only after **standard** challenge clear (or risk-accept) for the freeze unit — [challenge-layers.md](challenge-layers.md) |
 | Smell-clean alone | Never the freeze Next-Up |
 | Open queues | When `checkpoint.pending_clarifications` is non-empty **or** open challenge findings await absorb → Next Up = drain Qs / remediations (cheaper-first ladder), **not** challenge / re-attest — [challenge-layers.md](challenge-layers.md) |
+| Close-challenges NL | NL “close open challenges” / “ask until challenges close” → Next Up = drain dirty `challenge.*` stems + pending (cheaper-first). **Anti-trigger:** forbid inventing standing/spine/dual-lens redesign sitting under that ask — Plan [input-resolution.md](../../skills/rr-planner/refs/input-resolution.md) NL |
 | QPC ≠ challenge | Answering a `questions_per_cycle` batch never makes challenge the Next Up by itself |
 | Advance without finishing | Allowed when solid subset is load-bearing-stable; skill drives downstream impact on upstream change |
 | Risk-accept | Concrete AskQuestion → stamp `dirty-accepted` on named stems; record reasoning |

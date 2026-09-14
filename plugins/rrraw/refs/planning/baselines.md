@@ -156,6 +156,8 @@ Digest = `sha256:` + hex of canonical JSON for that doc’s `items.json` records
 
 Skill writes phase detail on first compose, freeze / lock-target / confirmed major-minor, and challenge attestation updates. Skill refreshes summary on phase transition / freeze / ship. Compose does not write either.
 
+**Pre-challenge sync (batch):** Before any challenge `Task`, skill refreshes `levels.*.digest` from live `items.json` and aligns `slice.requirement_ids` to `execute-slice.yaml` pins when a slice exists — one write step (with attestation dirtiness as usual). Do not challenge against lagged `status.yaml`.
+
 ### Challenge attestation
 
 Four-state per stem. Absent row = never scanned = `dirty`. `dirty-accepted` = **risk-accept** for **this digest only**. `status.yaml` `challenge:` is the only aggregate — no `challenge-index.yaml`. Layer contract: [challenge-layers.md](challenge-layers.md). Process-ownership UX: [INTENT.md](../../INTENT.md) UX.

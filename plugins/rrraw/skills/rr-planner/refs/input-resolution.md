@@ -123,6 +123,7 @@ Entry gate still requires frozen BRD + handoff for **freeze mint** and default c
 | freeze this slice, freeze-slice, select slice | `freeze-slice` |
 | research, competitors deep-dive (post-compose) | `research` |
 | challenge, review, critique, pre-mortem, red-team (Plan docs) | `challenge` |
+| close challenges, clear open challenges, ask until challenges close | `challenge` — **drain-first:** cheaper-first ladder on dirty stems / pending (`refs/planning/challenge-layers.md`); **anti-trigger:** do not invent standing/spine/dual-lens redesign under this NL |
 | resume, continue planning | `prd` + `resume: true` (or resume route) |
 | change, revise, patch the, update the PRD / delta / AC | `change` |
 | discover, exec summary, MRD, BRD, viability, ideation, business-case | `OUT_OF_SCOPE` → `rr-discovery` |
