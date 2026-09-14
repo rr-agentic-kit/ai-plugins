@@ -23,7 +23,7 @@ Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX;
 | `setup` | docs/ framework bootstrap | Shared setup |
 | `prd` | Compose PRD + standing Plan path | Entry gate passed |
 | `change` | Patch PRD / delta / AC section | `--change` + section + target |
-| `freeze-slice` | Mint `execute-slice.yaml` + stamp slice | Selected requirements + smell-clean AC + Effort drivers |
+| `freeze-slice` | Mint `execute-slice.yaml` + stamp slice | Selected requirements + standard challenge clear or risk-accept (smell-clean alone insufficient) + Effort drivers |
 | `research` | Cited findings on existing docs (scoped load) | Post-compose |
 | `challenge` | Technical pre-mortem + red-team (**standard**; add `deep` for exhaustive) | Prefer Plan targets; compact parent summary |
 | `optimize` | Suggest rewrite/split/refile alternatives for soft/hard docs | `--optimize` / NL context budget |
@@ -59,7 +59,7 @@ Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX;
 
 ## UX
 
-Process-ownership (user is not process-owner): [`../../INTENT.md`](../../INTENT.md) UX. Skill-local chrome below.
+Process-ownership (user is not process-owner): `INTENT.md` UX. Skill-local chrome below.
 
 ### Invoke
 
@@ -114,7 +114,12 @@ Session-state + status stamps written. **Next Up** per `refs/planning/progress.m
 - **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
 - **Dual-runtime:** Hooks + scripts ship for Cursor and Claude; document any parity gap
 - **Eval-first:** Fix FAIL audit ids only; preserve Plan outcome (no redesign)
-- **Write gates / re-audit:** After this redesign, re-run recipe-context-engineer shared write gates and re-audit `SKILL.md` before ship
+
+## Design notes
+
+- **Goal-likelihood vs ceremony** — Freeze when marginal Plan work stops moving builder→OMTM odds; smell-clean / section coverage alone never unlocks freeze-suggest
+- **Constitution-primary vs fat PRD** — Always-load INDEX + on-demand deltas/ADRs; refuse corpus dump under hard context budget
+- **Suggest-not-auto-rewrite** — `--optimize` and hard-budget paths propose alternatives → AskQuestion → apply; never silent path rewrite
 
 ## Notes
 
@@ -123,4 +128,4 @@ Session-state + status stamps written. **Next Up** per `refs/planning/progress.m
 - Shared ledger / items / setup: plugin `refs/planning/` (link there directly — no skill stubs)
 - Technique refs above are skill-local under `skills/rr-planner/refs/`
 - `docs/agent.plan.md` is tripwire only — refuse non-patch; route here or `rr-discovery`
-- Lexicon: plugin [GLOSSARY.md](../../GLOSSARY.md) / [ACRONYMS.md](../../ACRONYMS.md) — context budget, DEC, ADR narrowed, spine = constitution
+- Lexicon: plugin `GLOSSARY.md` / `ACRONYMS.md` — context budget, DEC, ADR narrowed, spine = constitution

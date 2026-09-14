@@ -50,23 +50,11 @@ Phrases: `refs/planning/progress.md` on every invocation.
 
 3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
 
-4. **Plan body** — Load [cascade.md](refs/cascade.md) Happy path (Plan). For `prd` / `change` / `freeze-slice`: run phases in that order (truncated for `freeze-slice` / section-scoped `change` per Side paths). Before marking any phase todo `completed`, run [goal-anchor.md](refs/goal-anchor.md) **Standing self-challenge** (auto-reflection layer — `refs/planning/challenge-layers.md`). Numbered phases:
+4. **Plan body** — Load [cascade.md](refs/cascade.md) Happy path / Side paths; for `prd` / `change` / `freeze-slice` run phases in that order (truncated per Side paths). Before marking any phase todo `completed`, run [goal-anchor.md](refs/goal-anchor.md) **Standing self-challenge** (auto-reflection — `refs/planning/challenge-layers.md`). Invariants only: dual-lens same sitting; humanize-before-select order per cascade; scoped load per [context-budget.md](refs/context-budget.md); freeze bar per [execute-handoff.md](refs/execute-handoff.md). Done: cascade Advancing vs stopping or pause checkpoint.
 
-   1. `posture` — Pre-Plan PRD-shape + `arch_doc_mode` (prefer `constitution-primary`) + Coach/Fast once ([project-posture.md](refs/project-posture.md)). Confirm before mint.
-   2. `standing` — Constitution INDEX (± tech ADRs); skill-owned mint + humanize. Draft rev OK; missing Decision later fails Effort. **Then** [context-budget.md](refs/context-budget.md) detect (`scripts/context_budget.sh --plan-dir`); hard → block full-load; Next Up `--optimize`.
-   3. `dual-lens` — Interview **and** system-design **same sitting** ([plan-interview.md](refs/plan-interview.md), [prioritization-lens.md](refs/prioritization-lens.md), [system-design.md](refs/system-design.md)). Scoped load: constitution + feature delta + cited ADR only. Neither completes without the other. Refuse Effort-without-architecture. `CONTEXT_BUDGET_EXCEEDED` → do not corpus-dump.
-   4. `requirements` — Full P1–P3 retained in facts; do not shrink the table.
-   5. `compose` → `humanize` — Compose `Task` (`doc_type: prd`) then **mandatory** `skills/rr-discovery/refs/compose-prose.md` (Gate 4). **Before** select / exit-gates / challenge / freeze — never after freeze.
-   6. `select` — Thin `_status_:` subset for buildable kernel; selection ≠ delete rows.
-   7. `exit-gates` — WWAS + [req-smell.md](refs/req-smell.md); Gate 6 stage-exit; Gate 7 if premise-critical. Smell-clean ≠ freeze-ready.
-   8. `tech-challenge` — Standard challenge (cheaper-first ladder first). Open queues → drain, do not spawn. Skip only when Side path / already clear.
-   9. `slice-freeze` — Mint `execute-slice.yaml` only after challenge clear / risk-accept + goal-likelihood stop ([execute-handoff.md](refs/execute-handoff.md)).
+5. **research / challenge** — Load `refs/planning/contracts.md`. Pre-Task: context-budget detect per [context-budget.md](refs/context-budget.md). Research: obey [research-method.md](refs/research-method.md). Challenge: obey Plan [challenge-method.md](refs/challenge-method.md) + [blind-spots.md](refs/blind-spots.md) + `refs/planning/decision-ledger.md` + `refs/planning/challenge-layers.md` (inject challenge-method into challenge `Task`; Discover stems → Discover challenge-method). Completes `write`.
 
-   Done: that ref's Advancing vs stopping conditions or pause checkpoint.
-
-5. **research / challenge** — Load `refs/planning/contracts.md`. **Pre-Task:** run context-budget detect; on hard → scoped load only or Next Up `--optimize` (`CONTEXT_BUDGET_EXCEEDED`). Research: [research-method.md](refs/research-method.md) — **no** “read all”. Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md` + `refs/planning/challenge-layers.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method); one target + constitution index + named contradiction candidates. Default depth = **standard**; `deep` only when explicit. **Before challenge `Task`:** (1) if mid-run constitution/PRD/delta prose changed → mandatory humanize (`compose-prose`) + dirty attestation first; (2) sync `status.yaml` digests + `slice.requirement_ids` to live files / execute-slice pins ([baselines.md](refs/planning/baselines.md)); (3) cheaper-first ladder + pre-Task probe in `refs/planning/challenge-layers.md` (auto-close → reword → AskQuestion ≤QPC → absorb batch → **then** one challenge pass). If `pending_clarifications` non-empty or open findings await absorb → do not spawn challenge; Next Up = drain (`refs/planning/progress.md`). NL “close challenges” = drain-first, not standing redesign ([input-resolution.md](refs/input-resolution.md)). After challenge reports: ≥2 plausible alternatives → AskQuestion before absorb — never silent-pick A-recs. QPC sizes AskQuestion batches only — never challenge cadence. Persist reports per `refs/planning/output-formats.md`. Completes `write`.
-
-5b. **optimize** — Load [context-budget.md](refs/context-budget.md). Run script audit; propose 1–3 alternatives per problem file; AskQuestion; apply chosen edits → compose-prose humanize → dirty challenge attestation → re-run script; loop ≤2 then stop + manual triage. Completes `write`.
+5b. **optimize** — Load [context-budget.md](refs/context-budget.md) `--optimize` procedure. Completes `write`.
 
 6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` **via** `scripts/session_state.sh` mutators + `docs/rr/{track}/plan/status.yaml` + refresh `rrr-status.yaml`. Multi-doc absorb → **batch** parallel mutators / compose `Task` (do not serial-invent across many files). First compose: emit `docs/rr/agent.plan.md` + sync root SoT. Next Up / freeze-suggest: `refs/planning/progress.md` + `refs/planning/challenge-layers.md`. Done: session-state + statuses written (no full-file checkpoint `Read`).
 
@@ -82,10 +70,12 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | [plan-interview.md](refs/plan-interview.md) / [prioritization-lens.md](refs/prioritization-lens.md) / [system-design.md](refs/system-design.md) | `dual-lens` (same sitting) |
 | [nature-expectation-packs.md](refs/nature-expectation-packs.md) | Interview / nature reflection (reflect → derive → elicit; not a pack fire-table) |
 | [doc-standards/prd.md](refs/doc-standards/prd.md) / constitution / architecture / feature-delta | Compose standing + PRD |
-| [decision-lite.md](refs/decision-lite.md) | Standing shards / tech ADRs / feature deltas |
-| [context-budget.md](refs/context-budget.md) | After standing; pre research/challenge Task; `--optimize`; plugin hooks |
-| [req-smell.md](refs/req-smell.md) / [execute-handoff.md](refs/execute-handoff.md) | Pre-freeze / slice freeze |
+| [decision-lite.md](refs/decision-lite.md) | Co-load with feature-delta / architecture / standing shards |
+| [context-budget.md](refs/context-budget.md) | After standing; pre research/challenge Task; `--optimize`; plugin hooks; scoped-load SoT |
+| [req-smell.md](refs/req-smell.md) / [execute-handoff.md](refs/execute-handoff.md) | Pre-freeze / slice freeze (freeze bar SoT = execute-handoff) |
 | [challenge-method.md](refs/challenge-method.md) / [blind-spots.md](refs/blind-spots.md) | Challenge / stage-exit |
+| [research-method.md](refs/research-method.md) | Research action |
+| [proactivity.md](refs/proactivity.md) | Pre-save / write |
 | [goal-anchor.md](refs/goal-anchor.md) / [expert-panel.md](refs/expert-panel.md) | Plan pass / Gate 2; Gate 7 / resume viability |
 | [note-sessions.md](refs/note-sessions.md) | After every Q&A; Plan level entry |
 | [domain-routing.md](refs/domain-routing.md) | Challenge / blind-spot domain placement; access-axis placement |

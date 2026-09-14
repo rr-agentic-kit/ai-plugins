@@ -153,4 +153,12 @@ Posture confirm: `type: project_posture`, `user_confirmed: true`. New Must after
 
 ## Session completion signals
 
-Phrase recognition only ("done", "that's enough", "good to proceed", "move on", "next level", "stop", "pause", "done for now"). Advance vs stop is [cascade.md](cascade.md) Advancing vs stopping — one rule. "move on" is not a gate bypass; that table's exceptions (binding `hold`/`kill`, open queue) still apply.
+Phrase recognition only ("done", "that's enough", "good to proceed", "move on", "next level", "stop", "pause", "done for now").
+
+| Signal | Action |
+|--------|--------|
+| **Advance** | Phase Done-when met; auto-reflection clear; no binding Gate 7 `hold`/`kill`; clarifications drained or accepted |
+| **Stop / pause** | User stop/pause; pending clarifications; binding panel `hold`/`kill`; open quality debt without risk-accept |
+| **Do not offer freeze** | Standing red flag / Discover-reopen open; smell-clean alone — freeze bar per [execute-handoff.md](execute-handoff.md) |
+
+"move on" is not a gate bypass. Cascade order / humanize-before-select: [cascade.md](cascade.md).

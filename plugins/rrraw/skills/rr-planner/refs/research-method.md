@@ -28,11 +28,11 @@ Research is a **distinct, later phase** — after docs are composed:
 
 **Skill:** after the agent returns, user confirms done (may re-`Task`) or stop / pause (checkpoint and exit).
 
-**Scoped load (hard rule):** Do **not** “read all” composed docs. Load constitution INDEX + briefs/sections in research scope + load-bearing deltas only. Pre-Task: [context-budget.md](context-budget.md) detect; hard → `CONTEXT_BUDGET_EXCEEDED` — refuse corpus dump; Next Up `--optimize` or narrow scope.
+**Scoped load:** Per [context-budget.md](context-budget.md) research row — no “read all”. Pre-Task detect; hard → `CONTEXT_BUDGET_EXCEEDED` / Next Up `--optimize`.
 
 Per iteration:
 
-1. Load scoped Plan docs (constitution INDEX + in-scope sections + load-bearing deltas) — not the full corpus.
+1. Load scoped Plan docs per context-budget research row.
 2. Extract claims marked `validated: false` or lacking citations.
 3. Prioritize: blocking assumptions > competitive gaps > nice-to-have.
 4. Plan 3–5 queries per iteration (not unlimited).

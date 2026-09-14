@@ -21,7 +21,7 @@
 | Section | Content |
 |---------|---------|
 | **Human brief** | Which tech ADRs matter for review now |
-| **ADRs** | Decision-lite entries with ids `ADR-n` — [decision-lite.md](../decision-lite.md) |
+| **ADRs** | Decision-lite entries with ids `ADR-n` — `skills/rr-planner/refs/decision-lite.md` |
 | **Deferred** | Postponed tech choices |
 | **Inherited** | Tech constraints from Discover / constitution cites |
 

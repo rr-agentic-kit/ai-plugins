@@ -8,7 +8,7 @@
 
 **Does not:** Re-litigate market/GTM/pricing. Does not auto-unfreeze. Parent keeps **compact** `parent_summary` only — full report on disk. Does not full-load supporting corpus.
 
-**Scoped load:** One target doc; supporting = constitution INDEX + **named** contradiction candidates only. Pre-Task budget detect — hard → `CONTEXT_BUDGET_EXCEEDED` ([context-budget.md](context-budget.md)).
+**Scoped load:** Per [context-budget.md](context-budget.md) challenge row (one target + named contradiction candidates). Pre-Task budget detect — hard → `CONTEXT_BUDGET_EXCEEDED`.
 
 **Complements:** [blind-spots.md](blind-spots.md) taxonomy. Discover stems use Discover `challenge-method.md` — do not mix.
 
@@ -21,7 +21,7 @@
 | **standard** | `--challenge` / `--review` default; skill pre-freeze suggest | All **relevant** load-bearing claims (constitution, deltas, AC, Effort honesty) | `clean-shallow` (`depth: shallow`) |
 | **deep** | Explicit `deep` / `--challenge deep` | Every detail / exhaustive | `clean-deep` (`depth: deep`) |
 
-Soft escalation (optional review Task) only on `deep` or heavy cull — [agents/planning/challenge.md](../../../agents/planning/challenge.md).
+Soft escalation (optional review Task) only on `deep` or heavy cull — `agents/planning/challenge.md`.
 
 ## Dual method (both offered)
 

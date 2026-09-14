@@ -4,7 +4,7 @@
 
 **Load when:** `ac-smell` todo; pre-freeze gate; challenge targeting AC.
 
-**Layer:** Smells tier — always-on, fast, inline/gate table. **Not** `--challenge` (`refs/planning/challenge-layers.md`). Smell-clean ≠ freeze-ready.
+**Layer:** Smells tier — always-on, fast, inline/gate table. **Not** `--challenge` (`refs/planning/challenge-layers.md`). Freeze bar (smell-clean ≠ freeze-ready): [execute-handoff.md](execute-handoff.md).
 
 **Does not:** Replace product judgment. Does not author test code. Fail freeze until cleaned or explicit hold. Does not satisfy standard challenge for freeze-suggest.
 
@@ -35,4 +35,4 @@ Acceptance = **Why** / **What** / observable **Acceptance** — product pass/fai
 
 - Zero open smells on freeze candidates, or documented holds
 - WWAS shape present on freeze-bound AC
-- Caller does **not** treat smell-clean as standard challenge clear
+- Caller does **not** treat smell-clean as standard challenge clear — freeze bar SoT [execute-handoff.md](execute-handoff.md)

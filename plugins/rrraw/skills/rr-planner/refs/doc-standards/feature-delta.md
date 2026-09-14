@@ -1,7 +1,7 @@
 # feature-delta
 
 **Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
-**Owner:** Per-feature product-delta vs standing constitution (OpenSpec-style) — mechanism, Effort drivers, UX-shape. Uses [decision-lite.md](../decision-lite.md).
+**Owner:** Per-feature product-delta vs standing constitution (OpenSpec-style) — mechanism, Effort drivers, UX-shape. Uses `skills/rr-planner/refs/decision-lite.md`.
 
 **Path:** `docs/rr/{track}/plan/deltas/<feature-id>.md`  
 **Load when:** Same-sitting dual-lens for a scored feature; slice freeze pins; research/challenge when load-bearing.
@@ -19,7 +19,7 @@
 | **Effort drivers** | **Required when the feature has `_effort_:`** — 2–5 bullets naming what made Effort = N (tech and/or UX) |
 | **UX-shape** | Interaction pattern, surfaces/flow, **cost-relevant states** — or explicit out-of-slice. Pure backend: `n/a` + reason |
 | **Consequences** | Follow-ons |
-| **Rejections** | Alternatives rejected ([decision-lite.md](../decision-lite.md)); optional one-line effort hint per option |
+| **Rejections** | Alternatives rejected (`skills/rr-planner/refs/decision-lite.md`); optional one-line effort hint per option |
 | **Integration points** | APIs / events / UI boundaries touched |
 | **Data-model delta** | Entities/fields changed vs standing law |
 | **Refs** | Pointers to constitution INDEX + cited tech ADRs + requirement leaves — no copy |
