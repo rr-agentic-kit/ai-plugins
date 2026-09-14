@@ -25,6 +25,7 @@ Shared schemas: `refs/planning/contracts.md`, `refs/planning/baselines.md`, `ref
 | `--research` | `research` |
 | `--challenge` | `challenge` |
 | `--review` | `challenge` |
+| `--optimize` | `optimize` |
 | `--setup` | `setup` |
 | `--freeze-slice` | `freeze-slice` |
 | `--resume` | _(selector)_ — sets `resume: true`; not a second primary when paired with continue-intent |
@@ -119,11 +120,12 @@ Entry gate still requires frozen BRD + handoff for **freeze mint** and default c
 | Intent signal | `action` |
 |---------------|----------|
 | setup, bootstrap planning, init plans | `setup` |
-| product requirements, PRD, features, RICE, stories, requirements, architecture spine | `prd` |
+| product requirements, PRD, features, RICE, stories, requirements, constitution, architecture spine | `prd` |
 | freeze this slice, freeze-slice, select slice | `freeze-slice` |
 | research, competitors deep-dive (post-compose) | `research` |
 | challenge, review, critique, pre-mortem, red-team (Plan docs) | `challenge` |
 | close challenges, clear open challenges, ask until challenges close | `challenge` — **drain-first:** cheaper-first ladder on dirty stems / pending (`refs/planning/challenge-layers.md`); **anti-trigger:** do not invent standing/spine/dual-lens redesign under this NL |
+| optimize plan docs, context budget, split architecture, shrink constitution, rename decision-lite | `optimize` |
 | resume, continue planning | `prd` + `resume: true` (or resume route) |
 | change, revise, patch the, update the PRD / delta / AC | `change` |
 | discover, exec summary, MRD, BRD, viability, ideation, business-case | `OUT_OF_SCOPE` → `rr-discovery` |
@@ -144,7 +146,7 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 | Dimension | Rule |
 |-----------|------|
 | Action | Exactly one primary per invocation |
-| Plan focus | `--prd` mutually exclusive with `--change` / `--research` / `--challenge` / `--freeze-slice` |
+| Plan focus | `--prd` mutually exclusive with `--change` / `--research` / `--challenge` / `--optimize` / `--freeze-slice` |
 | `--change` | Requires `--section` and `--target` |
 | `--setup` | Never combines with Plan primaries; never starts compose |
 | Discover flags | Always `OUT_OF_SCOPE` |
@@ -217,6 +219,7 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 | `freeze-slice` | `[]` | `["slice-freeze"]` |
 | `research` | `[]` | `["research"]` |
 | `challenge` | `[]` | `["challenge"]` — mode from `challenge_depth` |
+| `optimize` | `[]` | `["optimize"]` |
 | `setup` | `[]` | `["setup"]` |
 | `depth: deep` | — | append `research`, `challenge` after compose when applicable; set `challenge_depth: deep` |
 
@@ -235,5 +238,6 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 | `OUT_OF_SCOPE` | Discover / Execute / release-plan inventiveness / When-not-to-use |
 | `PLAN_ENTRY_REFUSED` | Frozen BRD + handoff missing |
 | `SLICE_REFUSED` | Smell-fail / Effort-without-architecture / Effort without drivers / UX-shape missing on UI-facing / shrink-full-set |
+| `CONTEXT_BUDGET_EXCEEDED` | Hard tier (≥8k tokens) on a plan doc; block full-load strategy — scoped load or `--optimize` ([context-budget.md](context-budget.md)) |
 
 Error shape: `refs/planning/contracts.md` `PhaseError`.

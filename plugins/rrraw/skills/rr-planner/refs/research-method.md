@@ -19,7 +19,7 @@ Research is a **distinct, later phase** — after docs are composed:
 | Competitive landscape | MRD competitors section, PRD differentiation |
 | Market sizing / trends | MRD segments, executive-summary "why now" |
 | Standards / regulations | BRD business rules, PRD NFRs (mechanism → spine / feature delta) |
-| Technology landscape | Standing architecture + deltas; Discover may park early notes in `tech.md` |
+| Technology landscape | Standing constitution + deltas (+ cited tech ADRs); Discover may park early notes in `tech.md` |
 | Customer evidence | PRD personas **section**, MRD customer needs |
 
 ## Iterative research
@@ -28,9 +28,11 @@ Research is a **distinct, later phase** — after docs are composed:
 
 **Skill:** after the agent returns, user confirms done (may re-`Task`) or stop / pause (checkpoint and exit).
 
+**Scoped load (hard rule):** Do **not** “read all” composed docs. Load constitution INDEX + briefs/sections in research scope + load-bearing deltas only. Pre-Task: [context-budget.md](context-budget.md) detect; hard → `CONTEXT_BUDGET_EXCEEDED` — refuse corpus dump; Next Up `--optimize` or narrow scope.
+
 Per iteration:
 
-1. Read all composed docs in `--output-dir`.
+1. Load scoped Plan docs (constitution INDEX + in-scope sections + load-bearing deltas) — not the full corpus.
 2. Extract claims marked `validated: false` or lacking citations.
 3. Prioritize: blocking assumptions > competitive gaps > nice-to-have.
 4. Plan 3–5 queries per iteration (not unlimited).

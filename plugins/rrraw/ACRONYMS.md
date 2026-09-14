@@ -19,7 +19,8 @@
 | SAM | Serviceable Addressable Market | Market sizing |
 | SOM | Serviceable Obtainable Market | Market sizing |
 | SoT | Source of Truth | Version / freeze law |
-| ADR | Architecture Decision Record | Spine / constitution adjacent |
+| ADR | Architecture Decision Record | **Tech only** under architecture/`adrs/` — ids `ADR-n`; not product deltas |
+| DEC | Decision (product / feature-delta) | decision-lite ids on `deltas/`; not `ADR-*` |
 | OMTM | One Metric That Matters | Discover north-star metric for goal-likelihood |
 | INTENT | Plugin Spec file (`INTENT.md`) | Process-ownership UX SoT — not README overview |
 | PR | Pull Request | GitHub forge ship unit; pair with MR |

@@ -1,50 +1,45 @@
-# architecture (standing spine)
+# architecture (tech ADRs)
 
 **Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
-**Owner:** Standing architecture spine standard — invariants only (tech + global UX baseline when Bind/Prevent would diverge).
+**Owner:** True **technical** Architecture Decision Records — stack, integration boundaries, data-model standing choices.
 
-**Path:** `docs/rr/{track}/plan/architecture.md`  
-**Load when:** Plan `standing` todo; same-sitting Effort; slice freeze pins.
+**Path:** `docs/rr/{track}/plan/architecture.md` and/or `adrs/`  
+**Load when:** On-demand when a capability cites a tech ADR; not the always-load standing law ([constitution.md](constitution.md)).
 
-**Does not:** Restate full stack/tree as the spine. Stack dump may seed; spine is invariants. Product AC stays on PRD. Does not dump component libraries as binding spine. Feature-local UX-shape lives in deltas.
+**Does not:** Hold product UX baselines, Bind/Prevent/Rule product constitution, or feature mechanism. Those live in `constitution.md` / `deltas/`. Does not invite C4 sprawl or ADR catalogs as context dumps.
 
-## Spine test
+## When to use
 
-Record only decisions that would **diverge if two units built independently**, or that set a **global interaction / design-system baseline** every UI feature must honor.
+| Use architecture / ADR | Use elsewhere |
+|------------------------|---------------|
+| Stack / runtime choice that binds implementers | Product non-negotiables → constitution INDEX |
+| Integration boundary / protocol standing choice | Feature mechanism + Effort drivers → `deltas/<id>.md` |
+| Data-model standing choice across features | Global UX baseline Bind/Prevent → constitution |
 
-| Marker | Meaning |
-|--------|---------|
-| **Binds** | Shared obligation every implementation must honor (tech or UX baseline) |
-| **Prevents** | Forbidden divergence |
-| **Rule** | Named policy (naming, auth boundary, tenancy, interaction pattern, …) |
-
-Also allow short sections: **Deferred**, **Inherited** (from Discover constraints / business-case).
-
-Global UX baseline (design-system / interaction-pattern) enters the spine **only** via Bind/Prevent/Rule (or a labeled Seed that is explicitly binding). Do not park feature-local screens or cost-relevant states here — those belong in `deltas/<feature-id>.md` UX-shape.
-
-## Required sections
+## Required sections (when file exists)
 
 | Section | Content |
 |---------|---------|
-| **Human brief** | Spine purpose + binds that matter for review; what feedback is needed — plain language, no new IDs |
-| **Purpose** | One paragraph — what this spine protects |
-| **Invariants** | `Binds` / `Prevents` / `Rule` bullets or ADR-lite entries (`skills/rr-planner/refs/adr-lite.md`) |
-| **Deferred** | Explicitly postponed decisions |
-| **Inherited** | Constraints pulled from frozen Discover (cite ids) |
-| **Seed (optional)** | Minimal stack / UX-baseline notes — labeled seed; binding only when marked as Bind/Prevent/Rule |
+| **Human brief** | Which tech ADRs matter for review now |
+| **ADRs** | Decision-lite entries with ids `ADR-n` — [decision-lite.md](../decision-lite.md) |
+| **Deferred** | Postponed tech choices |
+| **Inherited** | Tech constraints from Discover / constitution cites |
 
-When `arch_doc_mode: combined`, include a **Constitution** subsection ([constitution.md](constitution.md)). When `split`, constitution is a separate file.
+Product-shaped Bind/Prevent/Rule that used to live here as “spine” → **migrate to constitution** (`--optimize` rename/refile — AskQuestion first).
 
-Write Human brief last from locked invariants (or outline then refresh) — no invented binds. Persist only after `compose-prose` → `rr-humanize`.
+Write Human brief last. Persist only after `compose-prose` → `rr-humanize`.
+
+## Id convention
+
+- Technical decisions: **`ADR-n`** only under architecture / `adrs/`
+- Product feature deltas: **`DEC-n`** or feature-scoped revs — never `ADR-*`
 
 ## Rev / draft
 
-Frontmatter may carry `doc_rev: "?"` while draft. Slice freeze may pin `architecture_rev: draft`. **Draft ≠ missing:** freeze still requires Decision + Effort drivers for selected capabilities (draft rev OK). Accepted invariants follow supersede-only rules.
+Dual-read `architecture_rev` during transition; prefer `constitution_rev` for standing-law pins once constitution-primary. Draft rev OK; draft ≠ missing Decision/Effort drivers on selected capabilities.
 
 ## Done-when
 
-- [ ] Human brief is reviewable without decoding the full invariant list
-- Invariants use Bind/Prevent/Rule language
-- Global UX baseline only when Bind/Prevent would diverge — not a component catalog
-- No full design dump posing as spine
-- Feature work references this file instead of copying it
+- [ ] File contains tech ADRs only (or is absent / stub pointing to constitution)
+- No product UX baseline catalog
+- No silent combined constitution+architecture mint under `constitution-primary`

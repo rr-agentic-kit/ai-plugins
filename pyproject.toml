@@ -3,7 +3,10 @@ name = "ai-plugins-dev"
 version = "0.0.4-rc-11"
 description = "Development and test tooling for the ai-plugins marketplace repository"
 requires-python = ">=3.14"
-dependencies = ["pyyaml>=6.0.3"]
+dependencies = [
+    "pyyaml>=6.0.3",
+    "tiktoken>=0.12",
+]
 
 [dependency-groups]
 dev = [
@@ -56,7 +59,7 @@ module = "tests.*"
 disallow_untyped_defs = false
 
 [tool.coverage.run]
-source = ["audit_static", "validate_planning_script", "scripts"]
+source = ["audit_static", "validate_planning_script", "context_budget_script", "scripts"]
 relative_files = true
 omit = ["*/__main__.py"]
 

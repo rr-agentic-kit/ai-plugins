@@ -4,7 +4,10 @@
 |------|----------------------|-------------------|-------|
 | freeze | Lock a cascade stem or slice as authoritative for handoff | Git freeze / feature freeze ceremony | Discover freeze; Plan slice freeze |
 | slice | Buildable Plan kernel (`execute-slice.yaml`) selected for execute | Arbitrary backlog cut / sprint | Pin-complete; fused code+test start |
-| spine | Standing architecture + constitution baseline across features | Spinal column metaphor only | Shared Plan standing docs |
+| spine | Standing **constitution** INDEX (Bind/Prevent/Rule) across features; not fat architecture | Spinal column metaphor; tech ADR catalog | Prefer “constitution”; architecture = tech ADRs only |
+| constitution | Always-load standing law (brief + invariant INDEX) | Legal constitution metaphor only | `docs/rr/{track}/plan/constitution.md` |
+| decision-lite | Shared Context/Decision/Consequences/Rejections shape | Full ADR ceremony | Product deltas use `DEC-n`; tech uses `ADR-n` |
+| context budget | tiktoken soft/hard tiers + detect/optimize for Plan docs | Character count / `wc` | [context-budget.md](skills/rr-planner/refs/context-budget.md); soft≥5k hard≥8k |
 | cascade | Ordered ES→MRD→BRD (Discover) or Plan level cycle | Waterfall process | Level todos + compose/humanize |
 | challenge | Adversarial review via Task agent — **standard** or **deep** layer | Casual disagreement; smells; auto-reflection; **rr-review Challenge gate** | `--challenge` / `--challenge deep`; [challenge-layers.md](refs/planning/challenge-layers.md) |
 | Challenge (review) | rr-review gate that re-triages assess rows before report/fix/ci; consumers use **keep** only | Discover `--challenge` / challenge-layers | Persist `{assess-stem}-challenge.md` under `REVIEW_DIR`; unchallenged challengeable rows stop the report |
@@ -21,7 +24,7 @@
 | freeze-suggest | Skill may offer freeze as Next Up | User freeze-by-say-so | Requires standard-clear or risk-accept |
 | nature | Expectation pack / document nature for compose standards | Natural language / personality | Nature-expectation packs |
 | discover | `rr-discovery` phase: ES→MRD→BRD → business-case | General research / exploration | Before PRD |
-| plan | `rr-planner` phase: requirements, spine, slice from frozen case | Project planning ceremony | After Discover freeze |
+| plan | `rr-planner` phase: requirements, constitution, slice from frozen case | Project planning ceremony | After Discover freeze |
 | from-code | Discover path that extracts stems from codebase evidence | Generic reverse-engineering | `maturity: code-extraction`; no freeze-handoff while extracted |
 | beachhead | Narrow market/entry wedge chosen for focus | Military metaphor only | Market framing |
 | acceptance | WWAS-shaped AC for a requirement/slice | Generic stakeholder sign-off | Not mere “LGTM” |

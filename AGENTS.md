@@ -8,6 +8,7 @@ Dual-runtime plugin marketplace (Cursor + Claude Code). Plugins live under `plug
 - Plugin Python scripts must have tests in `tests/<plugin>/`. Tests are not part of the install artifact; they run in this monorepo and CI only. Tests live only under `tests/<plugin>/` or `tests/scripts/` — never under `plugins/`.
 - **Version alignment:** `pyproject.toml` `[project].version` must match each plugin’s `.cursor-plugin/plugin.json` and `.claude-plugin/plugin.json` `version` fields. Run `uv run python scripts/validate_plugin_versions.py` from repo root before committing manifest or version bumps.
 - **Monorepo vs install:** When working inside `plugins/<name>/` as an installed artifact, do not assume `tests/`, repo-root `pyproject.toml`, `uv.lock`, or `../../` exist. In a full monorepo checkout, those paths are available at the repo root—use this file and `CONTRIBUTING.md`, not plugin `CLAUDE.md`, for maintainer workflows.
+- **Dual-runtime parity:** Prefer full Cursor + Claude Code parity for skills, commands, agents, hooks, scripts, and both `plugin.json` manifests. If a capability is runtime-specific, document the gap in the plugin README and leave a tracked follow-up — do not silently ship one-runtime-only behavior for marketplace plugins.
 
 ## Tech stack
 
@@ -44,6 +45,7 @@ Full quality matrix (Black, Mypy, Bandit, pip-audit, coverage, Sonar): see `CONT
 | Plugin runtime / static audit / PyYAML bootstrap | `plugins/context-eng-hero/CLAUDE.md` |
 | Authoring skills, commands, rubrics | `plugins/context-eng-hero/skills/recipe-context-engineer/SKILL.md` |
 | Static memory / AGENTS packs | `plugins/context-eng-hero/skills/recipe-static-memory/SKILL.md` |
+| Dual-runtime plugin hooks (Cursor + Claude) | `.agents/hooks.md` |
 | CI, pre-commit, Sonar, fork setup | `CONTRIBUTING.md` |
 | Install / marketplace usage | `README.md` |
 | Per-plugin features | that plugin’s `README.md` |

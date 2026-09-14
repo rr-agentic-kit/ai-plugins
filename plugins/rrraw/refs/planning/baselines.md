@@ -126,7 +126,8 @@ levels:
   #   status: frozen | draft | ?
   #   requirement_ids: [PRD-3.1, PRD-3.2]
   #   execute_kernel: execute-slice.yaml
-  #   architecture_rev: draft | integer
+  #   constitution_rev: draft | integer   # prefer
+  #   architecture_rev: draft | integer   # dual-read during transition
 next_levels: {}           # populated iff next is set; same per-doc shape
 challenge:                # current track; next_challenge mirrors next_levels
   prd:
@@ -234,9 +235,9 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
         status.yaml          # DETAIL — PRD + optional slice
         session-state.json
         prd.md
-        architecture.md      # standing spine (invariants)
-        constitution.md      # optional; when arch_doc_mode: split
-        deltas/              # per-feature ADR-lite deltas
+        constitution.md      # standing law (always-load INDEX)
+        architecture.md      # tech ADRs only (on-demand)
+        deltas/              # per-feature decision-lite product-deltas
           <feature-id>.md
         execute-slice.yaml   # compact 5-field Execute kernel (on slice freeze)
         …
@@ -315,8 +316,8 @@ Compose does not increment anything. After Gate 6+7 pass for a level **or** afte
 Primary Plan freeze unit is a **selected requirement slice**, not the whole PRD table.
 
 1. Smell-gate AC (`req-smell` + WWAS) pass or explicit hold.
-2. Same-sitting architecture exists for selected capabilities (spine and/or feature deltas) with **Decision** + **Effort drivers**; UI-facing needs **UX-shape** (or `n/a` + reason). Architecture rev may be `draft` — **draft ≠ missing** Decision/drivers.
-3. Write/overwrite `docs/rr/{track}/plan/execute-slice.yaml` (5-field kernel + pins; Constraints cite delta/spine obligations; `delta_paths` must exist) — [output-formats.md](output-formats.md).
+2. Same-sitting standing record exists for selected capabilities (constitution and/or feature deltas; cited tech ADR when needed) with **Decision** + **Effort drivers**; UI-facing needs **UX-shape** (or `n/a` + reason). Constitution/architecture rev may be `draft` — **draft ≠ missing** Decision/drivers.
+3. Write/overwrite `docs/rr/{track}/plan/execute-slice.yaml` (5-field kernel + pins; Constraints cite delta/constitution obligations; `delta_paths` must exist) — [output-formats.md](output-formats.md).
 4. Stamp `plan/status.yaml` `slice:` with requirement ids + kernel path; do **not** shrink/delete deferred requirement rows.
 5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is. Execute starts fused code+test from the kernel — no separate tech-planning step.
 6. Whole-PRD freeze remains optional structure lock only — not the default handoff to Execute.
@@ -376,7 +377,7 @@ One `{PROJECT_ROOT}/docs/rr/tech.md`. Same tier as `later.md` / `future.md`. **N
 | Rule | |
 |------|--|
 | Discover | Skill may append early mechanism notes that surface before Plan owns architecture. |
-| Plan | **Does not** author product AC, integration contracts, or ADRs here. Standing truth = `docs/rr/{track}/plan/architecture.md` (+ optional `constitution.md`) and `docs/rr/{track}/plan/deltas/<feature-id>.md`. |
+| Plan | **Does not** author product AC, integration contracts, or ADRs here. Standing truth = `docs/rr/{track}/plan/constitution.md` (+ on-demand `architecture.md` tech ADRs) and `docs/rr/{track}/plan/deltas/<feature-id>.md`. |
 | Not a cascade doc | Never mint item ids; never run Gates 1–7 against this file. |
 
 ## `later.md` — deferred-topic parking lot

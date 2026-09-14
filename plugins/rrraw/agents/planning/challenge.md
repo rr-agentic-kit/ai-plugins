@@ -29,19 +29,19 @@ Function-style executor for `--challenge` / `--review` on **one** existing plann
 
 ## Inputs
 
-`PhaseInput` with `phase: "challenge"` and `level` set to the target stem (`executive-summary`, `mrd`, `brd`, `prd`, or Plan standing `architecture` when challenged).
+`PhaseInput` with `phase: "challenge"` and `level` set to the target stem (`executive-summary`, `mrd`, `brd`, `prd`, or Plan standing `constitution` / `architecture` when challenged).
 
 Required context:
 
 - `payload.input` or `payload.output_dir` — location of existing docs
-- The target planning doc (`{level}.md`) plus `items.json` if present; load other cascade docs for cross-doc contradiction checks only — do not emit findings for docs other than the target
+- The **one** target planning doc (`{level}.md`) plus `items.json` if present; supporting = constitution INDEX + **named** contradiction candidates only — do not emit findings for docs other than the target; do not full-load the corpus. Hard budget → skill should have blocked with `CONTEXT_BUDGET_EXCEEDED`
 - `session_state` if available (`project_posture`, `note_sessions`, decisions, assumptions, `item_registry`, `viability`)
 - `{level}.notes.yaml` sidecars if present
 - `decision-ledger.yaml` if present (read-only)
 - `payload.static_validation` — script result from the skill (`passed` / `failed` / `skipped`) plus error list
 - **Caller method ref** (orchestrator injects path in PhaseInput / Task prompt):
   - Discover (`executive-summary` \| `mrd` \| `brd`): load `skills/rr-discovery/refs/challenge-method.md` — pre-mortem (Tigers / Paper-Tigers / Elephants) + strategy red-team
-  - Plan (`prd` \| architecture / deltas / AC): load `skills/rr-planner/refs/challenge-method.md` — technical pre-mortem **and** assumption red-team; target = spine + deltas + AC; cap 3–5 kill-assumptions
+  - Plan (`prd` \| constitution / architecture / deltas / AC): load `skills/rr-planner/refs/challenge-method.md` — technical pre-mortem **and** assumption red-team; target = constitution + deltas + AC; cap 3–5 kill-assumptions
 - **Depth mode** from payload (`challenge_depth` or `depth`): **standard** (default) = relevant load-bearing claims; **deep** = exhaustive. Map: `refs/planning/challenge-layers.md`. Soft escalation (optional review Task) only on `deep` or heavy cull.
 - Load caller skill `refs/blind-spots.md` (Discover: `skills/rr-discovery/…`; Plan: `skills/rr-planner/…`) for taxonomy, applicability **union**, `fix_action` fences, specialized finding shapes, and severity rules
 - Load `refs/planning/decision-ledger.md` for the reason-graph scan and re-litigation guard (T6-5)
@@ -49,6 +49,7 @@ Required context:
 - Load `refs/planning/doc-standards/item-schema.md` for judgment checks (atomic split, inflated rank, status/priority enums)
 - Load `refs/planning/contracts.md` § challenge for output schema (incl. `parent_summary`)
 - Load `refs/planning/challenge-layers.md` for mode coverage bounds (standard vs deep)
+- Load `skills/rr-planner/refs/context-budget.md` when Plan target (scoped supporting load)
 
 ## Execution
 
@@ -104,4 +105,4 @@ Orchestrator may require report body sections from the injected `challenge-metho
 
 ## Orchestration
 
-Single-shot — skill `Task`s this agent once per challenge pass per target doc; no nested `Task`. Caller skill enforces stem allowlist (Discover: ES\|MRD\|BRD; Plan: prefer PRD / architecture / deltas) and injects the correct challenge-method path.
+Single-shot — skill `Task`s this agent once per challenge pass per target doc; no nested `Task`. Caller skill enforces stem allowlist (Discover: ES\|MRD\|BRD; Plan: prefer PRD / constitution / architecture / deltas) and injects the correct challenge-method path.

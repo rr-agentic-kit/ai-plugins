@@ -34,5 +34,6 @@
     "./skills/docs/rr-humanize/",
     "./skills/rr-git/",
     "./skills/rr-ci/"
-  ]
+  ],
+  "hooks": "./hooks/cursor.json"
 }

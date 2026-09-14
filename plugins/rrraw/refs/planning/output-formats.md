@@ -41,9 +41,9 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
         status.yaml                 # DETAIL — PRD + optional slice
         session-state.json
         prd.md
-        architecture.md             # standing spine (invariants-first)
-        constitution.md             # optional when arch_doc_mode: split
-        deltas/                     # per-feature ADR-lite
+        constitution.md             # ALWAYS-LOAD standing law (brief + INDEX)
+        architecture.md             # tech ADRs only (on-demand; optional)
+        deltas/                     # per-feature decision-lite product-deltas
           <feature-id>.md
         execute-slice.yaml          # 5-field Execute kernel on slice freeze
         research-report.md
@@ -51,7 +51,8 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
         items.json
         decision-ledger.yaml
         prd.challenge.report.md
-        architecture.challenge.report.md  # when challenging standing spine
+        constitution.challenge.report.md  # when challenging standing law
+        architecture.challenge.report.md  # when challenging tech ADRs
         raw-history/
     0.2/                            # next track once opened (replaces phase-subdir forks)
       discovery/
@@ -64,9 +65,9 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
 | mrd | `{track}/discovery/mrd.md` |
 | brd | `{track}/discovery/brd.md` |
 | prd | `{track}/plan/prd.md` |
-| architecture spine | `{track}/plan/architecture.md` (standing; Plan-owned; humanize) |
-| constitution | `{track}/plan/constitution.md` (optional; `arch_doc_mode: split`; else section of architecture) |
-| feature delta | `{track}/plan/deltas/<feature-id>.md` (ADR-lite; supersede-only once accepted) |
+| architecture (tech ADRs) | `{track}/plan/architecture.md` (on-demand; Plan-owned; humanize) |
+| constitution (standing law) | `{track}/plan/constitution.md` (always-load; `arch_doc_mode: constitution-primary`) |
+| feature delta | `{track}/plan/deltas/<feature-id>.md` (decision-lite product-delta; supersede-only once accepted) |
 | execute slice kernel | `{track}/plan/execute-slice.yaml` (machine; skill-owned on slice freeze; **skip humanize**) |
 | business-case handoff | `{track}/discovery/business-case.yaml` (machine; Discover freeze; Plan entry gate; **skip humanize**) |
 | assumptions map | `{track}/discovery/assumptions.md` (conditional; humanize) |
@@ -235,19 +236,19 @@ One file at `{PROJECT_ROOT}/docs/rr/tech.md`. Same tier as `later.md` / `future.
 
 | Rule | |
 |------|--|
-| Discover parking | Append early mechanism notes before Plan owns architecture. |
-| Plan | Do **not** author product AC, integration contracts, or ADRs here — use `architecture.md` / `constitution.md` / `deltas/`. |
+| Discover parking | Append early mechanism notes before Plan owns standing law / tech ADRs. |
+| Plan | Do **not** author product AC, integration contracts, or ADRs here — use `constitution.md` / `architecture.md` / `deltas/`. |
 | Not cascade | Never mint item ids; never run Gates 1–7 against this file. |
 
-## Standing Plan docs (spine / constitution / deltas)
+## Standing Plan docs (constitution / architecture / deltas)
 
 | Artifact | Role |
 |----------|------|
-| `{track}/plan/architecture.md` | Standing **spine** — invariants only (`Binds` / `Prevents` / `Rule`). Stack dump is seed, not spine. |
-| `{track}/plan/constitution.md` | Non-negotiables when `arch_doc_mode: split`; else a section of architecture. |
-| `{track}/plan/deltas/<feature-id>.md` | Per-feature ADR-lite delta vs spine — never restate the spine. Supersede-only once accepted. |
+| `{track}/plan/constitution.md` | Standing **law** — always-load brief + Bind/Prevent/Rule INDEX. |
+| `{track}/plan/architecture.md` | **Tech ADRs only** (`ADR-n`) — on-demand; not product UX baselines. |
+| `{track}/plan/deltas/<feature-id>.md` | Per-feature decision-lite product-delta vs constitution — never restate standing law. Supersede-only once accepted. Ids `DEC-n` / feature revs — not `ADR-*`. |
 
-Standards: Plan `refs/doc-standards/architecture.md`, `constitution.md`, `feature-delta.md`. Not item-graph validators (no `PRD-*` ids required). Skill may humanize prose bodies.
+Standards: Plan `refs/doc-standards/constitution.md`, `architecture.md`, `feature-delta.md`, `refs/decision-lite.md`. Not item-graph validators (no `PRD-*` ids required). Skill may humanize prose bodies.
 
 ## `execute-slice.yaml` (5-field Execute kernel)
 
@@ -262,7 +263,7 @@ why: "..."
 capabilities:
   - "..."
 constraints:
-  - "..."   # cite spine/delta obligations (mechanism + UX-shape when UI-facing)
+  - "..."   # cite constitution/delta/tech-ADR obligations (mechanism + UX-shape when UI-facing)
 non_goals:
   - "..."
 success_signal: "observable pass/fail"
@@ -270,7 +271,8 @@ pins:
   requirement_ids: [PRD-3.1, PRD-3.2]
   parents: [PRD-3]
   delta_paths: [deltas/PRD-3.md]   # files must exist under plan dir
-  architecture_rev: draft   # or integer; draft ≠ missing Decision/Effort drivers
+  constitution_rev: draft   # prefer; dual-read architecture_rev during transition
+  architecture_rev: draft   # optional during transition; draft ≠ missing Decision/Effort drivers
   ac_refs: ["prd.md § Guest checkout AC"]
 ```
 
@@ -278,9 +280,9 @@ pins:
 |-------|------|
 | `track` / `docs` / `product` | Required stamps from Plan phase status at freeze ([baselines.md](baselines.md)) |
 | `slice_id` | Required stable id for this freeze unit |
-| Why / Capabilities / Constraints / Non-goals / Success signal | Required kernel — five fields only for prose obligations; Constraints must cite delta/spine, not only product goals |
-| `pins` | Requirement ids, parents, delta paths (existing files), architecture rev (may be `draft`), AC refs |
-| Fail freeze | Smell-fail AC without hold; Effort without architecture or Effort drivers; UI-facing without UX-shape; empty `delta_paths` when mechanism needed; shrinking the full requirement table to “match the slice” |
+| Why / Capabilities / Constraints / Non-goals / Success signal | Required kernel — five fields only for prose obligations; Constraints must cite delta/constitution, not only product goals |
+| `pins` | Requirement ids, parents, delta paths (existing files), constitution_rev (prefer) and/or architecture_rev (transition), AC refs |
+| Fail freeze | Smell-fail AC without hold; Effort without standing record or Effort drivers; UI-facing without UX-shape; empty `delta_paths` when mechanism needed; shrinking the full requirement table to “match the slice” |
 | Validator (when file present) | Required-field + `delta_paths` file existence — `EXECUTE_SLICE_*` codes; judgment owns smell/WWAS |
 
 Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. **No Execute skill** in this redesign — Next Up is future Execute. Execute starts fused code+test; no separate tech-planning step.
@@ -411,7 +413,7 @@ Required version stamps on every mint (from Discover phase status): `track`, `do
 
 ## Cascade prose persist
 
-After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing spine/constitution/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md). After successful persist, skill runs silent lexicon harvest ([project-lexicon.md](project-lexicon.md)).
+After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing constitution/architecture/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md). After successful persist, skill runs silent lexicon harvest ([project-lexicon.md](project-lexicon.md)).
 
 ## Status merge
 
