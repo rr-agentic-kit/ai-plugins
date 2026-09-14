@@ -391,7 +391,7 @@ Invoke contract: `scripts/session_state.README.md` (run scripts; do not load scr
 
 `from_code_evidence`: `null` until `--from-code` research; then a structured summary of codebase findings (what shipped, actors if inferable, problem signals, constraints, domain language, reflection notes). Skill-owned. Merge only contradiction clarifications into `checkpoint.pending_clarifications`. Cite in cascade inheritance; do not invent market/TAM from package names (`skills/rr-discovery/refs/from-code.md`).
 
-`preferences.questions_per_cycle`: max AskQuestion count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-discovery/refs/input-resolution.md`); confirm-once persistence.
+`preferences.questions_per_cycle`: max AskQuestion count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-discovery/refs/input-resolution.md`); confirm-once persistence. **Anti-trigger:** does not schedule `--challenge` / re-attest — QPC is batch size only ([challenge-layers.md](challenge-layers.md)).
 
 `viability_stale`: per binding level (`executive-summary`, `mrd`). Set `true` when compose changes load-bearing ES facts ([baselines.md](baselines.md)). Gate 7 re-sit clears it.
 

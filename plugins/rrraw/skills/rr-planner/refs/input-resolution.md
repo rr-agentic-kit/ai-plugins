@@ -70,7 +70,9 @@ Default `output_dir` = `{PROJECT_ROOT}/docs/rr/{track}/plan/` (track from `docs/
 
 ### Question mode / questions per cycle
 
-Same as before: default `ask` + `questions_per_cycle: 1`; confirm-once persistence on explicit `--questions-per-cycle`.
+`questions_per_cycle` (QPC) = max AskQuestion count per **address cycle** (N questions → N answers). Default `ask` + `questions_per_cycle: 1`; confirm-once persistence on explicit `--questions-per-cycle`.
+
+**Anti-trigger:** QPC sizes AskQuestion batches only. It does **not** schedule `--challenge`, re-attest, or any challenge `Task`. Answering one QPC batch never implies “run challenge next.” Drain open remediations / pending clarifications with cheaper moves first — `refs/planning/challenge-layers.md`.
 
 ### Resume
 

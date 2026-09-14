@@ -44,6 +44,29 @@ Legacy helper stamps may write `clean` — treat as standard-clear for freeze-su
 
 If only one alternative is above “unlikely,” skill may close with recorded reasoning. If two or more remain plausible → AskQuestion required. Never silent-pick among peers. Applies to both Discover and Plan.
 
+## Stop-rule: no challenge while queues are open
+
+Do **not** run `--challenge` / re-attest / challenge `Task` while either is true:
+
+1. `checkpoint.pending_clarifications` is non-empty, **or**
+2. Open challenge findings await absorb (worklist still has addressable items)
+
+`questions_per_cycle` does not override this — answering a QPC batch is not a challenge trigger ([output-formats.md](output-formats.md)).
+
+## Cheaper-first ladder (before challenge Task)
+
+Before spawning a challenge `Task`, drain the open set in this order:
+
+1. **Auto-close** — assumption auto-close when only one plausible alternative
+2. **Reword** — clarify / tighten without a new AskQuestion when the gap is wording
+3. **AskQuestion** — ≤ `preferences.questions_per_cycle` per address cycle
+4. **Absorb batch** — apply remediations from answers / auto-closes into docs
+5. **Then** — one challenge pass (standard or deep as resolved)
+
+### Pre-Task probe
+
+Before challenge `Task`: open founder questions = 0 **and** remediation batch applied? If no → do not spawn challenge; Next Up = drain Qs / remediations ([progress.md](progress.md)).
+
 ## Freeze suggest (skill policy)
 
 **Mint freeze** mechanical gates stay in [baselines.md](baselines.md) (independent of attestation for CI).
@@ -75,3 +98,5 @@ When the current level cannot support the real goal given parents, challenge **u
 - Orchestrator distinguishes all four layers; does not treat smells or auto-reflection as `--challenge`
 - Freeze auto-suggest respects standard-clear or risk-accept
 - Attestation stamps match the mode map above
+- No challenge `Task` while `pending_clarifications` or open findings await absorb; cheaper-first ladder + pre-Task probe pass first
+- QPC never treated as challenge cadence

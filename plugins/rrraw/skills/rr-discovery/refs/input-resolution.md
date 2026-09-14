@@ -82,6 +82,8 @@ Allowed JSON on disk (not selected by `--format`): `items.json` and `session-sta
 
 Address-loop batch size. Persisted in `session-state.json` `preferences.questions_per_cycle`. Default never silently rises above `1` without explicit opt-in.
 
+**Anti-trigger:** QPC sizes AskQuestion batches only (N Q → N A per address cycle). It does **not** schedule `--challenge` / re-attest — `refs/planning/challenge-layers.md`.
+
 | Flag | `preferences.questions_per_cycle` |
 |------|-----------------------------------|
 | _(default)_ | `1` — one question per address cycle |

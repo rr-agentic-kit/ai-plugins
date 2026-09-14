@@ -43,8 +43,10 @@ Skill owns the close offer. User supplies product judgment and **risk acceptance
 | No skip-incentivize | Do not frame “move on” / “skip challenge” as the happy path to freeze |
 | Freeze auto-suggest | Only after **standard** challenge clear (or risk-accept) for the freeze unit — [challenge-layers.md](challenge-layers.md) |
 | Smell-clean alone | Never the freeze Next-Up |
+| Open queues | When `checkpoint.pending_clarifications` is non-empty **or** open challenge findings await absorb → Next Up = drain Qs / remediations (cheaper-first ladder), **not** challenge / re-attest — [challenge-layers.md](challenge-layers.md) |
+| QPC ≠ challenge | Answering a `questions_per_cycle` batch never makes challenge the Next Up by itself |
 | Advance without finishing | Allowed when solid subset is load-bearing-stable; skill drives downstream impact on upstream change |
 | Risk-accept | Concrete AskQuestion → stamp `dirty-accepted` on named stems; record reasoning |
 | Quality veto | Refuse freeze-by-say-so over open quality debt without risk-accept |
 
-Discover Next Up after BRD freeze → Plan. Plan Next Up after slice freeze → future Execute. Mid-chain: goal-likelihood / challenge / reopen work — not freeze-by-default.
+Discover Next Up after BRD freeze → Plan. Plan Next Up after slice freeze → future Execute. Mid-chain: goal-likelihood / challenge / reopen work — not freeze-by-default. When open queues block challenge, offer drain first; challenge only after the pre-Task probe passes.

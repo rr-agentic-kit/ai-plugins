@@ -31,7 +31,7 @@ Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sittin
 
 ## Procedure
 
-TodoWrite `merge: false` before step 1 with stable ids: `resolve` → `setup?` → `entry-gate` → `posture` → `standing` → `interview` → `score-architect` → `requirements` → `select` → `ac-smell` → `tech-challenge?` → `slice-freeze` → `compose`/`humanize` as needed → `write`. Mark `completed` before advancing. Omit Plan-body todos when `action` is `research` or `challenge` (only `resolve` → challenge/research → `write`). When `action` is `setup`: only `resolve`, `setup`. When `action` is `freeze-slice` with selection already done: `resolve` → `entry-gate` → `ac-smell` → `tech-challenge?` → `slice-freeze` → `write`.
+TodoWrite `merge: false` before step 1 with stable ids matching [cascade.md](refs/cascade.md) Happy path (Plan): `resolve` → `setup?` → `entry-gate` → `posture` → `standing` → `dual-lens` → `requirements` → `compose` → `humanize` → `select` → `exit-gates` → `tech-challenge` → `slice-freeze` → `write`. Mark `completed` before advancing. Omit Plan-body todos when `action` is `research` or `challenge` (only `resolve` → research/challenge → `write`). When `action` is `setup`: only `resolve`, `setup`. When `action` is `freeze-slice` with selection already done: `resolve` → `entry-gate` → `exit-gates` → `tech-challenge?` → `slice-freeze` → `write`.
 
 Phrases: `refs/planning/progress.md` on every invocation.
 
@@ -40,17 +40,29 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
 | `setup` | step 2 (completes `write`). Stop. | `setup` |
-| `prd`, `change` | step 3 → Plan body → write | `entry-gate` through `write` as listed above |
-| `freeze-slice` | step 3 → ac-smell → challenge? → slice-freeze → write | as listed |
+| `prd`, `change` | step 3 → Plan body → write | Happy path: `entry-gate` through `write` |
+| `freeze-slice` | step 3 → truncated freeze path → write | `entry-gate` → `exit-gates` → `tech-challenge?` → `slice-freeze` → `write` |
 | `research`, `challenge` | step 5 (completes `write`) | `write` only |
 
 2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start Plan compose. Default `output_dir` = `docs/rr/{track}/plan/`.
 
 3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
 
-4. **Plan body** — Load [cascade.md](refs/cascade.md). For `prd` / `change` / `freeze-slice`: run Pre-Plan posture → Level order → Per-level cycle as that ref directs. Before marking any phase todo `completed`, run [goal-anchor.md](refs/goal-anchor.md) **Standing self-challenge** (auto-reflection layer — `refs/planning/challenge-layers.md`). Mark `posture`, `standing`, `interview`, `score-architect`, `requirements`, `select`, `ac-smell`, `tech-challenge?`, `slice-freeze`, `compose`/`humanize` as cascade phases complete. Done: that ref's Advancing vs stopping conditions or pause checkpoint.
+4. **Plan body** — Load [cascade.md](refs/cascade.md) Happy path (Plan). For `prd` / `change` / `freeze-slice`: run phases in that order (truncated for `freeze-slice` / section-scoped `change` per Side paths). Before marking any phase todo `completed`, run [goal-anchor.md](refs/goal-anchor.md) **Standing self-challenge** (auto-reflection layer — `refs/planning/challenge-layers.md`). Numbered phases:
 
-5. **research / challenge** — Load `refs/planning/contracts.md`. Research: [research-method.md](refs/research-method.md). Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md` + `refs/planning/challenge-layers.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method). Default depth = **standard**; `deep` only when explicit. Persist reports per `refs/planning/output-formats.md`. Completes `write`.
+   1. `posture` — Pre-Plan PRD-shape + `arch_doc_mode` + Coach/Fast once ([project-posture.md](refs/project-posture.md)). Confirm before mint.
+   2. `standing` — Spine ± constitution; skill-owned mint + humanize. Draft rev OK; missing Decision later fails Effort.
+   3. `dual-lens` — Interview **and** system-design **same sitting** ([plan-interview.md](refs/plan-interview.md), [prioritization-lens.md](refs/prioritization-lens.md), [system-design.md](refs/system-design.md)). Neither completes without the other. Refuse Effort-without-architecture.
+   4. `requirements` — Full P1–P3 retained in facts; do not shrink the table.
+   5. `compose` → `humanize` — Compose `Task` (`doc_type: prd`) then **mandatory** `skills/rr-discovery/refs/compose-prose.md` (Gate 4). **Before** select / exit-gates / challenge / freeze — never after freeze.
+   6. `select` — Thin `_status_:` subset for buildable kernel; selection ≠ delete rows.
+   7. `exit-gates` — WWAS + [req-smell.md](refs/req-smell.md); Gate 6 stage-exit; Gate 7 if premise-critical. Smell-clean ≠ freeze-ready.
+   8. `tech-challenge` — Standard challenge (cheaper-first ladder first). Open queues → drain, do not spawn. Skip only when Side path / already clear.
+   9. `slice-freeze` — Mint `execute-slice.yaml` only after challenge clear / risk-accept + goal-likelihood stop ([execute-handoff.md](refs/execute-handoff.md)).
+
+   Done: that ref's Advancing vs stopping conditions or pause checkpoint.
+
+5. **research / challenge** — Load `refs/planning/contracts.md`. Research: [research-method.md](refs/research-method.md). Challenge: [blind-spots.md](refs/blind-spots.md) + Plan [challenge-method.md](refs/challenge-method.md) + `refs/planning/decision-ledger.md` + `refs/planning/challenge-layers.md`; inject Plan challenge-method into challenge `Task` (Discover stems → Discover challenge-method). Default depth = **standard**; `deep` only when explicit. **Before challenge `Task`:** run cheaper-first ladder + pre-Task probe in `refs/planning/challenge-layers.md` (auto-close → reword → AskQuestion ≤QPC → absorb batch → **then** one challenge pass). If `pending_clarifications` non-empty or open findings await absorb → do not spawn challenge; Next Up = drain (`refs/planning/progress.md`). QPC sizes AskQuestion batches only — never challenge cadence. Persist reports per `refs/planning/output-formats.md`. Completes `write`.
 
 6. **write** — Apply `refs/planning/success-criteria.md`, pre-save ([proactivity.md](refs/proactivity.md)), persist `session-state.json` **via** `scripts/session_state.sh` mutators + `docs/rr/{track}/plan/status.yaml` + refresh `rrr-status.yaml`. First compose: emit `docs/rr/agent.plan.md` + sync root SoT. Next Up / freeze-suggest: `refs/planning/progress.md` + `refs/planning/challenge-layers.md`. Done: session-state + statuses written (no full-file checkpoint `Read`).
 
@@ -63,7 +75,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | `refs/planning/challenge-layers.md` | Challenge / freeze-suggest / auto-reflection |
 | `refs/planning/setup.md` / `refs/planning/baselines.md` / `refs/planning/agent-config.md` | Setup; **version law** (freeze / open-next / ship); sync |
 | [cascade.md](refs/cascade.md) / [project-posture.md](refs/project-posture.md) | Plan body |
-| [plan-interview.md](refs/plan-interview.md) / [prioritization-lens.md](refs/prioritization-lens.md) / [system-design.md](refs/system-design.md) | Interview + score |
+| [plan-interview.md](refs/plan-interview.md) / [prioritization-lens.md](refs/prioritization-lens.md) / [system-design.md](refs/system-design.md) | `dual-lens` (same sitting) |
 | [nature-expectation-packs.md](refs/nature-expectation-packs.md) | Interview / nature reflection (reflect → derive → elicit; not a pack fire-table) |
 | [doc-standards/prd.md](refs/doc-standards/prd.md) / architecture / constitution / feature-delta | Compose standing + PRD |
 | [req-smell.md](refs/req-smell.md) / [execute-handoff.md](refs/execute-handoff.md) | Pre-freeze / slice freeze |

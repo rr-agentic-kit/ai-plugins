@@ -2,34 +2,71 @@
 
 **Owner:** Plan level order, inheritance/narrowing, freeze/remap, per-level cycle variants and gates. Orchestration is SKILL Procedure step 4. Discover cascade (ES→MRD→BRD + business-case) is owned by `rr-discovery`.
 
-## Entry gate (before Plan)
+## Happy path (Plan)
 
-SoT: [input-resolution.md](input-resolution.md) Entry gate (frozen BRD + `business-case.yaml`; brownfield = one AskQuestion). Do not restate conditions here.
+Canonical order for `--prd` / first Plan. Todo ids match SKILL Procedure. Auto-reflection ([goal-anchor.md](goal-anchor.md)) runs at every phase transition — not its own step.
 
-## Pre-Plan: posture
+**Hard rule:** `compose`/`humanize` after requirements facts are ready, **before** select / exit-gates / tech-challenge / slice-freeze. Never after freeze.
 
-Before minting PRD / standing structure, run [project-posture.md](project-posture.md) **PRD-shape + `arch_doc_mode`** (existence/commitment already confirmed in Discover). Offer Coach/Fast once ([plan-interview.md](plan-interview.md)). Do not re-run Discover posture/ideation.
-
-## Level order (Plan)
-
-```
-standing architecture (+ constitution) → PRD (full requirements) → select → AC smell → challenge? → slice freeze
-```
-
-Parents are frozen Discover docs — do not recompose them in Plan. Item identity: `refs/planning/doc-standards/item-schema.md`. Standing docs: [architecture.md](doc-standards/architecture.md), [feature-delta.md](doc-standards/feature-delta.md).
+**Hard rule:** Interview and score/architect are one `dual-lens` sitting — neither completes without the other.
 
 ```mermaid
 flowchart TD
-  BC["business-case.yaml"] --> Gate["Entry gate"]
-  Gate --> Posture["PRD-shape + arch_doc_mode"]
-  Posture --> Standing["architecture spine +/- constitution"]
-  Standing --> Interview["interview + score/architect"]
-  Interview --> FullReq["full requirements P1-P3"]
-  FullReq --> Select["status selected subset"]
-  Select --> Smell["WWAS + req-smell"]
-  Smell --> Challenge["tech challenge?"]
-  Challenge --> Slice["slice freeze + execute-slice.yaml"]
+  resolve[resolve] --> entryGate[entry-gate]
+  entryGate --> posture[posture]
+  posture --> standing[standing]
+  standing --> dualLens[dual-lens]
+  dualLens --> requirements[requirements]
+  requirements --> compose[compose-prd]
+  compose --> humanize[humanize]
+  humanize --> select[select]
+  select --> exitGates[exit-gates]
+  exitGates --> challenge[tech-challenge]
+  challenge --> sliceFreeze[slice-freeze]
+  sliceFreeze --> write[write]
 ```
+
+| Phase | Todo id | What happens | Stop / gate |
+|-------|---------|--------------|-------------|
+| 1 | `resolve` | Status-first + payload | Discover flags → route out |
+| 2 | `entry-gate` | Frozen BRD + `business-case.yaml` | Fail → AskQuestion; no silent compose |
+| 3 | `posture` | PRD-shape + `arch_doc_mode` + Coach/Fast once | Confirm before mint |
+| 4 | `standing` | Spine ± constitution; skill-owned mint + humanize | Draft rev OK; missing Decision later fails Effort |
+| 5 | `dual-lens` | Interview **and** system-design **same sitting** (RICE factors + Effort drivers / UX-shape on deltas) | Refuse Effort-without-architecture ([system-design.md](system-design.md)) |
+| 6 | `requirements` | Full P1–P3 retained in facts | Do not shrink table |
+| 7 | `compose` → `humanize` | Compose `Task` (`doc_type: prd`) then `compose-prose` | Gate 4; mandatory humanize |
+| 8 | `select` | Thin `_status_:` subset for buildable kernel | Selection ≠ delete rows |
+| 9 | `exit-gates` | WWAS + req-smell; Gate 6 stage-exit; Gate 7 if premise-critical | Smell-clean ≠ freeze-ready |
+| 10 | `tech-challenge` | Standard challenge (cheaper-first ladder first) | Open queues → drain, do not spawn |
+| 11 | `slice-freeze` | Mint `execute-slice.yaml` | Only after challenge clear / risk-accept + goal-likelihood stop |
+| 12 | `write` | session-state + `status.yaml` + Next Up | Always |
+
+### Side paths (not the happy path)
+
+| Action | Sequence |
+|--------|----------|
+| `setup` | `resolve` → `setup` → stop |
+| `research` / `challenge` alone | `resolve` → research/challenge → `write` |
+| `freeze-slice` (selection already done) | `resolve` → `entry-gate` → `exit-gates` (smell) → `tech-challenge?` → `slice-freeze` → `write` |
+| `change` | Same spine, section-scoped; re-enter at affected phase, not full replay from posture unless redirect |
+
+## Entry gate (before Plan)
+
+SoT: [input-resolution.md](input-resolution.md) Entry gate (frozen BRD + `business-case.yaml`; brownfield = one AskQuestion). Do not restate conditions here. Phase id: `entry-gate`.
+
+## Pre-Plan: posture
+
+Before minting PRD / standing structure, run [project-posture.md](project-posture.md) **PRD-shape + `arch_doc_mode`** (existence/commitment already confirmed in Discover). Offer Coach/Fast once ([plan-interview.md](plan-interview.md)). Do not re-run Discover posture/ideation. Phase id: `posture`.
+
+## Level order (Plan)
+
+Same spine as Happy path (Plan) above — do not invent a shorter order:
+
+```
+resolve → entry-gate → posture → standing → dual-lens → requirements → compose → humanize → select → exit-gates → tech-challenge → slice-freeze → write
+```
+
+Parents are frozen Discover docs — do not recompose them in Plan. Item identity: `refs/planning/doc-standards/item-schema.md`. Standing docs: [architecture.md](doc-standards/architecture.md), [feature-delta.md](doc-standards/feature-delta.md).
 
 ## Inheritance model
 
@@ -49,17 +86,20 @@ flowchart TD
 
 ## Per-level cycle
 
-Orchestration owns the skill (SKILL Procedure step 4). For `prd` / `change` / `freeze-slice`, apply only Plan-variant work:
+Orchestration owns the skill (SKILL Procedure step 4). For `prd` / `change` / `freeze-slice`, apply only Plan-variant work. Phase ids match Happy path (Plan):
 
-| Phase | Variant (Plan) |
-|-------|----------------|
+| Phase id | Variant (Plan) |
+|----------|----------------|
 | Load | [prd.md](doc-standards/prd.md) + item-schema + [plan-interview.md](plan-interview.md) |
-| Entry | Re-decision sweep (`refs/planning/decision-ledger.md`); [note-sessions.md](note-sessions.md) sidecar; handoff summary; then Pre-Plan posture above |
-| Standing | Spine (+ constitution per mode); feature deltas when scoring ([system-design.md](system-design.md), [adr-lite.md](adr-lite.md), [architecture.md](doc-standards/architecture.md), [feature-delta.md](doc-standards/feature-delta.md)) |
-| Interview / score | [plan-interview.md](plan-interview.md) → [prioritization-lens.md](prioritization-lens.md); Effort gated by [system-design.md](system-design.md); mint ledger rationale on ranked leaves; after Q&A → notes + raw-history; reflect → [proactivity.md](proactivity.md) |
-| Requirements / select | Full P1–P3 set retained (`_status_:` only — never shrink the table). **Thin select:** prefer a buildable kernel subset and shorter Plan cycles over doc-only breadth; defer the rest with status — do not delete rows or invent a “docs-complete” slice ([execute-handoff.md](execute-handoff.md)) |
-| Compose | Compose `Task` (`doc_type: prd` only) → **mandatory** `skills/rr-discovery/refs/compose-prose.md`; clarification loop (`refs/planning/contracts.md`); dirty challenge attestation when clean (`refs/planning/baselines.md`) |
-| Exit | WWAS + [req-smell.md](req-smell.md); optional tech challenge (inject Plan [challenge-method.md](challenge-method.md); compact `parent_summary`); [execute-handoff.md](execute-handoff.md) slice freeze; whole-PRD freeze = optional structure lock only |
+| `entry-gate` + `posture` | Re-decision sweep (`refs/planning/decision-ledger.md`); [note-sessions.md](note-sessions.md) sidecar; handoff summary; then Pre-Plan posture above |
+| `standing` | Spine (+ constitution per mode); skill-owned mint + humanize ([architecture.md](doc-standards/architecture.md), [feature-delta.md](doc-standards/feature-delta.md), [adr-lite.md](adr-lite.md)) |
+| `dual-lens` | Interview **and** system-design **same sitting** — [plan-interview.md](plan-interview.md) → [prioritization-lens.md](prioritization-lens.md); Effort gated by [system-design.md](system-design.md); feature deltas when scoring; mint ledger rationale on ranked leaves; after Q&A → notes + raw-history; reflect → [proactivity.md](proactivity.md). Neither interview nor score completes without the other. |
+| `requirements` | Full P1–P3 set retained in facts — never shrink the table |
+| `compose` → `humanize` | Compose `Task` (`doc_type: prd` only) → **mandatory** `skills/rr-discovery/refs/compose-prose.md`; clarification loop (`refs/planning/contracts.md`); dirty challenge attestation when clean (`refs/planning/baselines.md`). **Before** select / exit / challenge / freeze. |
+| `select` | Thin `_status_:` subset for buildable kernel — prefer shorter Plan cycles over doc-only breadth; defer with status — do not delete rows or invent a “docs-complete” slice ([execute-handoff.md](execute-handoff.md)) |
+| `exit-gates` | WWAS + [req-smell.md](req-smell.md); Gate 6 stage-exit; Gate 7 if premise-critical. Smell-clean ≠ freeze-ready. |
+| `tech-challenge` | Standard challenge (inject Plan [challenge-method.md](challenge-method.md); compact `parent_summary`); cheaper-first ladder first; open queues → drain, do not spawn |
+| `slice-freeze` | [execute-handoff.md](execute-handoff.md) mint; whole-PRD freeze = optional structure lock only |
 
 Stop / resume: leave drafts on disk; checkpoint `session-state.json` with `checkpoint.status: paused`. Resume: `rr-planner --resume --output-dir <same-dir>`. Do not rewrite Discover docs.
 
