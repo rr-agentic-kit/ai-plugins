@@ -185,6 +185,8 @@ Canonical emit order: `parent, kind, spec, status, priority, tag, goal-type, rea
 
 Unknown keys or missing required keys (`parent`, `kind`, `spec`) → validator FAIL. Body is plain prose after the meta line (AI-judged). `idea`/`draft` leaves may omit method/score keys or emit `—`. `ready` leaves missing a **real** rank/score where required (`—` does not count) → `DOR`.
 
+**Stop-rule / anti-trigger (agents):** Leaf body is plain prose. **Never** require a `>` prefix. **Never** refuse stripping `>`. Leftover `^> ?` lines are `STALE_FORMAT` — run `validate_planning.sh --rewrite`; do not cite removed `BODY_NOT_BLOCKQUOTE`. Before format refusals, Read this section from the **same plugin package** as the validate script (not an older cache tree).
+
 `_parent_: —` means graph null (ES roots). Native rank `—` means “applicable, not yet decided.”
 
 JSON shape: `refs/planning/schemas/items.schema.json`. Graph checks: `scripts/validate_planning.sh` (md-only; `--format yaml|json` is `UNSUPPORTED_FORMAT`).

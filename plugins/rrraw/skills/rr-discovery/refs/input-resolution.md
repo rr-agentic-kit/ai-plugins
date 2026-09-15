@@ -160,13 +160,15 @@ Parse `deep` as a challenge mode — bare `--challenge` is **standard**, not dee
 
 ### Stale cascade rewrite
 
-After a successful payload, before any `Task` (discover, challenge, resume): if `output_dir` already has cascade docs (`{stem}.md` or stale `{stem}.yaml` for `executive-summary`/`mrd`/`brd`), run:
+After a successful payload, before any `Task` (discover, challenge, resume): if `output_dir` already has cascade docs (`{stem}.md` or stale `{stem}.yaml` for `executive-summary`/`mrd`/`brd`), run from the **loaded skill’s plugin root** (same package as this skill — not an older cache version):
 
 ```bash
 sh scripts/validate_planning.sh --rewrite <output_dir>
 ```
 
-Same for `--input` when it is a directory of cascade docs and differs from `output_dir`. `--rewrite` converts list-meta and `{stem}.yaml` to canonical `{stem}.md` and deletes the yaml sibling. Skip when no cascade files exist (greenfield). Do not treat yaml as a live `--format`.
+Same for `--input` when it is a directory of cascade docs and differs from `output_dir`. `--rewrite` migrates list-meta, `{stem}.yaml` → canonical `{stem}.md` (deletes the yaml sibling), and **`>` blockquote leaf bodies → plain prose**. Skip when no cascade files exist (greenfield). Do not treat yaml as a live `--format`. Remaining `>` bodies are `STALE_FORMAT` until rewrite succeeds.
+
+**Anti-trigger:** Never require `>` on leaf bodies. Never refuse removing `>`. Before any format refuse, Read `refs/planning/doc-standards/item-schema.md` §Canonical item surface from the same plugin root as the script (batch) — do not Grep older cache copies or invent `BODY_NOT_BLOCKQUOTE`.
 
 ## NL intent fallback
 

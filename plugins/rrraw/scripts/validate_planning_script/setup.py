@@ -25,6 +25,7 @@ from .constants import (
 )
 from .layout_migrate import migrate_docs_layout
 from .models import Issue, has_errors
+from .parse import parse_planning_dir
 from .rewrite import rewrite_planning_dir
 from .workspace import (
     compute_mint_hash,
@@ -254,6 +255,16 @@ def setup_status(
     return "ok", "complete + mint_hash"
 
 
+def _blockquote_stale_issues(phase_dir: Path) -> list[Issue]:
+    """Probe: `>` leaf bodies must be gone after rewrite (plain prose SoT)."""
+    _, issues = parse_planning_dir(phase_dir)
+    return [
+        issue
+        for issue in issues
+        if issue.code == "STALE_FORMAT" and "blockquote" in issue.message
+    ]
+
+
 def setup_cascade_format(phase_dir: Path) -> tuple[str, str]:
     if not phase_dir.is_dir():
         return "failed", f"{phase_dir} is not a directory"
@@ -270,13 +281,17 @@ def setup_cascade_format(phase_dir: Path) -> tuple[str, str]:
         return "failed", "; ".join(
             issue.message for issue in issues if issue.severity == "error"
         )
+    stale = _blockquote_stale_issues(phase_dir)
+    if stale:
+        sample = "; ".join(issue.format() for issue in stale[:3])
+        return "failed", f"blockquote leaf bodies remain after rewrite: {sample}"
     after = {
         path.name: path.read_bytes()
         for path in phase_dir.iterdir()
         if path.is_file() and path.stem in stems and path.suffix in {".md", ".yaml"}
     }
     if before != after:
-        return "fixed", "rewrote list-meta/yaml to canonical md"
+        return "fixed", "rewrote list-meta/yaml/> bodies to canonical md"
     return "ok", _MSG_ALREADY_CANONICAL
 
 
