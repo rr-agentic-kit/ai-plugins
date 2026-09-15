@@ -73,7 +73,7 @@ Required context:
 14. For each required section with insufficient facts: do not invent; add `ClarificationItem`. Persist draft anyway.
 15. Set `sections_completed` and `sections_incomplete` explicitly.
 
-Static vs judgment: `refs/planning/success-criteria.md`. Compose must write parseable `_key_:` headers and `>` bodies.
+Static vs judgment: `refs/planning/success-criteria.md`. Compose must write parseable `_key_:` headers and plain bodies (never `>`).
 
 ## Outputs
 
