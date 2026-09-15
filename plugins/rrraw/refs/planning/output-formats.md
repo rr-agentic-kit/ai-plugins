@@ -120,7 +120,7 @@ created: 2026-06-24T10:00:00Z
 
 [decision/ask, what changed, top risks/holds, feedback needed — dual-audience; no new IDs]
 
-[remaining prose sections + item headings + `_key_:` line + `>` body per item-schema]
+[remaining prose sections + item headings + `_key_:` line + plain body per item-schema]
 
 ## Item index
 

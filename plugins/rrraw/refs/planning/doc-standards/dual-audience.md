@@ -21,7 +21,7 @@ After H1:
 
 1. **Human brief** (required — first body section)
 2. Existing prose sections (per level doc-standard)
-3. Ranked items (heading + `_key_:` + `>` body)
+3. Ranked items (heading + `_key_:` + plain body)
 4. **Item index** (last)
 
 ## Human brief
@@ -43,7 +43,7 @@ Every cascade / session `.md` prose persist runs `skills/rr-discovery/refs/compo
 
 ## Leaf bodies
 
-`>` blockquote bodies are **in scope** for readability / lexicon reshape. IDs and `_key_:` lines stay untouched. Prefer readable shalls — do not wipe rank enums or rationale tokens.
+Plain prose after `_key_:` (never `>`). Leaf bodies are **in scope** for readability / lexicon reshape. IDs and `_key_:` lines stay untouched. Prefer readable shalls — do not wipe rank enums or rationale tokens.
 
 ## Pointers
 
