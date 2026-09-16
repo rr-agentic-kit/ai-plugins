@@ -73,10 +73,20 @@ Allowed JSON on disk (not selected by `--format`): `items.json` and `session-sta
 
 ### Question mode
 
-| Flag | `question_mode` |
-|------|-----------------|
+| Layer | Field | Values |
+|-------|-------|--------|
+| Persisted config | `preferences.question_mode` | `ask` (default) \| `text` \| `auto` |
+| Payload | `question_mode` | Resolved from preferences; `--text-mode` overrides to `text` for this invocation only |
+| Per-question (when effective = `auto`) | `delivery` | `ask` \| `text` — chosen per clarification at surface time |
+
+| Flag / signal | `question_mode` |
+|---------------|-----------------|
 | _(default)_ | `ask` — structured `AskQuestion` |
-| `--text-mode` | `text` — questions inline in chat |
+| `--text-mode` | `text` — questions inline in chat (this invocation only) |
+| NL during resolve (“use auto question mode”, “auto question mode”) | `auto` — confirm-once persist to `preferences.question_mode` |
+| Resume | Read stored `preferences.question_mode`; default `ask` when absent |
+
+**Effective mode:** `payload.question_mode` after `--text-mode` override. All Q&A surfaces honor **effective** delivery: `text` → inline chat; `ask` → `AskQuestion`; `auto` → per-question heuristic ([goal-anchor.md](goal-anchor.md) § Question patterns). Record chosen `delivery` on each raw-history turn and in `pending_clarifications[]`.
 
 ### Questions per cycle
 

@@ -14,7 +14,7 @@
 |-------|---------|----------|--------|------------|
 | **Auto-reflection** | Every phase transition / sub-section (constant, like smells) | Goal-serve + obvious divergence | One-line / session reflection — **no** formal report | Allowed when alternatives unlikely; record reasoning |
 | **Smells** | Always-on checkers (Plan `req-smell` + Discover equivalents + goal-critical auto checks) | Most critical, fast | Inline / gate table | Same |
-| **`--challenge`** (standard) | User flag **or** skill stage-exit / pre-freeze suggest | All **relevant** load-bearing claims | Full `{stem}.challenge.report.md` | Same; AskQuestion when ≥2 plausible alternatives |
+| **`--challenge`** (standard) | User flag **or** skill stage-exit / pre-freeze suggest | All **relevant** load-bearing claims | Full `{stem}.challenge.report.md` | Same; founder question when ≥2 plausible alternatives (delivery per effective mode) |
 | **`--challenge deep`** | Explicit `deep` | Every detail / exhaustive | Full report + deeper attestation | Same |
 
 ```mermaid
@@ -42,9 +42,19 @@ Legacy helper stamps may write `clean` — treat as standard-clear for freeze-su
 
 ## Assumption auto-close
 
-If only one alternative is above “unlikely,” skill may close with recorded reasoning. If two or more remain plausible → AskQuestion required. Never silent-pick among peers. Applies to both Discover and Plan.
+If only one alternative is above “unlikely,” skill may close with recorded reasoning. If two or more remain plausible → founder question required (delivery per **effective** `question_mode`). Never silent-pick among peers. Applies to both Discover and Plan.
 
-**Post-report probe:** After a challenge report persists, if a finding offers ≥2 plausible remediations (A\|B\|C table or peer alternatives) → AskQuestion ≤ `preferences.questions_per_cycle` **before absorb**. Never silent-apply the agent-preferred letter, then re-attest. Re-attest only after the absorb batch for that stem.
+**Post-report probe:** After a challenge report persists, if a finding offers ≥2 plausible remediations (A\|B\|C table or peer alternatives) → surface ≤ `preferences.questions_per_cycle` per address cycle **before absorb** — delivery per **effective** `question_mode` (see below). Never silent-apply the agent-preferred letter, then re-attest. Re-attest only after the absorb batch for that stem.
+
+**Delivery (post-report + cheaper-first step 3):** Honor **effective** `payload.question_mode` — not hardcoded `AskQuestion`.
+
+| Effective mode | Surface |
+|----------------|---------|
+| `ask` | `AskQuestion` |
+| `text` | Inline chat — full context, recommendation, numbered/bulleted options |
+| `auto` | Per-question heuristic ([goal-anchor.md](../../skills/rr-planner/refs/goal-anchor.md) § Question patterns): long question (>~120 chars) and/or long option label (>~60 chars) and/or ≥3 substantive options → **text**; short confirm / yes-no / ≤3 terse single-select → **AskQuestion**; multi-paragraph remediation fork → **text** always |
+
+Record chosen `delivery` on each clarification and raw-history turn.
 
 ## Stop-rule: no challenge while queues are open
 
@@ -61,7 +71,7 @@ Before spawning a challenge `Task`, drain the open set in this order:
 
 1. **Auto-close** — assumption auto-close when only one plausible alternative
 2. **Reword** — clarify / tighten without a new AskQuestion when the gap is wording
-3. **AskQuestion** — ≤ `preferences.questions_per_cycle` per address cycle
+3. **Founder question** — ≤ `preferences.questions_per_cycle` per address cycle; delivery per **effective** `question_mode` (post-report table above — not hardcoded `AskQuestion`)
 4. **Absorb batch** — apply remediations from answers / auto-closes into docs. **Batch:** multi-doc → parallel mutators / compose `Task`; session-state via `scripts/session_state.sh` only (**read-budget:** never full-file `Read` of `session-state.json`)
 5. **Then** — one challenge pass (standard or deep as resolved)
 
@@ -91,6 +101,20 @@ Deep is optional rigor — never required for freeze-suggest. Smell-clean alone 
 | Upstream change after advance | Skill auto-marks downstream impact and drives review — user does not remember to re-check |
 | **Mint** frozen child / handoff | Full parent freeze still required (`PARENT_UNFROZEN`) |
 
+## Dogfood scope filter
+
+When slice / session posture is **dogfood** (minimum usable demo — not full MVP or external-pattern slice):
+
+| Fork class | Plan action |
+|------------|-------------|
+| **Demo-blocking** | Surface for founder decision (delivery per effective `question_mode`) |
+| **Volume / edge** (scale, rare race, exhaustive matrix) | **Auto-defer** — no `pending_clarifications` queue entry; note in challenge report as **Deferred (later phase)** |
+| **Cheap future hook** (design cost low at Execute) | **Auto-defer** with report note as **Future-ready (Execute)** — not blocking Plan Q&A |
+
+Under dogfood, post-report probe **does not queue** volume/edge forks — auto-defer with report note regardless of delivery mode. Demo-blocking forks still surface per effective mode.
+
+Judgment signals: user stated dogfood / demo slice / “minimum usable”; `execute-slice.yaml` `why` or session notes cite demo scope; standing constitution marks dogfood posture.
+
 ## Backward-chain
 
 When the current level cannot support the real goal given parents, challenge **upstream** — do not bury as HOLD. Discover: MRD↔ES, BRD↔MRD. Plan: Plan→Discover reopen. Detail in skill `goal-anchor` / `cascade`.
@@ -101,6 +125,7 @@ When the current level cannot support the real goal given parents, challenge **u
 - Freeze auto-suggest respects standard-clear or risk-accept
 - Attestation stamps match the mode map above
 - No challenge `Task` while `pending_clarifications` or open findings await absorb; cheaper-first ladder + pre-Task probe pass first
-- Post-report ≥2 alternatives → AskQuestion before absorb; never silent-pick among peers
+- Post-report ≥2 alternatives → founder question before absorb (delivery per effective `question_mode`); never silent-pick among peers
+- Dogfood: volume/edge forks auto-deferred with report note — not queued
 - Pre-challenge: digests + slice `requirement_ids` synced to live files
 - QPC never treated as challenge cadence

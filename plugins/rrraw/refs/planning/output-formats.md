@@ -165,7 +165,7 @@ session:
   started: 2026-08-15T18:52:03Z
   action: discover
   output_dir: /abs/path/docs/rr/0.1/discovery
-  question_mode: ask
+  question_mode: ask   # effective mode this session: ask | text | auto
   depth: standard
 turns:
   - ts: 2026-08-15T18:53:01Z
@@ -190,12 +190,12 @@ turns:
 | `session.started` | ISO-8601 UTC of first Q&A (file create) |
 | `session.action` | Normalized `action` |
 | `session.output_dir` | Resolved output directory |
-| `session.question_mode` | `ask` \| `text` |
+| `session.question_mode` | Effective mode: `ask` \| `text` \| `auto` |
 | `session.depth` | `shallow` \| `standard` \| `deep` |
 | `turns[].ts` | ISO-8601 UTC of the answer |
 | `turns[].level` | Cascade level or `session` |
 | `turns[].source` | `discovery` \| `compose` \| `blind-spots` \| `research` \| `challenge` \| `presave` \| `panel` |
-| `turns[].question` | `id`, `text`, `mode`, `options[]` |
+| `turns[].question` | `id`, `text`, `mode` (effective `question_mode`), `delivery` (`ask` \| `text` — required when mode is `auto`), `options[]` (optional when `delivery: text`) |
 | `turns[].answer` | `text` (verbatim), `selected` (option labels when applicable) |
 
 Append-only: never rewrite prior turns. Create `raw-history/` on first Q&A. If the session file is missing on resume, create a new timestamped file and update `raw_history_path`.
@@ -363,6 +363,7 @@ Invoke contract: `scripts/session_state.README.md` (run scripts; do not load scr
   "discovery_complete": false,
   "project_posture": {},
   "preferences": {
+    "question_mode": "ask",
     "questions_per_cycle": 1
   },
   "viability_stale": {
@@ -393,7 +394,41 @@ Invoke contract: `scripts/session_state.README.md` (run scripts; do not load scr
 
 `from_code_evidence`: `null` until `--from-code` research; then a structured summary of codebase findings (what shipped, actors if inferable, problem signals, constraints, domain language, reflection notes). Skill-owned. Merge only contradiction clarifications into `checkpoint.pending_clarifications`. Cite in cascade inheritance; do not invent market/TAM from package names (`skills/rr-discovery/refs/from-code.md`).
 
-`preferences.questions_per_cycle`: max AskQuestion count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-discovery/refs/input-resolution.md`); confirm-once persistence. **Anti-trigger:** does not schedule `--challenge` / re-attest — QPC is batch size only ([challenge-layers.md](challenge-layers.md)).
+`preferences.question_mode`: `ask` (default) \| `text` \| `auto`. Set via NL during resolve (“use auto question mode”) or confirm-once persist; `--text-mode` overrides to `text` for one invocation only ([input-resolution.md](../../skills/rr-planner/refs/input-resolution.md)). When `auto`, skill picks per-question `delivery` per [goal-anchor.md](../../skills/rr-planner/refs/goal-anchor.md) § Question patterns.
+
+`preferences.questions_per_cycle`: max **AskQuestion** count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-discovery/refs/input-resolution.md`); confirm-once persistence. **Anti-trigger:** does not schedule `--challenge` / re-attest — QPC is batch size only ([challenge-layers.md](challenge-layers.md)).
+
+### `checkpoint.pending_clarifications[]`
+
+Queue of unresolved founder questions. Skill-owned — agents return `clarifications_needed[]`; skill normalizes into this array and surfaces per effective `question_mode`.
+
+```json
+{
+  "id": "c-001",
+  "question": "Full question prose — not terse AskQuestion-only shape",
+  "context": "Why this blocks or what doc/finding triggered it",
+  "severity": "blocking|high|medium|low",
+  "delivery": "ask|text",
+  "dogfood_recommendation": "defer|future-ready|demo-blocking|null",
+  "options": [
+    { "id": "a", "label": "Option A" }
+  ],
+  "level": "prd",
+  "section": "guest-checkout",
+  "source": "challenge|compose|blind-spots|research"
+}
+```
+
+| Field | Rule |
+|-------|------|
+| `question` | Full prose — required for all delivery modes |
+| `context` | Required when `delivery: text` or effective mode is `text` |
+| `delivery` | Chosen surface: `ask` → `AskQuestion`; `text` → inline chat. When effective mode is `auto`, set per-question at surface time |
+| `dogfood_recommendation` | Optional. `defer` \| `future-ready` \| `demo-blocking` — skill may auto-defer non-demo-blocking under dogfood ([challenge-layers.md](challenge-layers.md)) without queueing |
+| `options[]` | Optional when `delivery: text` (inline numbered/bulleted list in chat). Required shape when `delivery: ask` |
+| `source` | Which phase produced the clarification |
+
+**Step 6 surface:** When draining `pending_clarifications`, honor each item's `delivery` (or compute from effective `auto` heuristic). `text` / auto-long → inline elaborated chat with `context` + recommendation; do not force AskQuestion-shaped UI.
 
 `viability_stale`: per binding level (`executive-summary`, `mrd`). Set `true` when compose changes load-bearing ES facts ([baselines.md](baselines.md)). Gate 7 re-sit clears it.
 
