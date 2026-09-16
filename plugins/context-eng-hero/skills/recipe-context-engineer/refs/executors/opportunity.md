@@ -1,10 +1,6 @@
----
-name: opportunity
-description: One-shot audit-redesign improvement report (ranked Keep/Improve/Restructure). Use when recipe-context-engineer improve Tasks need opportunities only—no edits.
-readonly: true
----
-
 # opportunity
+
+Owned by skill recipe-context-engineer; loaded only via actions/improve.md Task Caller Load — not a plugin agent.
 
 ## Role
 
@@ -43,9 +39,9 @@ Caller Load (parent Task prompt / payload):
 | `refs.rubric` | yes | `skills/recipe-context-engineer/refs/rubrics/audit-redesign.rubric.md` |
 | `refs.patterns` | yes | `skills/recipe-context-engineer/refs/improvement-patterns.md` |
 | `refs.template` | yes | `skills/recipe-context-engineer/refs/templates/audit-redesign-output.template.md` |
-| `compliance_skim` | optional | FAIL ids / note from parallel compliance agent — blockers section only |
+| `compliance_skim` | optional | FAIL ids / note from parallel `compliance` executor — blockers section only |
 
-Stable hard-links (agent may Read without re-injection): `actions/audit-redesign.md`, `rubrics/audit-redesign.rubric.md`, `improvement-patterns.md`, `templates/audit-redesign-output.template.md`. Parent still injects paths in the Task prompt (Caller Load).
+Stable hard-links (executor may Read without re-injection): `actions/audit-redesign.md`, `rubrics/audit-redesign.rubric.md`, `improvement-patterns.md`, `templates/audit-redesign-output.template.md`. Parent still injects paths in the Task prompt (Caller Load).
 
 ## Execution
 
@@ -58,10 +54,10 @@ Stable hard-links (agent may Read without re-injection): `actions/audit-redesign
 
 Emit the **full report** per `refs.template` (`templates/audit-redesign-output.template.md`). Optionally prefix one-line status + clarification bullets in markdown.
 
-Do **not** paste the template body into this agent file. Do **not** emit a parallel JSON schema whose fields only restate the Ranked table.
+Do **not** paste the template body into this executor file. Do **not** emit a parallel JSON schema whose fields only restate the Ranked table.
 
 **Apply-consumer contract:** Parent `improve` reads the markdown Ranked table (and Absorb column) per the template apply-consumer field contract. Apply only ranked rows with Absorb `fix` or `redesign` and Impact ∈ {high, medium}. Skip Keep notes, Absorb `defer`, Deferred table, and Impact `low`.
 
 ## Orchestration
 
-Single-shot. Parent may spawn this agent in parallel with `compliance`. No nested Task. No write gates. No auto-apply.
+Single-shot. Parent may spawn this executor in parallel with `compliance`. No nested Task. No write gates. No auto-apply.

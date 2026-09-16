@@ -39,7 +39,7 @@ Routing and actions: skill **Actions** table + `gate-prompts.md`.
 
 **Task / subagents:** isolated context; parallel = multiple Task calls in one message.
 
-**Task + Caller Load:** For independent diagnosis, spawn parallel Tasks in one turn and merge in the parent. Inject ref paths (and variant rubrics) in the Task payload; list stable refs in agent Inputs. Agents MUST NOT re-invoke the orchestrating skill for the same job. Exemplar: `actions/improve.md` (compliance + opportunity). Shared layout SoT: `design/design-core.md` **Shared knowledge layout**.
+**Task + Caller Load:** For independent diagnosis, spawn parallel Tasks in one turn and merge in the parent. Inject ref paths (and variant rubrics) in the Task payload; list stable refs in executor Inputs. Executors MUST NOT re-invoke the orchestrating skill for the same job. Task isolation does **not** require `agents/` catalog registration—parent-only specs live under skill `refs/executors/`. Exemplar: `actions/improve.md` (`compliance` + `opportunity`). Shared layout SoT: `design/design-core.md` **Shared knowledge layout**.
 
 ---
 

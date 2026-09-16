@@ -42,16 +42,20 @@ Picker for where judgment/templates live when a parent skill Tasks agents (or mu
 | Judgment/procedure shared by parent skill + its Task agents | **Skill `refs/` SoT** — agents Read paths and/or Caller Load injection |
 | Same pack needed by **≥2 skills** in the plugin | **Plugin-level `refs/<pack>/`** (rrraw `refs/planning/` pattern) |
 | Reusable **orchestrated** procedure with own routing/TodoWrite | **Internal sub-skill** (`disable-model-invocation: true`; optional Claude `user-invocable: false`) — not for hosting rubrics/templates |
+| Parent-only Task executor (must not ambient-discover) | Owning skill **`refs/executors/<role>.md`** — spawn via `generalPurpose` (or Claude generic Agent) + Read + Caller Load; **never** `agents/` |
+| Discoverable catalog Task / `@`-mention role | Plugin **`agents/`** with collision-aware `name` — see `design/agent.md` Access economy |
 | Agent-private progressive disclosure tree | **Forbidden** — `agents/<id>/refs/` |
 | Mega-agent with mode param holding all skill knowledge | **Forbidden** — function-style + Caller Load |
 
 **When to revisit plugin-level refs:** promote only when a second skill in the same plugin truly needs the same pack; one consumer skill keeps SoT under that skill’s `refs/`.
 
+**Stop-rule:** Parent-only executors that must not ambient-discover **must not** ship under `agents/`. Under the owning skill, short role stems (`compliance`, `opportunity`) are fine; never bare global nouns in the `agents/` catalog. Task spawn with Caller Load of a skill ref is valid; `agents/` is **discovery registration**, not a prerequisite for isolated Task execution.
+
 Companion rules:
 
-- Parent skill/action owns workflow; agents are single-shot executors (no nested skill invoke for the same orchestrator).
-- Parallel diagnosis: multiple Task calls in one turn; merge in parent (`actions/improve.md` is the exemplar).
-- Variant paths (type rubric, method ref) → **inject in Task payload**; stable set may be hard-linked in agent Inputs.
+- Parent skill/action owns workflow; agents/executors are single-shot (no nested skill invoke for the same orchestrator).
+- Parallel diagnosis: multiple Task calls in one turn; merge in parent (`actions/improve.md` is the exemplar — `refs/executors/compliance.md` + `opportunity.md`).
+- Variant paths (type rubric, method ref) → **inject in Task payload**; stable set may be hard-linked in executor/agent Inputs.
 
 ## Degrees of freedom
 

@@ -1,10 +1,6 @@
----
-name: compliance
-description: One-shot compliance audit report (static + type rubric). Use when recipe-context-engineer improve/audit Tasks need PASS/FAIL only—no edits.
-readonly: true
----
-
 # compliance
+
+Owned by skill recipe-context-engineer; loaded only via actions/improve.md Task Caller Load — not a plugin agent.
 
 ## Role
 
@@ -46,7 +42,7 @@ Caller Load (parent Task prompt / payload):
 | `refs.template` | yes | `skills/recipe-context-engineer/refs/templates/audit-output.template.md` |
 | `refs.failure_patterns` | recommended | `skills/recipe-context-engineer/refs/failure-patterns.md` |
 
-Stable hard-links (agent may Read without re-injection): `actions/audit.md`, `templates/audit-output.template.md`, `failure-patterns.md`. Parent **must** still inject the **type rubric** path.
+Stable hard-links (executor may Read without re-injection): `actions/audit.md`, `templates/audit-output.template.md`, `failure-patterns.md`. Parent **must** still inject the **type rubric** path.
 
 ## Execution
 
@@ -59,10 +55,10 @@ Stable hard-links (agent may Read without re-injection): `actions/audit.md`, `te
 
 Emit the **full report** per `refs.template` (`templates/audit-output.template.md`). Optionally prefix one-line status + clarification bullets in markdown.
 
-Do **not** paste the template body into this agent file. Do **not** emit a parallel JSON schema whose fields only restate Summary/Findings.
+Do **not** paste the template body into this executor file. Do **not** emit a parallel JSON schema whose fields only restate Summary/Findings.
 
 **Apply-consumer contract:** Parent `improve` reads the markdown report—Verdict plus Findings FAIL ids (all severities)—not a second schema.
 
 ## Orchestration
 
-Single-shot. Parent may spawn this agent in parallel with `opportunity`. No nested Task. No write gates.
+Single-shot. Parent may spawn this executor in parallel with `opportunity`. No nested Task. No write gates.

@@ -42,8 +42,20 @@ Shared layout SoT: `design/design-core.md` **Shared knowledge layout**.
 
 ## Access economy (agents) — hardness rule
 
+**Calling a Task ≠ shipping under `agents/`.** File under plugin `agents/**/*.md` registers a **catalog** subagent (`name` + `description` → Cursor Task types / Claude `@`-mention every session). Parent skill spawning Task / Agent with prompt “Read `refs/executors/….md` + Caller Load” is still an isolated one-shot executor—spec loads **only when that Task runs**; no ambient catalog entry.
+
+| Mechanism | What it does | Session cost |
+|-----------|--------------|--------------|
+| File under plugin `agents/**/*.md` | Registers a **catalog** subagent | Description uploaded every session; user can invoke outside the parent skill |
+| Parent skill spawns Task with Read of skill `refs/executors/….md` + Caller Load | Isolated one-shot executor | Spec loads only when that Task runs; no catalog entry |
+
+| Need | Pick |
+|------|------|
+| Discoverable Task / `@`-mention role (any skill or user may invoke) | **Plugin `agents/`** — collision-aware `name` (= file stem); not bare global nouns that collide across plugins |
+| Parent-only executor (one owning skill; must not ambient-discover) | Owning skill **`refs/executors/<role>.md`** (e.g. `compliance`, `opportunity`) — short role names OK under the skill; **never** `agents/` |
+
 1. **Body tool fence is always required** (portable) — **Tools and boundaries** with MUST / MUST NOT. Frontmatter `tools` / `disallowedTools` are **not** dual-runtime SoT.
-2. Marketplace default frontmatter: `name` + `description` only, unless author opts into a runtime.
+2. Marketplace default frontmatter: `name` + `description` only, unless author opts into a runtime. (**Catalog agents only** — parent-only executors under `refs/executors/` have **no** discovery frontmatter.)
 3. **Cursor extras when useful:** `readonly: true` for judgment-only agents; `model: inherit` only if teaching/explicit; avoid pinning fragile model IDs in marketplace plugins unless product requires it. Optional `is_background` when Cursor subagent docs apply.
 4. **Claude extras when useful and not plugin-ignored:** `tools` / `disallowedTools` aligned with body fence; `maxTurns` when unbounded loops are a risk; optional `skills` preload, `background`, `isolation`, `effort` when honored. **Omit** `permissionMode` / `hooks` / `mcpServers` in **plugin-shipped** agents—they are **ignored** when loaded from a plugin (false security if set).
 5. Never confuse workspace `permissions.json` / Claude settings allowlists with artifact frontmatter (`design/design-core.md` **Not artifact frontmatter**).
@@ -59,6 +71,8 @@ Need Claude tool narrowing / turn bound?
   → + tools/disallowedTools aligned to body; + maxTurns if loop risk
 Shipping via plugin?
   → do NOT set permissionMode / hooks / mcpServers (ignored)
+Parent-only Task executor (one skill caller)?
+  → do NOT put under agents/; use refs/executors/<role>.md (no name/description FM)
 ```
 
 ## Body vs frontmatter tool fence
@@ -80,6 +94,9 @@ Call out before writing:
 
 | Trigger | Response |
 |---------|----------|
+| “Put it in `agents/` so Task can call it” (only one parent skill calls it) | Wrong lever — use `refs/executors/<role>.md` + Task Caller Load; `agents/` is discovery registration, not a Task prerequisite |
+| Parent-only executor under `agents/` | Stop — catalog tax + ambient invoke; move to owning skill `refs/executors/` (short role names OK there) |
+| Bare global noun as catalog `name` (`compliance`, `opportunity`) | Collision risk in `agents/` only — parent-only stays under skill `refs/executors/`, not catalog |
 | No body tool fence | Critical gap — add MUST/MUST NOT before gates |
 | `permissionMode` / `hooks` / `mcpServers` on plugin agent | False security — remove; document ignored-in-plugins |
 | Frontmatter tools without body fence | Align body; FM is not SoT |

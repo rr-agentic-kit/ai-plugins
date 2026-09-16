@@ -89,7 +89,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 - **Dual close surface** — skill uses AskQuestion; commands may name slash as user homework only
 - **STATIC SKIPPED** — audit continues judgment; write paths block until static PASS or user accepts draft-only
 - **Minimum draft** — smallest template-shaped draft that satisfies clarify; refs only when FAIL proves the gap
-- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits + gated apply (agents `agents/audit/compliance.md` + `opportunity.md`)
+- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits + gated apply (parent-only executors `refs/executors/compliance.md` + `opportunity.md`; not catalog agents)
 - **Question tool fallback** — AskQuestion preferred; text-mode channel mandatory when tool/harness missing (`refs/questioning.md`)
 
 ## Constraints

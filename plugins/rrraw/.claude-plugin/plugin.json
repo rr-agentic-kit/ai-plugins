@@ -1,6 +1,6 @@
 {
   "name": "rrraw",
-  "version": "0.0.4-rc-16",
+  "version": "0.0.4-rc-17",
   "description": "Discover (ES\u2192BRD + business-case) + Plan (PRD+) + build/test/review + local git + forge-agnostic CI",
   "license": "Unlicense",
   "author": {

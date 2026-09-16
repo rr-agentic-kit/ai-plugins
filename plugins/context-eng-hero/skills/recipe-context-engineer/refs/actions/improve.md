@@ -1,6 +1,6 @@
 # Action: improve (internal)
 
-Orchestrate **compliance audit** + **audit-redesign** in parallel, merge an apply list, then run **fix** then **redesign** under shared write gates. Agents do **not** invoke this skill; parent injects refs (Caller Load).
+Orchestrate **compliance audit** + **audit-redesign** in parallel, merge an apply list, then run **fix** then **redesign** under shared write gates. Parent-only Task executors (`compliance`, `opportunity`) do **not** invoke this skill; parent injects refs (Caller Load).
 
 **Skip Advise** for this action (reports are the plan)—see `advisory.md`.
 
@@ -25,20 +25,20 @@ One **approve-revise-abort** covers the combined apply plan (not per-opportunity
 | `questioning.md` | `improve-1-load` (missing path; **Delivery channels**) |
 | `classify.md` | `improve-1-load` (type) |
 | `ui-brand.md` | `improve-1-load` (banner), parallel audits (liveness) |
-| `actions/audit.md` | Inject into compliance Task |
-| `actions/audit-redesign.md` | Inject into opportunity Task |
-| `rubrics/<type>.rubric.md` (+ `skill-ref` when Skill+Ref) | Inject into compliance Task |
-| `rubrics/audit-redesign.rubric.md` | Inject into opportunity Task |
-| `improvement-patterns.md` | Inject into opportunity Task |
-| `templates/audit-output.template.md` | Inject into compliance Task |
-| `templates/audit-redesign-output.template.md` | Inject into opportunity Task |
-| `failure-patterns.md` | Inject into compliance Task (recommended) |
+| `actions/audit.md` | Inject into `compliance` Task |
+| `actions/audit-redesign.md` | Inject into `opportunity` Task |
+| `rubrics/<type>.rubric.md` (+ `skill-ref` when Skill+Ref) | Inject into `compliance` Task |
+| `rubrics/audit-redesign.rubric.md` | Inject into `opportunity` Task |
+| `improvement-patterns.md` | Inject into `opportunity` Task |
+| `templates/audit-output.template.md` | Inject into `compliance` Task |
+| `templates/audit-redesign-output.template.md` | Inject into `opportunity` Task |
+| `failure-patterns.md` | Inject into `compliance` Task (recommended) |
 | `actions/fix.md` | `improve-4-apply-fix` |
 | `actions/redesign.md` | `improve-5-apply-redesign` |
 | `actions/shared-write-gates.md` | After apply drafts (one combined approve) |
 | `gate-prompts.md` | `improve-6-close` (**post-improve-routing**); write gate |
 | `close-contract.md` | `improve-6-close` |
-| Agents: `agents/audit/compliance.md`, `agents/audit/opportunity.md` | `improve-2-parallel-audits` |
+| Executors: `executors/compliance.md`, `executors/opportunity.md` | `improve-2-parallel-audits` (Read via Caller Load — not catalog agents) |
 
 ## Steps
 
@@ -51,9 +51,9 @@ One **approve-revise-abort** covers the combined apply plan (not per-opportunity
 ### Step 2: `improve-2-parallel-audits`
 
 - **Outcome:** Both diagnosis reports available.
-- **Done when:** In **one turn**, spawn two Task subagents (wait for both):
-  1. **compliance** — `agents/audit/compliance.md`; inject `{ path, type, plugin_root }` + `actions/audit.md` + type rubric (+ skill-ref rubric if Skill+Ref) + `templates/audit-output.template.md` (+ `failure-patterns.md`).
-  2. **opportunity** — `agents/audit/opportunity.md`; inject `{ path, type, plugin_root }` + `actions/audit-redesign.md` + `rubrics/audit-redesign.rubric.md` + `improvement-patterns.md` + `templates/audit-redesign-output.template.md` (+ optional compliance skim when already returned).
+- **Done when:** In **one turn**, spawn two **`generalPurpose`** Tasks (wait for both). Do **not** use named catalog subagent types from `agents/`—these executors are skill refs only.
+  1. **compliance** — prompt: Read `skills/recipe-context-engineer/refs/executors/compliance.md` + Caller Load `{ path, type, plugin_root }` + `actions/audit.md` + type rubric (+ skill-ref rubric if Skill+Ref) + `templates/audit-output.template.md` (+ `failure-patterns.md`).
+  2. **opportunity** — prompt: Read `skills/recipe-context-engineer/refs/executors/opportunity.md` + Caller Load `{ path, type, plugin_root }` + `actions/audit-redesign.md` + `rubrics/audit-redesign.rubric.md` + `improvement-patterns.md` + `templates/audit-redesign-output.template.md` (+ optional compliance skim when already returned).
 - Emit liveness before waits: `◆ Parallel audits (compliance + opportunity)…`.
 - Collect the full markdown reports from each. If either status line is `failed`, stop with clarifications—do not apply.
 
@@ -85,6 +85,6 @@ One **approve-revise-abort** covers the combined apply plan (not per-opportunity
 ## Stop
 
 - No ambient improve without a declared path.
-- Agents never Write; parent owns apply + gates.
+- Executors never Write; parent owns apply + gates.
 - Do not auto-apply Deferred / Keep / Absorb `defer` / Impact `low`.
 - Do not spawn a third “write agent”; parent executes fix/redesign procedures.
