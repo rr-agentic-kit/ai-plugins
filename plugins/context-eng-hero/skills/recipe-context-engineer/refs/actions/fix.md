@@ -12,8 +12,10 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 | `advisory.md` | `fix-2-plan` (scope check only) |
 | `ui-brand.md` | `fix-1-read` (banner) |
 | `frontmatter-schemas.md` | `fix-3-apply` |
-| `instruction-design.md` | `fix-2-plan` |
-| `skill-invocation.md` | `fix-3-apply` (skills) |
+| `design/design-core.md` | `fix-2-plan` |
+| `design/skill.md` | `fix-3-apply` (skills) |
+| `design/command.md` | `fix-3-apply` (commands) |
+| `design/agent.md` | `fix-3-apply` (agents) |
 | `readme-spec.md` | `fix-3-apply` (skill folders) |
 | `lexicon-spec.md` | `fix-2-plan`, `fix-3-apply` (`acronyms.*` / `glossary.*` FAILs) |
 | `templates/acronyms.template.md` | `fix-3-apply` (missing/wrong ACRONYMS.md) |

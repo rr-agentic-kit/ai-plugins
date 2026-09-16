@@ -2,6 +2,8 @@
 
 Reusable **AskQuestion** patterns for Context Engineer orchestration. Checkpoint box format: `refs/ui-brand.md`.
 
+**Delivery:** Prefer AskQuestion for these patterns; always fall back to the same options as numbered/labeled prose when the tool or harness is unavailable — see `questioning.md` **Delivery channels**. Do not stall or claim the tool is “unavailable” as product truth.
+
 ## Rules
 
 - `header` max 12 characters
@@ -9,6 +11,7 @@ Reusable **AskQuestion** patterns for Context Engineer orchestration. Checkpoint
 - 2–4 options per prompt; always include a freeform escape ("Other" / "Something else")
 - If user types freeform instead of selecting, map intent and continue—do not re-ask the same gate
 - One gate at a time; do not stack multiple AskQuestion calls in one turn unless the first answer requires a follow-up
+- Text-mode delivery of a gate still counts as that gate; route maps below apply unchanged
 
 ---
 
@@ -24,6 +27,22 @@ Skill intake when action is unclear (ambient invoke or vague request).
   - Fix or improve → if outcome change unclear, run **fix-vs-redesign** first; else **fix**
   - Create new → **create**
   - Something else → infer from freeform (extract, test, diff, redesign, learn, design assist) or one clarifying question
+
+---
+
+## Pattern: skill-ux-delivery
+
+Create/design clarify for skills—after invoke mode, before draft. Interaction shape only; not Purpose/Procedure content.
+
+- **question:** "How should this skill take input and deliver results?"
+- **header:** "Skill UX"
+- **options:** Gates + reports | Text-first | Minimal clarify | Other
+- **Route map:**
+  - **Gates + reports** → Prefer AskQuestion for forks; mandatory text-mode same options (**Delivery channels** in `questioning.md`); staged report/close. Draft README **UX → Clarify/Close** + SKILL **Orchestration** / Execution rules accordingly.
+  - **Text-first** → Prose clarify by default; optional AskQuestion when tool present. Still document Delivery channels if any enumerable gate appears.
+  - **Minimal clarify** → Open asks / assumptions; no gate graph. If draft has no enumerable forks: one-line N/A (“no AskQuestion gates”) so audit can PASS. If a fork appears later: document Delivery channels.
+  - **Other** → Freeform escape; map intent; store as open question or custom shape note—do not invent Purpose/Procedure content.
+- Never rewrite Purpose / When / Procedure from this gate alone.
 
 ---
 

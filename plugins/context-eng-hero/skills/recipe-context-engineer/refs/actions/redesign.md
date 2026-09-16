@@ -10,9 +10,11 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 | `questioning.md` | `redesign-1-clarify` |
 | `advisory.md` | `redesign-1-clarify` |
 | `redesign-intake.md` | `redesign-1-clarify` |
-| `instruction-design.md` | `redesign-2-plan` |
+| `design/design-core.md` | `redesign-2-plan` |
 | `frontmatter-schemas.md` | `redesign-2-plan`, `redesign-3-apply` |
-| `skill-invocation.md` | `redesign-3-apply` (skills) |
+| `design/skill.md` | `redesign-3-apply` (skills) |
+| `design/command.md` | `redesign-3-apply` (commands) |
+| `design/agent.md` | `redesign-3-apply` (agents) |
 | `readme-spec.md` | `redesign-3-apply` (skill folders) |
 | `lexicon-spec.md` | `redesign-3-apply` (ACRONYMS + GLOSSARY) |
 | `templates/acronyms.template.md` | `redesign-3-apply` (ACRONYMS.md) |
@@ -41,7 +43,7 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 ### Step 3: `redesign-3-apply`
 
 - **Outcome:** Redesigned draft applied.
-- **Done when:** All planned edits applied in memory or working copy; harvest new/changed jargon into `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md` (ensure both exist at resolved path).
+- **Done when:** All planned edits applied in memory or working copy; harvest new/changed jargon into `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md` (ensure both exist at resolved path); if Procedure/Orchestration/close gains or keeps AskQuestion/enumerable gates, wire **Delivery channels** (or one-line N/A if Minimal clarify and no forks)—same contract as create draft.
 
 ### Step 4: `redesign-4-gates`
 

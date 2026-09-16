@@ -10,7 +10,7 @@ Pick the **narrowest** type. Load at orchestration step 2 and action classify st
 | **Skill+Ref** | Base SKILL.md + `refs/` (or `references/`) loaded per progressive disclosure—variant or deep-dive refs |
 | **Ref file** | Skill-private `refs/*.md` (or `references/*.md`) — not an entry point; loaded because parent SKILL / action Ref index names it |
 | **Command** | Named slash entry with fixed input/output contract |
-| **Agent** | Role with tools, boundaries, and stop conditions |
+| **Agent** | Isolated-role Task executor with Role / Tools and boundaries / Stop / Inputs / Outputs (`agents/` or `agents/<group>/`) |
 | **Rule** | Always-on or glob-scoped constraint |
 | **Workflow** | Multi-step orchestration with delegation and per-step outputs |
 
@@ -24,7 +24,7 @@ Do not merge types. A folder with SKILL.md + `refs/` is **Skill+Ref**, not plain
 | `skills/<name>/SKILL.md` + `refs/` or `references/` | Skill+Ref |
 | `skills/<name>/refs/<topic>.md` (no SKILL edit) | Ref file |
 | `commands/<name>.md` | Command |
-| `agents/<name>.md` | Agent |
+| `agents/<name>.md` or `agents/<group>/<name>.md` | Agent |
 | `.cursor/rules/*.mdc` or `rules/` | Rule |
 | `*workflow*.md` with Steps + Delegation | Workflow |
 

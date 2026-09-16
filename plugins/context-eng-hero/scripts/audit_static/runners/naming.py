@@ -36,7 +36,7 @@ def run_naming(ctx: AuditContext) -> list[CheckResult]:
                     f"name={name_val!r} folder={folder!r}",
                 )
             )
-        case "command":
+        case "command" | "agent":
             stem = ctx.rel.stem
             path_match = str(name_val) == stem
             results.append(

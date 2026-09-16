@@ -12,6 +12,9 @@
 | NOISE | Noise failure pattern | Low-signal / bloated prose |
 | SAFETY | Safety failure pattern | Paths, secrets, unsafe routing |
 | ECHO | Echo failure pattern | Duplicated constraints across layers |
+| COHESION | Cohesion improvement pattern | Seams / pack boundaries (`improvement-patterns.md`) |
+| DISCLOSURE | Disclosure improvement pattern | Always-on vs progressive load economics |
+| FRAMING | Framing improvement pattern | LLM-hostile wording / weak forcing functions |
 | PASS | Check passed | Static or judgment |
 | FAIL | Check failed | Static or judgment |
 | AMBIGUOUS | Judgment inconclusive | Needs human call |

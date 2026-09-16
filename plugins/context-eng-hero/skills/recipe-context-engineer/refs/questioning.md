@@ -7,8 +7,20 @@ Rules for resolving missing context **without** hard-blocking on REQUIRED lists.
 1. **One question at a time** — never batch unrelated asks in one turn.
 2. **Classify before action** — if artifact type is unknown, resolve type before asking what to do.
 3. **Never block on REQUIRED** — offer paths forward instead of stopping with a bullet list of missing fields.
-4. **Prefer AskQuestion** when choices are enumerable (2–4 options); use open text only when options cannot be listed.
+4. **Prefer AskQuestion** when choices are enumerable (2–4 options); use open text only when options cannot be listed — always honor **Delivery channels** below.
 5. **Use open context first** — read the user message, @-attached files, and editor selection before asking.
+
+## Delivery channels
+
+Canonical contract for how clarify/gate questions reach the user. Gates in `gate-prompts.md` stay valid whether delivered via tool or text.
+
+1. **Enumerable (2–4 options):** attempt Cursor `AskQuestion` (`title?` + `questions[{id,prompt,options[{id,label}],allowMultiple?}]`); ≤1 UI question per assistant turn.
+2. **Mandatory fallback:** if the tool is missing from the allowlist, the call fails, the harness rejects it, or the user/session prefers text → emit the **same** options as short prose (numbered or labeled); wait for reply; **do not** narrate “AskQuestion is unavailable” as a product claim; **do not** stall the action.
+3. **Open / long prompts:** text channel by default (not AskQuestion).
+4. **Plan mode / other harnesses:** text fallback is first-class and allowed; do not treat tool absence as a hard stop.
+5. **Authored artifacts:** when this skill authors skills/commands that use AskQuestion, require the same fallback rule in those artifacts’ clarify/close paths (see `design/design-core.md`) so dogfooded skills survive Composer Auto and ACP gaps.
+
+Pointers: `gate-prompts.md` (gate shapes), `chat-orchestration.md` (agent vs author tooling).
 
 ## Missing path
 
@@ -45,7 +57,16 @@ When authoring a skill and mode is unclear:
   - **question:** "How should this skill be invoked?"
   - **header:** "Invoke mode"
   - **options:** Auto-invoke (ambient match) | Slash-or-parent (self-invoke) | Background (agent auto-pull, hide / on Claude)
-- Route per `skill-invocation.md`; draft `description` and flags only after selection.
+- Route per `design/skill.md`; draft `description` and flags only after selection.
+
+## Missing skill UX (input + delivery)
+
+When authoring a skill (create/design) and clarify/delivery shape is unset—**after** invoke mode is resolved (or deferred), **before** draft:
+
+- Run **skill-ux-delivery** in `gate-prompts.md` (AskQuestion preferred; same options as prose when tool/harness missing—**Delivery channels** above).
+- Choice is **interaction shape only**—do not rewrite Purpose / When / Procedure content from this gate alone.
+- Store the choice; draft wires README **UX → Clarify/Close** and SKILL **Execution rules** / **Orchestration** from it (see create/design draft steps).
+- Defer only when listed as an open question; do not invent a gate graph silently.
 
 ## Missing failure source (fix)
 

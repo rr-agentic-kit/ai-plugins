@@ -10,8 +10,11 @@
 | `advisory.md` | `create-2-clarify` |
 | `ui-brand.md` | `create-1-classify` (banner) |
 | `frontmatter-schemas.md` | `create-3-draft` |
-| `instruction-design.md` | `create-3-draft` |
-| `skill-invocation.md` | `create-2-clarify`, `create-3-draft` (skills) |
+| `design/design-core.md` | `create-3-draft` |
+| `design/skill.md` | `create-2-clarify`, `create-3-draft` (skills) |
+| `design/command.md` | `create-3-draft` (commands) |
+| `design/agent.md` | `create-3-draft` (agents) |
+| `gate-prompts.md` | `create-2-clarify` (skills: skill-ux-delivery), `create-5-close` |
 | `readme-spec.md` | `create-3-draft` (skill folders) |
 | `templates/readme.template.md` | `create-3-draft` (skill README) |
 | `lexicon-spec.md` | `create-3-draft` (ACRONYMS + GLOSSARY) |
@@ -23,7 +26,7 @@
 | `templates/<type>.template.md` (per `classify.md`) | `create-3-draft` |
 | Prior test/audit FAIL | `create-2-clarify` if supplied |
 | `shared-write-gates.md` | `create-4-gates` |
-| `gate-prompts.md`, `close-contract.md` | `create-5-close` |
+| `close-contract.md` | `create-5-close` |
 
 ## Steps
 
@@ -35,15 +38,16 @@
 
 ### Step 2: `create-2-clarify`
 
-- **Outcome:** Outcome, audience, failure mode, and (for skills) **invoke mode** are resolved (or explicitly deferred with open questions listed).
-- **Done when:** Clarify fields answered per `questioning.md` (one question at a time); skills: invoke mode per `skill-invocation.md`; no REQUIRED hard-stop at intake.
+- **Outcome:** Outcome, audience, failure mode, and (for skills) **invoke mode** + **skill UX (input/delivery)** are resolved (or explicitly deferred with open questions listed).
+- **Done when:** Clarify fields answered per `questioning.md` (one question at a time); skills: invoke mode per `design/skill.md` **and** skill UX resolved via **skill-ux-delivery** (`gate-prompts.md`) or deferred as an open question; no REQUIRED hard-stop at intake.
 - **Eval-first:** If user supplied test FAIL or audit FAIL, treat as **minimum write scope**.
 
 ### Step 3: `create-3-draft`
 
 - **Outcome:** Draft file content from template; `<!-- REQUIRED -->` markers replaced per `template-required-map.md`.
-- **Done when:** Full draft in memory; workflow steps include `todo_id` column if type is workflow; skill: `description` ≤160 chars and matches invoke mode; skill folder: sibling README per `readme-spec.md` drafted or defer reason recorded; `ACRONYMS.md` + `GLOSSARY.md` at resolved path per `lexicon-spec.md` (empty table OK).
+- **Done when:** Full draft in memory; workflow steps include `todo_id` column if type is workflow; skill: `description` ≤160 chars and matches invoke mode; skill folder: sibling README per `readme-spec.md` drafted or defer reason recorded; `ACRONYMS.md` + `GLOSSARY.md` at resolved path per `lexicon-spec.md` (empty table OK—companions ship every skill/plugin create); skills: **Delivery channels** wired from skill-UX choice into README **UX → Clarify/Close** and SKILL **Orchestration** / Execution rules (or one-line N/A if Minimal clarify and no enumerable forks).
 - **Skill folder draft order:** (1) README spec from `templates/readme.template.md` if missing or user supplied spec only; (2) `SKILL.md` from README + `templates/skill.template.md`; (3) ensure `ACRONYMS.md` + `GLOSSARY.md` at plugin root (or skill sibling if standalone)—harvest jargon from draft + co-loaded refs. If README already exists and user asked for `SKILL.md`, derive from README—do not invent a second spec.
+- **Delivery from UX gate:** Inject a short Question delivery / Orchestration constraint citing `questioning.md` **Delivery channels**—prefer AskQuestion when gates exist; text-mode same options mandatory; do not stall. Never rewrite Purpose/When/Procedure from the UX choice alone.
 - **README → SKILL derivation map** (per `readme-spec.md` reconstructability):
 
   | SKILL section | README source |
@@ -55,7 +59,8 @@
   | Actions table | **Actions** (id, outcome; omit Pick when) |
   | Procedure | Constraints phases + UX habit names only |
   | Exit conditions | Constraints stops + UX clarify caps |
-  | Execution rules | **UX** subsections |
+  | Execution rules | **UX** subsections (incl. Delivery channels / N/A) |
+  | Orchestration | **UX → Clarify/Close** + skill-UX choice |
 
 ### Step 4: `create-4-gates`
 

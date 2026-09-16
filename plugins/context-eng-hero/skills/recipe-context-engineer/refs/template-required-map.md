@@ -12,7 +12,7 @@ Use when replacing `<!-- REQUIRED -->` markers and when quoting evidence in refl
 | **When not to use** | `skill.anti-triggers` |
 | **Procedure** (imperative steps) | `skill.procedure.stop-points`, `skill.routing.no-chain-only` |
 | **Progressive disclosure** | `skill.progressive-disclosure`, `skill.refs.no-body-echo` |
-| **Orchestration** | `skill.orchestration.todo-mapping`, `workflow.orchestration.todowrite` (if multi-step) |
+| **Orchestration** | `skill.orchestration.todo-mapping`, `skill.clarify.delivery-channels` (Delivery channels stub or N/A when gates), `workflow.orchestration.todowrite` (if multi-step) |
 | Frontmatter `description` | `skill.description.recommended-length`, `skill.description.invoke-fit`, `static.description.*` |
 | Invoke flags | `skill.invoke.mode-flags`, `skill.invoke.no-wrong-lever` |
 
@@ -35,15 +35,20 @@ Same as Skill, plus audit `skill-ref.*` / `ref-file.*` rows when editing the pac
 | **Input contract** | `command.input.required` |
 | **Execution** (Action delegation) | `command.delegation.action-id`, `command.routing.no-chain-only` |
 | **Output** | `command.output.shape` |
+| AskQuestion / clarify gates (when present) | `command.clarify.delivery-channels` |
+| Frontmatter `argument-hint` | `command.argument-hint.when-args` |
 
 ## Agent
 
 | Section | Rubric id(s) |
 |---------|--------------|
-| **Role** | `agent.role.boundary` |
-| **Tools and boundaries** | `agent.tools.boundary` |
+| **Role** | `agent.role.domain` |
+| **Tools and boundaries** | `agent.boundaries.tools`, `agent.fence.body-required`, `agent.fm.tools-align-body` |
 | **Stop conditions** | `agent.stop.conditions` |
+| **Inputs** | `agent.inputs` |
 | **Outputs** | `agent.outputs.format` |
+| Frontmatter extras | `agent.fm.no-false-security`, `agent.access.portable-default` |
+| `description` | `agent.description.recommended-length`, `agent.description.invoke-fit` |
 
 ## Rule
 
@@ -63,7 +68,7 @@ Same as Skill, plus audit `skill-ref.*` / `ref-file.*` rows when editing the pac
 | **Steps** output column | `workflow.steps.output-contract` |
 | **Delegation** | `workflow.delegation.owners` |
 | **Exit and failure** | `workflow.exit.failure`, `workflow.steps.bounded` |
-| **Orchestration** | `workflow.orchestration.todowrite` |
+| **Orchestration** | `workflow.orchestration.todowrite`, `workflow.clarify.delivery-channels` (when AskQuestion/gates present; else N/A) |
 
 ## Skill README (`templates/readme.template.md`)
 
@@ -79,7 +84,7 @@ Sibling `skills/<name>/README.md`. Frontmatter optional. Static requires **Why**
 | **When → Use when** | `skill-ref.readme.spec` |
 | **When → Avoid when** | `skill-ref.readme.spec`, `skill-ref.readme.anti-triggers` |
 | **Philosophy** | `skill-ref.readme.philosophy` |
-| **UX** (`###` subsections) | `skill-ref.readme.ux` |
+| **UX** (`###` subsections) | `skill-ref.readme.ux` (Clarify/Close include Delivery channels fallback) |
 | **Design notes** | `skill-ref.readme.design-notes` |
 | **Constraints** | `skill-ref.readme.spec` |
 | **Notes** | `skill-ref.readme.spec` |

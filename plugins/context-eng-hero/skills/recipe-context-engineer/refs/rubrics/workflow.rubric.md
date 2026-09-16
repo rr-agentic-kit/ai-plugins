@@ -21,6 +21,7 @@ Judgment rows only in audit step 3. Static ids (`static.sections.required`, `sta
 | `workflow.steps.output-contract` | major | Each step row has non-empty **Output contract** cell |
 | `workflow.exit.failure` | major | **Exit and failure** lists abort triggers and what to report |
 | `workflow.routing.no-chain-only` | major | Workflow is not only a list of slashes without per-step owned work |
+| `workflow.clarify.delivery-channels` | major | If body/Orchestration mentions AskQuestion or enumerable branching gates: states text-mode fallback (same options as prose; no stall). Else one-line N/A or PASS if AskQuestion absent |
 
 ### Minor
 

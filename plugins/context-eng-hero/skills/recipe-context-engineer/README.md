@@ -52,12 +52,12 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 
 ## Philosophy
 
-- **Eval-first** — thicken from observed audit/test FAILs, not anticipated rules
+- **Eval-first** — thicken from observed compliance FAILs and ranked improvement opportunities, not anticipated rules
+- **Two-level audit** — compliance (`audit`: binary ship/write gate) stays separate from improvement (`audit-redesign`: ranked Keep/Improve/Restructure); reserved `--optimize` later runs both then applies absorb hints (fix then redesign) under write gates
 - **Live-miss → learn → absorb** — diagnose existing skill gaps from a live run miss (patch or friction); fix/redesign folds the handover in
 - **Scoped-only** — one declared artifact path per session; never ambient repo review
 - **Spec/executor split** — README = human spec; `SKILL.md` = Procedure and action refs
 - **Gates-before-write** — static → reflection → pre-ship → approve before any file write
-- **Minimum draft** — smallest template-shaped draft that satisfies clarify; refs only when FAIL proves the gap
 
 ## UX
 
@@ -71,7 +71,7 @@ Read user message and editor context; route plain requests to classified action 
 
 ### Clarify
 
-Active **AskQuestion** on path, action, type, and scope; one question at a time; use open context before asking.
+Active **AskQuestion** on path, action, type, invoke mode, and **skill UX (input/delivery)**; one question at a time; use open context before asking. If AskQuestion is missing or rejected, emit the same options as short prose and continue — never stall or claim the tool is “unavailable” (`refs/questioning.md` **Delivery channels**). Create/design: **skill-ux-delivery** gate after invoke mode; choice wires draft UX only—not Purpose/Procedure.
 
 ### Output
 
@@ -86,6 +86,9 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 - **Self-invoke** (`disable-model-invocation`) — orchestrator is expensive; requires explicit invocation
 - **Dual close surface** — skill uses AskQuestion; commands may name slash as user homework only
 - **STATIC SKIPPED** — audit continues judgment; write paths block until static PASS or user accepts draft-only
+- **Minimum draft** — smallest template-shaped draft that satisfies clarify; refs only when FAIL proves the gap
+- **audit-redesign stub** — improvement rubrics/templates + `refs/actions/audit-redesign.md` exist; not yet in the Actions table; do not treat as a shipped verb until wired
+- **Question tool fallback** — AskQuestion preferred; text-mode channel mandatory when tool/harness missing (`refs/questioning.md`)
 
 ## Constraints
 
@@ -97,13 +100,15 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 | **Paths** | Plugin-relative only; no `..` or absolute paths in authored content |
 | **README ↔ SKILL** | README = spec; SKILL = executor. Extract derives README from SKILL constraints, not Procedure paste |
 | **Lexicon** | `ACRONYMS.md` + `GLOSSARY.md` at plugin root (or skill sibling if standalone); harvest jargon; empty tables allowed |
+| **Skill UX** | Create/design: resolve **skill-ux-delivery**; audit catches lexicon + `*.clarify.delivery-channels` |
 | **Clarify caps** | Path unresolvable after 2 AskQuestion rounds → stop; action unresolvable after 1 → default design-assist |
 | **Write gate cap** | FAIL after 2 revision cycles → draft-only in chat |
 
 ## Notes
 
 - Static audit: `scripts/audit_static.py` from plugin root
-- Type rubrics: `refs/rubrics/`
+- Type rubrics (compliance): `refs/rubrics/`
+- Improvement rubric (audit-redesign): `refs/rubrics/audit-redesign.rubric.md`
 - Behavior probes: `refs/prompts/`
 
 Executor source of truth: `SKILL.md`. This README is the human spec—not a Procedure echo.

@@ -19,6 +19,7 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 | id | Severity | PASS when |
 |----|----------|-----------|
 | `skill-ref.refs.unique` | major | No two refs duplicate the same constraint without unique extension |
+| `skill.clarify.delivery-channels` | major | Pack SKILL (Procedure/Orchestration/close): if AskQuestion or enumerable gates → states text-mode fallback (same options as prose; no stall). If no gates: one-line N/A. Same id as `skill.rubric.md` |
 
 ### Minor
 

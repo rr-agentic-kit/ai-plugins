@@ -1,4 +1,25 @@
-# Skill invocation frontmatter
+# Skill design
+
+Judgment for **Skill** and **Skill+Ref**. Shared principles: `design/design-core.md`. Field tables: `frontmatter-schemas.md`. Helper scripts: `helper-cli.md`. Sibling README: `readme-spec.md`.
+
+## Skill vs Skill+Ref vs Ref
+
+| Shape | When |
+|-------|------|
+| **Skill** | Single `SKILL.md`; no sibling `refs/` pack |
+| **Skill+Ref** | Invariant procedure in SKILL; variant/detail in `refs/`—one hop from progressive disclosure / Action Ref index |
+| **Ref file** | Skill-private constraints for one subtask; not an entry point; YAML/`description` optional |
+
+Do not put invariant classify/orchestration that belongs in the parent SKILL into a ref.
+
+## Access economy (skills)
+
+1. Resolve **invoke mode** (Auto / Self / Background) **before** drafting `description` and flags.
+2. Add Claude `allowed-tools` only when turn-scoped grants are needed (e.g. `Bash(python3 scripts/…*)`).
+3. Never treat `allowed-tools` as “these are the only tools the model may use”—it is a **permission grant**, not a hard allowlist.
+4. Optional agentskills metadata (`license`, `compatibility`, `metadata`) only when shipping public skill packs that need them.
+
+## Invoke modes
 
 Two fields, two sides of the same coin. Use both only when each applies.
 
@@ -7,14 +28,14 @@ Two fields, two sides of the same coin. Use both only when each applies.
 | `disable-model-invocation: true` | Agent auto-trigger from description | User `/skill-name` (and explicit `Read` by agent or parent skill) |
 | `user-invocable: false` | Human `/skill-name` (hides from `/` menu on Claude Code) | Agent auto-trigger from description |
 
-## Platform behavior
+### Platform behavior
 
 | Field | Claude Code | Cursor |
 |-------|-------------|--------|
 | `disable-model-invocation: true` | No auto-trigger; **also drops description from ambient listing** (token savings) | No auto-trigger only; docs do **not** claim ambient-description exclusion |
 | `user-invocable: false` | Documented; hides from `/` menu | **Not in frontmatter schema** — likely ignored; treat as Claude-only |
 
-## Three invoke modes
+### Three modes
 
 Resolve mode **before** drafting `description` and flags (AskQuestion when unclear—see `questioning.md`).
 
@@ -24,7 +45,7 @@ Resolve mode **before** drafting `description` and flags (AskQuestion when uncle
 | **Self-invoke** | Human `/name` or parent `Read` / Action; not every related prompt | `disable-model-invocation: true` | Schema still requires `description`; Claude drops it from ambient listing; Cursor: no auto-trigger, **do not claim** listing exclusion |
 | **Background** | Agent auto-pull; hide from `/` (Claude) | `user-invocable: false` **without** disable | Description **is** the discovery surface — write for auto-pull, not slash UX |
 
-## When to use `disable-model-invocation: true`
+### When to use `disable-model-invocation: true`
 
 Portable default for internals. Use when the skill should **not** compete on ambient relevance:
 
@@ -41,7 +62,7 @@ disable-model-invocation: true
 ---
 ```
 
-## When to use `user-invocable: false`
+### When to use `user-invocable: false`
 
 **Claude Code extra only.** Not a context-savings lever and not reliable in Cursor.
 
@@ -60,7 +81,7 @@ user-invocable: false
 ---
 ```
 
-## Dual-runtime default (internal / action-like)
+### Dual-runtime default (internal / action-like)
 
 For skills meant to be invoked by humans **or** by other skills, **not** by ambient relevance:
 
@@ -76,7 +97,7 @@ user-invocable: false   # Claude Code: hide from / menu
 ---
 ```
 
-## Description: optimize for invocation mode
+## Description craft
 
 | Bound | Value | Recipe check |
 |-------|-------|--------------|
@@ -95,6 +116,16 @@ Write **after** invoke mode is known; count characters before gates.
 
 Audit **FAIL** if >160 unless user explicitly accepts over-budget (still **FAIL** if >1024).
 
+## Body budget
+
+- Prefer ≤~200 lines in SKILL body; push variant detail into `refs/` (one hop).
+- Progressive disclosure / Shared refs / Ref index names which ref for which step.
+- Scripts: agent **runs** helpers via shell—do not paste script source (`helper-cli.md`).
+
+## When to set `allowed-tools`
+
+Add only for Claude turn grants that unblock expected side effects (e.g. static audit script). Omit on Cursor-only targets. Align with `frontmatter-schemas.md` Notes—not a substitute for Procedure tool guidance.
+
 ## Anti-patterns (binary audit)
 
 | Anti-pattern | Why it fails |
@@ -105,9 +136,8 @@ Audit **FAIL** if >160 unless user explicitly accepts over-budget (still **FAIL*
 | `disable-model-invocation: true` on background knowledge the agent should auto-pull | Blocks the wrong side; use `user-invocable: false` on Claude Code instead |
 | Self-invoke description packed with ambient trigger verbs | Invites wrong auto-selection when flags mis-set |
 | Description >160 without justification | Bloat in listing that *does* get sent on auto-invoke paths |
+| Treating `allowed-tools` as a hard exclusive allowlist | Mis-teaches Claude semantics; body still needs tool/stop guidance |
 
-## Agents and sub-skills
+## Sub-skills
 
-Agents are not skills but share description rules (≤160, no delegation chains).
-
-Sub-skills (internal phases): require `disable-model-invocation: true`; optional `user-invocable: false` on Claude Code. Parent agent or workflow owns invocation—sub-skill body does not advertise ambient triggers.
+Require `disable-model-invocation: true`; optional `user-invocable: false` on Claude Code. Parent agent or workflow owns invocation—sub-skill body does not advertise ambient triggers.

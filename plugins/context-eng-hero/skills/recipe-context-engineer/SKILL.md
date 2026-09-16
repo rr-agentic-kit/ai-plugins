@@ -46,13 +46,17 @@ Every invocation follows this loop. Compress steps only when the user message al
 |-----|-----------|
 | `refs/classify.md` | Step 2; action classify steps |
 | `refs/disambiguation.md` | Step 1 |
-| `refs/questioning.md` | Intake gaps; clarify steps |
+| `refs/questioning.md` | Intake gaps; clarify steps (incl. skill-UX gate); **Delivery channels** |
 | `refs/advisory.md` | Step 4 |
-| `refs/gate-prompts.md` | Routing and post-action gates |
+| `refs/gate-prompts.md` | Routing, skill-ux-delivery, and post-action gates |
 | `refs/ui-brand.md` | Action banners and Next Up |
 | `refs/close-contract.md` | Step 6; template follow-ups |
 | `refs/chat-orchestration.md` | Authoring workflows/commands |
-| `refs/skill-invocation.md` | Authoring skills |
+| `refs/design/design-core.md` | Draft/plan: shared principles + type picker |
+| `refs/design/skill.md` | Authoring skills (invoke + allowed-tools) |
+| `refs/design/command.md` | Authoring commands |
+| `refs/design/agent.md` | Authoring plugin agents |
+| `refs/frontmatter-schemas.md` | Frontmatter field SoT (draft/gates) |
 | `refs/readme-spec.md` | Skill folder README (bidirectional spec) |
 | `refs/templates/readme.template.md` | Extract/create skill README |
 | `refs/lexicon-spec.md` | Plugin/skill ACRONYMS + GLOSSARY companions |
@@ -101,3 +105,6 @@ Every invocation follows this loop. Compress steps only when the user message al
 - **TodoWrite:** `merge: false`; one todo per step id; mark `completed` before advancing.
 - **Visual output:** Stage banner at action start (`ui-brand.md`).
 - **Post-action:** `close-contract.md`—never end on a bare report.
+- **Question delivery:** Prefer AskQuestion for enumerable gates; always fall back to the same options as prose when the tool/harness is missing — `refs/questioning.md` **Delivery channels**.
+- **Skill UX clarify:** On create/design skills, resolve **skill-ux-delivery** after invoke mode; draft wires authored Delivery channels (or one-line N/A) into the new artifact — maintain contract for dogfooded skills.
+- **Authored Delivery channels:** When this skill authors skills/commands/workflows that use AskQuestion, those artifacts must include the same fallback rule (`design/design-core.md`).

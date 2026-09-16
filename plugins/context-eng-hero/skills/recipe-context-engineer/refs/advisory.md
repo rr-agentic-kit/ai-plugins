@@ -17,7 +17,7 @@ Default create/fix path (Anthropic eval-first): **observe a miss, write the mini
 
 ## Goldilocks (over/under-spec)
 
-Challenge before writing (see `instruction-design.md` **Degrees of freedom**):
+Challenge before writing (see `design/design-core.md` **Degrees of freedom**):
 
 | Signal | Advisory response |
 |--------|-------------------|
@@ -57,10 +57,12 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **Stop points** — Each orchestration step has a done-when; no infinite loops
 - **Progressive disclosure** — Body ≤ ~200 lines or refs plan declared; heavy detail in `refs/`; **one hop** from SKILL (no ref→ref chains)
 - **Audience boundary** — Human vs agent vs both explicit; not "everyone"
-- **Invoke mode** — Auto / Slash-or-parent / Background chosen before drafting `description` and flags (`refs/skill-invocation.md`)
+- **Invoke mode** — Auto / Slash-or-parent / Background chosen before drafting `description` and flags (`design/skill.md`)
 - **Scripts folder** — If `scripts/` exists: agent **runs** helpers via shell; do not paste script bodies into SKILL (`refs/helper-cli.md`)
 - **README** — Sibling spec with Why/What/When; does not restate Procedure (`refs/readme-spec.md`)
 - **ACRONYMS + GLOSSARY** — Both companions at resolved path; table shape; harvest domain jargon (`refs/lexicon-spec.md`)
+- **Skill UX (input/delivery)** — Create/design: resolve **skill-ux-delivery** before draft (`gate-prompts.md`); wire README **UX → Clarify/Close** + SKILL Orchestration / Execution rules from that choice—do not rewrite Purpose/Procedure from the gate alone
+- **AskQuestion text fallback** — If Procedure/Orchestration/close uses AskQuestion or enumerable gates: state Delivery channels (prefer AskQuestion; same options as prose; no stall). If no gates: one-line N/A (`questioning.md`)
 
 **Skill+Ref additional:**
 
@@ -85,10 +87,12 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 
 ### Agent
 
-- **Tool boundary** — Allowlist or denylist explicit; not "use tools as needed"
+- **Body tool fence** — Allowlist or denylist with MUST/MUST NOT in body; not "use tools as needed"; frontmatter tools alone FAIL (`design/agent.md`)
 - **Stop conditions** — Per outcome; agent knows when to stop without user nudge
+- **Function-style default** — Non-interactive Task executor unless conversational variant justified
 - **Isolation mode** — Subagent vs inline chosen and justified
-- **Max turns bounded** — No unbounded "continue until done"
+- **Max turns bounded** — No unbounded "continue until done"; Claude `maxTurns` when loop risk
+- **Plugin-ignored fields** — Do not ship `permissionMode` / `hooks` / `mcpServers` as marketplace security (ignored in plugins)
 
 ### Rule
 
@@ -121,9 +125,11 @@ Call out before writing (do not silently author past these):
 | Audience = "everyone" or unspecified | Require narrowing before proceeding |
 | No failure mode for agent/workflow | Flag as **critical** gap |
 | Body > 200 lines without refs plan | Flag as **NOISE** risk; propose ref extraction |
-| `user-invocable: false` as sole control on internal skill | Flag **wrong lever** — auto-trigger may still run; see `skill-invocation.md` |
+| `user-invocable: false` as sole control on internal skill | Flag **wrong lever** — auto-trigger may still run; see `design/skill.md` |
 | Skill `description` >160 chars without justification | Flag **discovery bloat** — rewrite to one sentence ≤160 before gates |
 | Self-invoke skill with audit/fix/redesign verbs in `description` | Flag **invoke-fit** — outcome-first; no ambient trigger stuffing |
+| Plugin agent sets `permissionMode` / `hooks` / `mcpServers` | Flag **false security** — ignored when loaded from plugin; remove |
+| Agent tools only in frontmatter; vague body fence | Flag **missing body fence** — portable MUST/MUST NOT required |
 
 ## When to skip
 

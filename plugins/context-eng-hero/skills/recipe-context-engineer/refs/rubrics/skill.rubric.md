@@ -17,7 +17,7 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | id | Severity | PASS when |
 |----|----------|-----------|
 | `skill.discovery.when-clause` | major | `description` states WHAT the skill does and WHEN to use it (third person); quote the clause |
-| `skill.invoke.mode-flags` | major | Invoke mode (Auto / Self / Background) matches `disable-model-invocation` and `user-invocable` per `skill-invocation.md` |
+| `skill.invoke.mode-flags` | major | Invoke mode (Auto / Self / Background) matches `disable-model-invocation` and `user-invocable` per `design/skill.md` |
 | `skill.invoke.no-wrong-lever` | major | Internal/action-like skills do not use `user-invocable: false` **alone**; self-invoke skills have `disable-model-invocation: true` when ambient block intended |
 | `skill.description.invoke-fit` | major | `description` shape matches invoke mode (trigger keywords vs outcome-first); no ambient action verbs on self-invoke |
 | `skill.description.recommended-length` | major | `description` ≤160 characters one sentence, or user explicitly accepted over-budget in this session |
@@ -26,6 +26,7 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | `skill.consistency` | major | No contradictory MUST/MUST NOT between **Purpose**, **When to use**, and **Procedure** (cite both sides if FAIL) |
 | `skill.refs.no-body-echo` | major | Skill body does not restate constraints from refs it loads via Action **Run:** or progressive disclosure (cite both sides if FAIL) |
 | `skill.refs.unique-contribution` | major | Each ref named in progressive disclosure or Action **Load** adds at least one constraint not present in the skill body or other co-loaded refs for the same action |
+| `skill.clarify.delivery-channels` | major | If Procedure/Orchestration/close uses AskQuestion or enumerable gates: states text-mode fallback (same options as prose; no stall) per `questioning.md` **Delivery channels**. If no gates: one-line N/A |
 
 ### Minor
 
