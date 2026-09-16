@@ -27,6 +27,8 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | `skill.refs.no-body-echo` | major | Skill body does not restate constraints from refs it loads via Action **Run:** or progressive disclosure (cite both sides if FAIL) |
 | `skill.refs.unique-contribution` | major | Each ref named in progressive disclosure or Action **Load** adds at least one constraint not present in the skill body or other co-loaded refs for the same action |
 | `skill.clarify.delivery-channels` | major | If Procedure/Orchestration/close uses AskQuestion or enumerable gates: states text-mode fallback (same options as prose; no stall) per `questioning.md` **Delivery channels**. If no gates: one-line N/A |
+| `skill.orchestration.agent-inject` | major | If Procedure/action refs document Task agents: inject/load contract present (which refs in Task payload vs stable hard-links), or one-line N/A when no Task agents |
+| `skill.subskill.no-file-share-only` | major | Internal sub-skills are orchestrated procedures—not used only to host shared rubrics/templates (those belong in skill/plugin `refs/` per `design/design-core.md`) |
 
 ### Minor
 

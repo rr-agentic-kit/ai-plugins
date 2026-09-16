@@ -27,6 +27,10 @@ Judgment companion: `design/agent.md`. Field SoT: `frontmatter-schemas.md`.
 | `agent.consistency` | major | **Role**, boundaries, and stops do not contradict (cite if FAIL) |
 | `agent.fm.no-false-security` | major | Plugin-shipped agents do not set `permissionMode` / `hooks` / `mcpServers` as if they enforce security (ignored in plugins) |
 | `agent.fm.tools-align-body` | major | If frontmatter `tools` / `disallowedTools` present, they do not contradict the body fence |
+| `agent.knowledge.no-private-refs` | major | No `agents/<id>/refs/` tree claimed or required; knowledge lives in skill/plugin refs (`design/design-core.md`) |
+| `agent.knowledge.caller-load` | major | **Inputs** names caller-supplied or skill/plugin ref paths; does not own ambient discovery of the parent skill pack |
+| `agent.knowledge.no-skill-reinvoke` | major | MUST NOT instruct invoking the parent orchestrator skill for the same job |
+| `agent.outputs.no-template-echo` | major | **Outputs** links (does not paste) an injected/linked output template and does not invent a parallel JSON schema that only restates that markdown report |
 
 ### Minor
 

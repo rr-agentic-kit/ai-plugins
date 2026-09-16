@@ -14,7 +14,7 @@ Make **skills, commands, rules, agents, and workflows** discoverable, bounded, a
 ## When to use
 
 - Picking or narrowing **artifact type** (including Skill+Ref and ref file)
-- **Auditing**, **fixing**, **creating**, **extracting**, **testing**, **comparing**, or **learning from a live run miss (patch or friction)** on a scoped artifact file
+- **Auditing**, **improving** (compliance + opportunities + absorb), **fixing**, **creating**, **extracting**, **testing**, **comparing**, or **learning from a live run miss (patch or friction)** on a scoped artifact file
 - **Clarifying** outcome, audience, and failure modes before authoring
 
 ## When not to use
@@ -31,12 +31,12 @@ Every invocation follows this loop. Compress steps only when the user message al
 1. Intake   — read user message + editor context; Read `refs/disambiguation.md`
 2. Classify — if type unclear → one AskQuestion; see `refs/classify.md`
 3. Route    — if action unclear → `refs/gate-prompts.md` action-routing
-4. Advise   — `refs/advisory.md` for create, design, extract, fix, redesign; skip audit, test, diff, learn
+4. Advise   — `refs/advisory.md` for create, design, extract, fix, redesign; skip audit, audit-redesign, improve, test, diff, learn
 5. Act      — Read and execute `refs/actions/<action-id>.md`; TodoWrite step ids from that ref
 6. Close    — `refs/close-contract.md` + gate or `refs/ui-brand.md` Next Up
 ```
 
-**Intent seeding:** User states an action ("audit this", "fix the skill", "learn from this miss") → skip step 3, go to step 5.
+**Intent seeding:** User states an action ("audit this", "fix the skill", "learn from this miss", `--improve` / "improve this `<path>`") → skip step 3, go to step 5. `--improve` / improve-this still requires a declared path.
 
 **No deferral:** After step 6, if the user picks a follow-on, re-enter at step 5—do not tell them to type a command.
 
@@ -86,6 +86,8 @@ Every invocation follows this loop. Compress steps only when the user message al
 | create | New artifact from template + write gates | `refs/actions/create.md` |
 | extract | Draft + provenance from context | `refs/actions/extract.md` |
 | audit | Static + rubric report (no edits) | `refs/actions/audit.md` |
+| audit-redesign | Ranked improvement opportunities (no edits) | `refs/actions/audit-redesign.md` |
+| improve | Parallel audits → merge → fix then redesign under write gates | `refs/actions/improve.md` |
 | fix | Minimal edits for existing intent | `refs/actions/fix.md` |
 | redesign | Change outcome/scope + write gates | `refs/actions/redesign.md` |
 | learn | Approved gap package from a live run miss—patch or friction (no skill edits) | `refs/actions/learn.md` |

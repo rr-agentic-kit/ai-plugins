@@ -15,6 +15,14 @@ Map each opportunity to one primary pattern. Group bullets under one pattern whe
 | **LOAD** | Executor cognitive load; too many hops or decisions per turn | `imp.load.executor` |
 | **COLLISION** | Discovery overlap or sibling skill/command collision | `imp.discovery.sibling-collision` |
 
+**Shared-knowledge examples** (same pattern labels; no new ids):
+
+| Smell | Pattern |
+|-------|---------|
+| Echo of rubrics/output templates into agent body, or parallel JSON that restates Ranked/Findings | **COHESION** |
+| Wrong always-on sub-skill used only to share static judgment/files | **DISCLOSURE** |
+| Agent re-orchestrates / re-invokes parent skill for the same job | **LOAD** / **ORCHESTRATION** |
+
 **Not compliance:** These are ranked improvement opportunities (Keep / Improve / Restructure), not ship-blocking FAILs. Compliance blockers belong in a skim section only—see `rubrics/audit-redesign.rubric.md`.
 
 ## Assessment quality (not compliance FAIL labels)

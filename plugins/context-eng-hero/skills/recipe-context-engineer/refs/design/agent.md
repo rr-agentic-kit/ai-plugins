@@ -23,9 +23,22 @@ Default for marketplace agents (rrraw-like):
 | Write fence | Body states what may be written vs read-only |
 | Status stops | Concrete stop triggers (`ok` / `partial` / `failed` or equivalent) |
 | Single-shot | One invocation → one typed result; no unbounded “continue until perfect” |
-| Handoff economy | Compact parent summary; full narrative only when declared output requires it |
+| Handoff economy | Prefer markdown report SoT; full narrative when the output template requires it—no parallel JSON that only restates that report |
 
 **Conversational variant:** lighter Role + Tools + Stop for chatty helpers. Same portable body fence requirement; do not ship dual equal templates—start from function-style and strip only what the product needs.
+
+## Caller Load (operational)
+
+Shared layout SoT: `design/design-core.md` **Shared knowledge layout**.
+
+| Rule | Do |
+|------|----|
+| Knowledge home | Prefer skill/plugin `refs/` over duplicating judgment in the agent body |
+| Stable refs | List hard-link paths under **Inputs**; parent may still inject the same paths in the Task prompt |
+| Variant refs | Require parent inject (type rubric, method ref)—agent MUST NOT ambient-discover the parent skill pack |
+| **Outputs** | **Link** the output template path; do not paste template sections into the agent |
+| Schema echo | Do not invent a parallel JSON handoff when the template is already markdown-table shaped (Ranked / Findings) |
+| Orchestrator | MUST NOT instruct invoking the parent orchestrator skill for the same job |
 
 ## Access economy (agents) — hardness rule
 
@@ -73,3 +86,8 @@ Call out before writing:
 | Unbounded “continue until done” | Add stop conditions + optional `maxTurns` |
 | Conversational defaults for Task executor role | Prefer function-style; justify variant |
 | Nested path but `name` ≠ stem | Static `static.name.path-match` FAIL |
+| Agent embeds full rubric/template copy | Echo — link skill/plugin refs; Caller Load |
+| Agent invokes parent skill for same job | Forbidden — parent owns orchestration |
+| `agents/*/refs/` tree or claim | Forbidden — see design-core picker |
+| Mega-role modes holding all skill knowledge | Forbidden — function-style + Caller Load |
+| JSON handoff that only restates md Ranked/Findings | Prefer md report SoT; drop parallel schema |

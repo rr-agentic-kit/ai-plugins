@@ -1,12 +1,10 @@
-# Action: audit-redesign (spec stub)
+# Action: audit-redesign (internal)
 
-> **Status:** Spec stub only — **wiring deferred**. Rubrics and templates are source of truth for judgment. Do **not** add this id to the skill **Actions** table, post-routing gates, or ui-brand stages until Phase 2. Implementers may wire `--audit-redesign` / reserved `--optimize` later **without** redesigning rubrics.
+**Diagnosis only.** Ranked Keep/Improve/Restructure opportunities—no file edits. Compliance PASS/FAIL remains `refs/actions/audit.md`. Apply orchestration is owned by **improve** (`refs/actions/improve.md`).
 
-**Diagnosis only.** No file edits. Compliance PASS/FAIL remains `refs/actions/audit.md`.
+## Apply-consumer contract
 
-## Forward-compat
-
-Reserved future alias **`--optimize`:** run compliance **audit** → **audit-redesign** → apply absorb hints (`fix` then `redesign`) under write gates. Keep opportunity `id`s, absorb hints, and `templates/audit-redesign-output.template.md` section headers stable for that pipeline. Consumers must not assume ≤7 ranked rows (`rank` is unbounded `1…N`; `impact` is required).
+Opportunity field names, absorb hints, and `templates/audit-redesign-output.template.md` section headers are stable for **`--improve`**. Consumers must not assume ≤7 ranked rows (`rank` is unbounded `1…N`; `impact` is required). Skip Keep notes, `absorb: defer`, Deferred, and `impact: low` when applying.
 
 ## Ref index (Read at step)
 
@@ -15,20 +13,21 @@ Reserved future alias **`--optimize`:** run compliance **audit** → **audit-red
 | `disambiguation.md` | `ar-1-load` |
 | `questioning.md` | `ar-1-load` (missing path; **Delivery channels**) |
 | `classify.md` | `ar-1-load` (type) |
-| `ui-brand.md` | `ar-1-load` (banner — stage string TBD at wiring) |
+| `ui-brand.md` | `ar-1-load` (banner) |
 | `rubrics/audit-redesign.rubric.md` | `ar-2-judge`, `ar-3-challenge` |
 | `improvement-patterns.md` | `ar-4-filter-rank` |
 | `templates/audit-redesign-output.template.md` | `ar-5-report` |
+| `gate-prompts.md` | `ar-5-report` (**post-audit-redesign-routing**) |
 | `close-contract.md` | `ar-5-report` |
 | Type rubric / prior audit report (optional skim) | `ar-2-judge` (compliance blockers section only) |
 
-## Steps (outline)
+## Steps
 
 ### Step 1: `ar-1-load`
 
 - **Outcome:** Target path and artifact type known.
 - **Done when:** Path resolved via `questioning.md` if missing; type stated per `classify.md` (or assumption noted once).
-- **Banner:** TBD at wiring (`CE ► AUDIT-REDESIGN` candidate).
+- **Banner:** `CE ► AUDIT-REDESIGN` per `ui-brand.md`.
 
 ### Step 2: `ar-2-judge`
 
@@ -48,15 +47,14 @@ Reserved future alias **`--optimize`:** run compliance **audit** → **audit-red
 ### Step 5: `ar-5-report`
 
 - **Outcome:** Report emitted; loop closed without edits.
-- **Done when:** Report per `templates/audit-redesign-output.template.md` (Challenge + Ranked + optional Deferred); close per `close-contract.md`. Post-action AskQuestion / routing **deferred** to Phase 2 (text-mode fallback still applies if any gate is added later).
+- **Done when:** Report per `templates/audit-redesign-output.template.md` (Challenge + Ranked + optional Deferred); **post-audit-redesign-routing** AskQuestion per `gate-prompts.md`; follow-ups verb-only per `close-contract.md`.
 
 ## Stop
 
-**Diagnosis only** during steps 1–5. No auto-apply. Do not run write gates. User may manually follow absorb hints via **fix** / **redesign**; `--optimize` orchestration is out of scope for this stub.
+**Diagnosis only** during steps 1–5. No auto-apply. Do not run write gates. User may absorb via **fix** / **redesign** from the routing gate, or run **improve** for parallel audits + gated apply.
 
-## Explicit non-goals (this stub)
+## Explicit non-goals
 
-- Full SKILL Actions-table / post-routing / ui-brand stage
-- Implementing `--optimize`
+- Auto-applying opportunities (owned by **improve**)
 - Changing compliance rubrics or write-gate reflection
 - Truncating valid ranked survivors to meet a numeric ceiling

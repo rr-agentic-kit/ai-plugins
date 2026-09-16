@@ -21,12 +21,12 @@ Skill intake when action is unclear (ambient invoke or vague request).
 
 - **question:** "What do you want to do with this artifact?"
 - **header:** "Action"
-- **options:** Audit it | Fix or improve | Create new | Something else
+- **options:** Audit it | Improve it | Create new | Something else
 - **Route map:**
-  - Audit it → **audit**
-  - Fix or improve → if outcome change unclear, run **fix-vs-redesign** first; else **fix**
+  - Audit it → **audit** (freeform may pick **audit-redesign** for improvement-only diagnosis)
+  - Improve it → **improve** (requires declared path)
   - Create new → **create**
-  - Something else → infer from freeform (extract, test, diff, redesign, learn, design assist) or one clarifying question
+  - Something else → infer from freeform (fix, redesign, extract, test, diff, learn, audit-redesign, design assist) or one clarifying question; if outcome change unclear for edits, run **fix-vs-redesign** first
 
 ---
 
@@ -105,6 +105,36 @@ After audit report is emitted.
   - Done for now → end with **Next Up** block only; no further action
 
 If verdict PASS and user picks fix, confirm they want polish-only (**fix**) vs contract change (**redesign**) via **fix-vs-redesign**.
+
+---
+
+## Pattern: post-audit-redesign-routing
+
+After audit-redesign report is emitted.
+
+- **question:** "Improvement report ready. What next?"
+- **header:** "Next"
+- **options:** Absorb via fix | Absorb via redesign | Done for now
+- **Route map:**
+  - Absorb via fix → **fix** (pass ranked `absorb: fix` ids + path; skip defer/low)
+  - Absorb via redesign → **redesign** (pass ranked `absorb: redesign` ids + path)
+  - Done for now → end with **Next Up** block only; no further action
+
+Freeform may request **improve** (full parallel + gated apply) or compliance **audit** instead.
+
+---
+
+## Pattern: post-improve-routing
+
+After improve completes (gates passed and file written, diagnosis-only with empty apply list, or user declined write).
+
+- **question:** "Improve complete. What next?"
+- **header:** "Next"
+- **options:** Audit again | Run behavior test | Done for now
+- **Route map:**
+  - Audit again → **audit**
+  - Run behavior test → **test**
+  - Done for now → end with **Next Up** block only
 
 ---
 

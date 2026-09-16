@@ -20,6 +20,8 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 |----|----------|-----------|
 | `skill-ref.refs.unique` | major | No two refs duplicate the same constraint without unique extension |
 | `skill.clarify.delivery-channels` | major | Pack SKILL (Procedure/Orchestration/close): if AskQuestion or enumerable gates → states text-mode fallback (same options as prose; no stall). If no gates: one-line N/A. Same id as `skill.rubric.md` |
+| `skill.orchestration.agent-inject` | major | If pack actions Task agents: inject/load contract present (or N/A). Same id as `skill.rubric.md` |
+| `skill.subskill.no-file-share-only` | major | Sub-skill not used only as file share for rubrics/templates. Same id as `skill.rubric.md` |
 
 ### Minor
 

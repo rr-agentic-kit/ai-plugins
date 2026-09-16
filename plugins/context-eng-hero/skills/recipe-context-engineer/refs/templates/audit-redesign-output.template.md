@@ -2,7 +2,7 @@
 
 Fill from `rubrics/audit-redesign.rubric.md`. Map patterns via `improvement-patterns.md`. **No** compliance PASS/FAIL verdict; opportunities are ranked after challenge + quality filter, not capped by count.
 
-**Stability:** Field names and section headers are reserved for a future `--optimize` apply pipeline—keep them stable. `rank` is unbounded `1…N`; `impact` is required; do not assume ≤7 ranked rows.
+**Stability:** Field names and section headers are reserved for the **`--improve`** apply pipeline—keep them stable. `rank` is unbounded `1…N`; `impact` is required; do not assume ≤7 ranked rows.
 
 ```markdown
 # Audit-redesign: <artifact-type> — <file-or-title>
@@ -50,7 +50,20 @@ Fill from `rubrics/audit-redesign.rubric.md`. Map patterns via `improvement-patt
 ## Recommended next step (user)
 - Absorb via **fix** (Improve / absorb:fix) and/or **redesign** (Restructure / absorb:redesign)
 - Defer low-ROI items; re-run compliance **audit** if blockers listed above
-- Reserved later: `--optimize` runs compliance audit → audit-redesign → apply absorb hints (fix then redesign) under write gates
+- Or run **`--improve`**: compliance audit → audit-redesign → apply absorb hints (fix then redesign) under write gates
 ```
 
 **Filter:** Rank only `impact` ∈ {high, medium} with `confidence` = observed, or high+hypothesized. Drop opportunities without evidence. `medium`+`hypothesized` → Deferred (not ranked). `impact: low` never ranks. Do not invent a single craft FAIL that blocks ship. No numeric ceiling on ranked rows.
+
+## Apply-consumer field contract
+
+Parent **improve** (and manual fix/redesign absorb) reads these fields only:
+
+| Field | Apply rule |
+|-------|------------|
+| `id` | Stable slug; cite in fix/redesign plans |
+| `rank` | Priority among ranked rows; unbounded `1…N` |
+| `absorb` | `fix` → fix lane; `redesign` → redesign lane; `defer` → **skip** |
+| `impact` | Apply only `high` \| `medium`; **skip** `low` |
+| `confidence` | Informational; Deferred (`medium`+`hypothesized`) already excluded from ranked apply |
+| Keep / Deferred sections | **Never** auto-apply |

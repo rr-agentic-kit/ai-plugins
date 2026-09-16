@@ -28,9 +28,30 @@ When work spans verifiable steps: action commands → **TodoWrite** with ids fro
 | **Ref file** | Skill-private constraints for one subtask; loaded via parent SKILL / action Ref index |
 | **Command** | Slash contract: inputs, delegation to skill **Action**, output shape |
 | **Agent** | Isolated-role executor: Role / Tools and boundaries / Stop / Inputs / Outputs |
+| **Agent knowledge** | Skill or plugin `refs/` (Read / Caller Load)—**not** an `agents/<id>/refs/` tree |
 | **Refs (orchestrator)** | Templates, rubrics, checklists—Read at the step that branches |
 
 Link the canonical ref once; do not duplicate policy in three places.
+
+## Shared knowledge layout
+
+Picker for where judgment/templates live when a parent skill Tasks agents (or multiple skills share a pack). Type files (`design/agent.md`, `design/skill.md`) point here once—do not restate the table.
+
+| Need | Pick |
+|------|------|
+| Judgment/procedure shared by parent skill + its Task agents | **Skill `refs/` SoT** — agents Read paths and/or Caller Load injection |
+| Same pack needed by **≥2 skills** in the plugin | **Plugin-level `refs/<pack>/`** (rrraw `refs/planning/` pattern) |
+| Reusable **orchestrated** procedure with own routing/TodoWrite | **Internal sub-skill** (`disable-model-invocation: true`; optional Claude `user-invocable: false`) — not for hosting rubrics/templates |
+| Agent-private progressive disclosure tree | **Forbidden** — `agents/<id>/refs/` |
+| Mega-agent with mode param holding all skill knowledge | **Forbidden** — function-style + Caller Load |
+
+**When to revisit plugin-level refs:** promote only when a second skill in the same plugin truly needs the same pack; one consumer skill keeps SoT under that skill’s `refs/`.
+
+Companion rules:
+
+- Parent skill/action owns workflow; agents are single-shot executors (no nested skill invoke for the same orchestrator).
+- Parallel diagnosis: multiple Task calls in one turn; merge in parent (`actions/improve.md` is the exemplar).
+- Variant paths (type rubric, method ref) → **inject in Task payload**; stable set may be hard-linked in agent Inputs.
 
 ## Degrees of freedom
 

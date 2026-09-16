@@ -1,6 +1,6 @@
 # Advisory (design partner)
 
-Loaded in the **Advise** orchestration step and after **Gather** in Clarify. Run for **create**, **design**, **extract**, **fix**, and **redesign**—skip for **audit**, **test**, **diff**, and **learn** (diagnosis-only).
+Loaded in the **Advise** orchestration step and after **Gather** in Clarify. Run for **create**, **design**, **extract**, **fix**, and **redesign**—skip for **audit**, **audit-redesign**, **improve**, **test**, **diff**, and **learn** (diagnosis-only or report-as-plan).
 
 ## Eval-first authoring
 
@@ -63,6 +63,8 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **ACRONYMS + GLOSSARY** — Both companions at resolved path; table shape; harvest domain jargon (`refs/lexicon-spec.md`)
 - **Skill UX (input/delivery)** — Create/design: resolve **skill-ux-delivery** before draft (`gate-prompts.md`); wire README **UX → Clarify/Close** + SKILL Orchestration / Execution rules from that choice—do not rewrite Purpose/Procedure from the gate alone
 - **AskQuestion text fallback** — If Procedure/Orchestration/close uses AskQuestion or enumerable gates: state Delivery channels (prefer AskQuestion; same options as prose; no stall). If no gates: one-line N/A (`questioning.md`)
+- **Task inject/load contract** — When the skill Tasks agents: document which refs go in the Task payload vs stable hard-links before draft (`chat-orchestration.md`; exemplar `actions/improve.md`)
+- **Sub-skill ≠ file share** — Sub-skill proposed only to share rubrics/templates with an agent → redirect to skill/plugin `refs/` SoT (`design/design-core.md` picker)
 
 **Skill+Ref additional:**
 
@@ -93,6 +95,9 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **Isolation mode** — Subagent vs inline chosen and justified
 - **Max turns bounded** — No unbounded "continue until done"; Claude `maxTurns` when loop risk
 - **Plugin-ignored fields** — Do not ship `permissionMode` / `hooks` / `mcpServers` as marketplace security (ignored in plugins)
+- **Caller Load / shared refs** — Prefer skill or plugin `refs/` SoT; Inputs name caller-supplied or hard-linked paths; no ambient parent-skill discovery (`design/design-core.md` **Shared knowledge layout**)
+- **Outputs link template** — Link output template; do not paste rubric/template text or parallel JSON that only restates Ranked/Findings tables
+- **No parent re-invoke** — Agent MUST NOT instruct invoking the orchestrating parent skill for the same job
 
 ### Rule
 
@@ -130,8 +135,13 @@ Call out before writing (do not silently author past these):
 | Self-invoke skill with audit/fix/redesign verbs in `description` | Flag **invoke-fit** — outcome-first; no ambient trigger stuffing |
 | Plugin agent sets `permissionMode` / `hooks` / `mcpServers` | Flag **false security** — ignored when loaded from plugin; remove |
 | Agent tools only in frontmatter; vague body fence | Flag **missing body fence** — portable MUST/MUST NOT required |
+| Agent copies rubric **or output template** text / parallel JSON schema instead of linking | Flag **echo / COHESION** — link template; prefer md Task handoff |
+| Sub-skill proposed only to share rubrics/templates with an agent | Redirect to skill/plugin `refs/` SoT (`design/design-core.md` picker) |
+| Plugin agent discovers ambient parent skill instead of Caller Load | Flag **load-efficiency** — inject paths in Task payload |
+| Designing skill+agents without inject/load contract | Flag **gap** — document inject list before draft |
+| Needless JSON Task handoff when Ranked/Findings tables already carry apply fields | Prefer **md report SoT**; drop parallel schema |
 
 ## When to skip
 
 - User message already addresses every item in the catalog for the detected type → skip Advise silently (0 gaps)
-- Action is audit, test, diff, or learn → Advise not loaded
+- Action is audit, audit-redesign, improve, test, diff, or learn → Advise not loaded

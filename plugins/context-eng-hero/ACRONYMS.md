@@ -15,6 +15,7 @@
 | COHESION | Cohesion improvement pattern | Seams / pack boundaries (`improvement-patterns.md`) |
 | DISCLOSURE | Disclosure improvement pattern | Always-on vs progressive load economics |
 | FRAMING | Framing improvement pattern | LLM-hostile wording / weak forcing functions |
+| IMPROVE | Improve action / stage banner | `--improve`; parallel audits then gated absorb |
 | PASS | Check passed | Static or judgment |
 | FAIL | Check failed | Static or judgment |
 | AMBIGUOUS | Judgment inconclusive | Needs human call |

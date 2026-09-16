@@ -26,7 +26,9 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 |--------|---------|-----------|
 | create | New artifact from template + write gates | New folder or file; no existing definition to extract from |
 | extract | Draft + provenance from context | `SKILL.md` exists; user wants README or spec from definition |
-| audit | Static + rubric report (no edits) | Check quality without changing files |
+| audit | Static + rubric report (no edits) | Check compliance quality without changing files |
+| audit-redesign | Ranked Keep/Improve/Restructure opportunities (no edits) | Improvement diagnosis only; no auto-apply |
+| improve | Parallel compliance + opportunity audits, then absorb under write gates | Declared path; want diagnose-and-apply (`--improve`) |
 | fix | Minimal edits for existing intent | Audit or test FAIL; same outcome and scope |
 | redesign | Change outcome/scope + write gates | Wrong capability, audience, or outcome |
 | learn | Approved gap package from a live run miss—patch or friction (no skill edits) | Live run miss (patch or friction); fold learning back via fix/redesign |
@@ -39,7 +41,7 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 ### Use when
 
 - Picking or narrowing artifact type (including Skill+Ref and ref file)
-- Auditing, fixing, creating, extracting, testing, comparing, or learning from a live run miss (patch or friction) on a scoped definition
+- Auditing, improving, fixing, creating, extracting, testing, comparing, or learning from a live run miss (patch or friction) on a scoped definition
 - Clarifying outcome, audience, and failure modes before authoring
 - Generating or updating a skill README from an existing `SKILL.md` (**extract**)
 - Packaging gaps after a live run miss (patch or friction) so fix/redesign can absorb without re-deriving the miss (**learn**)
@@ -53,7 +55,7 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 ## Philosophy
 
 - **Eval-first** — thicken from observed compliance FAILs and ranked improvement opportunities, not anticipated rules
-- **Two-level audit** — compliance (`audit`: binary ship/write gate) stays separate from improvement (`audit-redesign`: ranked Keep/Improve/Restructure); reserved `--optimize` later runs both then applies absorb hints (fix then redesign) under write gates
+- **Two-level audit** — compliance (`audit`: binary ship/write gate) stays separate from improvement (`audit-redesign`: ranked Keep/Improve/Restructure); `--improve` runs both then applies absorb hints (fix then redesign) under write gates
 - **Live-miss → learn → absorb** — diagnose existing skill gaps from a live run miss (patch or friction); fix/redesign folds the handover in
 - **Scoped-only** — one declared artifact path per session; never ambient repo review
 - **Spec/executor split** — README = human spec; `SKILL.md` = Procedure and action refs
@@ -87,7 +89,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 - **Dual close surface** — skill uses AskQuestion; commands may name slash as user homework only
 - **STATIC SKIPPED** — audit continues judgment; write paths block until static PASS or user accepts draft-only
 - **Minimum draft** — smallest template-shaped draft that satisfies clarify; refs only when FAIL proves the gap
-- **audit-redesign stub** — improvement rubrics/templates + `refs/actions/audit-redesign.md` exist; not yet in the Actions table; do not treat as a shipped verb until wired
+- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits + gated apply (agents `agents/audit/compliance.md` + `opportunity.md`)
 - **Question tool fallback** — AskQuestion preferred; text-mode channel mandatory when tool/harness missing (`refs/questioning.md`)
 
 ## Constraints

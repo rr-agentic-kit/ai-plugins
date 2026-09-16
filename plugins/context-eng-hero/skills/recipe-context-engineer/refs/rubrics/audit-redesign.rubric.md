@@ -2,9 +2,9 @@
 
 Diagnosis-only judgment for **improvement** quality—not compliance PASS/FAIL. Compliance remains `rubrics/<type>.rubric.md` + `scripts/audit_static.py` via the **audit** action.
 
-Map each opportunity to a label in `improvement-patterns.md`. Output shape: `templates/audit-redesign-output.template.md`. Procedure stub: `actions/audit-redesign.md` (wiring deferred).
+Map each opportunity to a label in `improvement-patterns.md`. Output shape: `templates/audit-redesign-output.template.md`. Procedure: `actions/audit-redesign.md`.
 
-**Stable ids:** Dimension and opportunity field names below are reserved for a future `--optimize` pipeline (compliance audit → audit-redesign → absorb `fix` then `redesign`). Do not rename without a migration note. **Migration:** `rank` is unbounded `1…N`; `impact` is a new required field (`high` \| `medium` \| `low`); the former “max 7” cap is retired—reserved `--optimize` consumers must not assume ≤7 rows.
+**Stable ids:** Dimension and opportunity field names below are reserved for the **`--improve`** pipeline (compliance audit → audit-redesign → absorb `fix` then `redesign`). Do not rename without a migration note. **Migration:** `rank` is unbounded `1…N`; `impact` is a required field (`high` \| `medium` \| `low`); the former “max 7” cap is retired—`--improve` consumers must not assume ≤7 rows.
 
 ## Success / anti-goals
 
@@ -56,7 +56,7 @@ Evaluate each dimension. Emit 0–N candidates with evidence; omit empty dimensi
 
 | Field | Rule |
 |-------|------|
-| **Look for** | Mixed concerns in one artifact; unclear SKILL vs ref vs companion boundaries; duplicate ownership |
+| **Look for** | Mixed concerns in one artifact; unclear SKILL vs ref vs companion boundaries; duplicate ownership; agent body echoing linked rubrics/templates or parallel JSON restating Ranked/Findings |
 | **Improve when** | Seams exist but are muddy; split or rename without changing outcome |
 | **Restructure when** | Wrong pack architecture (e.g. Skill+Ref needed, or ref should be inlined) |
 
@@ -64,7 +64,7 @@ Evaluate each dimension. Emit 0–N candidates with evidence; omit empty dimensi
 
 | Field | Rule |
 |-------|------|
-| **Look for** | Always-on body bloated; critical constraints buried in refs; refs that should be body (or reverse) |
+| **Look for** | Always-on body bloated; critical constraints buried in refs; refs that should be body (or reverse); always-on sub-skill used only to share static judgment/files |
 | **Improve when** | Move/compress content without contract change |
 | **Restructure when** | Progressive-disclosure topology is wrong for invoke cost |
 
@@ -80,7 +80,7 @@ Evaluate each dimension. Emit 0–N candidates with evidence; omit empty dimensi
 
 | Field | Rule |
 |-------|------|
-| **Look for** | Clarify/TodoWrite/close paths costly; stacked gates |
+| **Look for** | Clarify/TodoWrite/close paths costly; stacked gates; agent re-orchestrates parent skill instead of single-shot return |
 | **Improve when** | Same forks, cheaper delivery |
 | **Restructure when** | Gate graph or close surface should change |
 
@@ -104,7 +104,7 @@ Evaluate each dimension. Emit 0–N candidates with evidence; omit empty dimensi
 
 | Field | Rule |
 |-------|------|
-| **Look for** | Too many hops, tables, or decisions per turn; Ref index overload |
+| **Look for** | Too many hops, tables, or decisions per turn; Ref index overload; agent re-invokes parent orchestrator for the same job |
 | **Improve when** | Compress load path |
 | **Restructure when** | Action surface should split or merge |
 
@@ -145,6 +145,5 @@ Mandatory internal pass after candidates exist and **before** filter/rank. Mirro
 ## Explicit non-goals
 
 - Replacing compliance rubrics or write-gate reflection
-- Auto-applying opportunities
-- Shipping as a SKILL Actions-table row until Phase 2 wiring
+- Auto-applying opportunities (owned by **improve**)
 - Truncating valid ranked survivors to meet a numeric ceiling

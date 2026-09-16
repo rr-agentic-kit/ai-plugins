@@ -141,3 +141,12 @@ Add only for Claude turn grants that unblock expected side effects (e.g. static 
 ## Sub-skills
 
 Require `disable-model-invocation: true`; optional `user-invocable: false` on Claude Code. Parent agent or workflow owns invocation—sub-skill body does not advertise ambient triggers.
+
+Shared layout SoT: `design/design-core.md` **Shared knowledge layout**.
+
+| Rule | Do |
+|------|----|
+| What a sub-skill is | Reusable **orchestrated** procedure with its own routing/TodoWrite |
+| What it is not | A dump for shared rubrics/templates—use skill `refs/` or plugin-level `refs/<pack>/` |
+| Parent + Task agents | Document inject/load list in action or orchestration refs (point to `chat-orchestration.md` once) |
+| Same orchestrator | Agents MUST NOT re-invoke this parent skill for the job the parent already owns |

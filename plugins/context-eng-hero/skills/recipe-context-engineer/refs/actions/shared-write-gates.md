@@ -1,6 +1,6 @@
 # Shared write gates (internal)
 
-Used by **create**, **fix**, **redesign**, **design**, and **extract** (file write) after draft content exists at an approved plugin-relative path. Each action's `*-4-gates` step runs these four gates in order.
+Used by **create**, **fix**, **redesign**, **design**, **extract** (file write), and **improve** (combined apply draft) after draft content exists at an approved plugin-relative path. Each action's gates step runs these four gates in order (**improve** runs them once on the merged fix+redesign draft).
 
 ## Ref index (Read at gate)
 

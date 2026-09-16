@@ -29,11 +29,11 @@ description: Role and when to use in one sentence ≤160. No delegation chains o
 
 ## Inputs
 
-<!-- What invoker provides (agent.inputs) -->
+<!-- REQUIRED (agent.inputs): what invoker provides. Caller Load — list stable skill/plugin ref paths; require parent inject for variant refs (type rubric, method). Prefer refs SoT over pasting judgment into this body. See design/design-core.md Shared knowledge layout. -->
 
 ## Outputs
 
-<!-- REQUIRED (agent.outputs.format): format -->
+<!-- REQUIRED (agent.outputs.format): link the report/output template path; prefer markdown. Do not paste template sections or invent parallel JSON unless a field truly cannot live in the template (Ranked/Findings tables already carry apply fields). -->
 
 ## Orchestration
 
