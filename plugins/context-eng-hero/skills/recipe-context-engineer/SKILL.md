@@ -1,8 +1,8 @@
 ---
 name: recipe-context-engineer
-description: Use when designing, auditing, fixing, or creating skills, commands, rules, agents, or workflows—not ambient code review.
+description: Hardens scoped skills, commands, rules, agents, and workflows via gated design and write loops—slash or explicit Read only.
 disable-model-invocation: true
-allowed-tools: Read, Write, Edit, Bash(python3 scripts/audit_static.py*)
+allowed-tools: Read, Write, Edit, Bash(python3 scripts/audit_static.py*), Task, AskQuestion, TodoWrite
 ---
 
 # Context engineer
@@ -29,11 +29,17 @@ Every invocation follows this loop. Compress steps only when the user message al
 
 ```
 1. Intake   — read user message + editor context; Read `refs/disambiguation.md`
+            Done when: disambiguation loaded; path resolved or Exit stop fired
 2. Classify — if type unclear → one AskQuestion; see `refs/classify.md`
+            Done when: type stated (or assumption noted once)
 3. Route    — if action unclear → `refs/gate-prompts.md` action-routing
+            Done when: action id known (or design-assist default stated)
 4. Advise   — `refs/advisory.md` for create, design, extract, fix, redesign; skip audit, audit-redesign, improve, test, diff, learn
-5. Act      — Read and execute `refs/actions/<action-id>.md`; TodoWrite step ids from that ref
+            Done when: gaps listed or Advise skipped per action table
+5. Act      — Read and execute `refs/actions/<action-id>.md`; TodoWrite step ids from that ref (or single-shot N/A when action allows)
+            Done when: action ref steps complete per that ref's Stop/Done when
 6. Close    — `refs/close-contract.md` + gate or `refs/ui-brand.md` Next Up
+            Done when: matching post-*-routing gate or Next Up emitted
 ```
 
 **Intent seeding:** User states an action ("audit this", "fix the skill", "learn from this miss", `--improve` / "improve this `<path>`") → skip step 3, go to step 5. `--improve` / improve-this still requires a declared path.
@@ -41,6 +47,10 @@ Every invocation follows this loop. Compress steps only when the user message al
 **No deferral:** After step 6, if the user picks a follow-on, re-enter at step 5—do not tell them to type a command.
 
 ## Ref index
+
+Draft/gates/probes/templates/rubrics load only from the **action** Ref index (`refs/actions/<id>.md`)—that table is SoT for staged Reads. Do **not** treat the Authoring table below as always-on.
+
+### Orchestration (always)
 
 | Ref | Read when |
 |-----|-----------|
@@ -51,6 +61,13 @@ Every invocation follows this loop. Compress steps only when the user message al
 | `refs/gate-prompts.md` | Routing, skill-ux-delivery, and post-action gates |
 | `refs/ui-brand.md` | Action banners and Next Up |
 | `refs/close-contract.md` | Step 6; template follow-ups |
+
+### Authoring (action Ref index only)
+
+Load these only when the active action Ref index names them (create/design/extract/fix/redesign draft paths)—not on audit / improve / test / learn / diff alone.
+
+| Ref | Read when |
+|-----|-----------|
 | `refs/chat-orchestration.md` | Authoring workflows/commands |
 | `refs/design/design-core.md` | Draft/plan: shared principles + type picker |
 | `refs/design/skill.md` | Authoring skills (invoke + allowed-tools) |
@@ -58,15 +75,9 @@ Every invocation follows this loop. Compress steps only when the user message al
 | `refs/design/agent.md` | Authoring plugin agents |
 | `refs/frontmatter-schemas.md` | Frontmatter field SoT (draft/gates) |
 | `refs/readme-spec.md` | Skill folder README (bidirectional spec) |
-| `refs/templates/readme.template.md` | Extract/create skill README |
 | `refs/lexicon-spec.md` | Plugin/skill ACRONYMS + GLOSSARY companions |
-| `refs/templates/acronyms.template.md` | Create/harvest ACRONYMS.md |
-| `refs/templates/glossary.template.md` | Create/harvest GLOSSARY.md |
 | `refs/helper-cli.md` | Target has `scripts/` |
 | `refs/template-required-map.md` | Drafting; reflection evidence |
-| `refs/rubrics/` | Type judgment rubrics (audit, reflection) |
-| `refs/templates/` | Artifact and output templates |
-| `refs/prompts/` | Behavior probe prompts (test action) |
 
 ## Exit conditions
 
@@ -78,6 +89,7 @@ Every invocation follows this loop. Compress steps only when the user message al
 | Write gate FAIL after 2 revision cycles | Draft-only in chat; "Manual review required." Stop write. |
 | Bash unavailable (`audit_static.py` missing) | **Audit:** `STATIC SKIPPED`; continue judgment. **Write paths:** block until static PASS or user accepts draft-only. |
 | Advisory produces 0 gaps | Skip Advise silently |
+| No matching ref for a required Load | Use SKILL invariant + this Exit table; do **not** invent a ref. Stop if the action cannot proceed without that ref. |
 
 ## Actions
 
@@ -104,9 +116,9 @@ Every invocation follows this loop. Compress steps only when the user message al
 ## Execution rules
 
 - **Action ref is source of truth** for steps, staged Reads, and stop rules.
-- **TodoWrite:** `merge: false`; one todo per step id; mark `completed` before advancing.
+- **TodoWrite:** `merge: false`; one todo per step id; mark `completed` before advancing. **Single-shot N/A** (one line) allowed for `audit`, `audit-redesign`, `diff`, and `test`; required for write paths and `improve`. Under **improve** nested apply: only `improve-1…6` todos — do not spawn nested `fix-*` / `redesign-*` lists (`actions/improve.md` Stop).
 - **Visual output:** Stage banner at action start (`ui-brand.md`).
 - **Post-action:** `close-contract.md`—never end on a bare report.
-- **Question delivery:** Prefer AskQuestion for enumerable gates; always fall back to the same options as prose when the tool/harness is missing — `refs/questioning.md` **Delivery channels**.
+- **Question delivery:** Prefer AskQuestion; text-mode same options (no stall) — SoT `refs/questioning.md` **Delivery channels**.
 - **Skill UX clarify:** On create/design skills, resolve **skill-ux-delivery** after invoke mode; draft wires authored Delivery channels (or one-line N/A) into the new artifact — maintain contract for dogfooded skills.
 - **Authored Delivery channels:** When this skill authors skills/commands/workflows that use AskQuestion, those artifacts must include the same fallback rule (`design/design-core.md`).

@@ -152,6 +152,20 @@ After fix completes (gates passed and file written, or user declined write).
 
 ---
 
+## Pattern: post-redesign-routing
+
+After redesign completes (gates passed and file written, or user declined write).
+
+- **question:** "Redesign complete. What next?"
+- **header:** "Next"
+- **options:** Audit again | Run behavior test | Done for now
+- **Route map:**
+  - Audit again → **audit**
+  - Run behavior test → **test**
+  - Done for now → end with **Next Up** block only
+
+---
+
 ## Pattern: post-learn-routing
 
 After learn handover is written (or chat-only draft accepted).

@@ -20,3 +20,4 @@
 | FAIL | Check failed | Static or judgment |
 | AMBIGUOUS | Judgment inconclusive | Needs human call |
 | SoT | Source of truth | Always-on body is `AGENTS.md`; Claude pointer is `CLAUDE.md` |
+| ACP | Agent Client Protocol | Harness/channel gaps where AskQuestion may be absent (`questioning.md`) |

@@ -5,9 +5,11 @@ Used by **Action: redesign** step 1. Intake proceeds with stated assumptions per
 ## Done-when for apply (before `redesign-2-plan` completes)
 
 - Plugin-relative **path** to the definition file.
-- **Delta brief** from the user (paste or bullets): what should change in outcome, audience, capabilities, or failure modes.
+- **Delta brief** from the user (paste or bullets): what should change in outcome, audience, capabilities, or failure modes — **or** prior **audit-redesign** Ranked rows with Absorb `redesign` (opportunity ids + detail) when absorb-via-redesign / nested under **improve**.
 
 ## AskQuestion (when fields missing)
+
+Skip this block when a Ranked Absorb `redesign` detail set (or improve merge plan) already supplies the delta brief—state breaking-change assumption once and proceed.
 
 1. **Outcome delta** — what should succeed differently?
 2. **Audience delta** — who applies this now vs before?

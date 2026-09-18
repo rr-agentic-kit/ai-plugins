@@ -14,8 +14,6 @@ Plugin teams ship skills, commands, rules, agents, and workflows that other engi
 - **Human spec:** Sibling `README.md` holds Why/What/When; `SKILL.md` holds Procedure (bidirectional per `refs/readme-spec.md`)
 - **Lexicon:** Plugin-root `ACRONYMS.md` + `GLOSSARY.md` (always required; harvest on create/design/redesign/extract per `refs/lexicon-spec.md`)
 
-**Out of scope:** Production application code; repo-wide review without a declared artifact path.
-
 ### Verification
 
 Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
@@ -73,7 +71,7 @@ Read user message and editor context; route plain requests to classified action 
 
 ### Clarify
 
-Active **AskQuestion** on path, action, type, invoke mode, and **skill UX (input/delivery)**; one question at a time; use open context before asking. If AskQuestion is missing or rejected, emit the same options as short prose and continue — never stall or claim the tool is “unavailable” (`refs/questioning.md` **Delivery channels**). Create/design: **skill-ux-delivery** gate after invoke mode; choice wires draft UX only—not Purpose/Procedure.
+AskQuestion (or text-mode same options) on path/action/type/invoke/skill-UX; create/design: **skill-ux-delivery** after invoke — SoT `refs/questioning.md`.
 
 ### Output
 

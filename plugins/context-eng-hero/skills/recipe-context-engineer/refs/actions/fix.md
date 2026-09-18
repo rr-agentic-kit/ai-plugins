@@ -56,6 +56,17 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 - **Outcome:** User routed to next action or done.
 - **Done when:** **post-fix-routing** AskQuestion per `gate-prompts.md`; on selection, skill continues; else **Next Up** per `close-contract.md`.
 
+## Nested under improve
+
+When parent `improve` injects path + failure source from the merge plan (compliance FAIL ids ∪ Ranked Absorb `fix`):
+
+1. Treat `fix-1-read` done-when as satisfied — no AskQuestion for Missing failure source; skip FIX banner and `fix-5-close`.
+2. **Load only:** this file’s Steps 2–3 (`fix-2-plan`, `fix-3-apply`) plus `fix-intake.md` Mapping rule; type design/frontmatter/readme/lexicon refs only if a planned edit touches that surface.
+3. **Do not** TodoWrite `fix-*` step ids — parent owns `improve-1…6` only.
+4. **Gates:** If redesign lane is empty, parent runs `shared-write-gates.md` once on this draft; else return draft to parent for combine — do not run `fix-4-gates` yourself.
+
+Standalone fix (user-invoked, no improve parent) uses the full Ref index and Steps 1–5 above.
+
 ## Stop
 
-No scope expansion. When audit-led, fix **every** FAIL (critical, major, minor)—no "critical only" shortcut.
+No scope expansion. When audit-led, fix **every** FAIL (critical, major, minor)—no "critical only" shortcut. Same for every Ranked Absorb `fix` id when that is the failure source.

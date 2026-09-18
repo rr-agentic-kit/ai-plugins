@@ -8,6 +8,7 @@ Used by **Action: fix** step 1. Intake proceeds with stated assumptions per `que
 - **Failure source** (one or more):
   - Prior **audit** report with every FAIL id (critical, major, minor), or
   - Prior **test** report with probe FAIL ids tied to the same contract, or
+  - Prior **audit-redesign** Ranked rows with Absorb `fix` (opportunity ids + detail)—same contract as audit FAIL lists; aligns with `classify.md` Routing and **post-audit-redesign-routing**, or
   - Prior **learn handover** (`LEARN-HANDOVER.md` or chat handover)—approved topic ids = FAIL list (same contract as audit/test reports), or
   - User **symptom list** mapped to concrete edits (no scope expansion).
 
@@ -16,7 +17,7 @@ Used by **Action: fix** step 1. Intake proceeds with stated assumptions per `que
 Use when the user did not supply an audit/test/learn report and intent is unclear:
 
 1. **Preserve primary outcome?** — yes / no / unsure (if no → recommend **redesign**).
-2. **Input type** — audit report / test report / learn handover / symptom list only.
+2. **Input type** — audit report / test report / audit-redesign Absorb `fix` ids / learn handover / symptom list only.
 3. **Scope** — fix listed failures only / user proposes extra edits (reject extra unless user re-runs **redesign**).
 
 ## Reject
@@ -27,6 +28,6 @@ Use when the user did not supply an audit/test/learn report and intent is unclea
 
 ## Mapping rule
 
-Each FAIL id, approved learn topic id, or symptom must map to one concrete edit before step 2 (`fix-2-plan`) completes.
+Each FAIL id, Ranked Absorb `fix` opportunity id, approved learn topic id, or symptom must map to one concrete edit before step 2 (`fix-2-plan`) completes.
 
 **Eval-first:** Fix only what FAILs require; do not thicken with anticipated rules. Re-run **test** after fix when probes exist. After absorb from learn handover: recommend delete user-project `LEARN-HANDOVER.*` + re-audit/test on **plugin source** (never cache).
