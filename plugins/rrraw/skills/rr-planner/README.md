@@ -14,7 +14,7 @@ Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX;
 
 **Explicitly no traditional sprints** (no capacity/velocity theater). Sequencing language: **slice / phase / selected requirements**. Release/version bundling of frozen slices is a later Plan add-on — not this skill’s inventiveness.
 
-**Out of scope:** Execute / ship-check / ticket writing — future. Execute starts fused code+test from the kernel; no separate tech-planning step in Plan.
+**Out of scope:** Execute prepare/implement / ship-check / ticket writing — builder (**rr-prepare**, **rr-coder**). Plan has no separate tech-planning ceremony; thin tech ADRs may complete at prepare.
 
 ## Actions
 

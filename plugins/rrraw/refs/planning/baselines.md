@@ -223,7 +223,7 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
     rrr-status.yaml          # SUMMARY
     agent.plan.md            # tripwire
     future.md / tech.md / later.md
-    tasks/                   # reserved (global; not CoW on open-next)
+    tasks/                   # global ids + {slice_id}/ (not CoW on open-next)
     0.1/
       discovery/
         status.yaml          # DETAIL — ES/MRD/BRD
@@ -319,7 +319,7 @@ Primary Plan freeze unit is a **selected requirement slice**, not the whole PRD 
 2. Same-sitting standing record exists for selected capabilities (constitution and/or feature deltas; cited tech ADR when needed) with **Decision** + **Effort drivers**; UI-facing needs **UX-shape** (or `n/a` + reason). Constitution/architecture rev may be `draft` — **draft ≠ missing** Decision/drivers.
 3. Write/overwrite `docs/rr/{track}/plan/execute-slice.yaml` (5-field kernel + pins; Constraints cite delta/constitution obligations; `delta_paths` must exist) — [output-formats.md](output-formats.md).
 4. Stamp `plan/status.yaml` `slice:` with requirement ids + kernel path; do **not** shrink/delete deferred requirement rows.
-5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is. Execute starts fused code+test from the kernel — no separate tech-planning step.
+5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is. Execute prep = **rr-prepare**; Plan has no separate tech-planning ceremony (thin tech ADRs may complete at prepare).
 6. Whole-PRD freeze remains optional structure lock only — not the default handoff to Execute.
 
 Refuse freeze when Effort lacks drivers, UI-facing selected features lack UX-shape, or Constraints only restate product goals. See Plan `skills/rr-planner/refs/execute-handoff.md`.

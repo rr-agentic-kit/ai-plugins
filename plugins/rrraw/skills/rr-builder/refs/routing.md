@@ -6,6 +6,7 @@
 
 | Input signal | Load |
 |--------------|------|
+| `--prepare`, prepare slice, decompose execute-slice, tech plan for slice | `rr-prepare/SKILL.md` |
 | Implement, refactor, production code change | `rr-coder/SKILL.md` |
 | Tests, coverage, flaky, migrate tests | `rr-tester/SKILL.md` |
 | OWASP, secrets, vulnerability audit | `rr-security-auditor/SKILL.md` |
@@ -27,18 +28,20 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 
 ## Plan-driven routing
 
-When `payload.plan_path` is set (`docs/plans/` or user file):
+When `payload.plan_path` is set (`docs/plans/` or user file) **or** an `execute-slice.yaml` / prepare intent is present:
 
-1. Read plan goal and acceptance criteria.
-2. Implementation tasks → **rr-coder**.
-3. Test-only tasks → **rr-tester**.
-4. Explicit security acceptance → **rr-security-auditor** or **rr-review** with `--security`.
-5. "Review before merge" without lane → **rr-review** `--all`.
+1. Prepare / decompose / tech-plan-for-slice → **rr-prepare** (stop after L3; no auto-chain to coder).
+2. Read plan goal and acceptance criteria.
+3. Implementation tasks (already prepared or explicit implement) → **rr-coder**.
+4. Test-only tasks → **rr-tester**.
+5. Explicit security acceptance → **rr-security-auditor** or **rr-review** with `--security`.
+6. "Review before merge" without lane → **rr-review** `--all`.
 
-If the plan is planning-only (no code tasks), stop: **rr-planner** owns that artifact.
+If the plan is planning-only (no code or prepare tasks), stop: **rr-planner** owns that artifact.
 
 ## Anti-patterns
 
-- Loading all four nested `SKILL.md` files in one turn.
+- Loading all nested `SKILL.md` files in one turn.
+- Auto-chaining **rr-prepare** → **rr-coder** in the same run.
 - Running **rr-ci** before review completes when user only asked for local review.
 - Using **rr-builder** for exec-summary / PRD authoring.

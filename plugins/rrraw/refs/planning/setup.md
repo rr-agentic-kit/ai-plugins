@@ -28,7 +28,7 @@ Script stdout: one machine line per section (`section\tcreated|fixed|ok|failed\t
 | `docs root` | mkdir `docs/` | — | exists |
 | `rr directory` | mkdir `docs/rr/` | — | exists |
 | `layout migrate` | — | move legacy phase-first / flat trees into `docs/rr/{track}/{phase}/`; relocate parking | already migrated / nothing to migrate |
-| `tasks directory` | mkdir `docs/rr/tasks/` (empty; reserved) | — | exists |
+| `tasks directory` | mkdir `docs/rr/tasks/` (empty; `registry.yaml` minted on first prepare) | — | exists |
 | `discovery directory` | mkdir `docs/rr/{track}/discovery/` | — | exists |
 | `plan directory` | mkdir `docs/rr/{track}/plan/` | — | exists |
 | `root SoT load line` | — (never create missing CLAUDE/AGENTS) | append/restore line | already present (or no root SoT files) |

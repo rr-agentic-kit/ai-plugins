@@ -1,6 +1,6 @@
 ---
 name: rr-builder
-description: Routes implement, test, security, or multi-lane review to one nested skill. Use for code, tests, OWASP, or review — not rr-planner or rr-ci alone.
+description: Routes prepare, implement, test, security, or review to one nested skill. Use for tech-plan, code, tests, OWASP, or review — not rr-planner or rr-ci alone.
 ---
 
 # rr-builder
@@ -13,6 +13,7 @@ Given a plan (`docs/plans/`), flags, or natural language, **classify** the work 
 
 ## When to use
 
+- Prepare / decompose a frozen execute-slice into `docs/rr/tasks/`
 - Implement or refactor production code
 - Test assess/write/fix/migrate/flaky flows
 - OWASP / secrets / vulnerability audit
@@ -34,14 +35,15 @@ See [refs/anti-overlap.md](refs/anti-overlap.md).
 TodoWrite `merge: false` with ids `resolve`, `classify`, `load`, `execute` when routing spans 3+ steps; omit for a single unambiguous nested skill.
 
 1. **resolve** — Load [refs/input-resolution.md](refs/input-resolution.md). Normalize flags, plan path, or NL into `payload.lane` and optional `payload.nested_flags`. Done: payload emitted or one AskQuestion.
-2. **classify** — If `payload.lane` is ambiguous, AskQuestion once: code | test | security | review-all. Done: exactly one lane.
+2. **classify** — If `payload.lane` is ambiguous, AskQuestion once: prepare | code | test | security | review-all. Done: exactly one lane.
 3. **load** — **`Read`** the nested skill from [refs/routing.md](refs/routing.md). Do not preload other nested skills.
-4. **execute** — Follow the nested skill until its done-when. If outcome is review `--ci`, after findings **`Read`** `skills/rr-ci/SKILL.md` for forge POST. Stop; do not continue into rr-ci unless `--ci` or user asked to ship.
+4. **execute** — Follow the nested skill until its done-when. Prepare stops after L3 (no auto-chain to coder). If outcome is review `--ci`, after findings **`Read`** `skills/rr-ci/SKILL.md` for forge POST. Stop; do not continue into rr-ci unless `--ci` or user asked to ship.
 
 ## Nested skills (path-loaded only)
 
 | Lane | Path | Listed in plugin.json |
 |------|------|------------------------|
+| Prepare | [rr-prepare/SKILL.md](rr-prepare/SKILL.md) | no |
 | Code | [rr-coder/SKILL.md](rr-coder/SKILL.md) | no |
 | Test | [rr-tester/SKILL.md](rr-tester/SKILL.md) | no |
 | Security | [rr-security-auditor/SKILL.md](rr-security-auditor/SKILL.md) | no |

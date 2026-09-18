@@ -34,10 +34,13 @@
 
 | Skill | Not a substitute for |
 |-------|----------------------|
-| rr-coder | rr-tester (test strategy), rr-security-auditor (OWASP depth) |
+| rr-prepare | rr-planner (product Plan/DEC), rr-coder (implement); owns tech plan + lazy tech ADR gaps + task WBS under `docs/rr/tasks/` |
+| rr-coder | rr-tester (test strategy), rr-security-auditor (OWASP depth), rr-prepare (task decomposition) |
 | rr-tester | rr-coder (production design), rr-review orchestration |
 | rr-security-auditor | rr-coder CPNNN, full test coverage |
 | rr-review | rr-ci POST mechanics, host-specific forge/MR scripts |
+
+**rr-prepare stop phrase:** "Tech plan / task WBS only — use **rr-prepare**; product Plan stays **rr-planner**; code stays **rr-coder**."
 
 ## Host-agnostic contract
 

@@ -28,3 +28,7 @@
 | CPNNN | Coder Principles rule ID (`CP` + 3 digits) | Builder code-lane findings; e.g. `CP013` — not `CP-13` |
 | OWASP | Open Worldwide Application Security Project | Builder security lane Top 10 patterns |
 | ARNNN | Architecture review rule ID (`AR` + digits) | Builder code-lane architecture section; e.g. `AR004` |
+| L1 | Prepare layer 1 — ordered `task-summary` | rr-prepare; capability atoms + depends_on |
+| L2 | Prepare layer 2 — detailed `{NNNN}.md` task | rr-prepare; one atom at a time |
+| L3 | Prepare layer 3 — PR division map | rr-prepare; no forge open |
+| WBS | Work Breakdown Structure | rr-prepare ordered task tree under `docs/rr/tasks/` |

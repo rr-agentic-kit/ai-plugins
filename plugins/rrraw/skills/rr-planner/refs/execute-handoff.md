@@ -8,7 +8,7 @@
 
 ## Success metric (north-star)
 
-After freeze, a future Execute agent can start **fused code+test** without inventing stack, feature mechanism, or cost-driving UX shape — and RICE Effort that selected this slice was not inflated by Happy-Path Effort. Pin-complete kernel + Effort honesty are **necessary** pass conditions for the mint itself.
+After freeze, **rr-prepare** (builder) turns the kernel into ordered tasks under `docs/rr/tasks/`; later **rr-coder** implements. Pin-complete kernel + Effort honesty are **necessary** pass conditions for the mint itself — prepare may complete thin tech ADRs when forced, but Plan does not run a separate tech-planning ceremony.
 
 **Plan success** (skill north-star) is broader: the Plan raises the odds the builder reaches the frozen Discover objective / OMTM. Freeze is allowed only when further Plan work stops moving that likelihood **and** no open standing red flag / Discover-reopen blocks it.
 
@@ -34,7 +34,7 @@ Plus **version stamps** (`track`, `docs`, `product` from Plan phase status at fr
 
 Stamp `plan/status.yaml` `slice:` (`refs/planning/baselines.md`).
 
-Execute starts fused code+test from this kernel — **no separate tech-planning step**. Obligation break → existing classify-the-change / unfreeze.
+Execute prep = **rr-prepare** (ordered tasks + lazy tech ADRs). Plan still has **no** separate tech-planning ceremony — thin tech ADRs may be completed at prepare. Obligation break → existing classify-the-change / unfreeze.
 
 ## Thin selection at freeze
 
@@ -75,7 +75,7 @@ Plan body may proceed citing a **solid subset** of draft Discover when the skill
 
 ## Next Up
 
-Future **Execute** consumes the kernel. No Execute skill in this redesign. Future **release/version** grouping may reference frozen slices — not designed here. Close habits: `refs/planning/progress.md`.
+Future **Execute** starts with **rr-prepare** then **rr-coder** / test / review. Future **release/version** grouping may reference frozen slices — not designed here. Close habits: `refs/planning/progress.md`.
 
 ## Done-when
 

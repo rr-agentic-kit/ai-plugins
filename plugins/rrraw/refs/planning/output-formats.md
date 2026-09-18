@@ -19,7 +19,7 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
     rrr-status.yaml                 # SUMMARY — phase/track/product/docs glance (not pin input)
     agent.plan.md                   # non-patch tripwire (skill-owned; not cascade input)
     future.md / tech.md / later.md  # parking (not validator input)
-    tasks/                          # reserved — tsk-{NNN}-{intent}/ (global; not CoW on open-next)
+    tasks/                          # global task tree — registry.yaml + {slice_id}/ (not CoW on open-next)
     0.1/                            # current track (every track is version-first)
       discovery/
         status.yaml                 # DETAIL — ES/MRD/BRD revs/pins/challenge/mint_hash
@@ -89,13 +89,31 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
 | Q&A history | `{track}/{phase}/raw-history/{UTC compact ISO-8601}.yaml` |
 | research report | `{track}/plan/research-report.md` |
 | challenge report | `{track}/{phase}/{stem}.challenge.report.md` (one per cascade/standing doc; overwrite on each scan of that stem) |
-| tasks (reserved) | `rr/tasks/tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md` — see below |
+| tasks | `rr/tasks/registry.yaml` + `rr/tasks/{slice_id}/` — see below |
 
 Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet. File exists only while unresolved notes remain; skill deletes it when empty after compose persist. Create `docs/rr/{next}/{phase}/` only when the skill mints `next` after confirm.
 
-### Tasks (reserved)
+### Tasks (`docs/rr/tasks/`)
 
-Global under `docs/rr/tasks/` — **not** per-track folders. Naming: `tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md`. Frontmatter carries `track` for version metadata. **Never** copy-on-write when opening a next track. Out of validator scope for now (same class as `future.md`). Task authoring / Execute integration is a later pass.
+Global under `docs/rr/tasks/` — **not** per-track folders. **Never** copy-on-write when opening a next track. Out of cascade validator scope (same class as `future.md`). Authored by **rr-prepare** (builder tech plan); not Plan compose.
+
+```
+docs/rr/tasks/
+  registry.yaml          # next_id + optional index (SoT for global monotonic ids)
+  {slice_id}/
+    task-summary.md      # L1 ordered list + L3 PR division
+    0001.md              # L2 detailed task (id starts at 1, never 0)
+    0002.md
+    …
+```
+
+| Rule | |
+|------|--|
+| `{slice_id}` | Kernel `slice_id` (e.g. `slice-001`) |
+| Global task ids | First task ever is `1` → `0001.md`; next slice continues at `N+1` (does not restart). Allocate via `registry.yaml` (`next_id`); on mint, scan max existing id if registry missing |
+| Filename | Zero-padded four-digit id; frontmatter `id:` integer |
+| Frontmatter | `track`, `slice_id`, kernel/PRD pins, `depends_on` (global task ids) |
+| Supersedes | Former reserved naming `tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md` |
 
 `--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` (`skills/rr-discovery/refs/input-resolution.md`). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and phase `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md`, `agent.plan.md`, `tech.md`, `later.md`, `docs/GLOSSARY.md`, `docs/ACRONYMS.md`, and `rrr-status.yaml` are **not validator cascade input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
 
@@ -285,7 +303,7 @@ pins:
 | Fail freeze | Smell-fail AC without hold; Effort without standing record or Effort drivers; UI-facing without UX-shape; empty `delta_paths` when mechanism needed; shrinking the full requirement table to “match the slice” |
 | Validator (when file present) | Required-field + `delta_paths` file existence — `EXECUTE_SLICE_*` codes; judgment owns smell/WWAS |
 
-Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. **No Execute skill** in this redesign — Next Up is future Execute. Execute starts fused code+test; no separate tech-planning step.
+Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. Execute prep = **rr-prepare** (builder lane) — Plan has no separate tech-planning ceremony; thin tech ADRs may be completed at prepare. After prepare, implement via **rr-coder** (no auto-chain from prepare).
 
 ## `later.md`
 

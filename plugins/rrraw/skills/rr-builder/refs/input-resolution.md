@@ -8,11 +8,12 @@ Exactly one **lane** unless user explicitly requested multi-lane review:
 
 | Signal | `payload.lane` |
 |--------|----------------|
+| `--prepare`, "prepare slice", "decompose execute-slice", "tech plan for slice" | `prepare` |
 | `--code`, `--test`, `--security`, `--all`, `--fix`, `--ci`, "review", "code review" | `review` |
 | Any rr-tester primary flag (see `rr-tester/refs/input-resolution.md`) | `test` |
 | `--security-audit`, "OWASP", "secrets audit", "vulnerability" (without review flags) | `security` |
 | "implement", "refactor", "build", "add feature", plan with implementation tasks | `code` |
-| Ambiguous | AskQuestion once: code \| test \| security \| review-all |
+| Ambiguous | AskQuestion once: prepare \| code \| test \| security \| review-all |
 
 ## Review flags (forward to rr-review)
 
@@ -45,16 +46,28 @@ Planning-only docs without implementation intent → `OUT_OF_SCOPE` → **rr-pla
 
 | Pattern | Lane |
 |---------|------|
+| "prepare slice", "decompose execute-slice", "tech plan for slice" | prepare |
 | "write tests for", "coverage", "flaky" | test |
 | "security review", "check for SQL injection" | security (or review if `--all`) |
 | "review my changes", "PR review" | review |
 | "implement", "fix bug in", "refactor" | code |
 
+## Prepare path
+
+When `lane: prepare`, resolve `execute-slice.yaml` (explicit path or next open) into `payload.prepare`. Nested skill owns posture + task tree; parent does not invent task ids.
+
+```yaml
+prepare:
+  kernel_path: null | string
+  slice_id: null | string
+```
+
 ## Output payload (skill session)
 
 ```yaml
-lane: code | test | security | review
+lane: prepare | code | test | security | review
 plan_path: null | string
+prepare: null | { kernel_path, slice_id }
 review: null | { lanes, outcome, scope, paths }
 test: null | object   # rr-tester normalized payload
 security_scope: null | { scope, paths }

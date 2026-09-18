@@ -1,7 +1,7 @@
 # architecture (tech ADRs)
 
 **Audience: dual** — `refs/planning/doc-standards/dual-audience.md`  
-**Owner:** True **technical** Architecture Decision Records — stack, integration boundaries, data-model standing choices.
+**Owner:** True **technical** Architecture Decision Records — stack, integration boundaries, data-model standing choices. Plan authors ADRs when Effort drivers need them; **rr-prepare** may mint/revise build-blocking `ADR-n` **only when forced** by L1/L2 (lazy — not a pre-pass dump). Product DEC/constitution stay Plan-owned.
 
 **Path:** `docs/rr/{track}/plan/architecture.md` and/or `adrs/`  
 **Load when:** On-demand when a capability cites a tech ADR; not the always-load standing law ([constitution.md](constitution.md)).
