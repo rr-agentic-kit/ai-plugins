@@ -17,6 +17,10 @@ _GITLAB = re.compile(
 )
 
 
+def _host_is(host: str, domain: str) -> bool:
+    return host == domain or host.endswith(f".{domain}")
+
+
 @dataclass(frozen=True)
 class Remote:
     forge: str
@@ -45,7 +49,7 @@ def parse_remote_url(url: str) -> Remote:
     host = (parsed.hostname or "").lower()
     path = (parsed.path or "").lstrip("/")
     gh = _GITHUB.search(normalized) or _GITHUB.search(https_like)
-    if ("github.com" in host or gh) and gh:
+    if (_host_is(host, "github.com") or gh) and gh:
         return Remote("github", host or "github.com", gh.group("owner"), gh.group("repo"))
     gl = _GITLAB.search(normalized) or _GITLAB.search(https_like)
     if "gitlab" in host or gl:
