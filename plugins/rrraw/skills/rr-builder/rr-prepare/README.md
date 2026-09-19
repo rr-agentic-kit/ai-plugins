@@ -44,7 +44,7 @@ Resolve `execute-slice.yaml` + posture (greenfield / brownfield / docs-ahead / c
 
 ### Clarify
 
-AskQuestion (or text-mode same options) for irreversible tech forks and L1 validation; pause after L1 and each L2 by default.
+AskQuestion (or text-mode same options) for irreversible tech forks and L1 validation (DAG, grain, requirement map, posture); pause after L1 and each L2 by default (batch L2 only if parent requests).
 
 ### Output
 

@@ -11,7 +11,11 @@ track: "0.1"
 kernel_path: docs/rr/0.1/plan/execute-slice.yaml
 posture: greenfield
 prepare_status: l1 | l2 | complete
-pending_tech: []
+pending_tech: []   # empty = no topics yet; else list of maps:
+# pending_tech:
+#   - topic: auth-session-store
+#     blocked_task_ids: [3]
+#     status: pending   # pending | forced | resolved
 doc_drift: null
 ---
 ```
@@ -26,7 +30,7 @@ Optional column / note: `doc_drift` when brownfield posture marked drift.
 
 ## Pending tech
 
-Mirror [tech-decisions.md](tech-decisions.md) inventory until resolved.
+Mirror [tech-decisions.md](tech-decisions.md) inventory until resolved. Shape: YAML list of maps (`topic`, `blocked_task_ids`, `status`); `[]` means no topics yet.
 
 ## PR map (L3)
 

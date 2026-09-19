@@ -6,6 +6,8 @@
 
 Opportunity field names, absorb hints, and `templates/audit-redesign-output.template.md` section headers are stable for **`--improve`**. Consumers must not assume ≤7 ranked rows (`rank` is unbounded `1…N`; `impact` is required). Skip Keep notes, `absorb: defer`, Deferred, and `impact: low` when applying.
 
+**Detect ≠ absorb:** Ranked opportunities may include **SCRIPTABLE** waste (deterministic invent or context-bloating shell/list) even when the skill has no `scripts/` yet. Summary/Why = detection; Suggested direction + `absorb` = how to improve (point Procedure at CLI/helper/filtered stdout). Do not treat “no helper-cli” as a compliance-style blocker or as the opportunity itself.
+
 ## Ref index (Read at step)
 
 | Ref | When |
@@ -37,7 +39,7 @@ Opportunity field names, absorb hints, and `templates/audit-redesign-output.temp
 ### Step 3: `ar-3-challenge`
 
 - **Outcome:** Candidates challenged per rubric **Challenge (before rank)** (FP / FN / stability / id stability / Effect / Cost / Delta).
-- **Done when:** FP drops/demotions applied; FN pass recorded (“coverage: no additional.” or added medium/high with evidence); stability flips noted with conservative (lower) band kept; ids use `imp.<dimension>.<evidence-anchor-slug>`; Effect/Cost/Delta demotions, drops, or defer applied (or “none” noted per pass).
+- **Done when:** FP drops/demotions applied; FN pass recorded (“coverage: no additional.” or added medium/high with evidence) **including** explicit scriptable + context-bloat walks (or “scriptable/context-bloat: none”); stability flips noted with conservative (lower) band kept; ids use `imp.<dimension>.<evidence-anchor-slug>`; Effect/Cost/Delta demotions, drops, or defer applied (or “none” noted per pass)—Cost must not demote SCRIPTABLE solely for introducing an indexed helper.
 
 ### Step 4: `ar-4-filter-rank`
 

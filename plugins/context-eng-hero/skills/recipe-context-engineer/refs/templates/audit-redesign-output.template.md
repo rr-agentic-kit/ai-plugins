@@ -20,7 +20,7 @@ Fill from `rubrics/audit-redesign.rubric.md`. Map patterns via `improvement-patt
 
 ## Challenge
 - **FP:** <drops/demotions, or “none”>
-- **FN:** <added medium/high with evidence, or “coverage: no additional.”>
+- **FN:** <added medium/high with evidence, or “coverage: no additional.” / “scriptable/context-bloat: none”>
 - **Stability:** <flips kept at lower band, or “none”>
 - **Effect:** <demotions/drops for speculative or taste-only effect, or “none”>
 - **Cost:** <demotions where absorb adds load without proportional gain, or “none”>
@@ -38,8 +38,8 @@ Fill from `rubrics/audit-redesign.rubric.md`. Map patterns via `improvement-patt
 - **Dimension:** `imp.…`
 - **Evidence:** `<path>` — <section/quote>
 - **Impact:** high | medium
-- **Why it matters:** …
-- **Suggested direction:** …
+- **Why it matters:** … (detect: waste / invent / context dump — not “missing scripts/”)
+- **Suggested direction:** … (improve: point at CLI / index custom helper / filter stdout→value)
 - **Absorb hint:** fix | redesign | defer
 
 ## Deferred (optional)

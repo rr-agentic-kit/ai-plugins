@@ -13,6 +13,7 @@ Map each opportunity to one primary pattern. Group bullets under one pattern whe
 | **FREEDOM** | Degrees of freedom mismatch (too rigid or too open) | `imp.freedom.fit` |
 | **EVAL-LOOP** | Hard to audit/test/thicken from observed FAILs | `imp.eval.loop-fitness` |
 | **LOAD** | Executor cognitive load; too many hops or decisions per turn | `imp.load.executor` |
+| **SCRIPTABLE** | Agent forced to invent deterministic multi-step work (or dump→filter) a one-shot tool could return | `imp.load.executor` |
 | **COLLISION** | Discovery overlap or sibling skill/command collision | `imp.discovery.sibling-collision` |
 
 **Shared-knowledge examples** (same pattern labels; no new ids):
@@ -22,6 +23,10 @@ Map each opportunity to one primary pattern. Group bullets under one pattern whe
 | Echo of rubrics/output templates into agent body, or parallel JSON that restates Ranked/Findings | **COHESION** |
 | Wrong always-on sub-skill used only to share static judgment/files | **DISCLOSURE** |
 | Agent re-orchestrates / re-invokes parent skill for the same job | **LOAD** / **ORCHESTRATION** |
+| Procedure makes the LLM mint/scan/allocate/parse via multi-step invent (registry ids, path walks) when a single CLI/script could emit the value | **SCRIPTABLE** |
+| Shell/grep/find dumps large name lists into context for the LLM to filter, instead of emitting the needed value | **SCRIPTABLE** |
+
+**Detect ≠ absorb:** Ranking **SCRIPTABLE** does **not** require `scripts/` on the skill today. Opportunity = the waste. Absorb (fix/redesign) separately chooses: point Procedure at an existing CLI, index a custom helper from the skill, or tighten stdout filters. Stock one-off `git`/`gh` calls are not auto-opportunities; custom repeated optimizations should be indexed from the skill when absorbed.
 
 **Not compliance:** These are ranked improvement opportunities (Keep / Improve / Restructure), not ship-blocking FAILs. Compliance blockers belong in a skim section only—see `rubrics/audit-redesign.rubric.md`.
 

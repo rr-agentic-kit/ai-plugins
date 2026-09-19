@@ -34,4 +34,11 @@ Markdown + YAML only — no XML DSL.
 
 ## Id allocation
 
-Mint via `docs/rr/tasks/registry.yaml` `next_id` (global monotonic). On mint, if registry missing: scan max existing `{NNNN}.md` under `docs/rr/tasks/` and continue. Ids start at **1** (never 0).
+Mint via `docs/rr/tasks/registry.yaml` `next_id` (global monotonic). Ids start at **1** (never 0).
+
+If registry missing:
+
+1. Scan max existing `{NNNN}.md` under `docs/rr/tasks/` → continue from max+1
+2. If no task files exist → create registry with `next_id: 1`
+
+Do not invent a second mint algorithm in phase contracts — this section is SoT.

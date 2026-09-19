@@ -82,3 +82,35 @@ def test_nested_agent_name_mismatch_fails(tmp_path: Path):
 
 def test_detect_nested_agent():
     assert m.detect_type(Path("agents/planning/challenge.md")) == "agent"
+
+
+def test_nested_skill_name_matches_leaf_folder(tmp_path: Path):
+    root = tmp_path / "plugin"
+    skill = root / "skills" / "rr-builder" / "rr-prepare" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\n"
+        "name: rr-prepare\n"
+        "description: Nested skill fixture for leaf-folder path match.\n"
+        "---\n\n"
+        "# rr-prepare\n\n"
+        "## Purpose\n\nPrepare.\n\n"
+        "## When to use\n\nPrepare.\n\n"
+        "## When not to use\n\nCode.\n\n"
+        "## Procedure\n\n1. Resolve.\n",
+        encoding="utf-8",
+    )
+    (root / "ACRONYMS.md").write_text(
+        "# Acronyms\n\n| Acronym | Expansion | Notes |\n"
+        "|---------|-----------|-------|\n| None yet | — | — |\n",
+        encoding="utf-8",
+    )
+    (root / "GLOSSARY.md").write_text(
+        "# Glossary\n\n| Term | Meaning (this plugin) | Not confused with | Notes |\n"
+        "|------|----------------------|-------------------|-------|\n"
+        "| None yet | — | — | — |\n",
+        encoding="utf-8",
+    )
+    results = m.run_checks(root, "skills/rr-builder/rr-prepare/SKILL.md")
+    row = result_by_id(results, "static.name.path-match")
+    assert row["result"] == "PASS"

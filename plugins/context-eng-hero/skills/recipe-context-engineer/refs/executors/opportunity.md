@@ -47,8 +47,8 @@ Stable hard-links (executor may Read without re-injection): `actions/audit-redes
 
 1. Validate Inputs. Missing path/type/required refs → status `failed` + clarification bullets.
 2. Read injected `actions/audit-redesign.md` and execute steps `ar-2-judge` through `ar-5-report` content production only (skip interactive **post-audit-redesign-routing** — parent owns close when running standalone; `improve` merges instead).
-3. Apply rubric Challenge (before rank) and impact×confidence filter. Rank unbounded `1…N`. Do not assume ≤7 rows.
-4. Fill report per `templates/audit-redesign-output.template.md` (sole report SoT).
+3. Apply rubric Challenge (before rank) and impact×confidence filter. Rank unbounded `1…N`. Do not assume ≤7 rows. FN must walk scriptable invent + context-bloating shell/list (SCRIPTABLE); do not require existing `scripts/`.
+4. Fill report per `templates/audit-redesign-output.template.md` (sole report SoT). Summary/Why = detect; Suggested direction + absorb = improve path.
 
 ## Outputs
 

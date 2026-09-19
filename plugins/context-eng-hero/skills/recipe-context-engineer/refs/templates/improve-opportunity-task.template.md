@@ -22,9 +22,10 @@ Do NOT Write/Edit/Bash. Do NOT invoke skills. Do NOT re-litigate compliance PASS
 ## Execution
 1. Validate Inputs per opportunity.md
 2. Execute audit-redesign.md steps ar-2-judge through ar-5-report only (skip post-audit-redesign-routing)
-3. Challenge before rank; impact×confidence filter; rank unbounded 1…N
+3. Challenge before rank (FN must walk scriptable + context-bloating shell/list; skills need no scripts/ to rank SCRIPTABLE); impact×confidence filter; rank unbounded 1…N
 4. Emit FULL markdown report per audit-redesign-output.template.md
-5. Absorb column values: fix | redesign | defer
+5. Absorb column values: fix | redesign | defer — absorb = how to improve; Summary/Why = detected waste
+6. Pattern SCRIPTABLE when invent/dump waste is primary (see improvement-patterns.md)
 
 ## Output
 - status: ok|partial|failed

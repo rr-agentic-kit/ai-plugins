@@ -22,9 +22,7 @@ Do not load full PRD into context unless a pin forces a specific section.
 
 ## Posture classify
 
-Apply [sequencing.md](sequencing.md) table. Emit one of: `greenfield` | `brownfield` | `docs_ahead` | `conflict`.
-
-`conflict` → stop or AskQuestion before L1 (adopt code vs adopt docs). Text-mode: same two options; no stall.
+Apply [sequencing.md](sequencing.md) posture table (including **Conflict** stop/AskQuestion). Emit one of: `greenfield` | `brownfield` | `docs_ahead` | `conflict`.
 
 ## Output payload (session)
 
@@ -34,7 +32,7 @@ slice_id: string
 track: string
 posture: greenfield | brownfield | docs_ahead | conflict
 pins: object
-pending_tech: []   # filled/updated in tech gate
+pending_tech: []   # filled in tech gate; [] or list of {topic, blocked_task_ids, status}
 ```
 
 ## Stop conditions

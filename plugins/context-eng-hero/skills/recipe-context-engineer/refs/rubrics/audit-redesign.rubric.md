@@ -104,9 +104,11 @@ Evaluate each dimension. Emit 0–N candidates with evidence; omit empty dimensi
 
 | Field | Rule |
 |-------|------|
-| **Look for** | Too many hops, tables, or decisions per turn; Ref index overload; agent re-invokes parent orchestrator for the same job |
-| **Improve when** | Compress load path |
+| **Look for** | Too many hops, tables, or decisions per turn; Ref index overload; agent re-invokes parent orchestrator for the same job; **scriptable waste** — procedure forces LLM through deterministic multi-step algorithms (mint/scan/allocate/parse) a one-shot tool could return; **context-bloating shell/list** — grep/find/awk/sed (or equivalent) dumps large listings for the LLM to filter instead of emitting the needed value |
+| **Improve when** | Compress load path; or (absorb separately) point Procedure at filtered CLI / custom helper indexed from the skill — do **not** treat “no `scripts/` yet” as absence of opportunity |
 | **Restructure when** | Action surface should split or merge |
+
+**SCRIPTABLE (pattern):** Prefer label **SCRIPTABLE** when the evidence is invent-or-dump waste above; still use dimension `imp.load.executor`. Skills need **no** existing `scripts/` or helper-cli for this opportunity to rank.
 
 ### Discovery / sibling collision — `imp.discovery.sibling-collision`
 
@@ -120,12 +122,12 @@ Evaluate each dimension. Emit 0–N candidates with evidence; omit empty dimensi
 
 Mandatory internal pass after candidates exist and **before** filter/rank. Mirror deep-reflect discipline (invoker/failure/ambiguity mindset) without loading `pre-write-reflection.md`. Emit a short Challenge block in the report (or immediately above the ranked table). Completeness requires all seven passes—this is the quality gate for one-shot recall, not a prelude to another assessment loop.
 
-1. **FP pass** — for each candidate: would a second agent reject for weak evidence, compliance echo, or taste? Drop or demote impact/confidence.
-2. **FN pass** — walk each dimension again; list any missed medium/high with evidence, or write “coverage: no additional.”
+1. **FP pass** — for each candidate: would a second agent reject for weak evidence, compliance echo, or taste? Drop or demote impact/confidence. Do **not** FP-drop SCRIPTABLE solely because `scripts/` is absent (absence is allowed; opportunity is the waste).
+2. **FN pass** — walk each dimension again; **also** walk: (a) any deterministic multi-step invent that is easily scriptable? (b) any shell/list step that bloates context instead of returning the needed value? List missed medium/high with evidence, or write “coverage: no additional.” (include “scriptable/context-bloat: none” when both walks are empty).
 3. **Stability pass** — re-apply impact/confidence tables to every survivor; if score would change, keep the **lower** impact / weaker confidence (conservative) and note the flip.
 4. **Id stability** — `id` derived from `imp.<dimension>.<evidence-anchor-slug>` so independent assessments collide on the same slug when evidence matches.
 5. **Effect pass** — for each candidate: if left alone, how much does this change executor output or wrong-behavior risk? Demote impact or drop if the effect is speculative or taste-only.
-6. **Cost pass** — compare status-quo invoke/token/hop load vs the proposed absorb. Demote if the “fix” adds load without proportional reliability gain.
+6. **Cost pass** — compare status-quo invoke/token/hop load vs the proposed absorb. Demote if the “fix” adds load without proportional reliability gain. Do **not** demote SCRIPTABLE only because absorb would *introduce* a helper — weigh status-quo invent/dump cost vs one indexed invoke.
 7. **Delta pass** — how much would the suggested Improve/Restructure actually improve vs status quo? Drop or set `absorb: defer` if the delta is marginal.
 
 ## Opportunity record (required fields)
@@ -134,13 +136,20 @@ Mandatory internal pass after candidates exist and **before** filter/rank. Mirro
 |-------|----------------|
 | `id` | Stable slug: `imp.<dimension>.<evidence-anchor-slug>` (unique in report; collide across independent assessments when evidence matches) |
 | `dimension` | One of the eight dimension ids above |
-| `pattern` | Label from `improvement-patterns.md` |
+| `pattern` | Label from `improvement-patterns.md` (use **SCRIPTABLE** when invent/dump waste is the primary smell) |
 | `stance` | `Keep` \| `Improve` \| `Restructure` (ranked list uses Improve/Restructure only) |
 | `evidence` | Path + section/quote; else drop |
 | `impact` | `high` \| `medium` \| `low` (discrete bands only) |
 | `confidence` | `observed` \| `hypothesized` |
-| `absorb` | `fix` \| `redesign` \| `defer` |
+| `absorb` | `fix` \| `redesign` \| `defer` — **how to improve**, not the detection itself |
 | `rank` | Unbounded `1…N` among filter survivors (1 = highest priority); omit for Deferred / dropped |
+
+**Detect vs absorb (field split):**
+
+| Report field | Owns |
+|--------------|------|
+| Summary / Why it matters | **Detect** — name the waste (invent steps, context dump, token/hop cost) |
+| Suggested direction / Absorb hint | **Improve** — how to cut it (point at existing CLI; index custom helper from skill; filter stdout→value). Not “missing scripts/” as the opportunity. |
 
 ## Explicit non-goals
 

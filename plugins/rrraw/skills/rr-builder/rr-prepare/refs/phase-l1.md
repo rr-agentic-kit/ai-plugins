@@ -15,7 +15,7 @@
 
 1. Kernel + listed deltas (paths from inject)
 2. Constitution INDEX
-3. `docs/rr/tasks/registry.yaml` (create with `next_id: 1` if absent)
+3. `docs/rr/tasks/registry.yaml` — if absent: scan max existing `{NNNN}.md` under `docs/rr/tasks/` and continue from max+1; if none exist, create with `next_id: 1` (see [task-template.md](task-template.md) Id allocation)
 4. Injected refs above
 
 ## Work

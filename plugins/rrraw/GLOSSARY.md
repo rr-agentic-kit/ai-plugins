@@ -17,10 +17,12 @@
 | task-summary | L1 ordered task list + L3 PR map for one `slice_id` | PRD backlog; sprint board | `docs/rr/tasks/{slice_id}/task-summary.md` |
 | global task id | Monotonic integer across slices (`0001.md` …) via `registry.yaml` | Per-slice restarting ids; old `tsk-NNN` naming | Never 0; frontmatter `id:` integer |
 | pending_tech | Tech decision topic tracked until forced ADR mint | Product DEC backlog | Listed on task-summary; not pre-persisted ADR dump |
+| posture | Prepare sequencing stance vs code/docs: `greenfield` \| `brownfield` \| `docs_ahead` \| `conflict` | Soft “tone” / team culture posture | Classified in rr-prepare; Conflict → stop or AskQuestion |
+| doc_drift | Mark on task-summary when brownfield code ahead of Plan/ADRs | Generic docs debt / stale README | Reverse-derive mechanism; do not invent parallel greenfield |
 | runId | Daily id for one rr-review run (`yyyymmdd-NN` local) | CI job id / forge pipeline id | Mint: max `NN` for today + 1 (or `01`) |
 | REVIEW_DIR | Artifact root `.ai/review/<runId>/` for one review run | `.rr-builder/` (retired); **`.ai/ci/`** (rr-ci sidecars) | Flat locked filenames + merged `report.md` |
 | CI_DIR | Sidecar root `.ai/ci/` for rr-ci CLI/skill disk writes | `.ai/review/` (rr-review) | e.g. `job-<id>.log` from `debug-pipeline --save-log` |
-| nested skill | Path-loaded child under `skills/rr-builder/` (rr-prepare, rr-coder, …) | Top-level `skills/<name>/` marketplace skill | Intentional `static.name.path-match` exception |
+| nested skill | Path-loaded child under `skills/rr-builder/` (rr-prepare, rr-coder, …) | Top-level `skills/<name>/` marketplace skill | `name` must equal leaf folder; static matches parent of `SKILL.md` |
 | keep | Challenge disposition: row survives for report/fix/POST | Soft demote without Challenge | Consumers must ignore non-keep rows |
 | auto-reflection | Continuous phase-transition goal-serve check (no formal report) | User `--challenge`; smells | Standing self-challenge; challenge-layers |
 | smells | Always-on fast checkers (req-smell + Discover equivalents) | Challenge attestation / freeze-ready | Smell-clean ≠ freeze-suggest |

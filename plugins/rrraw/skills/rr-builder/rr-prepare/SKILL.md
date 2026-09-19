@@ -31,7 +31,7 @@ Turn a pin-complete `execute-slice.yaml` into buildable task artifacts under `do
 | Ref | When |
 |-----|------|
 | [refs/input-resolution.md](refs/input-resolution.md) | Every invoke — resolve kernel + posture |
-| [refs/tech-decisions.md](refs/tech-decisions.md) | Tech-decision gate; mint/revise `ADR-n` only when forced |
+| [refs/tech-decisions.md](refs/tech-decisions.md) | Tech-decision gate; lazy ADR |
 | [refs/sequencing.md](refs/sequencing.md) | L1 `depends_on` + L2 reorder checks |
 | [refs/task-grain.md](refs/task-grain.md) | L1 atom sizing |
 | [refs/summary-template.md](refs/summary-template.md) | Write / update `task-summary.md` |
@@ -49,11 +49,11 @@ TodoWrite `merge: false` with ids `resolve`, `tech`, `l1`, `l2`, `l3` when the r
 
 **Delivery channels:** Prefer AskQuestion for load-bearing irreversible forks and L1 validation. Text-mode: same options as prose; do not stall waiting for a widget.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Load kernel (explicit path or next open). Read pinned deltas, constitution INDEX, cited ADRs, AC refs. Classify **posture** per [sequencing.md](refs/sequencing.md). Missing freeze → stop / **rr-planner**. Done: kernel + posture stated.
-2. **tech** — Inventory technical decision *topics* per [tech-decisions.md](refs/tech-decisions.md). List `pending_tech` on summary; **persist `ADR-n` only when L1/L2 would otherwise invent mechanism**. AskQuestion only for irreversible forks. Done: pending list and/or forced ADRs written.
-3. **l1** — Decompose capabilities into ordered capability atoms ([task-grain.md](refs/task-grain.md), [phase-l1.md](refs/phase-l1.md)). Allocate global ids via `docs/rr/tasks/registry.yaml`. Write `task-summary.md` ([summary-template.md](refs/summary-template.md)). **Pause** for L1 validation (AskQuestion or text-mode). Done: validated ordered summary or stop on reject.
-4. **l2** — One task at a time in dependency order ([phase-l2l3.md](refs/phase-l2l3.md)): research; write `{NNNN}.md` ([task-template.md](refs/task-template.md)); pass [compatibility-gate.md](refs/compatibility-gate.md); mark summary `detailed`. Default pause after each L2. Done: all L1 tasks detailed or stop on gate fail.
-5. **l3** — PR division into summary + frontmatter `pr_group` ([pr-division.md](refs/pr-division.md)). Mark prepare `complete`. **Stop** — do not chain **rr-coder**.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Load kernel (explicit path or next open). Read pinned deltas, constitution INDEX, cited ADRs, AC refs. Classify **posture** per [sequencing.md](refs/sequencing.md). Missing freeze → stop / **rr-planner**. Done: session payload emitted (`kernel_path`, `slice_id`, `track`, `posture`, `pins`, `pending_tech`) per input-resolution Output.
+2. **tech** — Inventory topics and apply mint rules per [tech-decisions.md](refs/tech-decisions.md). List `pending_tech` on summary. AskQuestion only for irreversible forks. Done: pending list and/or forced ADRs written.
+3. **l1** — Decompose capabilities into ordered capability atoms ([task-grain.md](refs/task-grain.md), [phase-l1.md](refs/phase-l1.md)). Allocate global ids via `docs/rr/tasks/registry.yaml`. Write `task-summary.md` ([summary-template.md](refs/summary-template.md)). **Pause** for L1 validation (AskQuestion or text-mode) — pass only if: `depends_on` is a DAG; every row grain-PASS; every row has `requirement_ids` or an explicit prep unlock; posture noted on summary. Done: validated ordered summary or stop on reject.
+4. **l2** — One task at a time in dependency order ([phase-l2l3.md](refs/phase-l2l3.md)): research; write `{NNNN}.md` ([task-template.md](refs/task-template.md)); pass [compatibility-gate.md](refs/compatibility-gate.md); mark summary `detailed`. Default: pause after each L2. Batch L2 only when parent/user requests — still run compatibility-gate per task before `detailed`. Done: all L1 tasks detailed or stop on gate fail.
+5. **l3** — PR division into summary + frontmatter `pr_group` ([pr-division.md](refs/pr-division.md)). Done when: every detailed task has `pr_group`; summary PR map written; `prepare_status: complete`. **Stop** — do not chain **rr-coder**.
 
 ## Nested agents (future)
 
