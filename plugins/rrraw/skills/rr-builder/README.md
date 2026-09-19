@@ -50,7 +50,7 @@ Defaults: orchestrate without drive/scope → `manual` × `full`. Lone `--auto` 
 - **Orchestrate by default; handoff on explicit flag** — explicit never silently re-enters orchestrate; drive/scope do not mutate handoff lanes
 - **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; ready list marks cursor stage **`(next)`**; silent chain only with `--auto` (default drive×scope is `manual` × `full`)
 - **One nested skill (or stage knowledge set) per stage turn** — never preload all lane skills
-- **Plan ≠ build** — plan stage loads knowledge only; no application source edits
+- **Plan ≠ build** — plan stage loads knowledge only; no application source edits; plan lands in `{NNNN}-{step}.plan.md` (1-based step) so build loads one step’s plan, not a bloated task body
 - **Review under orchestrate is `--fix --all`** — report-only review uses explicit `--review` without `--fix`
 - **Delivered → rr-ci** — builder stops at ship boundary
 

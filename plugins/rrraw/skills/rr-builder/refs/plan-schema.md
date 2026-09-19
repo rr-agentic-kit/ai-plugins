@@ -1,6 +1,23 @@
 # Plan-stage output schema
 
-**Audience:** `rr-builder` orchestrate **plan** stage. Persist the plan under the active task’s **Steps** entry for `step_index` (or an adjacent `### Plan` block keyed to that step). **No** application source edits.
+**Audience:** `rr-builder` orchestrate **plan** stage. **No** application source edits.
+
+**Outcome:** Keep task + **build** context small — one step plan per file so build does not load every step’s plan.
+
+## Persist path (canonical)
+
+Write the five required sections to:
+
+`docs/rr/tasks/{slice_id}/{NNNN}-{step}.plan.md`
+
+| Token | Meaning |
+|-------|---------|
+| `{NNNN}` | Zero-padded task id (same stem as `{NNNN}.md`) |
+| `{step}` | **1-based** Steps list item (`step_index + 1`). Cursor `step_index` on `{NNNN}.md` stays **0-based**. |
+
+After writing the sidecar, add a one-line pointer on that Steps item in `{NNNN}.md` (e.g. `→ plan: \`{NNNN}-{step}.plan.md\``). Do **not** paste the five sections into the task body.
+
+Optional frontmatter on the plan file: `task_id`, `step`, `step_index`, `slice_id`.
 
 ## Required sections
 
@@ -14,10 +31,18 @@
 
 ## Done-when
 
-All five sections present and non-empty; assessment is enough for **build** to start without inventing scope; **no** application source edits this stage. Then set `step_plan_done: true` on `{NNNN}.md` (see [slice-pipeline.md](slice-pipeline.md) cursor persistence).
+1. Sidecar `{NNNN}-{step}.plan.md` exists at the path above.
+2. All five sections present and non-empty; assessment is enough for **build** to start without inventing scope.
+3. `{NNNN}.md` Steps item has the pointer only (no inlined five-section plan).
+4. **No** application source edits this stage.
+5. Then set `step_plan_done: true` on `{NNNN}.md` (see [slice-pipeline.md](slice-pipeline.md) cursor persistence).
+
+**Probe:** Do not set `step_plan_done: true` from prose inside `{NNNN}.md` alone — the sidecar must exist with the five sections.
 
 ## Anti-patterns
 
+- Dumping the five plan sections into `{NNNN}.md` body or an adjacent `### Plan` block (bloated task context)
 - Pasting full language matrices or implement Procedures into the plan body
 - Editing application source “to explore”
 - Omitting **Verify hooks** (pushes invent into build)
+- Using 0-based `{step}` in the filename (filename step is always 1-based)

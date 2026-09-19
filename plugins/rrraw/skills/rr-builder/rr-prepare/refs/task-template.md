@@ -32,7 +32,7 @@ Cursor algorithm SoT: [../../refs/slice-pipeline.md](../../refs/slice-pipeline.m
 | **Goal** | One observable outcome for this capability atom |
 | **Obligations** | Constitution cites + **cited tech ADRs** + delta obligations |
 | **Read-first** | Paths/symbols/docs to open before coding |
-| **Steps** | Ordered implementer steps (mechanism-bearing); plan stage fills [plan-schema.md](../../refs/plan-schema.md) under the active step |
+| **Steps** | Ordered implementer steps (mechanism-bearing only). Plan stage writes sidecar `{NNNN}-{step}.plan.md` per [plan-schema.md](../../refs/plan-schema.md) (`step` = 1-based); after plan, add a one-line pointer on that item (`→ plan: \`{NNNN}-{step}.plan.md\``) — do **not** inline the five plan sections here |
 | **Verify / done** | How to know the atom is done (product AC refs OK) |
 | **Non-goals** | Explicit exclusions for this task |
 | **Open risks** | Residual risks / `pending_tech` blockers |
