@@ -47,7 +47,7 @@ TodoWrite `merge: false` with ids `resolve-root`, `load-ref`, `execute` when the
 
 **Fallback (no matching row):** AskQuestion to classify the task, or load [refs/safety.md](refs/safety.md) before any destructive git.
 
-3. **execute** — Follow the ref. Confirm with the user before permanently discarding uncommitted work or rewriting history others may have pulled. Done: command finished or user declined. Stop: user declined confirm, or safety gate blocks.
+3. **execute** — Follow the ref. Confirm with the user before permanently discarding uncommitted work or rewriting history others may have pulled. For merge/rebase **finish commits**, follow [refs/conflict-resolution.md](refs/conflict-resolution.md) finish rules (warn on large hooked stages; quiet await; no full status/hook dumps). Done: command finished or user declined. Stop: user declined confirm, safety gate blocks, or conflict-resolution finish **Stop** fires.
 
 ## Invariants
 
@@ -56,4 +56,4 @@ TodoWrite `merge: false` with ids `resolve-root`, `load-ref`, `execute` when the
 
 ## Orchestration
 
-Single-shot when one git command. Multi-step: TodoWrite ids above. No slash-command chaining.
+Single-shot when one git command. Multi-step: TodoWrite ids above. No slash-command chaining. Enumerable forks (load-ref fallback): Prefer AskQuestion; text-mode same options; no stall.
