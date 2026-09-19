@@ -32,7 +32,7 @@ claim check → persist .md
    - generate ≤ **1** `scan`
    - rewrite ≤ **2** (`scan`, optional `apply-safe`)
    - Paths relative to plugin root, e.g. `python3 skills/docs/rr-humanize/scripts/cli.py scan …` (follow humanize SKILL for exact invocation).
-4. **Claim check** — humanize must **not** invent TAM, metrics, Musts, stakeholders, or premises. Every sentence traces to draft/ledger/items — **including Human brief**. Structural IDs, YAML frontmatter, and `_key_:` lines are **out of scope** for lexicon wipe. Narrative prose **and** leaf `>` blockquote bodies are in scope (readable shalls; do not wipe rank enums or rationale tokens).
+4. **Claim check** — humanize must **not** invent TAM, metrics, Musts, stakeholders, or premises. Every sentence traces to draft/ledger/items — **including Human brief**. Structural IDs, YAML frontmatter, and `_key_:` lines are **out of scope** for lexicon wipe. Narrative prose **and** leaf bodies are in scope (readable shalls; do not wipe rank enums or rationale tokens).
 5. **Persist** only after claim check passes. On failure → fix prose or AskQuestion; do not write invented specificity.
 6. **Lexicon harvest** (silent) — After persist succeeds, Load `refs/planning/project-lexicon.md`. Scan humanized prose + co-persisted item labels for new host-domain acronyms / overloaded terms → additive merge into `{PROJECT_ROOT}/docs/GLOSSARY.md` and `docs/ACRONYMS.md`. Never AskQuestion; never overwrite/delete rows; never mint empty files. Create files only on first successful merge.
 
@@ -55,7 +55,7 @@ Do not run scan/reshape on these.
 | In scope | Out of scope for lexicon / readability wipe |
 |----------|-----------------------------------------------|
 | Narrative sections, overviews, appendices, **Human brief** | `{DOC}-n.m` ids, `_key_:` lines, parent pointers |
-| Leaf `>` blockquote bodies (readable shalls) | Rank enums (`Must`, `basic`, RICE factors), rationale id tokens (`r-NNN`) |
+| Leaf bodies (readable shalls) | Rank enums (`Must`, `basic`, RICE factors), rationale id tokens (`r-NNN`) |
 | Challenge report prose body | Frontmatter keys (`doc_rev`, `depth`, …) |
 | Session artifacts listed above | Heading id prefixes on item lines |
 

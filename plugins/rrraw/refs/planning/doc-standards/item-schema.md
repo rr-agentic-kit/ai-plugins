@@ -147,13 +147,13 @@ Discovery defaults new items to `idea`. Moving to `draft` means “we are specif
 
 ## Canonical item surface (closed vocabulary)
 
-Working surface is markdown. Validation target is structured. Compose writes `{level}.md` and merges `items.json`. Item records live on disk, not in the Task return. Cascade `{stem}.yaml` and list-meta (`- **Key:**`) are stale — `validate_planning.sh --rewrite` migrates them.
+Working surface is markdown. Validation target is structured. Compose writes `{level}.md` and merges `items.json`. Item records live on disk, not in the Task return. Cascade `{stem}.yaml`, list-meta (`- **Key:**`), and `>` blockquote bodies are stale — `validate_planning.sh --rewrite` migrates them.
 
 Parser is regex, not an LLM. Three-line grammar:
 
 1. Heading = id + title
 2. Next non-empty line = closed metadata (`_key_:`)
-3. Following `^> ?` lines = body; anything else before the next heading is prose or `STALE_FORMAT`. Leaf body without `>` is `BODY_NOT_BLOCKQUOTE`. Containers have no `>` body.
+3. Following plain prose after a blank line under `_key_:` = body (until the next heading). `^> ?` bodies are stale — still parseable (quotes stripped) so `--rewrite` can migrate, but `validate` fails with `STALE_FORMAT` until rewritten. Containers have no body.
 
 Heading:
 
@@ -183,7 +183,9 @@ Split segments on `\s+\|\s+(?=_[a-z][a-z0-9-]*_:)` so effect text may contain `|
 
 Canonical emit order: `parent, kind, spec, status, priority, tag, goal-type, reach, impact, confidence, effort, moscow, kano, rationale, supersedes, superseded-by`. Omit inapplicable keys. `--rewrite` must not inject method `—` when the source omitted the key. Emit only keys present on the item (plus required `parent`/`kind`/`spec` for a parseable header).
 
-Unknown keys or missing required keys (`parent`, `kind`, `spec`) → validator FAIL. Body is the blockquote (AI-judged). `idea`/`draft` leaves may omit method/score keys or emit `—`. `ready` leaves missing a **real** rank/score where required (`—` does not count) → `DOR`.
+Unknown keys or missing required keys (`parent`, `kind`, `spec`) → validator FAIL. Body is plain prose after the meta line (AI-judged). `idea`/`draft` leaves may omit method/score keys or emit `—`. `ready` leaves missing a **real** rank/score where required (`—` does not count) → `DOR`.
+
+**Stop-rule / anti-trigger (agents):** Leaf body is plain prose. **Never** require a `>` prefix. **Never** refuse stripping `>`. Leftover `^> ?` lines are `STALE_FORMAT` — run `validate_planning.sh --rewrite`; do not cite removed `BODY_NOT_BLOCKQUOTE`. Before format refusals, Read this section from the **same plugin package** as the validate script (not an older cache tree).
 
 `_parent_: —` means graph null (ES roots). Native rank `—` means “applicable, not yet decided.”
 
@@ -208,14 +210,14 @@ _parent_: BRD-2 | _kind_: container | _spec_: draft
 #### ES-3: Multi-language support
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-007
 
-> Product UI and content available in English and Spanish at launch.
+Product UI and content available in English and Spanish at launch.
 ```
 
 ```markdown
 #### BRD-2.1: Revenue share cap
 _parent_: BRD-2 | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-014
 
-> Partner revenue share shall not exceed 30% without executive approval.
+Partner revenue share shall not exceed 30% without executive approval.
 ```
 
 ### Leaf — Kano (MRD needs)
@@ -231,7 +233,7 @@ _parent_: MRD-2 | _kind_: leaf | _spec_: ready | _kano_: basic | _rationale_: r-
 #### ES-5: GDPR consent for personalization
 _parent_: — | _kind_: leaf | _spec_: ready | _tag_: regulatory | _rationale_: r-009
 
-> Consent required before collecting taste profile or feedback data; users can see, delete, and change consent.
+Consent required before collecting taste profile or feedback data; users can see, delete, and change consent.
 ```
 
 ### Leaf — PRD goal
@@ -240,7 +242,7 @@ _parent_: — | _kind_: leaf | _spec_: ready | _tag_: regulatory | _rationale_: 
 #### PRD-1: Increase first-purchase conversion
 _parent_: BRD-2 | _kind_: leaf | _spec_: ready | _goal-type_: primary | _rationale_: r-010
 
-> Move checkout completion rate from 12% to 18% within 90 days of launch.
+Move checkout completion rate from 12% to 18% within 90 days of launch.
 ```
 
 ### Leaf — PRD story (RIC)
@@ -249,7 +251,7 @@ _parent_: BRD-2 | _kind_: leaf | _spec_: ready | _goal-type_: primary | _rationa
 #### PRD-3.1: Guest checkout story
 _parent_: PRD-3 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visitors | _impact_: 2 | _confidence_: medium | _rationale_: r-014
 
-> As a guest, I can complete checkout without an account so that first purchase is not blocked.
+As a guest, I can complete checkout without an account so that first purchase is not blocked.
 ```
 
 ### Leaf — PRD feature (RICE)
@@ -258,7 +260,7 @@ _parent_: PRD-3 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visi
 #### PRD-3: Guest checkout
 _parent_: BRD-2 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visitors | _impact_: 2 | _confidence_: medium | _effort_: 5 | _rationale_: r-014
 
-> Enable checkout without account creation for first-time buyers.
+Enable checkout without account creation for first-time buyers.
 ```
 
 ### Leaf — PRD feature (RICE + selection)
@@ -267,7 +269,7 @@ _parent_: BRD-2 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visi
 #### PRD-3: Guest checkout
 _parent_: BRD-2 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visitors | _impact_: 2 | _confidence_: medium | _effort_: 5 | _status_: selected | _rationale_: r-014
 
-> Enable checkout without account creation for first-time buyers.
+Enable checkout without account creation for first-time buyers.
 ```
 
 ### Leaf — PRD requirement (P-priority + selection)
@@ -276,7 +278,7 @@ _parent_: BRD-2 | _kind_: leaf | _spec_: ready | _reach_: 40% of first-time visi
 #### PRD-3.1: Guest may pay without account
 _parent_: PRD-3 | _kind_: leaf | _spec_: ready | _priority_: P1 | _status_: selected | _rationale_: r-015
 
-> Guest completes payment without creating an account; account optional after purchase.
+Guest completes payment without creating an account; account optional after purchase.
 ```
 
 ## Item index

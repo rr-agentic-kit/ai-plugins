@@ -19,7 +19,7 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
     rrr-status.yaml                 # SUMMARY — phase/track/product/docs glance (not pin input)
     agent.plan.md                   # non-patch tripwire (skill-owned; not cascade input)
     future.md / tech.md / later.md  # parking (not validator input)
-    tasks/                          # reserved — tsk-{NNN}-{intent}/ (global; not CoW on open-next)
+    tasks/                          # global task tree — registry.yaml + {slice_id}/ (not CoW on open-next)
     0.1/                            # current track (every track is version-first)
       discovery/
         status.yaml                 # DETAIL — ES/MRD/BRD revs/pins/challenge/mint_hash
@@ -41,9 +41,9 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
         status.yaml                 # DETAIL — PRD + optional slice
         session-state.json
         prd.md
-        architecture.md             # standing spine (invariants-first)
-        constitution.md             # optional when arch_doc_mode: split
-        deltas/                     # per-feature ADR-lite
+        constitution.md             # ALWAYS-LOAD standing law (brief + INDEX)
+        architecture.md             # tech ADRs only (on-demand; optional)
+        deltas/                     # per-feature decision-lite product-deltas
           <feature-id>.md
         execute-slice.yaml          # 5-field Execute kernel on slice freeze
         research-report.md
@@ -51,7 +51,8 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
         items.json
         decision-ledger.yaml
         prd.challenge.report.md
-        architecture.challenge.report.md  # when challenging standing spine
+        constitution.challenge.report.md  # when challenging standing law
+        architecture.challenge.report.md  # when challenging tech ADRs
         raw-history/
     0.2/                            # next track once opened (replaces phase-subdir forks)
       discovery/
@@ -64,9 +65,9 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
 | mrd | `{track}/discovery/mrd.md` |
 | brd | `{track}/discovery/brd.md` |
 | prd | `{track}/plan/prd.md` |
-| architecture spine | `{track}/plan/architecture.md` (standing; Plan-owned; humanize) |
-| constitution | `{track}/plan/constitution.md` (optional; `arch_doc_mode: split`; else section of architecture) |
-| feature delta | `{track}/plan/deltas/<feature-id>.md` (ADR-lite; supersede-only once accepted) |
+| architecture (tech ADRs) | `{track}/plan/architecture.md` (on-demand; Plan-owned; humanize) |
+| constitution (standing law) | `{track}/plan/constitution.md` (always-load; `arch_doc_mode: constitution-primary`) |
+| feature delta | `{track}/plan/deltas/<feature-id>.md` (decision-lite product-delta; supersede-only once accepted) |
 | execute slice kernel | `{track}/plan/execute-slice.yaml` (machine; skill-owned on slice freeze; **skip humanize**) |
 | business-case handoff | `{track}/discovery/business-case.yaml` (machine; Discover freeze; Plan entry gate; **skip humanize**) |
 | assumptions map | `{track}/discovery/assumptions.md` (conditional; humanize) |
@@ -88,13 +89,31 @@ Project domain lexicon lives at `{PROJECT_ROOT}/docs/GLOSSARY.md` and `{PROJECT_
 | Q&A history | `{track}/{phase}/raw-history/{UTC compact ISO-8601}.yaml` |
 | research report | `{track}/plan/research-report.md` |
 | challenge report | `{track}/{phase}/{stem}.challenge.report.md` (one per cascade/standing doc; overwrite on each scan of that stem) |
-| tasks (reserved) | `rr/tasks/tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md` — see below |
+| tasks | `rr/tasks/registry.yaml` + `rr/tasks/{slice_id}/` — see below |
 
 Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. Create `{level}.notes.yaml` on first off-level note for that doc — even if the composed `{level}.md` does not exist yet. File exists only while unresolved notes remain; skill deletes it when empty after compose persist. Create `docs/rr/{next}/{phase}/` only when the skill mints `next` after confirm.
 
-### Tasks (reserved)
+### Tasks (`docs/rr/tasks/`)
 
-Global under `docs/rr/tasks/` — **not** per-track folders. Naming: `tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md`. Frontmatter carries `track` for version metadata. **Never** copy-on-write when opening a next track. Out of validator scope for now (same class as `future.md`). Task authoring / Execute integration is a later pass.
+Global under `docs/rr/tasks/` — **not** per-track folders. **Never** copy-on-write when opening a next track. Out of cascade validator scope (same class as `future.md`). Authored by **rr-prepare** (builder tech plan); not Plan compose.
+
+```
+docs/rr/tasks/
+  registry.yaml          # next_id + optional index (SoT for global monotonic ids)
+  {slice_id}/
+    task-summary.md      # L1 ordered list + L3 PR division
+    0001.md              # L2 detailed task (id starts at 1, never 0)
+    0002.md
+    …
+```
+
+| Rule | |
+|------|--|
+| `{slice_id}` | Kernel `slice_id` (e.g. `slice-001`) |
+| Global task ids | First task ever is `1` → `0001.md`; next slice continues at `N+1` (does not restart). Allocate via `registry.yaml` (`next_id`); on mint, scan max existing id if registry missing |
+| Filename | Zero-padded four-digit id; frontmatter `id:` integer |
+| Frontmatter | `track`, `slice_id`, kernel/PRD pins, `depends_on` (global task ids) |
+| Supersedes | Former reserved naming `tsk-{NNN}-{intent}/tsk-{NNN}-{desc}.md` |
 
 `--format` allowed value is `md` only. `yaml` and `json` → `UNSUPPORTED_FORMAT` (`skills/rr-discovery/refs/input-resolution.md`). `payload.format` stays `"md"`. `items.json` and `session-state.json` are always JSON. `decision-ledger.yaml` and phase `status.yaml` are always YAML — skill-owned, validator input, not selected by `--format`. `{level}.notes.yaml` is always YAML — not selected by `--format`, not an item, **not validator input**. `future.md`, `agent.plan.md`, `tech.md`, `later.md`, `docs/GLOSSARY.md`, `docs/ACRONYMS.md`, and `rrr-status.yaml` are **not validator cascade input** — do not parse them as cascade docs. Cascade `{stem}.yaml` is stale input for `--rewrite`, not a live format. Do not write `planning-bundle.json`, `session-log.md`, or `lines.yaml`. `decisions.json` is not a user artifact; decisions live in `session-state.json`. Reason-graph bodies live in `decision-ledger.yaml`, not the decision log.
 
@@ -119,7 +138,7 @@ created: 2026-06-24T10:00:00Z
 
 [decision/ask, what changed, top risks/holds, feedback needed — dual-audience; no new IDs]
 
-[remaining prose sections + item headings + `_key_:` line + `>` body per item-schema]
+[remaining prose sections + item headings + `_key_:` line + plain body per item-schema]
 
 ## Item index
 
@@ -164,7 +183,7 @@ session:
   started: 2026-08-15T18:52:03Z
   action: discover
   output_dir: /abs/path/docs/rr/0.1/discovery
-  question_mode: ask
+  question_mode: ask   # effective mode this session: ask | text | auto
   depth: standard
 turns:
   - ts: 2026-08-15T18:53:01Z
@@ -189,12 +208,12 @@ turns:
 | `session.started` | ISO-8601 UTC of first Q&A (file create) |
 | `session.action` | Normalized `action` |
 | `session.output_dir` | Resolved output directory |
-| `session.question_mode` | `ask` \| `text` |
+| `session.question_mode` | Effective mode: `ask` \| `text` \| `auto` |
 | `session.depth` | `shallow` \| `standard` \| `deep` |
 | `turns[].ts` | ISO-8601 UTC of the answer |
 | `turns[].level` | Cascade level or `session` |
 | `turns[].source` | `discovery` \| `compose` \| `blind-spots` \| `research` \| `challenge` \| `presave` \| `panel` |
-| `turns[].question` | `id`, `text`, `mode`, `options[]` |
+| `turns[].question` | `id`, `text`, `mode` (effective `question_mode`), `delivery` (`ask` \| `text` — required when mode is `auto`), `options[]` (optional when `delivery: text`) |
 | `turns[].answer` | `text` (verbatim), `selected` (option labels when applicable) |
 
 Append-only: never rewrite prior turns. Create `raw-history/` on first Q&A. If the session file is missing on resume, create a new timestamped file and update `raw_history_path`.
@@ -235,19 +254,19 @@ One file at `{PROJECT_ROOT}/docs/rr/tech.md`. Same tier as `later.md` / `future.
 
 | Rule | |
 |------|--|
-| Discover parking | Append early mechanism notes before Plan owns architecture. |
-| Plan | Do **not** author product AC, integration contracts, or ADRs here — use `architecture.md` / `constitution.md` / `deltas/`. |
+| Discover parking | Append early mechanism notes before Plan owns standing law / tech ADRs. |
+| Plan | Do **not** author product AC, integration contracts, or ADRs here — use `constitution.md` / `architecture.md` / `deltas/`. |
 | Not cascade | Never mint item ids; never run Gates 1–7 against this file. |
 
-## Standing Plan docs (spine / constitution / deltas)
+## Standing Plan docs (constitution / architecture / deltas)
 
 | Artifact | Role |
 |----------|------|
-| `{track}/plan/architecture.md` | Standing **spine** — invariants only (`Binds` / `Prevents` / `Rule`). Stack dump is seed, not spine. |
-| `{track}/plan/constitution.md` | Non-negotiables when `arch_doc_mode: split`; else a section of architecture. |
-| `{track}/plan/deltas/<feature-id>.md` | Per-feature ADR-lite delta vs spine — never restate the spine. Supersede-only once accepted. |
+| `{track}/plan/constitution.md` | Standing **law** — always-load brief + Bind/Prevent/Rule INDEX. |
+| `{track}/plan/architecture.md` | **Tech ADRs only** (`ADR-n`) — on-demand; not product UX baselines. |
+| `{track}/plan/deltas/<feature-id>.md` | Per-feature decision-lite product-delta vs constitution — never restate standing law. Supersede-only once accepted. Ids `DEC-n` / feature revs — not `ADR-*`. |
 
-Standards: Plan `refs/doc-standards/architecture.md`, `constitution.md`, `feature-delta.md`. Not item-graph validators (no `PRD-*` ids required). Skill may humanize prose bodies.
+Standards: Plan `refs/doc-standards/constitution.md`, `architecture.md`, `feature-delta.md`, `refs/decision-lite.md`. Not item-graph validators (no `PRD-*` ids required). Skill may humanize prose bodies.
 
 ## `execute-slice.yaml` (5-field Execute kernel)
 
@@ -262,7 +281,7 @@ why: "..."
 capabilities:
   - "..."
 constraints:
-  - "..."   # cite spine/delta obligations (mechanism + UX-shape when UI-facing)
+  - "..."   # cite constitution/delta/tech-ADR obligations (mechanism + UX-shape when UI-facing)
 non_goals:
   - "..."
 success_signal: "observable pass/fail"
@@ -270,7 +289,8 @@ pins:
   requirement_ids: [PRD-3.1, PRD-3.2]
   parents: [PRD-3]
   delta_paths: [deltas/PRD-3.md]   # files must exist under plan dir
-  architecture_rev: draft   # or integer; draft ≠ missing Decision/Effort drivers
+  constitution_rev: draft   # prefer; dual-read architecture_rev during transition
+  architecture_rev: draft   # optional during transition; draft ≠ missing Decision/Effort drivers
   ac_refs: ["prd.md § Guest checkout AC"]
 ```
 
@@ -278,12 +298,12 @@ pins:
 |-------|------|
 | `track` / `docs` / `product` | Required stamps from Plan phase status at freeze ([baselines.md](baselines.md)) |
 | `slice_id` | Required stable id for this freeze unit |
-| Why / Capabilities / Constraints / Non-goals / Success signal | Required kernel — five fields only for prose obligations; Constraints must cite delta/spine, not only product goals |
-| `pins` | Requirement ids, parents, delta paths (existing files), architecture rev (may be `draft`), AC refs |
-| Fail freeze | Smell-fail AC without hold; Effort without architecture or Effort drivers; UI-facing without UX-shape; empty `delta_paths` when mechanism needed; shrinking the full requirement table to “match the slice” |
+| Why / Capabilities / Constraints / Non-goals / Success signal | Required kernel — five fields only for prose obligations; Constraints must cite delta/constitution, not only product goals |
+| `pins` | Requirement ids, parents, delta paths (existing files), constitution_rev (prefer) and/or architecture_rev (transition), AC refs |
+| Fail freeze | Smell-fail AC without hold; Effort without standing record or Effort drivers; UI-facing without UX-shape; empty `delta_paths` when mechanism needed; shrinking the full requirement table to “match the slice” |
 | Validator (when file present) | Required-field + `delta_paths` file existence — `EXECUTE_SLICE_*` codes; judgment owns smell/WWAS |
 
-Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. **No Execute skill** in this redesign — Next Up is future Execute. Execute starts fused code+test; no separate tech-planning step.
+Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. Execute prep = **rr-prepare** (builder lane) — Plan has no separate tech-planning ceremony; thin tech ADRs may be completed at prepare. After prepare, implement via **rr-coder** (no auto-chain from prepare).
 
 ## `later.md`
 
@@ -316,6 +336,22 @@ scanned_digest: "sha256:..."
 
 Written on **every stop** and after **each level completion**. Required for `--resume`. Internal only — not a human plan doc and **not** project knowledge (`status.yaml` is).
 
+### Layout decision (T5)
+
+**Keep one JSON file per phase dir** + **Python mutator/projector** (`scripts/session_state.sh`). Rejected for now: shard into many small files + raw `jq` — worse atomicity and migrate cost; context budget is solved by projection either way. Revisit shards only if projector round-trips become the bottleneck.
+
+### Access budget (stop-rule)
+
+| Do | Do not |
+|----|--------|
+| Run `sh scripts/session_state.sh view\|get\|… --path {output_dir}/session-state.json` | `Read` the whole `session-state.json` into agent context |
+| Parse one JSON stdout envelope | Invent ad-hoc full-file rewrite via editor tools |
+| Use mutator commands for append/patch | `dump --i-know` except rare offline debug |
+
+**Probe (resolve/resume done-when):** tool output includes a `view`/`get` projection (or mutator `ok: true`). A full-file `Read` of `session-state.json` is a **procedure fail**.
+
+Invoke contract: `scripts/session_state.README.md` (run scripts; do not load script source as docs).
+
 ```json
 {
   "metadata": {
@@ -345,6 +381,7 @@ Written on **every stop** and after **each level completion**. Required for `--r
   "discovery_complete": false,
   "project_posture": {},
   "preferences": {
+    "question_mode": "ask",
     "questions_per_cycle": 1
   },
   "viability_stale": {
@@ -365,7 +402,7 @@ Written on **every stop** and after **each level completion**. Required for `--r
 }
 ```
 
-`raw_history_path` is relative to `output_dir`. Resume loads this file, continues from `checkpoint.current_level`, and appends Q&A to that history file.
+`raw_history_path` is relative to `output_dir`. Resume loads this file **via the session-state CLI projection**, continues from `checkpoint.current_level`, and appends Q&A to that history file.
 
 `composed_docs`: `doc_type` → path relative to `output_dir`. Paths only — never document bodies. Do not stash compose output in session-state; compose writes immediately.
 
@@ -375,7 +412,41 @@ Written on **every stop** and after **each level completion**. Required for `--r
 
 `from_code_evidence`: `null` until `--from-code` research; then a structured summary of codebase findings (what shipped, actors if inferable, problem signals, constraints, domain language, reflection notes). Skill-owned. Merge only contradiction clarifications into `checkpoint.pending_clarifications`. Cite in cascade inheritance; do not invent market/TAM from package names (`skills/rr-discovery/refs/from-code.md`).
 
-`preferences.questions_per_cycle`: max AskQuestion count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-discovery/refs/input-resolution.md`); confirm-once persistence.
+`preferences.question_mode`: `ask` (default) \| `text` \| `auto`. Set via NL during resolve (“use auto question mode”) or confirm-once persist; `--text-mode` overrides to `text` for one invocation only ([input-resolution.md](../../skills/rr-planner/refs/input-resolution.md)). When `auto`, skill picks per-question `delivery` per [goal-anchor.md](../../skills/rr-planner/refs/goal-anchor.md) § Question patterns.
+
+`preferences.questions_per_cycle`: max **AskQuestion** count per address cycle (default `1`). Set via `--questions-per-cycle N` (`skills/rr-discovery/refs/input-resolution.md`); confirm-once persistence. **Anti-trigger:** does not schedule `--challenge` / re-attest — QPC is batch size only ([challenge-layers.md](challenge-layers.md)).
+
+### `checkpoint.pending_clarifications[]`
+
+Queue of unresolved founder questions. Skill-owned — agents return `clarifications_needed[]`; skill normalizes into this array and surfaces per effective `question_mode`.
+
+```json
+{
+  "id": "c-001",
+  "question": "Full question prose — not terse AskQuestion-only shape",
+  "context": "Why this blocks or what doc/finding triggered it",
+  "severity": "blocking|high|medium|low",
+  "delivery": "ask|text",
+  "dogfood_recommendation": "defer|future-ready|demo-blocking|null",
+  "options": [
+    { "id": "a", "label": "Option A" }
+  ],
+  "level": "prd",
+  "section": "guest-checkout",
+  "source": "challenge|compose|blind-spots|research"
+}
+```
+
+| Field | Rule |
+|-------|------|
+| `question` | Full prose — required for all delivery modes |
+| `context` | Required when `delivery: text` or effective mode is `text` |
+| `delivery` | Chosen surface: `ask` → `AskQuestion`; `text` → inline chat. When effective mode is `auto`, set per-question at surface time |
+| `dogfood_recommendation` | Optional. `defer` \| `future-ready` \| `demo-blocking` — skill may auto-defer non-demo-blocking under dogfood ([challenge-layers.md](challenge-layers.md)) without queueing |
+| `options[]` | Optional when `delivery: text` (inline numbered/bulleted list in chat). Required shape when `delivery: ask` |
+| `source` | Which phase produced the clarification |
+
+**Step 6 surface:** When draining `pending_clarifications`, honor each item's `delivery` (or compute from effective `auto` heuristic). `text` / auto-long → inline elaborated chat with `context` + recommendation; do not force AskQuestion-shaped UI.
 
 `viability_stale`: per binding level (`executive-summary`, `mrd`). Set `true` when compose changes load-bearing ES facts ([baselines.md](baselines.md)). Gate 7 re-sit clears it.
 
@@ -395,7 +466,7 @@ Required version stamps on every mint (from Discover phase status): `track`, `do
 
 ## Cascade prose persist
 
-After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing spine/constitution/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md). After successful persist, skill runs silent lexicon harvest ([project-lexicon.md](project-lexicon.md)).
+After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing constitution/architecture/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md). After successful persist, skill runs silent lexicon harvest ([project-lexicon.md](project-lexicon.md)).
 
 ## Status merge
 
@@ -409,7 +480,7 @@ After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/co
 ## Adapter rules
 
 1. Overwrite confirm: `skills/rr-planner/refs/cascade.md` per-level discovery step 8. Skip the prompt when `--input` implied refresh.
-2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `viability[]`, `note_sessions`, `composed_docs` paths). Skill is the only writer of this file. Skill is also the only writer of `decision-ledger.yaml`, `status.yaml`, `agent.plan.md`, and `future.md`.
+2. Always write `session-state.json` on stop or level completion for resume (include `raw_history_path`, `project_posture` once confirmed, `viability[]`, `note_sessions`, `composed_docs` paths). Skill is the only writer of this file — **via `scripts/session_state.sh` mutators** (or equivalent atomic JSON write), not full-file editor dumps into context. Skill is also the only writer of `decision-ledger.yaml`, `status.yaml`, `agent.plan.md`, and `future.md`.
 3. Compose writes/merges `items.json`. Skill reads it; skill does not write it. Compose reads `reserved_ids` from the ledger and never re-mints those ids. Compose writes frontmatter `track` / `doc_rev` / `pins`; skill mints `status.yaml` after freeze.
 4. Append a raw-history turn after every Q&A; do not wait for stage-exit. Skill owns `raw-history/`.
 5. Write/append `{level}.notes.yaml` when an off-level answer is parked; do not put parked prose in item headings. Skill owns sidecars; prune: `skills/rr-planner/refs/note-sessions.md`. Next-track notes while `next` is open go to that track's sidecar, not `future.md`.

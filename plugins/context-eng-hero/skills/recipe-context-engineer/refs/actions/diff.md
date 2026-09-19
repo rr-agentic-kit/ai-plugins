@@ -7,7 +7,7 @@
 | `disambiguation.md` | `diff-1-read` |
 | `templates/diff-output.template.md` | `diff-3-report` |
 | `frontmatter-schemas.md` | `diff-2-compare` |
-| `instruction-design.md` | `diff-2-compare` (if intent comparison needs signal/noise lens) |
+| `design/design-core.md` | `diff-2-compare` (if intent comparison needs signal/noise lens) |
 | `close-contract.md` | `diff-3-report` |
 
 ## Steps

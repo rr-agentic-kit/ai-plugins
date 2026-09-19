@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reflection.schema.json",
+  "title": "CE improve pre-write reflection lean JSON",
+  "type": "object",
+  "required": ["target", "type", "result", "judgment", "harness"],
+  "additionalProperties": true,
+  "properties": {
+    "status": { "type": "string", "enum": ["ok", "partial", "failed"] },
+    "clarifications": { "type": "array", "items": { "type": "string" } },
+    "kind": { "const": "reflection" },
+    "target": { "type": "string", "minLength": 1 },
+    "type": { "type": "string", "minLength": 1 },
+    "result": { "type": "string", "enum": ["PASSED", "FAILED"] },
+    "deep_reflect": { "type": "array", "items": { "type": "string" } },
+    "harness_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "reliable": { "type": ["string", "boolean"] },
+        "consistent": { "type": ["string", "boolean"] },
+        "deterministic": { "type": ["string", "boolean"] }
+      }
+    },
+    "judgment": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/check_row" }
+    },
+    "harness": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/check_row" }
+    },
+    "top_patterns": { "type": "string" }
+  },
+  "$defs": {
+    "check_row": {
+      "type": "object",
+      "required": ["id", "severity", "result", "evidence"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string" },
+        "result": { "type": "string" },
+        "evidence": { "type": "string" }
+      }
+    }
+  }
+}

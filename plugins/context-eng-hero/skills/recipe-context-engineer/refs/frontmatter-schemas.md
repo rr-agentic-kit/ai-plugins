@@ -1,30 +1,64 @@
 # Frontmatter and naming schemas
 
-**Hard rules** for artifacts in Cursor plugins. Paths are **relative to the plugin root**; no `..`; referenced files must exist before ship.
+**Hard rules** for artifacts in Cursor + Claude marketplace plugins. Paths are **relative to the plugin root**; no `..`; referenced files must exist before ship.
+
+**SoT split:** this file = mechanical field tables. Judgment (“when to set”) = `design/<type>.md`. Shared access economy = `design/design-core.md`.
+
+Columns: **Field | Required | Portable | Cursor | Claude | Notes**.
 
 ## Skill (`skills/<name>/SKILL.md`)
 
-| Field / rule | Requirement |
-|--------------|-------------|
-| Frontmatter | YAML between `---` delimiters |
-| `name` | Required; **must equal** parent folder name `<name>` |
-| `name` format | `[a-z0-9-]{1,64}` |
-| `description` | Required; max **1024** characters (hard); **recommended ≤160** one sentence—shape per invoke mode in `skill-invocation.md` |
-| `disable-model-invocation` | Optional boolean—`true` = self-invoke (slash / parent Read); no ambient auto-trigger |
-| `user-invocable` | Optional boolean—Claude Code only: `false` hides `/` menu; **not** Cursor schema; never sole control for internals |
-| `allowed-tools` | Optional; comma-separated tool names with optional specifiers per Claude Code syntax (e.g. `Bash(python3 scripts/audit_static.py*)`) |
-| Path | `skills/<name>/SKILL.md` |
+| Field | Required | Portable | Cursor | Claude | Notes |
+|-------|----------|----------|--------|--------|-------|
+| Frontmatter (`---` YAML) | yes | yes | yes | yes | Must parse |
+| `name` | yes | yes | yes | yes | **Must equal** parent folder `<name>`; `[a-z0-9-]{1,64}` |
+| `description` | yes | yes | yes | yes | Max **1024**; **recommended ≤160**; shape per invoke mode in `design/skill.md` |
+| `disable-model-invocation` | no | yes | yes | yes | `true` = self-invoke (slash / parent Read); no ambient auto-trigger |
+| `user-invocable` | no | partial | **ignored** | yes | Claude: `false` hides `/` menu; never sole control for internals |
+| `allowed-tools` | no | no | no | yes | Turn-scoped **permission grant**, not a hard exclusive allowlist |
+| `argument-hint` / `arguments` | no | no | no | yes | When slash-invoked with args |
+| `license` | no | yes | optional | optional | agentskills.io optional |
+| `compatibility` | no | yes | optional | optional | agentskills.io optional |
+| `metadata` | no | yes | optional | optional | agentskills.io optional |
+| Path | yes | yes | yes | yes | `skills/<name>/SKILL.md` |
 
-Invoke modes and description rules: `refs/skill-invocation.md`. Sub-skills: `disable-model-invocation: true`; optional `user-invocable: false` on Claude Code.
+Invoke modes and description rules: `design/skill.md`. Sub-skills: `disable-model-invocation: true`; optional `user-invocable: false` on Claude Code.
 
 ## Command (`commands/<name>.md`)
 
-| Field / rule | Requirement |
-|--------------|-------------|
-| Frontmatter | YAML between `---` |
-| `name` | Required; **must equal** file stem (`commands/<name>.md`) |
-| `description` | Required; **recommended ≤160** one sentence; max 1024 |
-| Body | Input contract + delegation to skill **Action** (no internal `refs/` or `plugins/` paths) |
+| Field | Required | Portable | Cursor | Claude | Notes |
+|-------|----------|----------|--------|--------|-------|
+| Frontmatter (`---` YAML) | yes | yes | yes | yes | Must parse |
+| `name` | yes | yes | yes | yes | **Must equal** file stem |
+| `description` | yes | yes | yes | yes | **Recommended ≤160**; max 1024 |
+| `argument-hint` | no | no | no | yes | When slash expects args |
+| `allowed-tools` | no | no | no | yes | Side-effect narrowing / pre-approve only |
+| `model` | no | no | no | yes | Optional pin; prefer omit in marketplace defaults |
+| Body | yes | yes | yes | yes | Input + Action delegation + output; no internal `refs/` / `plugins/` paths |
+
+Judgment: `design/command.md`.
+
+## Agent (`agents/<name>.md` or `agents/<group>/<name>.md`)
+
+| Field | Required | Portable | Cursor | Claude | Notes |
+|-------|----------|----------|--------|--------|-------|
+| Frontmatter (`---` YAML) | yes | yes | yes | yes | Must parse |
+| `name` | yes | yes | yes | yes | **Must equal** file stem (nested OK: `agents/planning/challenge.md` → `name: challenge`) |
+| `description` | yes | yes | yes | yes | **Recommended ≤160**; purpose + when; no delegation chains |
+| `model` | no | no | yes | yes | Cursor: `inherit` \| id; Claude: model id; avoid fragile pins in marketplace |
+| `readonly` | no | no | yes | no | Cursor judgment-only agents |
+| `is_background` / `background` | no | no | `is_background` | `background` | Runtime-specific naming |
+| `tools` | no | no | no | yes | Align with **body** fence; not dual-runtime SoT |
+| `disallowedTools` | no | no | no | yes | Align with body fence |
+| `maxTurns` | no | no | no | yes | When unbounded loops are a risk |
+| `skills` (preload) | no | no | no | yes | Optional Claude preload |
+| `isolation` / `effort` | no | no | no | yes | Optional Claude |
+| ~~`permissionMode`~~ | — | — | — | **ignored in plugins** | Project/user agents only; do not ship as marketplace security |
+| ~~`hooks`~~ | — | — | — | **ignored in plugins** | Same caveat |
+| ~~`mcpServers`~~ | — | — | — | **ignored in plugins** | Same caveat |
+| Body tool fence | yes | yes | yes | yes | **Tools and boundaries** with MUST/MUST NOT — always required |
+
+Judgment: `design/agent.md`. Forbidden: `agents/<id>/refs/`.
 
 ## Rule (`.cursor/rules/*.mdc` or project rules)
 
@@ -33,15 +67,6 @@ Invoke modes and description rules: `refs/skill-invocation.md`. Sub-skills: `dis
 | Frontmatter | YAML between `---` |
 | `description` | Required |
 | Targeting | `alwaysApply` and/or `globs` / `path` patterns per product docs; globs must be valid |
-
-## Agent (`agents/<name>.md` or `.cursor/agents/<name>.md`)
-
-| Field / rule | Requirement |
-|--------------|-------------|
-| Frontmatter | YAML between `---` |
-| `name` | Required; consistent with file stem where applicable |
-| `description` | Required; **recommended ≤160**; purpose + when; no delegation chains in description |
-| Body | Role, tools boundary, **stop conditions** |
 
 ## Workflow (markdown doc)
 

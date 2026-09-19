@@ -23,7 +23,7 @@ Before minting structure, recommend `prd_shape` + `scope_mode` (+ optional `arch
 | Market shape | B2C, persona-heavy | B2B, buyer≠user |
 | What gets prioritized | Outcomes / JTBD first | Capabilities / RICE-on-features first |
 | WIP style | Stories before capabilities named | Features first; stories as usage angles |
-| Downstream need | Slice kernel later | Needs architecture spine sooner |
+| Downstream need | Slice kernel later | Needs constitution INDEX sooner |
 | NFR criticality | Few product-level NFRs | Several NFRs are product commitments on PRD |
 
 **Output:** `prd_shape: story_led | feature_led | hybrid` + `scope_mode: discovery | closed`. Revisit only on explicit user change or objective shift.
@@ -56,7 +56,7 @@ Persist **factors only** — composed `(R×I×C)/E` score is **not stored**.
 | **Reach** | ✓ | ✓ | 10–100% of a **named** target — state the denominator |
 | **Impact** | ✓ | ✓ | `0.25` Minimal · `0.5` Low · `1` Medium · `2` High · `3` Massive |
 | **Confidence** | ✓ | ✓ | `low`→0.5 · `medium`→0.8 · `high`→1.0 |
-| **Effort** | ✓ | — | Fibonacci `1, 2, 3, 5, 8, 13` on **features only** — **refuse** without same-sitting architecture (spine and/or feature delta) that cites **Effort drivers**; UI-facing also needs UX-shape (or `n/a` + reason) |
+| **Effort** | ✓ | — | Fibonacci `1, 2, 3, 5, 8, 13` on **features only** — **refuse** without same-sitting standing record (constitution and/or feature delta) that cites **Effort drivers**; UI-facing also needs UX-shape (or `n/a` + reason) |
 
 Stories score **RIC** (no Effort). Features score full **RICE**. Goals use `primary`/`support` only. Requirement leaves use P1–P3. Out-of-scope items get no RICE factors. Framework choice: `skills/rr-planner/refs/prioritization-lens.md`.
 
@@ -69,7 +69,7 @@ After scoring, validate RICE/RIC consistency and adherence to parent feature int
 | Kind | Where |
 |------|-------|
 | Product-facing NFR / WWAS AC | PRD |
-| Standing invariants | `architecture.md` (+ constitution) |
+| Standing invariants | `constitution.md` (+ tech `architecture.md` / ADRs on demand) |
 | Feature mechanism | `deltas/<feature-id>.md` |
 | Discover early parking only | Root `tech.md` — **Plan does not author AC/ADR there** |
 

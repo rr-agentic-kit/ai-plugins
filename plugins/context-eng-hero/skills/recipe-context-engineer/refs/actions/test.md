@@ -10,7 +10,9 @@
 | `close-contract.md` | `test-3-report` |
 | Probes for detected type | `test-2-probes` |
 
-Probe files: `prompts/skill.prompt.md` | `prompts/skill-ref.prompt.md` | `prompts/ref-file.prompt.md` | `prompts/command.prompt.md` | `prompts/agent.prompt.md` | `prompts/rule.prompt.md` | `prompts/workflow.prompt.md`
+Probe files: `prompts/skill.prompt.md` | `prompts/skill-ref.prompt.md` | `prompts/skill-ref-meta.prompt.md` | `prompts/ref-file.prompt.md` | `prompts/command.prompt.md` | `prompts/agent.prompt.md` | `prompts/rule.prompt.md` | `prompts/workflow.prompt.md`
+
+**Skill+Ref probe pick:** language-variant packs (e.g. `refs/java.md`) → `skill-ref.prompt.md`; orchestrator packs (`refs/actions/`, `refs/executors/`, rubrics/design) → `skill-ref-meta.prompt.md`.
 
 ## Probe outcomes
 
@@ -25,7 +27,7 @@ Probe files: `prompts/skill.prompt.md` | `prompts/skill-ref.prompt.md` | `prompt
 ### Step 1: `test-1-classify`
 
 - **Outcome:** Artifact type and matching prompt file selected.
-- **Done when:** Type stated per `classify.md`; correct `prompts/*.prompt.md` loaded (Skill+Ref → `prompts/skill-ref.prompt.md`; single ref file → `prompts/ref-file.prompt.md`).
+- **Done when:** Type stated per `classify.md`; correct `prompts/*.prompt.md` loaded (Skill+Ref → `skill-ref.prompt.md` or `skill-ref-meta.prompt.md` per probe pick above; single ref file → `prompts/ref-file.prompt.md`).
 
 ### Step 2: `test-2-probes`
 

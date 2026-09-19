@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "apply-plan.schema.json",
+  "title": "CE improve apply-plan lean JSON",
+  "type": "object",
+  "required": ["reports", "fix", "redesign"],
+  "additionalProperties": true,
+  "properties": {
+    "status": { "type": "string", "enum": ["ok", "partial", "failed"] },
+    "clarifications": { "type": "array", "items": { "type": "string" } },
+    "kind": { "const": "apply-plan" },
+    "reports": {
+      "type": "object",
+      "required": ["compliance", "opportunity", "apply_plan"],
+      "additionalProperties": true,
+      "properties": {
+        "compliance": { "type": "string", "minLength": 1 },
+        "opportunity": { "type": "string", "minLength": 1 },
+        "apply_plan": { "type": "string", "minLength": 1 }
+      }
+    },
+    "fix": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lane_row" }
+    },
+    "redesign": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lane_row" }
+    },
+    "dropped": { "type": "string" }
+  },
+  "$defs": {
+    "lane_row": {
+      "type": "object",
+      "required": ["source", "id", "intent"],
+      "additionalProperties": true,
+      "properties": {
+        "source": { "type": "string" },
+        "id": { "type": "string", "minLength": 1 },
+        "absorb": { "type": "string" },
+        "intent": { "type": "string" }
+      }
+    }
+  }
+}

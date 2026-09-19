@@ -77,7 +77,15 @@ Shared across compose, research, and challenge agents:
 }
 ```
 
-Agents **never** prompt the user directly. They return `clarifications_needed[]`; the skill surfaces per `payload.question_mode` (`ask` → `AskQuestion`, `text` → inline chat). Loop until list is empty or user says done.
+Agents **never** prompt the user directly. They return `clarifications_needed[]`; the skill surfaces per **effective** `payload.question_mode`:
+
+| Effective mode | Surface |
+|----------------|---------|
+| `ask` | `AskQuestion` (≤ `preferences.questions_per_cycle` per address cycle) |
+| `text` | Inline chat — full question prose, context, recommendation, numbered/bulleted options |
+| `auto` | Per-question: skill picks `delivery` (`ask` \| `text`) via heuristic in [goal-anchor.md](../../skills/rr-planner/refs/goal-anchor.md) § Question patterns |
+
+Record chosen `delivery` on each surfaced clarification and raw-history turn. Loop until list is empty or user says done.
 
 ## Parsing policy
 

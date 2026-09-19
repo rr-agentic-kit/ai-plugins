@@ -99,6 +99,35 @@ def test_setup_cascade_format_not_directory(tmp_path: Path) -> None:
     assert "not a directory" in message
 
 
+def test_setup_cascade_format_fails_when_blockquote_remains(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    phase = tmp_path / "discovery"
+    phase.mkdir()
+    (phase / "brd.md").write_text(
+        "---\n"
+        'doc_type: brd\n'
+        'track: "0.1"\n'
+        'doc_rev: "?"\n'
+        "pins: {}\n"
+        "created: 2026-01-01T00:00:00Z\n"
+        "---\n\n"
+        "### BRD-1: Title\n"
+        "_parent_: — | _kind_: leaf | _spec_: draft | _moscow_: Must | "
+        "_rationale_: r-001\n\n"
+        "> Stale body\n",
+        encoding="utf-8",
+    )
+
+    def _noop_rewrite(planning_dir: Path, *, empty_ok: bool = False) -> list:
+        return []
+
+    monkeypatch.setattr(setup_mod, "rewrite_planning_dir", _noop_rewrite)
+    status, message = setup_mod.setup_cascade_format(phase)
+    assert status == "failed"
+    assert "blockquote" in message.lower()
+
+
 def test_setup_cascade_versioning_yaml_read_error(tmp_path: Path) -> None:
     plans = tmp_path / "plans"
     plans.mkdir()

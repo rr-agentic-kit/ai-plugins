@@ -57,7 +57,7 @@ Flags (`--setup` / `--discover` / `--from-code` / `--challenge` / `--challenge d
 
 ### Intake
 
-Status-first (summary → phase status + session-state); resolve emits payload before cascade. From-code: research root = `--input` or `PROJECT_ROOT`.
+Status-first (summary → phase status + session-state **via** `scripts/session_state.sh view`); resolve emits payload before cascade. From-code: research root = `--input` or `PROJECT_ROOT`.
 
 ### Clarify
 

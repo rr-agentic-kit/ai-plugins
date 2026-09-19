@@ -9,12 +9,12 @@ VALID_FILES: dict[str, str] = {
 ## ES-1: Competitive window
 _parent_: — | _kind_: leaf | _spec_: ready
 
-> Why now.
+Why now.
 
 ## ES-2: Regulatory ceiling
 _parent_: — | _kind_: leaf | _spec_: ready | _tag_: regulatory
 
-> Constraint.
+Constraint.
 
 ## ES-3: Guest checkout
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
@@ -40,7 +40,7 @@ _parent_: BRD-1 | _kind_: container | _spec_: draft
 ### PRD-1.1: Guest checkout
 _parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active users | _impact_: 2 | _confidence_: medium | _effort_: 5
 
-> As a guest, I can complete checkout without an account.
+As a guest, I can complete checkout without an account.
 """,
 }
 
@@ -199,12 +199,12 @@ RATIONALE_FILES: dict[str, str] = {
 ## ES-1: Competitive window
 _parent_: — | _kind_: leaf | _spec_: ready | _rationale_: r-006
 
-> Why now.
+Why now.
 
 ## ES-2: Regulatory ceiling
 _parent_: — | _kind_: leaf | _spec_: ready | _tag_: regulatory | _rationale_: r-007
 
-> Constraint.
+Constraint.
 
 ## ES-3: Guest checkout
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must | _rationale_: r-001
@@ -230,7 +230,7 @@ _parent_: BRD-1 | _kind_: container | _spec_: draft
 ### PRD-1.1: Guest checkout
 _parent_: PRD-1 | _kind_: leaf | _spec_: ready | _reach_: 40% of monthly active users | _impact_: 2 | _confidence_: medium | _effort_: 5 | _rationale_: r-004
 
-> As a guest, I can complete checkout without an account.
+As a guest, I can complete checkout without an account.
 """,
 }
 

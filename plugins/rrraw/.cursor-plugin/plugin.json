@@ -1,21 +1,39 @@
 {
   "name": "rrraw",
   "displayName": "RRRaw",
-  "version": "0.0.4-rc-9",
-  "description": "Discover (executive-summary\u2192BRD + business-case) + Plan (PRD+) + Test excellence \u2014 flag-driven phase agents",
+  "version": "0.0.4-rc-21",
+  "description": "Discover (ES\u2192BRD + business-case) + Plan (PRD+) + build/test/review + local git + forge-agnostic CI",
   "license": "Unlicense",
   "keywords": [
     "discovery",
     "planning",
     "testing",
     "agents",
-    "quality"
+    "quality",
+    "build",
+    "review",
+    "git",
+    "ci"
   ],
   "category": "developer-tools",
   "tags": [
     "discovery",
     "planning",
     "testing",
-    "agents"
-  ]
+    "agents",
+    "quality",
+    "git",
+    "ci",
+    "build",
+    "review"
+  ],
+  "skills": [
+    "./skills/rr-discovery/",
+    "./skills/rr-planner/",
+    "./skills/rr-builder/",
+    "./skills/docs/rr-humanize/",
+    "./skills/rr-git/",
+    "./skills/rr-ci/"
+  ],
+  "hooks": "./hooks/cursor.json"
 }

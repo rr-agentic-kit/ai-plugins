@@ -64,7 +64,7 @@ Required context:
 9. **PRD only:** write shape/overview prose from the posture legend. Do not assume Must = MVP. Do not invent sprint/release-plan sections.
 10. **Mechanism / AC placement (PRD):** product WWAS AC stays on PRD. Standing invariants and feature mechanism are skill-owned (`architecture.md` / `deltas/`) — compose does **not** mint those files and does **not** route Plan AC into root `tech.md`. Discover parking in `tech.md` is out of compose scope.
 11. **Status / priority:** default new items `spec: idea`. Set `draft` when specifying. Never auto-promote to `ready`. On PRD requirement leaves emit `_priority_: P1|P2|P3` when ranked; optional `_status_:` from the closed enum. Selecting never deletes siblings.
-12. **Render order** (`refs/planning/doc-standards/dual-audience.md`): after H1 → **Human brief** (first body section) → remaining required prose → ranked items (heading + `_key_:` + `>` body) → **Item index**. Write or refresh Human brief from locked facts last (or outline first then refresh after mint) — no invented claims. Frontmatter: `doc_type`, `track`, `doc_rev` (`?` until freeze), `pins`, `created`; when caller `action` is `from-code`, also `maturity: code-extraction`. Always write markdown.
+12. **Render order** (`refs/planning/doc-standards/dual-audience.md`): after H1 → **Human brief** (first body section) → remaining required prose → ranked items (heading + `_key_:` + plain body) → **Item index**. Write or refresh Human brief from locked facts last (or outline first then refresh after mint) — no invented claims. Frontmatter: `doc_type`, `track`, `doc_rev` (`?` until freeze), `pins`, `created`; when caller `action` is `from-code`, also `maturity: code-extraction`. Always write markdown.
 13. **Persist draft** to `payload.output_dir` before returning (`ok` and `partial` only; skip on `failed`):
     - Write `{level}.md` only (draft until skill humanize).
     - Merge this level’s item records into `items.json`.
@@ -73,7 +73,7 @@ Required context:
 14. For each required section with insufficient facts: do not invent; add `ClarificationItem`. Persist draft anyway.
 15. Set `sections_completed` and `sections_incomplete` explicitly.
 
-Static vs judgment: `refs/planning/success-criteria.md`. Compose must write parseable `_key_:` headers and `>` bodies.
+Static vs judgment: `refs/planning/success-criteria.md`. Compose must write parseable `_key_:` headers and plain bodies (never `>`).
 
 ## Outputs
 

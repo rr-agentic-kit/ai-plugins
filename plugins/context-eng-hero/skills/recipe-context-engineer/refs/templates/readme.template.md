@@ -48,7 +48,7 @@
 
 ### Clarify
 
-<!-- OPTIONAL (skill-ref.readme.spec): AskQuestion habits, one at a time -->
+<!-- OPTIONAL (skill-ref.readme.spec): AskQuestion habits, one at a time; text-mode same options mandatory (Delivery channels) -->
 
 ### Output
 
@@ -56,7 +56,7 @@
 
 ### Close
 
-<!-- OPTIONAL (skill-ref.readme.spec): Next Up / AskQuestion; no slash deferral -->
+<!-- OPTIONAL (skill-ref.readme.spec): Next Up / AskQuestion; text-mode same options when tool missing; no slash deferral -->
 
 ## Design notes
 

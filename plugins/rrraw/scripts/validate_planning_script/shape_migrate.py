@@ -10,6 +10,7 @@ import yaml
 
 from .constants import (
     ATX_HEADING_RE,
+    BODY_QUOTE_RE,
     CANONICAL_KEY_ORDER,
     DOC_STEMS,
     EM_DASH,
@@ -76,11 +77,16 @@ def _format_meta_line(meta: dict[str, str]) -> str:
     return " | ".join(parts)
 
 
-def _wrap_blockquote(body: str) -> str:
+def _emit_plain_body(body: str) -> str:
+    """Emit canonical plain leaf body; strip stale `>` prefixes on ingest."""
     stripped = body.strip("\n")
     if not stripped.strip():
         return ""
-    return "\n".join(">" if not line else f"> {line}" for line in stripped.splitlines())
+    lines: list[str] = []
+    for line in stripped.splitlines():
+        match = BODY_QUOTE_RE.match(line)
+        lines.append(match.group(1) if match else line)
+    return "\n".join(lines)
 
 
 def _normalize_section(name: str) -> str:
@@ -242,10 +248,7 @@ def _render_item_block(block: _DocBlock) -> list[str]:
         out.append(_format_meta_line(block.meta))
     if block.body.strip():
         out.append("")
-        if block.body.lstrip().startswith(">"):
-            out.append(block.body)
-        else:
-            out.append(_wrap_blockquote(block.body))
+        out.append(_emit_plain_body(block.body))
     return out
 
 

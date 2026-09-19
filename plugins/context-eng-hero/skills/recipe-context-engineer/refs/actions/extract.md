@@ -9,8 +9,10 @@
 | `advisory.md` | `extract-2-classify` |
 | `classify.md` | `extract-2-classify` |
 | `frontmatter-schemas.md` | `extract-3-draft` |
-| `instruction-design.md` | `extract-3-draft` |
-| `skill-invocation.md` | `extract-3-draft` (skills) |
+| `design/design-core.md` | `extract-3-draft` |
+| `design/skill.md` | `extract-3-draft` (skills) |
+| `design/command.md` | `extract-3-draft` (commands) |
+| `design/agent.md` | `extract-3-draft` (agents) |
 | `readme-spec.md` | `extract-3-draft` (skill folders) |
 | `templates/readme.template.md` | `extract-3-draft` (skill README output) |
 | `lexicon-spec.md` | `extract-3-draft` (ACRONYMS + GLOSSARY harvest) |
@@ -40,7 +42,8 @@
 - **Outcome:** Template-shaped **minimum** draft produced (eval-first).
 - **Done when:** All template sections filled or gaps explicitly marked; only constraints justified by source or observed FAIL—no anticipated thickening; workflow includes `todo_id` if applicable.
 - **Skill README** (output `skills/<name>/README.md`): Read `SKILL.md` + progressive-disclosure refs for **constraints** (invoke mode, gates, eval-first, paths)—**not** to dump **Procedure** or Load chains. Fill `templates/readme.template.md` per `readme-spec.md` scannable section model and clarity rules. Provenance lists source paths (`SKILL.md`, ref paths used) + assumptions + open questions.
-- **Lexicon harvest** (when writing skill/plugin artifacts): Scan draft + co-loaded refs; merge domain acronyms into `ACRONYMS.md` and overloaded terms into `GLOSSARY.md` at resolved path per `lexicon-spec.md`. Create empty companions if missing.
+- **Lexicon harvest** (when writing skill/plugin artifacts): Scan draft + co-loaded refs; merge domain acronyms into `ACRONYMS.md` and overloaded terms into `GLOSSARY.md` at resolved path per `lexicon-spec.md`. Create empty companions if missing (companions ship every skill/plugin extract).
+- **Delivery channels** (skills/commands/workflows): If draft Procedure/Orchestration/close uses AskQuestion or enumerable gates, state Delivery channels per `questioning.md` / `design/design-core.md`; if no gates, one-line N/A. When extracting README **UX**, preserve Clarify/Close fallback language.
 - **README section map (extract):**
 
   | README section | Source in SKILL / refs |

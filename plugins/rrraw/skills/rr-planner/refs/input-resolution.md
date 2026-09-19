@@ -25,6 +25,7 @@ Shared schemas: `refs/planning/contracts.md`, `refs/planning/baselines.md`, `ref
 | `--research` | `research` |
 | `--challenge` | `challenge` |
 | `--review` | `challenge` |
+| `--optimize` | `optimize` |
 | `--setup` | `setup` |
 | `--freeze-slice` | `freeze-slice` |
 | `--resume` | _(selector)_ — sets `resume: true`; not a second primary when paired with continue-intent |
@@ -70,13 +71,30 @@ Default `output_dir` = `{PROJECT_ROOT}/docs/rr/{track}/plan/` (track from `docs/
 
 ### Question mode / questions per cycle
 
-Same as before: default `ask` + `questions_per_cycle: 1`; confirm-once persistence on explicit `--questions-per-cycle`.
+| Layer | Field | Values |
+|-------|-------|--------|
+| Persisted config | `preferences.question_mode` | `ask` (default) \| `text` \| `auto` |
+| Payload | `question_mode` | Resolved from preferences; `--text-mode` overrides to `text` for this invocation only |
+| Per-question (when effective = `auto`) | `delivery` | `ask` \| `text` — chosen per clarification at surface time |
+
+| Flag / signal | `question_mode` |
+|---------------|-----------------|
+| _(default)_ | `ask` — structured `AskQuestion` |
+| `--text-mode` | `text` — questions inline in chat (this invocation only; does not persist unless confirm-once) |
+| NL during resolve (“use auto question mode”, “auto question mode”) | `auto` — confirm-once persist to `preferences.question_mode` |
+| Resume | Read stored `preferences.question_mode`; default `ask` when absent |
+
+**Effective mode:** `payload.question_mode` after `--text-mode` override. Challenge / post-report / cheaper-first paths honor **effective** delivery: `text` → inline chat; `ask` → `AskQuestion`; `auto` → per-question heuristic ([goal-anchor.md](goal-anchor.md) § Question patterns). Record chosen `delivery` on each raw-history turn and in `pending_clarifications[]`.
+
+`questions_per_cycle` (QPC) = max **AskQuestion** count per **address cycle** (N questions → N answers). Default `ask` + `questions_per_cycle: 1`; confirm-once persistence on explicit `--questions-per-cycle`.
+
+**Anti-trigger:** QPC sizes AskQuestion batches only. It does **not** schedule `--challenge`, re-attest, or any challenge `Task`. Answering one QPC batch never implies “run challenge next.” Drain open remediations / pending clarifications with cheaper moves first — `refs/planning/challenge-layers.md`.
 
 ### Resume
 
 | Flag | Behavior |
 |------|----------|
-| `--resume` | Load `session-state.json`; continue Plan checkpoint; append Q&A. Route: `resume`. |
+| `--resume` | Project `session-state.json` via `scripts/session_state.sh view`; continue Plan checkpoint; append Q&A. Route: `resume`. Full-file `Read` of the checkpoint is a procedure fail. |
 | Auto-resume | NL “continue” / “resume” with checkpoint → treat as `--resume` |
 
 ### `--change` / slice select
@@ -117,10 +135,12 @@ Entry gate still requires frozen BRD + handoff for **freeze mint** and default c
 | Intent signal | `action` |
 |---------------|----------|
 | setup, bootstrap planning, init plans | `setup` |
-| product requirements, PRD, features, RICE, stories, requirements, architecture spine | `prd` |
+| product requirements, PRD, features, RICE, stories, requirements, constitution, architecture spine | `prd` |
 | freeze this slice, freeze-slice, select slice | `freeze-slice` |
 | research, competitors deep-dive (post-compose) | `research` |
 | challenge, review, critique, pre-mortem, red-team (Plan docs) | `challenge` |
+| close challenges, clear open challenges, ask until challenges close | `challenge` — **drain-first:** cheaper-first ladder on dirty stems / pending (`refs/planning/challenge-layers.md`); **anti-trigger:** do not invent standing/spine/dual-lens redesign under this NL |
+| optimize plan docs, context budget, split architecture, shrink constitution, rename decision-lite | `optimize` |
 | resume, continue planning | `prd` + `resume: true` (or resume route) |
 | change, revise, patch the, update the PRD / delta / AC | `change` |
 | discover, exec summary, MRD, BRD, viability, ideation, business-case | `OUT_OF_SCOPE` → `rr-discovery` |
@@ -141,7 +161,7 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 | Dimension | Rule |
 |-----------|------|
 | Action | Exactly one primary per invocation |
-| Plan focus | `--prd` mutually exclusive with `--change` / `--research` / `--challenge` / `--freeze-slice` |
+| Plan focus | `--prd` mutually exclusive with `--change` / `--research` / `--challenge` / `--optimize` / `--freeze-slice` |
 | `--change` | Requires `--section` and `--target` |
 | `--setup` | Never combines with Plan primaries; never starts compose |
 | Discover flags | Always `OUT_OF_SCOPE` |
@@ -156,7 +176,7 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 
 ## Status-first routing
 
-Load `docs/rr/rrr-status.yaml` (fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml` and `session-state.json`. Entry gate also reads discovery status + `business-case.yaml`.
+Load `docs/rr/rrr-status.yaml` (fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml`. For checkpoint: run `sh scripts/session_state.sh view --path {output_dir}/session-state.json` (preset `resume`) — **never** `Read` the whole `session-state.json` into context. Entry gate also reads discovery status + `business-case.yaml`. Missing file → treat as no checkpoint (`MISSING_CHECKPOINT` when `--resume`).
 
 | `payload.route` | When |
 |-----------------|------|
@@ -214,6 +234,7 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 | `freeze-slice` | `[]` | `["slice-freeze"]` |
 | `research` | `[]` | `["research"]` |
 | `challenge` | `[]` | `["challenge"]` — mode from `challenge_depth` |
+| `optimize` | `[]` | `["optimize"]` |
 | `setup` | `[]` | `["setup"]` |
 | `depth: deep` | — | append `research`, `challenge` after compose when applicable; set `challenge_depth: deep` |
 
@@ -232,5 +253,6 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 | `OUT_OF_SCOPE` | Discover / Execute / release-plan inventiveness / When-not-to-use |
 | `PLAN_ENTRY_REFUSED` | Frozen BRD + handoff missing |
 | `SLICE_REFUSED` | Smell-fail / Effort-without-architecture / Effort without drivers / UX-shape missing on UI-facing / shrink-full-set |
+| `CONTEXT_BUDGET_EXCEEDED` | Hard tier (≥8k tokens) on a plan doc; block full-load strategy — scoped load or `--optimize` ([context-budget.md](context-budget.md)) |
 
 Error shape: `refs/planning/contracts.md` `PhaseError`.

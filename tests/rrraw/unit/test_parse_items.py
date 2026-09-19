@@ -111,7 +111,7 @@ def test_stale_list_meta():
     assert "STALE_FORMAT" in error_codes(issues)
 
 
-def test_body_not_blockquote():
+def test_plain_body_canonical():
     text = """\
 ## ES-1: Vision
 _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
@@ -119,7 +119,19 @@ _parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
 Vision without quotes.
 """
     _, issues = vp.parse_markdown(text, "executive-summary.md")
-    assert "BODY_NOT_BLOCKQUOTE" in error_codes(issues)
+    assert "STALE_FORMAT" not in error_codes(issues)
+    assert not error_codes(issues)
+
+
+def test_blockquote_body_stale():
+    text = """\
+## ES-1: Vision
+_parent_: — | _kind_: leaf | _spec_: idea | _moscow_: —
+
+> Vision with quotes.
+"""
+    _, issues = vp.parse_markdown(text, "executive-summary.md")
+    assert "STALE_FORMAT" in error_codes(issues)
 
 
 def test_invalid_rationale_shape():

@@ -13,6 +13,8 @@ sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>
 # optional: --docs-root <dir>   # default {PROJECT_ROOT}/docs
 ```
 
+**Plugin root:** Run that script from the **same package root as the loaded skill** (`SKILL.md` → plugin root → `scripts/`). Do not Glob an older `~/.claude/plugins/cache/**/0.0.4-rc-N` sibling. Format disputes: Read `refs/planning/doc-standards/item-schema.md` §Canonical item surface from that same root (batch with the script invoke) — never invent format law from memory or an older cache.
+
 Do **not** pass a plans-dir positional. Create dirs if missing. Do **not** invent cascade docs or empty `future.md`. Do **not** create missing root SoT files.
 
 Legacy layouts (`docs/discovery/`, `docs/plan/`, `docs/plans/`, `docs/planning/`): **auto-migrated** by the `layout migrate` section into `docs/rr/{track}/{phase}/`. Skills may still read legacy paths until migrate runs.
@@ -26,7 +28,7 @@ Script stdout: one machine line per section (`section\tcreated|fixed|ok|failed\t
 | `docs root` | mkdir `docs/` | — | exists |
 | `rr directory` | mkdir `docs/rr/` | — | exists |
 | `layout migrate` | — | move legacy phase-first / flat trees into `docs/rr/{track}/{phase}/`; relocate parking | already migrated / nothing to migrate |
-| `tasks directory` | mkdir `docs/rr/tasks/` (empty; reserved) | — | exists |
+| `tasks directory` | mkdir `docs/rr/tasks/` (empty; `registry.yaml` minted on first prepare) | — | exists |
 | `discovery directory` | mkdir `docs/rr/{track}/discovery/` | — | exists |
 | `plan directory` | mkdir `docs/rr/{track}/plan/` | — | exists |
 | `root SoT load line` | — (never create missing CLAUDE/AGENTS) | append/restore line | already present (or no root SoT files) |
@@ -34,7 +36,7 @@ Script stdout: one machine line per section (`section\tcreated|fixed|ok|failed\t
 | `rrr-status.yaml` | mint summary defaults under `docs/rr/` | fill missing keys only | complete |
 | `discovery status.yaml` | mint Discover-stem unfrozen shell | fill missing keys; never bump track | complete + `mint_hash` |
 | `plan status.yaml` | mint PRD-only unfrozen shell | fill missing keys; never bump track | complete + `mint_hash` |
-| `cascade format` | — | `--rewrite` per phase dir that has cascade docs | already canonical **or no docs** |
+| `cascade format` | — | `--rewrite` per phase dir (list-meta, `{stem}.yaml`, **`>` → plain leaf body**); **fail** if `STALE_FORMAT` blockquote remains | already canonical **or no docs** |
 | `cascade versioning` | insert `track`/`doc_rev`/`pins`/`created` | drop `version`/`traces_from`; align with phase status | already canonical **or no docs** |
 | `pr validate workflow` | write `.github/workflows/rrr-validate-planning.yml` | overwrite if template drift | matches template |
 

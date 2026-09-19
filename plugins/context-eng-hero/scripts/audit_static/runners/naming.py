@@ -26,7 +26,8 @@ def run_naming(ctx: AuditContext) -> list[CheckResult]:
 
     match ctx.artifact_type:
         case "skill":
-            folder = ctx.rel.parts[1] if len(ctx.rel.parts) >= 2 else ""
+            # Leaf folder holding SKILL.md (supports nested skills/parent/child/).
+            folder = ctx.rel.parent.name if len(ctx.rel.parts) >= 2 else ""
             path_match = str(name_val) == folder
             results.append(
                 check(
@@ -36,7 +37,7 @@ def run_naming(ctx: AuditContext) -> list[CheckResult]:
                     f"name={name_val!r} folder={folder!r}",
                 )
             )
-        case "command":
+        case "command" | "agent":
             stem = ctx.rel.stem
             path_match = str(name_val) == stem
             results.append(
