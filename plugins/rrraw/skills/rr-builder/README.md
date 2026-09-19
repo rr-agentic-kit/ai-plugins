@@ -10,7 +10,7 @@ Execute needs one entry that owns pipeline cursor (prepare → plan → build �
 
 Owns flag/NL normalization, **orchestrate vs handoff** mode, drive×scope run loop, stage→load contracts, and on-demand load of `rr-prepare`, `rr-coder`, `rr-tester`, `rr-security-auditor`, or `rr-review`. Prepare/execute cursor under `docs/rr/tasks/`; review artifacts under `.ai/review/<runId>/`.
 
-**Out of scope:** cascade planning; opening PR/MR after delivered (→ **rr-ci**); inventing refactor-stage procedure (TBD stub); standalone git ops; README tone rewrites.
+**Out of scope:** inventing a **refactor** stage procedure while TBD; README tone rewrites. Mis-invocation redirects live under **Avoid when** only.
 
 ## Actions
 
@@ -48,8 +48,7 @@ Defaults: orchestrate without drive/scope → `manual` × `full`. Lone `--auto` 
 ## Philosophy
 
 - **Orchestrate by default; handoff on explicit flag** — explicit never silently re-enters orchestrate; drive/scope do not mutate handoff lanes
-- **Default `manual` × `full`** — confirm/pick among remaining stages; silent chain only with `--auto`
-- **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; ready list marks cursor stage **`(next)`**
+- **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; ready list marks cursor stage **`(next)`**; silent chain only with `--auto` (default drive×scope is `manual` × `full`)
 - **One nested skill (or stage knowledge set) per stage turn** — never preload all lane skills
 - **Plan ≠ build** — plan stage loads knowledge only; no application source edits
 - **Review under orchestrate is `--fix --all`** — report-only review uses explicit `--review` without `--fix`
@@ -90,4 +89,4 @@ Stop per drive×scope loop (stage done-when, delivered, hard stop, or decline). 
 
 Nested lane skills intentionally fail context-engineer `static.name.path-match` — they are path-loaded children of `rr-builder`, not top-level `skills/<name>/` entries.
 
-Layout: `refs/` (router + pipeline + validate), `rr-prepare/`, `rr-coder/`, `rr-tester/`, `rr-security-auditor/`, `rr-review/`.
+Layout: `refs/` (router + pipeline + validate + plan allowlist/schema), `rr-prepare/`, `rr-coder/`, `rr-tester/`, `rr-security-auditor/`, `rr-review/`.

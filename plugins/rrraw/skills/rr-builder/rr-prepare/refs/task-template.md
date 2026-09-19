@@ -17,8 +17,13 @@ adr_refs: []
 status: detailed
 builder_stage: null | prepare | plan | build | review | refactor | step_validate | task_validate
 step_index: null | integer   # 0-based into Steps; omit when not in a task-step stage
+step_plan_done: false | true   # current step_index only; reset on step advance
+step_build_done: false | true
+step_review_done: false | true
 ---
 ```
+
+Cursor algorithm SoT: [../../refs/slice-pipeline.md](../../refs/slice-pipeline.md). Do not infer the three `step_*_done` flags from body prose.
 
 ## Body sections (required)
 
@@ -27,7 +32,7 @@ step_index: null | integer   # 0-based into Steps; omit when not in a task-step 
 | **Goal** | One observable outcome for this capability atom |
 | **Obligations** | Constitution cites + **cited tech ADRs** + delta obligations |
 | **Read-first** | Paths/symbols/docs to open before coding |
-| **Steps** | Ordered implementer steps (mechanism-bearing) |
+| **Steps** | Ordered implementer steps (mechanism-bearing); plan stage fills [plan-schema.md](../../refs/plan-schema.md) under the active step |
 | **Verify / done** | How to know the atom is done (product AC refs OK) |
 | **Non-goals** | Explicit exclusions for this task |
 | **Open risks** | Residual risks / `pending_tech` blockers |

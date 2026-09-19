@@ -26,7 +26,7 @@ Map each opportunity to one primary pattern. Group bullets under one pattern whe
 | Procedure makes the LLM mint/scan/allocate/parse via multi-step invent (registry ids, path walks) when a single CLI/script could emit the value | **SCRIPTABLE** |
 | Shell/grep/find dumps large name lists into context for the LLM to filter, instead of emitting the needed value | **SCRIPTABLE** |
 
-**Detect ≠ absorb:** Ranking **SCRIPTABLE** does **not** require `scripts/` on the skill today. Opportunity = the waste. Absorb (fix/redesign) separately chooses: point Procedure at an existing CLI, index a custom helper from the skill, or tighten stdout filters. Stock one-off `git`/`gh` calls are not auto-opportunities; custom repeated optimizations should be indexed from the skill when absorbed.
+**Detect ≠ absorb:** Ranking **SCRIPTABLE** does **not** require `scripts/` on the skill today. Opportunity = the waste. Absorb (fix/redesign) separately chooses: point Procedure at an existing CLI, index a custom helper from the skill, or tighten stdout filters. When the waste is **report/scaffold paste** (large markdown tables, severity math, repeated report shapes), prefer the **Lean emit + schema + render** recipe in `helper-cli.md` / `templates/reports/README.md` over adding more prose procedure. Stock one-off `git`/`gh` calls are not auto-opportunities; custom repeated optimizations should be indexed from the skill when absorbed.
 
 **Not compliance:** These are ranked improvement opportunities (Keep / Improve / Restructure), not ship-blocking FAILs. Compliance blockers belong in a skim section only—see `rubrics/audit-redesign.rubric.md`.
 

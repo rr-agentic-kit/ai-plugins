@@ -19,9 +19,12 @@
 | full (builder) | rr-builder **scope** (`--full`): remaining stages until **delivered** (or hard stop) | Review `--scope …\|full`; “full auto” as drive | Default scope; silent multi-stage chain only when `drive=auto` |
 | orchestrate | Builder advances slice pipeline (prepare→…→delivered) under drive×scope | Handoff (one nested skill then stop) | Dual-mode invariant with handoff; default `manual` × `full` |
 | handoff | Builder loads one nested skill on `--prepare`/`--coder`/`--tester`/`--security`/`--review` and stops | Orchestrate / drive×scope pipeline advance | No silent re-entry to orchestrate in the same run; drive/scope ignored |
-| builder_stage | Cursor token on task-summary / `{NNNN}.md`: prepare\|plan\|build\|review\|refactor\|step_validate\|task_validate\|slice_validate\|delivered | Git stage; CI stage metaphor only | Minimal v1 fields + `step_index` |
+| builder_stage | Cursor token on task-summary / `{NNNN}.md`: prepare\|plan\|build\|review\|refactor\|step_validate\|task_validate\|slice_validate\|delivered | Git stage; CI stage metaphor only | With `step_index` + `step_*_done` booleans ([slice-pipeline.md](skills/rr-builder/refs/slice-pipeline.md)) |
+| step_plan_done | `{NNNN}.md` boolean: plan done for current `step_index` | Inferring “planned” from prose | Reset to false when advancing `step_index` |
+| step_build_done | `{NNNN}.md` boolean: build done for current `step_index` | CI “build passed” | Cursor reads this — not narrative |
+| step_review_done | `{NNNN}.md` boolean: review done for current `step_index` | Casual “reviewed” | Orchestrate review sets true after `--fix --all` |
 | task-step | Ordered implementer step inside a prepare task’s **Steps** | Full capability atom / prepare task | Pipeline runs plan→build→review→… per step |
-| plan (builder) | Task-step stage: enrich step plan + assessment; **knowledge load only**; no app source edits | rr-planner **plan** phase / product Plan | Under orchestrate; not product cascade |
+| plan (builder) | Task-step stage: enrich step plan + assessment; **plan-knowledge allowlist only**; no app source edits | rr-planner **plan** phase / product Plan | Output shape: [plan-schema.md](skills/rr-builder/refs/plan-schema.md) |
 | build (builder) | Task-step stage: implement code + tests via full rr-coder + rr-tester | Generic “build the app”; CI build job | Executes source; after plan done-when |
 | review (builder) | Task-step / handoff review: rr-review; orchestrate review forces `--fix --all` | Casual code glance; Challenge (Discover) | Explicit `--review` may be report-only |
 | refactor (builder) | Task-step stage **TBD** — skip or stop; do not invent procedure | Ad-hoc cleanup commits | Stub until specified |

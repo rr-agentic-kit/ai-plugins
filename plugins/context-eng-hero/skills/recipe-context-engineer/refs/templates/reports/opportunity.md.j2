@@ -1,0 +1,50 @@
+{# Opportunity (audit-redesign) report — scaffolding only. #}
+{%- set title = target.title or target.path -%}
+# Audit-redesign: {{ target.type }} — {{ title }}
+
+## Target
+- Path: `{{ target.path }}`
+- Type: {{ target.type }}
+
+## Compliance blockers (skim only)
+- {{ compliance_blockers | default("none", true) }}
+
+## Keep (optional)
+{%- if keep %}
+{%- for k in keep %}
+- {{ k }}
+{%- endfor %}
+{%- else %}
+- (none)
+{%- endif %}
+
+## Challenge
+{{ challenge | default("See investigation notes in payload.", true) | trim }}
+
+## Ranked opportunities
+
+| Rank | id | Pattern | Stance | Impact | Confidence | Absorb | Summary |
+|------|----|---------|--------|--------|------------|--------|---------|
+{%- for row in ranked %}
+| {{ row.rank }} | `{{ row.id }}` | {{ row.pattern }} | {{ row.stance | default("Improve", true) }} | {{ row.impact }} | {{ row.confidence }} | {{ row.absorb }} | {{ row.summary }} |
+{%- else %}
+| — | — | — | — | — | — | — | (none) |
+{%- endfor %}
+
+### Opportunity detail
+
+{{ opportunity_detail | default("(see ranked summaries)", true) | trim }}
+
+## Deferred (optional)
+{%- if deferred %}
+| id | Pattern | Impact | Confidence | Reason |
+|----|---------|--------|------------|--------|
+{%- for row in deferred %}
+| {{ row.id | default("—", true) }} | {{ row.pattern | default("", true) }} | {{ row.impact | default("", true) }} | {{ row.confidence | default("", true) }} | {{ row.reason | default("", true) }} |
+{%- endfor %}
+{%- else %}
+| — | — | — | — | None |
+{%- endif %}
+
+## Recommended next step (user)
+- Absorb via **fix** and/or **redesign** per Absorb column; or **`--improve`**

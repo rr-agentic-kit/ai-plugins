@@ -87,7 +87,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 - **Dual close surface** — skill uses AskQuestion; commands may name slash as user homework only
 - **STATIC SKIPPED** — audit continues judgment; write paths block until static PASS or user accepts draft-only
 - **Minimum draft** — smallest template-shaped draft that satisfies clarify; refs only when FAIL proves the gap
-- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits + gated apply (parent-only executors `refs/executors/compliance.md` + `opportunity.md`; not catalog agents)
+- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits (lean JSON → `render_ce_report.py`) + gated apply + scoped git stage of touch list (parent-only executors; not catalog agents)
 - **Question tool fallback** — AskQuestion preferred; text-mode channel mandatory when tool/harness missing (`refs/questioning.md`)
 
 ## Constraints
@@ -96,7 +96,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 |-------|------|
 | **Invoke** | `disable-model-invocation: true` — slash or explicit `Read` of `SKILL.md` |
 | **Eval-first** | Thicken from observed audit/test FAILs—not anticipated rules or mandatory research |
-| **Write gates** | Static → pre-write reflection → pre-ship → approve-revise-abort |
+| **Write gates** | Static → pre-write reflection → pre-ship → approve-revise-abort; `--improve` then scoped `git add` of touch list only |
 | **Paths** | Plugin-relative only; no `..` or absolute paths in authored content |
 | **README ↔ SKILL** | README = spec; SKILL = executor. Extract derives README from SKILL constraints, not Procedure paste |
 | **Lexicon** | `ACRONYMS.md` + `GLOSSARY.md` at plugin root (or skill sibling if standalone); harvest jargon; empty tables allowed |
@@ -107,6 +107,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 ## Notes
 
 - Static audit: `scripts/audit_static.py` from plugin root
+- Improve report render: `scripts/render_ce_report.py` (schemas + Jinja under `refs/templates/reports/`)
 - Type rubrics (compliance): `refs/rubrics/`
 - Improvement rubric (audit-redesign): `refs/rubrics/audit-redesign.rubric.md`
 - Behavior probes: `refs/prompts/`

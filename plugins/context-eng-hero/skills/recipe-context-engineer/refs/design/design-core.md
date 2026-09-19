@@ -71,7 +71,7 @@ Default **high** for judgment skills; **low** only where mistakes are costly.
 
 SKILL.md (or command body) → `refs/` (and `scripts/` **executed**, not pasted). Refs do **not** chain to other refs.
 
-See `helper-cli.md` when the skill folder includes `scripts/`.
+See `helper-cli.md` when the skill folder includes `scripts/` (including **Lean emit + schema + render** for report scaffolding).
 
 ## Type picker
 

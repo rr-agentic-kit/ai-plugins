@@ -4,9 +4,11 @@ Owned by skill recipe-context-engineer; loaded only via actions/improve.md Task 
 
 ## Role
 
-Function-style Task executor for **audit-redesign** (improvement opportunities) only. Single-shot: run the injected audit-redesign procedure against one target path and emit the full markdown report. Non-interactive.
+Function-style Task executor for **audit-redesign** (improvement opportunities) only. Single-shot: run the injected audit-redesign procedure against one target path. Non-interactive.
 
-Does **not** invent a parallel JSON handoff. Does **not** invoke `recipe-context-engineer` or any skill. Does **not** apply absorb hints (parent `improve` / fix / redesign own apply).
+Under **improve** (`emit: lean-json`): emit **lean JSON** per `templates/reports/opportunity.schema.json` — parent validates + Jinja-renders via `scripts/render_ce_report.py`. Standalone callers may still ask for full markdown.
+
+Does **not** Write/Edit/Bash. Does **not** invoke `recipe-context-engineer` or any skill. Does **not** apply absorb hints (parent `improve` / fix / redesign own apply).
 
 ## Tools and boundaries
 
@@ -20,7 +22,7 @@ Does **not** invent a parallel JSON handoff. Does **not** invoke `recipe-context
 
 | Status | When |
 |--------|------|
-| ok | Full audit-redesign report emitted; all eight dimensions evaluated; Challenge + Ranked (+ optional Deferred) complete |
+| ok | All eight dimensions evaluated; Challenge + Ranked complete; improve → lean JSON with Ranked Absorb/Impact; standalone → full markdown |
 | partial | Target readable but type incomplete, or compliance skim incomplete with assumptions noted as clarifications |
 | failed | Path missing/unreadable, `type` missing/invalid, or required injected refs absent |
 
@@ -38,25 +40,28 @@ Caller Load (parent Task prompt / payload):
 | `refs.audit_redesign` | yes | `skills/recipe-context-engineer/refs/actions/audit-redesign.md` |
 | `refs.rubric` | yes | `skills/recipe-context-engineer/refs/rubrics/audit-redesign.rubric.md` |
 | `refs.patterns` | yes | `skills/recipe-context-engineer/refs/improvement-patterns.md` |
-| `refs.template` | yes | `skills/recipe-context-engineer/refs/templates/audit-redesign-output.template.md` |
+| `refs.template` | yes | `skills/recipe-context-engineer/refs/templates/audit-redesign-output.template.md` (shape SoT) |
+| `refs.lean_schema` | when improve | `skills/recipe-context-engineer/refs/templates/reports/opportunity.schema.json` |
+| `emit` | when improve | `lean-json` |
 | `compliance_skim` | optional | FAIL ids / note from parallel `compliance` executor — blockers section only |
 
-Stable hard-links (executor may Read without re-injection): `actions/audit-redesign.md`, `rubrics/audit-redesign.rubric.md`, `improvement-patterns.md`, `templates/audit-redesign-output.template.md`. Parent still injects paths in the Task prompt (Caller Load).
+Stable hard-links (executor may Read without re-injection): `actions/audit-redesign.md`, `rubrics/audit-redesign.rubric.md`, `improvement-patterns.md`, `templates/audit-redesign-output.template.md`, `templates/reports/opportunity.schema.json`. Parent still injects paths in the Task prompt (Caller Load). Never Read `*.md.j2`.
 
 ## Execution
 
 1. Validate Inputs. Missing path/type/required refs → status `failed` + clarification bullets.
 2. Read injected `actions/audit-redesign.md` and execute steps `ar-2-judge` through `ar-5-report` content production only (skip interactive **post-audit-redesign-routing** — parent owns close when running standalone; `improve` merges instead).
 3. Apply rubric Challenge (before rank) and impact×confidence filter. Rank unbounded `1…N`. Do not assume ≤7 rows. FN must walk scriptable invent + context-bloating shell/list (SCRIPTABLE); do not require existing `scripts/`.
-4. Fill report per `templates/audit-redesign-output.template.md` (sole report SoT). Summary/Why = detect; Suggested direction + absorb = improve path.
+4. Fill findings; when `emit: lean-json`, build payload per `opportunity.schema.json`. Otherwise fill markdown per `audit-redesign-output.template.md`. Summary/Why = detect; absorb = improve path.
 
 ## Outputs
 
-Emit the **full report** per `refs.template` (`templates/audit-redesign-output.template.md`). Optionally prefix one-line status + clarification bullets in markdown.
+- **Improve:** lean JSON envelope (`kind: opportunity`) + one-line status. Do **not** emit full markdown in the Task return.
+- **Standalone:** full report per `refs.template`.
 
-Do **not** paste the template body into this executor file. Do **not** emit a parallel JSON schema whose fields only restate the Ranked table.
+Do **not** paste the template body into this executor file.
 
-**Apply-consumer contract:** Parent `improve` reads the markdown Ranked table (and Absorb column) per the template apply-consumer field contract. Apply only ranked rows with Absorb `fix` or `redesign` and Impact ∈ {high, medium}. Skip Keep notes, Absorb `defer`, Deferred table, and Impact `low`.
+**Apply-consumer contract:** Parent `improve` reads lean `ranked[]` (Absorb + Impact) and/or rendered markdown. Apply only Absorb `fix`\|`redesign` with Impact ∈ {high, medium}. Skip Keep, Absorb `defer`, Deferred, Impact `low`.
 
 ## Orchestration
 

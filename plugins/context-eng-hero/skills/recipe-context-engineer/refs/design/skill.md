@@ -120,7 +120,7 @@ Audit **FAIL** if >160 unless user explicitly accepts over-budget (still **FAIL*
 
 - Prefer ≤~200 lines in SKILL body; push variant detail into `refs/` (one hop).
 - Progressive disclosure / Shared refs / Ref index names which ref for which step.
-- Scripts: agent **runs** helpers via shell—do not paste script source (`helper-cli.md`).
+- Scripts: agent **runs** helpers via shell—do not paste script source (`helper-cli.md`). When authoring a target with report/scaffold waste, prefer lean JSON + `refs/templates/reports/<kind>.schema.json` + Jinja render (`helper-cli.md` **Lean emit + schema + render**) over procedure that re-emits full markdown.
 
 ## When to set `allowed-tools`
 

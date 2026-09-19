@@ -18,20 +18,22 @@ After review `--ci` findings: **Read** `skills/rr-ci/SKILL.md` for forge POST. D
 
 Local worktree / destructive git during review `--fix`: **Read** `skills/rr-git/refs/` as rr-review already directs — does not replace standalone **rr-git**.
 
-## Orchestrate stage → load table
+## Orchestrate stage → load
 
-Load table below is unchanged by drive/scope. Run loop (auto/manual × next/full, readiness) lives in [slice-pipeline.md](slice-pipeline.md). Validate rubrics: [task-validate.md](task-validate.md), [slice-validate.md](slice-validate.md).
+**SoT for stage contracts, Loads, execute-source?, and done-when:** [slice-pipeline.md](slice-pipeline.md) (Task-step stage contracts + Knowledge load vs full-skill). Do **not** maintain a parallel Loads matrix here.
 
-| Stage | Load | Execute application source? |
-|-------|------|------------------------------|
-| **prepare** | Full `rr-prepare/SKILL.md` | No |
-| **plan** | **Knowledge only** — rr-coder Required Knowledge (incl. [architecture.md](../rr-coder/refs/architecture.md) when AR-relevant) + rr-tester refs needed for step assessment (heuristics/contracts). Do **not** follow full implement Procedures | **No** |
-| **build** | Full `rr-coder/SKILL.md` **and** `rr-tester/SKILL.md` (code + tests for the step) | **Yes** |
-| **review** | Full `rr-review/SKILL.md` with forced `--fix --all` | Via review fix path |
-| **refactor** | TBD stub — skip or stop `refactor stage not specified` | No invented procedure |
-| **step_validate** / **task_validate** | [task-validate.md](task-validate.md) | No |
-| **slice_validate** | [slice-validate.md](slice-validate.md) | No |
-| **delivered** | Stop — point to **rr-ci** | No |
+| Stage | Pointer |
+|-------|---------|
+| **prepare** | Full `rr-prepare/SKILL.md` |
+| **plan** | [plan-knowledge.md](plan-knowledge.md) + [plan-schema.md](plan-schema.md) |
+| **build** | Full `rr-coder/SKILL.md` **and** `rr-tester/SKILL.md` |
+| **review** | Full `rr-review/SKILL.md` with forced `--fix --all` |
+| **refactor** | TBD stub — see slice-pipeline |
+| **step_validate** / **task_validate** | [task-validate.md](task-validate.md) |
+| **slice_validate** | [slice-validate.md](slice-validate.md) |
+| **delivered** | Stop — point to **rr-ci** |
+
+Run loop (auto/manual × next/full, readiness, cursor): [slice-pipeline.md](slice-pipeline.md).
 
 ### Review lane delegation (inside rr-review)
 
@@ -50,6 +52,8 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Loading all nested `SKILL.md` files in one turn (preload-all).
 - Re-entering **orchestrate** after an explicit handoff in the same run.
 - Writing application source during **plan** stage.
+- Dumping rr-coder Required Knowledge / language matrices on **plan** (use [plan-knowledge.md](plan-knowledge.md) only).
+- Inventing plan/build/review completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
 - Auto-chaining prepare → build without cursor/done-when.
 - Running **rr-ci** / opening PR from **slice delivered** (builder stops; engineer invokes **rr-ci**).
 - Using **rr-builder** for exec-summary / PRD authoring → **rr-planner**.

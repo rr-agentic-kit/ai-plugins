@@ -13,3 +13,4 @@ htmlcov/
 
 plugins/context-eng-hero/.venv/
 .agents/local.md
+.ai/

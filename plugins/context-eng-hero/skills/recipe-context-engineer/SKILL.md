@@ -2,7 +2,7 @@
 name: recipe-context-engineer
 description: Hardens scoped skills, commands, rules, agents, and workflows via gated design and write loops—slash or explicit Read only.
 disable-model-invocation: true
-allowed-tools: Read, Write, Edit, Bash(python3 scripts/audit_static.py*), Task, AskQuestion, TodoWrite
+allowed-tools: Read, Write, Edit, Bash(python3 scripts/audit_static.py*), Bash(python3 scripts/render_ce_report.py*), Task, AskQuestion, TodoWrite
 ---
 
 # Context engineer

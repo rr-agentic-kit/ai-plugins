@@ -19,7 +19,7 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 | `lexicon-spec.md` | `redesign-3-apply` (ACRONYMS + GLOSSARY) |
 | `templates/acronyms.template.md` | `redesign-3-apply` (ACRONYMS.md) |
 | `templates/glossary.template.md` | `redesign-3-apply` (GLOSSARY.md) |
-| `helper-cli.md` | `redesign-3-apply` (when `scripts/`) |
+| `helper-cli.md` | `redesign-3-apply` (when `scripts/`; SCRIPTABLE report waste → lean-emit recipe) |
 | `template-required-map.md` | `redesign-3-apply` |
 | `templates/<type>.template.md` (per `classify.md`) | `redesign-3-apply` |
 | `chat-orchestration.md` | `redesign-2-plan` (workflows) |
@@ -43,7 +43,7 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 ### Step 3: `redesign-3-apply`
 
 - **Outcome:** Redesigned draft applied.
-- **Done when:** All planned edits applied in memory or working copy; harvest new/changed jargon into `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md` (ensure both exist at resolved path); if Procedure/Orchestration/close gains or keeps AskQuestion/enumerable gates, wire **Delivery channels** (or one-line N/A if Minimal clarify and no forks)—same contract as create draft.
+- **Done when:** All planned edits applied in memory or working copy; harvest new/changed jargon into `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md` (ensure both exist at resolved path); if Procedure/Orchestration/close gains or keeps AskQuestion/enumerable gates, wire **Delivery channels** (or one-line N/A if Minimal clarify and no forks)—same contract as create draft. When absorbing **SCRIPTABLE** report/scaffold waste, apply `helper-cli.md` **Lean emit + schema + render**.
 
 ### Step 4: `redesign-4-gates`
 
