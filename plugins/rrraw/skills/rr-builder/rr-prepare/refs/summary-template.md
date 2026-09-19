@@ -9,7 +9,7 @@
 slice_id: slice-001
 track: "0.1"
 kernel_path: docs/rr/0.1/plan/execute-slice.yaml
-posture: greenfield
+posture: greenfield   # greenfield | brownfield | docs_ahead | conflict
 prepare_status: l1 | l2 | complete
 pending_tech: []   # empty = no topics yet; else list of maps:
 # pending_tech:

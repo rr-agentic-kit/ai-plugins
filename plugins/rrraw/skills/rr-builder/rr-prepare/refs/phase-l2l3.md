@@ -9,6 +9,7 @@
 | Validated `task-summary.md` path + `slice_id` | yes |
 | `posture` + `pending_tech` | yes |
 | Next task id to detail (L2) or `mode: l3` | yes |
+| `batch_l2` | no — default **true** (detail all remaining outlined tasks in dependency order this turn). Set `false` / `pause_each_l2` when parent wants a human gate after each task. |
 | Refs to load | `task-template.md`, `compatibility-gate.md`, `sequencing.md`, `tech-decisions.md`; for L3 also `pr-division.md` |
 
 ## Load (phase must Read)
@@ -17,7 +18,7 @@
 2. Cited ADRs / code paths for mechanism
 3. Injected refs
 
-## L2 work (one task)
+## L2 work (per task)
 
 1. Research code/docs/web as needed for posture.
 2. Force-mint ADR if blocked by `pending_tech` and irreversible.
@@ -25,7 +26,7 @@
 4. Run compatibility gate — FAIL → do not mark `detailed`.
 5. Mark summary row `detailed`; re-check sequencing.
 
-Default: return after **one** task so parent can validate.
+**Batch vs pause:** Default `batch_l2: true` — continue to the next outlined task in dependency order after each PASS. Still run compatibility-gate **per task** before `detailed`. When `batch_l2: false` / `pause_each_l2`, return after **one** task so parent can validate.
 
 ## L3 work (once, after all detailed)
 
@@ -42,4 +43,4 @@ Default: return after **one** task so parent can validate.
 
 ## Stop
 
-L2: return after each task (or batch only if parent requested). L3: prepare complete — **do not** invoke **rr-coder**.
+L2: return after the batch (or after one task if pause requested). L3: prepare complete — **do not** invoke **rr-coder**.

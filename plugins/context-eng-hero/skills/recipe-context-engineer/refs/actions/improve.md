@@ -6,7 +6,7 @@ Orchestrate **compliance audit** + **audit-redesign** in parallel, merge an appl
 
 ## Apply policy
 
-Merge from the **markdown** reports only (no parallel JSON handoff). Template SoT: `templates/audit-output.template.md` (Verdict / Findings FAIL ids) and `templates/audit-redesign-output.template.md` (Ranked **Absorb** column + apply-consumer field contract).
+Merge from the **persisted** markdown reports only (no parallel JSON handoff; no full-report paste into chat). Template SoT: `templates/audit-output.template.md` (Verdict / Findings FAIL ids) and `templates/audit-redesign-output.template.md` (Ranked **Absorb** column + apply-consumer field contract).
 
 Under write gates:
 
@@ -15,7 +15,23 @@ Under write gates:
 3. Ranked opportunities with Absorb `redesign` → **redesign**
 4. **Skip:** Keep notes, Absorb `defer`, Deferred table, Impact `low`
 
-One **approve-revise-abort** covers the combined apply plan (not per-opportunity spam)—`shared-write-gates.md`.
+**Two human gates (not one theatrical approve):**
+
+1. **approve-apply-plan** after `improve-3-merge` — before any target-path mutation
+2. **approve-revise-abort** after shared write gates — before promoting draft → target
+
+## Report scratch (read-budget)
+
+Per improve run, create `.ai/learning/ce-improve/<run-id>/` under the **user project** (mkdir if needed). Persist:
+
+| File | Content |
+|------|---------|
+| `compliance.md` | Full compliance report |
+| `opportunity.md` | Full audit-redesign report |
+| `apply-plan.md` | Merged plan per `improve-apply-plan.template.md` |
+| `draft/` | Off-path draft tree (optional mirror of target relatives) |
+
+Chat after audits: status + Verdict / ranked counts + **links** to those files — **do not** paste full Task report bodies.
 
 ## Ref index (Read at step)
 
@@ -38,8 +54,8 @@ One **approve-revise-abort** covers the combined apply plan (not per-opportunity
 | `failure-patterns.md` | Inject into `compliance` Task (recommended) |
 | `actions/fix.md` | `improve-4-apply-fix` |
 | `actions/redesign.md` | `improve-5-apply-redesign` |
-| `actions/shared-write-gates.md` | After apply drafts (one combined approve) |
-| `gate-prompts.md` | `improve-6-close` (**post-improve-routing**); write gate |
+| `actions/shared-write-gates.md` | After apply drafts (one combined write approve) |
+| `gate-prompts.md` | `improve-3-merge` (**approve-apply-plan**); write gate; `improve-6-close` |
 | `close-contract.md` | `improve-6-close` |
 | Executors: `executors/compliance.md`, `executors/opportunity.md` | `improve-2-parallel-audits` (Read via Caller Load — not catalog agents) |
 
@@ -47,48 +63,55 @@ One **approve-revise-abort** covers the combined apply plan (not per-opportunity
 
 ### Step 1: `improve-1-load`
 
-- **Outcome:** Target path and artifact type known; plugin root resolved.
-- **Done when:** Path resolved via `questioning.md` if missing (ambient “improve this” without a declared path → stop per skill exit conditions); type stated per `classify.md` (or assumption noted once).
+- **Outcome:** Target path and artifact type known; plugin root resolved; `<run-id>` chosen (short timestamp or uuid stem).
+- **Done when:** Path resolved via `questioning.md` if missing (ambient “improve this” without a declared path → stop per skill exit conditions); type stated per `classify.md` (or assumption noted once); scratch dir path known.
 - **Banner:** `CE ► IMPROVE` per `ui-brand.md`.
 
 ### Step 2: `improve-2-parallel-audits`
 
-- **Outcome:** Both diagnosis reports available.
+- **Outcome:** Both diagnosis reports **persisted** and linked.
 - **Done when:** In **one turn**, spawn two **`generalPurpose`** Tasks (wait for both). Do **not** use named catalog subagent types from `agents/`—these executors are skill refs only. Fill prompts from `templates/improve-compliance-task.template.md` and `templates/improve-opportunity-task.template.md` (required Caller Load fields + injected refs).
   1. **compliance** — template + `{ path, type, plugin_root }` + type rubric (+ skill-ref rubric if Skill+Ref) + `actions/audit.md` + `templates/audit-output.template.md` (+ `failure-patterns.md`).
   2. **opportunity** — template + `{ path, type, plugin_root }` + `actions/audit-redesign.md` + `rubrics/audit-redesign.rubric.md` + `improvement-patterns.md` + `templates/audit-redesign-output.template.md` (+ optional compliance skim when already returned).
 - Emit liveness before waits: `◆ Parallel audits (compliance + opportunity)…`.
-- Collect the full markdown reports from each. If either status line is `failed`, stop with clarifications—do not apply.
+- Collect reports from each Task. If either status line is `failed`, stop with clarifications—do not apply.
+- **Parent Write** (executors still must not Write): save full markdown to `.ai/learning/ce-improve/<run-id>/compliance.md` and `opportunity.md`. Chat: one-line status each + Verdict / ranked-count summary + **markdown links** to those two files. **read-budget:** do not re-paste full report bodies into chat.
 
 ### Step 3: `improve-3-merge`
 
-- **Outcome:** Unified apply list ready for write paths.
-- **Done when:** Built from report markdown (not a second schema) and presented per `templates/improve-apply-plan.template.md`:
+- **Outcome:** Unified apply list approved **before** any target mutation.
+- **Done when:** Built from **persisted** report files (not a second schema) and written to `.ai/learning/ce-improve/<run-id>/apply-plan.md` per `templates/improve-apply-plan.template.md` (required **Reports** block + lean **Intent** per id):
   - **fix list:** every compliance Findings FAIL id (all severities) ∪ Ranked rows with Absorb `fix` (Impact high|medium)
   - **redesign list:** Ranked rows with Absorb `redesign` (Impact high|medium)
   - **Dropped:** Keep notes, Absorb `defer`, Deferred rows, Impact `low`
-- Present the combined apply plan before gates. Empty both lists → skip to `improve-6-close` with diagnosis-only Next Up (no write).
+- Present in chat: link to `apply-plan.md` + Reports links + lane tables (no full report dump). Empty both lists → skip to `improve-6-close` with diagnosis-only Next Up (no write).
+- **Gate:** **approve-apply-plan** per `gate-prompts.md`. Abort → no draft, no target Write, still close. Approve → continue to apply steps.
 
 ### Step 4: `improve-4-apply-fix`
 
-- **Outcome:** Compliance FAILs + Absorb `fix` opportunities addressed with minimal same-intent edits.
-- **Done when:** If fix list empty → mark completed and continue. Else run `actions/fix.md` **Nested under improve** short path against the merged fix list (not the full standalone Steps 1–5). **Nested intake:** `fix-1-read` done-when satisfied from the merge plan—path + type already known; failure source = compliance Findings FAIL ids ∪ Ranked Absorb `fix` ids; skip AskQuestion for Missing failure source (`fix-intake.md`). **TodoWrite:** only `improve-1…6` — do not spawn `fix-*` todos. Produce draft only—**do not** run write gates yet if redesign list is non-empty (combine drafts). If redesign list empty → proceed to shared write gates on the fix draft before close.
+- **Outcome:** Compliance FAILs + Absorb `fix` opportunities addressed with minimal same-intent edits **off target path**.
+- **Done when:** If fix list empty → mark completed and continue. Else run `actions/fix.md` **Nested under improve** short path against the merged fix list (not the full standalone Steps 1–5). **Nested intake:** `fix-1-read` done-when satisfied from the merge plan—path + type already known; failure source = compliance Findings FAIL ids ∪ Ranked Absorb `fix` ids; skip AskQuestion for Missing failure source (`fix-intake.md`). **TodoWrite:** only `improve-1…6` — do not spawn `fix-*` todos.
+- **stop-rule:** Do **not** Write/Edit the approved **target** plugin paths in this step. Hold draft in memory and/or under `.ai/learning/ce-improve/<run-id>/draft/`. Snapshot pre-draft target bytes if a tool forces an on-path touch for static (restore on Abort).
+- Produce draft only—**do not** run write gates yet if redesign list is non-empty (combine drafts). If redesign list empty → proceed to shared write gates on the fix draft before close.
 
 ### Step 5: `improve-5-apply-redesign`
 
-- **Outcome:** Absorb `redesign` opportunities applied (or skipped).
+- **Outcome:** Absorb `redesign` opportunities applied to the **draft** set (or skipped).
 - **Done when:** If redesign list empty → mark completed. Else run `actions/redesign.md` **Nested under improve** short path against the redesign list. **Nested intake:** treat full `redesign-1-clarify` / `redesign-intake.md` done-when as satisfied from the merge plan—delta brief = Ranked Absorb `redesign` opportunity detail; skip **all** redesign-intake AskQuestions (outcome/audience/capabilities/failure modes/breaking-change); record breaking-change assumption once in the apply plan. **TodoWrite:** only `improve-1…6` — do not spawn `redesign-*` todos. Merge with any fix draft into one candidate artifact set.
-- **Gates:** Run `shared-write-gates.md` once on the combined draft. One **approve-revise-abort** for the whole plan. On Abort → no write; still close with Next Up.
+- **Same stop-rule** as improve-4: no target-path promotion yet.
+- **Gates:** Run `shared-write-gates.md` once on the combined **draft**. One **approve-revise-abort** for the whole plan — AskQuestion **must** include Reports + apply-plan + draft links. On Approve → promote draft → target paths. On Abort → discard draft / restore snapshot; **target paths unchanged**; still close with Next Up.
 
 ### Step 6: `improve-6-close`
 
 - **Outcome:** User routed after improve.
-- **Done when:** **post-improve-routing** AskQuestion per `gate-prompts.md`; follow-ups verb-only per `close-contract.md`. Surface both diagnosis reports (or paths/summaries) in the close narrative when useful.
+- **Done when:** **post-improve-routing** AskQuestion per `gate-prompts.md`; follow-ups verb-only per `close-contract.md`. Close narrative cites **paths** to persisted reports (and apply-plan) — not full report bodies.
 
 ## Stop
 
 - No ambient improve without a declared path.
-- Executors never Write; parent owns apply + gates.
+- Executors never Write; parent owns report persist, apply drafts, and gates.
 - Do not auto-apply Deferred / Keep / Absorb `defer` / Impact `low`.
 - Do not spawn a third “write agent”; parent executes fix/redesign **Nested under improve** short paths.
 - Nested apply: TodoWrite **only** `improve-1…6`; never nest `fix-*` / `redesign-*` todo lists.
+- **No target-path Write before approve-apply-plan.** **No target-path promotion before Write-gate Approve.**
+- **read-budget:** never paste full compliance/opportunity reports into chat when scratch files exist — link them.

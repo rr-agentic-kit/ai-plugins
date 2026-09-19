@@ -15,13 +15,13 @@
 
 1. Kernel + listed deltas (paths from inject)
 2. Constitution INDEX
-3. `docs/rr/tasks/registry.yaml` — if absent: scan max existing `{NNNN}.md` under `docs/rr/tasks/` and continue from max+1; if none exist, create with `next_id: 1` (see [task-template.md](task-template.md) Id allocation)
+3. `docs/rr/tasks/registry.yaml` — mint per [task-template.md](task-template.md) **Id allocation** (stdout→value; no path-list dumps)
 4. Injected refs above
 
 ## Work
 
 1. Decompose Capabilities into ordered capability atoms (grain rubric).
-2. Allocate global ids; build DAG `depends_on`.
+2. Allocate global ids; build DAG `depends_on`; run sequencing **Cycle probe** → PASS or FAIL+cycle.
 3. Write `docs/rr/tasks/{slice_id}/task-summary.md`.
 4. Update `pending_tech` topics blocked by L1 order if any.
 

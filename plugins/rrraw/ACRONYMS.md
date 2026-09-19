@@ -32,3 +32,4 @@
 | L2 | Prepare layer 2 — detailed `{NNNN}.md` task | rr-prepare; one atom at a time |
 | L3 | Prepare layer 3 — PR division map | rr-prepare; no forge open |
 | WBS | Work Breakdown Structure | rr-prepare ordered task tree under `docs/rr/tasks/` |
+| NL | Natural Language | Parent/user invoke without an explicit path or flag |

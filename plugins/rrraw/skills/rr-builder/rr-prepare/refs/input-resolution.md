@@ -7,7 +7,7 @@
 | Input | Action |
 |-------|--------|
 | Explicit `execute-slice.yaml` path | Load that file |
-| `--prepare` / NL without path | Next open pin-complete kernel under `docs/rr/{track}/plan/execute-slice.yaml` (current track from `docs/rr/rrr-status.yaml` / plan `status.yaml`) |
+| `--prepare` / NL without path | Prefer asking parent for an explicit path. If still omitted: read current track from `docs/rr/rrr-status.yaml` / plan `status.yaml` → open that track’s `docs/rr/{track}/plan/execute-slice.yaml` only if pin-complete → else **Stop** → **rr-planner**. Emit one `kernel_path` (or empty→stop). **Do not** glob-dump plan trees into context for the LLM to filter. |
 | Missing or unfrozen | **Stop** → **rr-planner** (`execute-handoff` / freeze) |
 
 ## Load set (after path resolves)
@@ -22,7 +22,7 @@ Do not load full PRD into context unless a pin forces a specific section.
 
 ## Posture classify
 
-Apply [sequencing.md](sequencing.md) posture table (including **Conflict** stop/AskQuestion). Emit one of: `greenfield` | `brownfield` | `docs_ahead` | `conflict`.
+Apply [sequencing.md](sequencing.md) posture table (tokens `greenfield` \| `brownfield` \| `docs_ahead` \| `conflict`, including **conflict** stop/AskQuestion). Emit exactly one of those four tokens.
 
 ## Output payload (session)
 

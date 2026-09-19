@@ -1,14 +1,14 @@
 # rr-prepare
 
-Builder-owned tech plan: pin-complete `execute-slice.yaml` → ordered tasks under `docs/rr/tasks/`.
+Builder-owned tech plan: pin-complete execute-slice → ordered task artifacts for Execute.
 
 ## Why
 
-Execute needs capability atoms, real dependencies, cited tech ADRs, and a PR map before code — without inventing PRD intent or product law. Done when `task-summary.md` is complete, every task file is detailed, and prepare stops (no auto-chain to **rr-coder**).
+Execute needs capability atoms, real dependencies, cited tech ADRs, and a PR map before code — without inventing PRD intent or product law. Done when the slice task-summary is complete, every task file is detailed, and prepare stops (no auto-chain to **rr-coder**).
 
 ## What
 
-Owns tech-decision gate (lazy `ADR-n`), L1 ordered summary, L2 task detail, L3 PR division. Artifacts: `docs/rr/tasks/registry.yaml` + `{slice_id}/`.
+Owns tech-decision gate (lazy tech ADR), L1 ordered summary, L2 task detail, L3 PR division. Artifacts: global task registry + per-slice task folder.
 
 **Out of scope:** product PRD/constitution/DEC; application code; forge PR open.
 
@@ -30,7 +30,7 @@ Owns tech-decision gate (lazy `ADR-n`), L1 ordered summary, L2 task detail, L3 P
 - **Lazy tech ADRs** — mint only when L1/L2 would invent mechanism
 - **Code wins on brownfield mechanism** — reverse-derive; do not redesign against live call graph
 - **Stop after L3** — prepare ≠ implement
-- **Global task ids** — monotonic across slices via `registry.yaml`
+- **Global task ids** — monotonic across slices via registry
 
 ## UX
 
@@ -40,15 +40,15 @@ Parent **rr-builder** loads this nested skill (`disable-model-invocation` / `use
 
 ### Intake
 
-Resolve `execute-slice.yaml` + posture (greenfield / brownfield / docs-ahead / conflict).
+Resolve execute-slice kernel + posture (greenfield / brownfield / docs_ahead / conflict). Prefer an explicit kernel path from parent.
 
 ### Clarify
 
-AskQuestion (or text-mode same options) for irreversible tech forks and L1 validation (DAG, grain, requirement map, posture); pause after L1 and each L2 by default (batch L2 only if parent requests).
+AskQuestion (or text-mode same options) for irreversible tech forks and L1 validation (DAG, grain, requirement map, posture). L2 batches by default; pause after each L2 only when parent requests.
 
 ### Output
 
-`docs/rr/tasks/{slice_id}/task-summary.md` + `{NNNN}.md`; optional forced `ADR-n` under plan architecture paths.
+Per-slice task-summary + numbered task files; optional forced tech ADRs under plan architecture paths.
 
 ### Close
 
@@ -64,4 +64,7 @@ Mark prepare complete; stop. Do not chain **rr-coder**.
 
 ## Notes
 
-Layout: `SKILL.md`, `refs/` (input, sequencing, tech-decisions, grain, PR, templates, compatibility, phase contracts). Lexicon: plugin `GLOSSARY.md` / `ACRONYMS.md`.
+- Kernel: `docs/rr/{track}/plan/execute-slice.yaml` (track from `docs/rr/rrr-status.yaml` / plan `status.yaml`)
+- Tasks: `docs/rr/tasks/registry.yaml` + `docs/rr/tasks/{slice_id}/` (`task-summary.md`, `{NNNN}.md`)
+- Pack layout: `SKILL.md`, `refs/` (input, sequencing, tech-decisions, grain, PR, templates, compatibility, phase contracts)
+- Lexicon: plugin `GLOSSARY.md` / `ACRONYMS.md`

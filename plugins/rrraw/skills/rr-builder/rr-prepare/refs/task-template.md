@@ -36,9 +36,9 @@ Markdown + YAML only — no XML DSL.
 
 Mint via `docs/rr/tasks/registry.yaml` `next_id` (global monotonic). Ids start at **1** (never 0).
 
-If registry missing:
+**Mechanical mint (stdout → value only):**
 
-1. Scan max existing `{NNNN}.md` under `docs/rr/tasks/` → continue from max+1
-2. If no task files exist → create registry with `next_id: 1`
+1. If registry exists: read `next_id`; allocate consecutive integers for this L1 batch; write back updated `next_id`. Emit only the allocated id list — do not paste the registry file into chat.
+2. If registry missing: compute `max_id` as the maximum integer stem among existing `{NNNN}.md` under `docs/rr/tasks/` (shell/find that prints **one integer**, or `0` if none). Continue from `max_id+1`. Create registry with `next_id` set after allocation. **Do not** dump path listings into context for the LLM to filter.
 
 Do not invent a second mint algorithm in phase contracts — this section is SoT.
