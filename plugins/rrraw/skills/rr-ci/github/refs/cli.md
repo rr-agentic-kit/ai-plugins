@@ -13,6 +13,8 @@ gh pr review --request-changes --body "..."
 gh run list --branch "$BRANCH" --limit 1
 gh run view RUN_ID --log-failed
 gh run rerun RUN_ID --failed
+gh issue create --repo OWNER/REPO --title "..." --body "..."
+gh issue create --title "..." --body-file body.md
 ```
 
-Prefer `gh` over raw `curl` to `api.github.com` when `gh` is authenticated. JSON: `gh … --json fields`.
+Prefer `gh` over raw `curl` to `api.github.com` when `gh` is authenticated. JSON: `gh … --json fields`. Use `--repo OWNER/REPO` when forge target ≠ cwd origin.

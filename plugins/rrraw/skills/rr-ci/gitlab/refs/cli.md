@@ -4,7 +4,16 @@ Do not copy `glab --help` into context. Run `glab <command> --help` for flags.
 
 ## MR title and description
 
-Parent skill `refs/pr-mr-templates.md`. Default create flags: nested SKILL **Procedure** step 4.
+Parent skill `refs/pr-mr-templates.md`. Default create flags: nested SKILL **Procedure** (Default MR create).
+
+## Issues
+
+```bash
+glab issue create --repo OWNER/REPO -t "..." -d "..."
+glab issue create -t "..." -d "..."
+```
+
+Use `--repo` when forge target ≠ cwd origin. Draft → approve → create: parent/nested **Issue create** steps — do not invent flags.
 
 ## Assignee and reviewer: append vs replace
 
