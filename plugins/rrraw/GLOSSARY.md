@@ -11,8 +11,23 @@
 | cascade | Ordered ES→MRD→BRD (Discover) or Plan level cycle | Waterfall process | Level todos + compose/humanize |
 | challenge | Adversarial review via Task agent — **standard** or **deep** layer | Casual disagreement; smells; auto-reflection; **rr-review Challenge gate** | `--challenge` / `--challenge deep`; [challenge-layers.md](refs/planning/challenge-layers.md) |
 | Challenge (review) | rr-review gate that re-triages assess rows before report/fix/ci; consumers use **keep** only | Discover `--challenge` / challenge-layers | Persist `{assess-stem}-challenge.md` under `REVIEW_DIR`; unchallenged challengeable rows stop the report |
-| lane | rr-builder work class: `prepare` \| `code` \| `test` \| `security` \| `review` | Git branch lane / swimlane metaphor only | Nested skill or review assess pass |
-| prepare | Builder tech plan: execute-slice → `docs/rr/tasks/` + lazy tech ADRs | Product Plan / rr-planner; implement (rr-coder) | Nested under rr-builder; stop after L3 |
+| lane | rr-builder handoff class: `prepare` \| `coder` \| `tester` \| `security` \| `review` | Git branch lane; review assess pass (`code`/`test`/`security`) | Nested skill under explicit flag; not orchestrate stage |
+| prepare | Builder tech plan: execute-slice → `docs/rr/tasks/` + lazy tech ADRs | Product Plan / rr-planner; implement (rr-coder) | Nested under rr-builder; stop after L3; also orchestrate **prepare** stage |
+| auto | rr-builder **drive** (`--auto`): execute without confirm between stages; pairs with `scope` (`next`\|`full`) | Casual “automatic”; CI auto-merge; **orchestrate** mode | Not the same as mode; default drive is **manual**. See [slice-pipeline.md](skills/rr-builder/refs/slice-pipeline.md) |
+| manual | rr-builder **drive** (`--manual`): show step(s), wait for confirm/edit (or ready pick), then execute | Casual “by hand”; handoff lane | Default drive; with `full`, ready list marks cursor stage **`(next)`** |
+| next (builder) | rr-builder **scope** (`--next`): only the cursor’s next stage | Casual “what’s next”; product next-up | Lone `--next` → `drive=manual`. Cursor stage labeled **`(next)`** in manual-full lists |
+| full (builder) | rr-builder **scope** (`--full`): remaining stages until **delivered** (or hard stop) | Review `--scope …\|full`; “full auto” as drive | Default scope; silent multi-stage chain only when `drive=auto` |
+| orchestrate | Builder advances slice pipeline (prepare→…→delivered) under drive×scope | Handoff (one nested skill then stop) | Dual-mode invariant with handoff; default `manual` × `full` |
+| handoff | Builder loads one nested skill on `--prepare`/`--coder`/`--tester`/`--security`/`--review` and stops | Orchestrate / drive×scope pipeline advance | No silent re-entry to orchestrate in the same run; drive/scope ignored |
+| builder_stage | Cursor token on task-summary / `{NNNN}.md`: prepare\|plan\|build\|review\|refactor\|step_validate\|task_validate\|slice_validate\|delivered | Git stage; CI stage metaphor only | Minimal v1 fields + `step_index` |
+| task-step | Ordered implementer step inside a prepare task’s **Steps** | Full capability atom / prepare task | Pipeline runs plan→build→review→… per step |
+| plan (builder) | Task-step stage: enrich step plan + assessment; **knowledge load only**; no app source edits | rr-planner **plan** phase / product Plan | Under orchestrate; not product cascade |
+| build (builder) | Task-step stage: implement code + tests via full rr-coder + rr-tester | Generic “build the app”; CI build job | Executes source; after plan done-when |
+| review (builder) | Task-step / handoff review: rr-review; orchestrate review forces `--fix --all` | Casual code glance; Challenge (Discover) | Explicit `--review` may be report-only |
+| refactor (builder) | Task-step stage **TBD** — skip or stop; do not invent procedure | Ad-hoc cleanup commits | Stub until specified |
+| task-validate | Rubric: task Goal / Verify / Obligations met | Slice validate; forge QA | [task-validate.md](skills/rr-builder/refs/task-validate.md) |
+| slice validate | Rubric: slice goal / pinned AC met after all tasks PASS | task-validate; product acceptance ceremony | [slice-validate.md](skills/rr-builder/refs/slice-validate.md) |
+| delivered | Slice validate PASS — builder stop; ship boundary → **rr-ci** | “Done” chat close without AC proof | Builder does not open PR/MR |
 | capability atom | Smallest prepare task that delivers observable value (or unlocks it) | Full PRD leaf; pure rename | Grain rubric in rr-prepare |
 | task-summary | L1 ordered task list + L3 PR map for one `slice_id` | PRD backlog; sprint board | `docs/rr/tasks/{slice_id}/task-summary.md` |
 | global task id | Monotonic integer across slices (`0001.md` …) via `registry.yaml` | Per-slice restarting ids; old `tsk-NNN` naming | Never 0; frontmatter `id:` integer |

@@ -16,7 +16,8 @@ Owns tech-decision gate (lazy tech ADR), L1 ordered summary, L2 task detail, L3 
 
 ### Use when
 
-- `--prepare` / “prepare slice” / “decompose execute-slice” / “tech plan for slice” via **rr-builder**
+- `--prepare` / “prepare slice” / “decompose execute-slice” / “tech plan for slice” via **rr-builder** (explicit handoff)
+- Builder orchestrate when prepare is incomplete (`prepare_status` ≠ complete / outlined rows; drive/scope per parent)
 - After Plan slice freeze when builders need ordered tasks
 
 ### Avoid when
@@ -36,7 +37,7 @@ Owns tech-decision gate (lazy tech ADR), L1 ordered summary, L2 task detail, L3 
 
 ### Invoke
 
-Parent **rr-builder** loads this nested skill (`disable-model-invocation` / `user-invocable: false`).
+Parent **rr-builder** loads this nested skill on `--prepare` handoff or orchestrate **prepare** stage (`disable-model-invocation` / `user-invocable: false`).
 
 ### Intake
 

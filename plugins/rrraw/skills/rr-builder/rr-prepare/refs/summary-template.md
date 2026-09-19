@@ -11,6 +11,7 @@ track: "0.1"
 kernel_path: docs/rr/0.1/plan/execute-slice.yaml
 posture: greenfield   # greenfield | brownfield | docs_ahead | conflict
 prepare_status: l1 | l2 | complete
+builder_stage: null | prepare | plan | build | review | refactor | step_validate | task_validate | slice_validate | delivered
 pending_tech: []   # empty = no topics yet; else list of maps:
 # pending_tech:
 #   - topic: auth-session-store

@@ -1,6 +1,6 @@
 ---
 name: rr-builder
-description: Routes prepare, implement, test, security, or review to one nested skill. Use for tech-plan, code, tests, OWASP, or review — not rr-planner or rr-ci alone.
+description: Slice build orchestrator (drive×scope; default --manual --full) or lane handoff via --prepare/--coder/--tester/--security/--review. Not rr-planner/rr-ci.
 ---
 
 # rr-builder
@@ -9,22 +9,22 @@ description: Routes prepare, implement, test, security, or review to one nested 
 
 ## Purpose
 
-Given a plan (`docs/plans/`), flags, or natural language, **classify** the work lane and **`Read` only the matching nested `SKILL.md`**. Do not load every nested skill on one prompt. Artifacts for review live under **`.ai/review/<runId>/`**.
+**Orchestrate** building a pin-complete execute-slice for software engineers: prepare → per-task plan/build/review/validate → slice validate → **delivered** boundary. Drive (`--auto` \| `--manual`) × scope (`--next` \| `--full`) control confirm gates and how far one run advances. With an explicit lane flag, **hand off** to exactly one nested skill and stop (drive/scope ignored). Artifacts: `docs/rr/tasks/` (prepare/execute cursor), `.ai/review/<runId>/` (review).
 
 ## When to use
 
-- Prepare / decompose a frozen execute-slice into `docs/rr/tasks/`
-- Implement or refactor production code
-- Test assess/write/fix/migrate/flaky flows
-- OWASP / secrets / vulnerability audit
-- Multi-lane review (`--code`, `--test`, `--security`, `--all`) with optional `--fix` or `--ci`
+- Continue or resume a frozen slice (orchestrate: no lane flag; defaults `drive=manual`, `scope=full`)
+- Run without confirms (`--auto`) or only the cursor stage (`--next`)
+- Explicit single-lane work: `--prepare` / `--coder` / `--tester` / `--security` / `--review`
+- Task-step plan (knowledge only) or build (code + tests) under orchestrate
+- Multi-lane review with fix under orchestrate review (`--fix --all` forced) or explicit `--review`
 
 ## When not to use
 
 | Need | Use instead |
 |------|-------------|
 | Cascade planning (exec-summary → PRD) | **rr-planner** |
-| PR/MR create, pipeline debug, inline POST mechanics | **rr-ci** (after review `--ci` handoff) |
+| PR/MR create, pipeline debug, forge POST after **delivered** | **rr-ci** |
 | Local git only (rebase, worktree, squash) | **rr-git** |
 | Docs humanization | **rr-humanize** |
 
@@ -32,20 +32,26 @@ See [refs/anti-overlap.md](refs/anti-overlap.md).
 
 ## Procedure
 
-TodoWrite `merge: false` with ids `resolve`, `classify`, `load`, `execute` when routing spans 3+ steps; omit for a single unambiguous nested skill.
+TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the run spans 3+ steps; omit for a single unambiguous handoff.
 
-1. **resolve** — Load [refs/input-resolution.md](refs/input-resolution.md). Normalize flags, plan path, or NL into `payload.lane` and optional `payload.nested_flags`. Done: payload emitted or one AskQuestion.
-2. **classify** — If `payload.lane` is ambiguous, AskQuestion once: prepare | code | test | security | review-all. Done: exactly one lane.
-3. **load** — **`Read`** the nested skill from [refs/routing.md](refs/routing.md). Do not preload other nested skills.
-4. **execute** — Follow the nested skill until its done-when. Prepare stops after L3 (no auto-chain to coder). If outcome is review `--ci`, after findings **`Read`** `skills/rr-ci/SKILL.md` for forge POST. Stop; do not continue into rr-ci unless `--ci` or user asked to ship.
+**Task agents:** N/A — no Task spawn; nested skills are path-loaded `Read`s only.
+
+**Delivery channels:** Prefer AskQuestion for missing kernel/`slice_id`, ambiguous mode, manual confirm/ready-pick, and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
+
+1. **resolve** — Load [refs/input-resolution.md](refs/input-resolution.md). Normalize flags / NL into `payload.mode` (`orchestrate` \| `handoff`), `payload.drive` / `payload.scope` (orchestrate defaults: `manual` × `full`), optional `payload.lane`, and slice/task cursor fields. Explicit lane → omit/ignore drive/scope. Done: payload emitted or one AskQuestion.
+2. **mode** — If explicit lane flag → **handoff**. Else → **orchestrate** (probe cursor per [refs/slice-pipeline.md](refs/slice-pipeline.md)). Explicit flag wins over cursor. Done: exactly one mode.
+3. **load** — Follow [refs/routing.md](refs/routing.md):
+   - **Handoff:** `Read` only the matching nested `SKILL.md` once.
+   - **Orchestrate:** load stage contract (full nested skill, knowledge refs only, or validate rubric). Do not preload every nested skill.
+4. **execute** — Apply drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` after each done-when. **Stop** — handoff does not re-enter orchestrate; plan stage must not edit application source; delivered → point to **rr-ci** (do not open PR). Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
 
 ## Nested skills (path-loaded only)
 
-| Lane | Path | Listed in plugin.json |
-|------|------|------------------------|
+| Lane / stage use | Path | Listed in plugin.json |
+|------------------|------|------------------------|
 | Prepare | [rr-prepare/SKILL.md](rr-prepare/SKILL.md) | no |
-| Code | [rr-coder/SKILL.md](rr-coder/SKILL.md) | no |
-| Test | [rr-tester/SKILL.md](rr-tester/SKILL.md) | no |
+| Coder | [rr-coder/SKILL.md](rr-coder/SKILL.md) | no |
+| Tester | [rr-tester/SKILL.md](rr-tester/SKILL.md) | no |
 | Security | [rr-security-auditor/SKILL.md](rr-security-auditor/SKILL.md) | no |
 | Review hub | [rr-review/SKILL.md](rr-review/SKILL.md) | no |
 
@@ -57,4 +63,7 @@ Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
 |-----|------|
 | [refs/input-resolution.md](refs/input-resolution.md) | Every invocation |
 | [refs/routing.md](refs/routing.md) | After resolve |
+| [refs/slice-pipeline.md](refs/slice-pipeline.md) | Orchestrate mode (run loop + cursor) |
+| [refs/task-validate.md](refs/task-validate.md) | Task / step validate stages |
+| [refs/slice-validate.md](refs/slice-validate.md) | Slice validate stage |
 | [refs/anti-overlap.md](refs/anti-overlap.md) | Boundary disputes |

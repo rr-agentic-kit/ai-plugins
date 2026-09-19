@@ -16,8 +16,9 @@ Parses lanes, mints `runId`, builds brief, chunks large scope, assesses via nest
 
 ### Use when
 
-- `--code` / `--test` / `--security` / `--all` review from **rr-builder**
-- Optional `--fix` (inline apply) or `--ci` (forge POST after Challenge)
+- **rr-builder** `--review` with nested `--code` / `--test` / `--security` / `--all`
+- Optional nested `--fix` (inline apply) or `--ci` (forge POST after Challenge)
+- Builder orchestrate **review** stage (forced `--fix --all`; drive/scope per parent)
 - "Review my changes" / PR review intent with multi-lane findings
 
 ### Avoid when
@@ -37,7 +38,7 @@ Parses lanes, mints `runId`, builds brief, chunks large scope, assesses via nest
 
 ### Invoke
 
-Via **rr-builder** review flags or direct parent **Read** when `lane: review`.
+Via **rr-builder** `--review` (+ nested flags) or orchestrate **review** stage; parent **Read** when `lane: review`.
 
 ### Intake
 
@@ -65,4 +66,4 @@ Flat locked filenames under `REVIEW_DIR` (see `refs/artifacts.md`); merged `REVI
 
 ## Notes
 
-Flag surface: `[--code] [--test] [--security] [--all] [--fix | --ci] [--scope MR|PR|all|full] [paths…]`.
+Flag surface under **rr-builder** `--review`: `[--code] [--test] [--security] [--all] [--fix | --ci] [--scope MR|PR|all|full] [paths…]`. Auto review stage forces `--fix --all`.

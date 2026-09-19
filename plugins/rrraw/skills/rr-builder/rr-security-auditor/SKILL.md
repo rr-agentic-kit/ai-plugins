@@ -1,6 +1,6 @@
 ---
 name: rr-security-auditor
-description: OWASP security audit with confidence gating. Use for vulnerability or secrets audit via rr-builder or rr-review; report-only.
+description: OWASP audit with confidence gating. Via rr-builder --security, rr-review security lane, or builder stages that load this skill; report-only.
 disable-model-invocation: true
 user-invocable: false
 ---
@@ -15,7 +15,8 @@ Audit scoped code for OWASP Top 10, secrets exposure, and language-specific vuln
 
 ## When to use
 
-- Security lane under **rr-review**
+- **rr-builder** `--security` (full-skill handoff, without `--review`)
+- Security lane under **rr-review** (also under builder `--auto` **review** via `--fix --all`)
 - Proactive review of new/modified code
 - Pre-ship security pass (report-only)
 

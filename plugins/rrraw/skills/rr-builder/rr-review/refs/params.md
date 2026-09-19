@@ -2,9 +2,19 @@
 
 **Audience:** **rr-review** via **rr-builder**. Parse flags into this block before running review steps.
 
+## Invoke context
+
+| Context | How flags arrive |
+|---------|------------------|
+| **Handoff** | Parent `--review` plus nested `--code|--test|--security|--all|--fix|--ci|--scope|paths` |
+| **Orchestrate (auto review stage)** | Builder **forces** `--fix --all` (report-only is not available on auto; use explicit `--review` without `--fix`) |
+
+Top-level `--code` / `--test` / `--all` / `--fix` / `--ci` **without** `--review` are **not** valid builder routers (breaking — no compat aliases). Use `--review …` or `--auto`.
+
 ## Grammar
 
 ```
+# Under rr-builder --review:
 [--code] [--test] [--security] [--all] [--fix | --ci] [--scope MR|PR|all|full] [paths…]
 ```
 
@@ -26,6 +36,7 @@
 | (none) | `outcome: report` |
 | `--fix` | `outcome: fix` |
 | `--ci` | `outcome: ci` |
+| Auto review stage | `outcome: fix` + `lanes: [code, test, security]` (forced) |
 
 **`--fix` and `--ci` are incompatible** → stop: `incompatible flags: --fix and --ci`.
 

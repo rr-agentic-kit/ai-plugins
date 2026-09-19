@@ -16,8 +16,8 @@ Normalizes test flags into a canonical payload, delegates to one phase agent or 
 
 ### Use when
 
-- `--init`, `--assess`, `--complete-missing-tests`, `--fix-broken-tests`, `--migrate-tests`, `--diagnose-flaky`, or other primary test flags
-- Test lane under **rr-review** or **rr-builder** test routing
+- `--init`, `--assess`, `--complete-missing-tests`, `--fix-broken-tests`, `--migrate-tests`, `--diagnose-flaky`, or other primary test flags via **rr-builder** `--tester`
+- Test lane under **rr-review**; builder orchestrate **plan** (knowledge) / **build** (full skill with rr-coder; drive/scope per parent)
 
 ### Avoid when
 
@@ -36,7 +36,7 @@ Normalizes test flags into a canonical payload, delegates to one phase agent or 
 
 ### Invoke
 
-Via **rr-builder** with test flags, or parent **Read** of this skill when lane is `test`.
+Via **rr-builder** `--tester` (or nested test flags under that handoff), **rr-review** test lane, or parent **Read** on orchestrate plan/build stages.
 
 ### Intake
 

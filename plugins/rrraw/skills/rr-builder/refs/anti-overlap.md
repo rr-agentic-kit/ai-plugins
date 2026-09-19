@@ -12,11 +12,13 @@
 
 ## rr-ci
 
-**Owns:** Forge detect, PR/MR title/description, pipeline debug, publish, deploy, inline POST scripts. Disk sidecars under **`.ai/ci/`**.
+**Owns:** Forge detect, PR/MR title/description, pipeline debug, publish, deploy, inline POST scripts. Disk sidecars under **`.ai/ci/`**. Ship after **slice delivered**.
 
-**rr-builder does not:** open MR/PR except when **rr-review** finished with `--ci` and hands off to **rr-ci**.
+**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--full`) and explicit lane **handoffs**. Stops at delivered — does **not** open MR/PR from orchestrate.
 
-**Stop phrase:** "Ship/CI only — use **rr-ci**." Review first if user wants findings before POST.
+**rr-builder does not:** open MR/PR except when **rr-review** handoff finished with `--ci` and hands off to **rr-ci**.
+
+**Stop phrase:** "Ship/CI only — use **rr-ci**." After slice validate PASS → delivered boundary → **rr-ci**. Review first if user wants findings before POST.
 
 ## rr-git
 
@@ -34,11 +36,11 @@
 
 | Skill | Not a substitute for |
 |-------|----------------------|
-| rr-prepare | rr-planner (product Plan/DEC), rr-coder (implement); owns tech plan + lazy tech ADR gaps + task WBS under `docs/rr/tasks/` |
-| rr-coder | rr-tester (test strategy), rr-security-auditor (OWASP depth), rr-prepare (task decomposition) |
+| rr-prepare | rr-planner (product Plan/DEC), rr-coder (implement); owns tech plan + lazy tech ADR gaps + task WBS under `docs/rr/tasks/`; also orchestrate **prepare** stage |
+| rr-coder | rr-tester (test strategy), rr-security-auditor (OWASP depth), rr-prepare (task decomposition); plan stage = knowledge only |
 | rr-tester | rr-coder (production design), rr-review orchestration |
 | rr-security-auditor | rr-coder CPNNN, full test coverage |
-| rr-review | rr-ci POST mechanics, host-specific forge/MR scripts |
+| rr-review | rr-ci POST mechanics, host-specific forge/MR scripts; orchestrate review forces `--fix --all` |
 
 **rr-prepare stop phrase:** "Tech plan / task WBS only — use **rr-prepare**; product Plan stays **rr-planner**; code stays **rr-coder**."
 

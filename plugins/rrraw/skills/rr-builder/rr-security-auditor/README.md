@@ -16,7 +16,8 @@ Audits scoped code for OWASP Top 10, secrets exposure, and language-specific vul
 
 ### Use when
 
-- Security lane under **rr-review**
+- **rr-builder** `--security` handoff (without `--review`)
+- Security lane under **rr-review** / builder auto **review**
 - Proactive review of new/modified code
 - Pre-ship security pass (report-only)
 

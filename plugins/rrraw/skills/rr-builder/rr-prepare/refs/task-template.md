@@ -15,6 +15,8 @@ files_likely: []
 pr_group: null
 adr_refs: []
 status: detailed
+builder_stage: null | prepare | plan | build | review | refactor | step_validate | task_validate
+step_index: null | integer   # 0-based into Steps; omit when not in a task-step stage
 ---
 ```
 

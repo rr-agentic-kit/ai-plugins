@@ -1,8 +1,6 @@
 ---
 name: rr-prepare
-description: Decompose pin-complete execute-slice.yaml into ordered docs/rr/tasks artifacts. Use via rr-builder --prepare or prepare-slice NL.
-disable-model-invocation: true
-user-invocable: false
+description: Decompose pin-complete execute-slice into docs/rr/tasks. Via --prepare, prepare NL, or orchestrate prepare (drive/scope per parent).
 ---
 
 # rr-prepare
@@ -15,7 +13,8 @@ Turn a pin-complete `execute-slice.yaml` into buildable task artifacts under `do
 
 ## When to use
 
-- `--prepare`, “prepare slice”, “decompose execute-slice”, or “tech plan for slice” via **rr-builder**
+- `--prepare`, “prepare slice”, “decompose execute-slice”, or “tech plan for slice” via **rr-builder** (explicit handoff)
+- Also loaded under **rr-builder** orchestration when the pipeline cursor is still in **prepare** (drive/scope per parent)
 - After Plan slice freeze when Execute needs ordered capability atoms + PR map
 
 ## When not to use

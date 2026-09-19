@@ -1,6 +1,6 @@
 ---
 name: rr-tester
-description: Flag-driven test excellence — assess, write/fix/migrate, flaky triage via agents/test/*. Use under rr-builder or rr-review test lane.
+description: Flag-driven test excellence via agents/test/*. Via --tester, review test lane, or orchestrate plan/build (drive/scope per parent).
 disable-model-invocation: true
 user-invocable: false
 ---
@@ -15,7 +15,8 @@ Normalize test flags into a canonical payload, delegate to one `agents/test/*` a
 
 ## When to use
 
-- Test assess, gap identification, write/fix/migrate, flaky triage (via **rr-builder** or **rr-review** test lane)
+- Test assess, gap identification, write/fix/migrate, flaky triage via **rr-builder** `--tester` (full-skill handoff) or **rr-review** test lane
+- Also loaded under **rr-builder** orchestration: **plan** stage = knowledge refs for step assessment; **build** stage = full skill (tests for the step)
 - `--init` stack discovery and `CLAUDE.md` patch
 
 ## When not to use

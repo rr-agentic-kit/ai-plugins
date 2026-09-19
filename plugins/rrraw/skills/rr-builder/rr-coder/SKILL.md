@@ -1,6 +1,6 @@
 ---
 name: rr-coder
-description: Production code standards (SOLID, CPNNN, architecture, observability). Use when implementing or refactoring application source via rr-builder or rr-review.
+description: Production code standards (SOLID, CPNNN, architecture). Via --coder, review code lane, or orchestrate plan/build (drive/scope per parent).
 disable-model-invocation: true
 user-invocable: false
 ---
@@ -15,7 +15,8 @@ Apply production code standards (SOLID, CPNNN rubric, architecture, observabilit
 
 ## When to use
 
-- Implement or refactor production/application source (via **rr-builder** or **rr-review** code lane)
+- Implement or refactor production/application source via **rr-builder** `--coder` (full-skill handoff) or **rr-review** code lane
+- Also loaded under **rr-builder** orchestration: **plan** stage = knowledge refs only (no source edits); **build** stage = full skill for the step
 - Code lane review with CP finding table and mandatory **`## Architecture`** section
 
 ## When not to use

@@ -16,7 +16,8 @@ Applies principles to **application source** only (implement, refactor, or code-
 
 ### Use when
 
-- Implement or refactor production/application source via **rr-builder** or **rr-review** code lane
+- Implement or refactor via **rr-builder** `--coder` or **rr-review** code lane
+- Builder orchestrate **plan** (knowledge load, no execute) or **build** (full skill + tests via rr-tester; drive/scope per parent)
 - Code-lane review needing CP findings and mandatory `## Architecture`
 
 ### Avoid when

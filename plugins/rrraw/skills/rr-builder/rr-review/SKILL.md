@@ -1,6 +1,6 @@
 ---
 name: rr-review
-description: "Multi-lane review hub: brief, assess, Challenge, merge under .ai/review/<runId>/. Use for --code/--test/--security/--all with --fix or --ci."
+description: "Multi-lane review under .ai/review/<runId>/. Via --review (+ nested flags) or orchestrate review (forces --fix --all)."
 disable-model-invocation: true
 user-invocable: false
 ---
@@ -15,8 +15,9 @@ Orchestrate multi-lane code / test / security review in the **parent session** a
 
 ## When to use
 
-- Multi-lane review via `--code`, `--test`, `--security`, or `--all`
-- Optional `--fix` (inline apply) or `--ci` (handoff to **rr-ci** after Challenge)
+- Multi-lane review via **rr-builder** `--review` with nested `--code`, `--test`, `--security`, or `--all`
+- Optional nested `--fix` (inline apply) or `--ci` (handoff to **rr-ci** after Challenge)
+- Builder orchestrate **review** stage — parent **forces** `--fix --all` (engineers wanting report-only use explicit `--review` without `--fix`)
 - Review intent from **rr-builder** when `payload.lane` is `review`
 
 ## When not to use
