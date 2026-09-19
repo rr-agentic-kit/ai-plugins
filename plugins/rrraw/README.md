@@ -43,7 +43,7 @@ No slash commands. Invoke skills with flags or clear natural language; details l
 rr-discovery --setup
 rr-discovery --discover
 ```
-→ Bootstrap `docs/` (incl. PR-scoped `validate_planning` check) then run Discover through BRD freeze.
+→ Bootstrap `docs/` (plugin-runtime `validate_planning` only — no host CI wire) then run Discover through BRD freeze.
 
 ```
 rr-planner --prd
@@ -64,7 +64,7 @@ Flags, actions, and gates → each skill’s [README](skills/rr-discovery/README
 | Skills | `skills/rr-discovery/`, `skills/rr-planner/`, `skills/rr-test/` | Public flag-driven APIs |
 | Planning agents | `agents/planning/` | Compose, research, challenge Task agents |
 | Test agents | `agents/test/` | Assess, gaps, write, fix, flaky, … |
-| Validate | `scripts/validate_planning*` | Planning artifact shape / ledger checks (PR CI via setup) |
+| Validate | `scripts/validate_planning*` | Planning artifact shape / ledger checks (plugin-runtime; not host CI) |
 | Shared refs | `refs/planning/` | Ledger, baselines, contracts (flow skills only for versioning) |
 
 `skills/docs/rr-humanize/` is an internal prose helper (cascade humanize gate) — not a top-level skill; no version mint.

@@ -6,7 +6,7 @@ Read `rrr-status.yaml` in this directory for a one-line glance (`phase`, `track`
 
 When present, read `docs/GLOSSARY.md` and `docs/ACRONYMS.md` for project domain terms (silent skill harvest — do not AskQuestion about lexicon).
 
-Patches to the current track are allowed. Any non-patch version change (`track`, major/minor, open-next, unfreeze, frozen `rev` / pins) — **stop** and load skill `rr-discovery` or `rr-planner` as appropriate. Do not classify or mint here. Do not edit those fields by hand (PR CI fails `HAND_BUMP`).
+Patches to the current track are allowed. Any non-patch version change (`track`, major/minor, open-next, unfreeze, frozen `rev` / pins) — **stop** and load skill `rr-discovery` or `rr-planner` as appropriate. Do not classify or mint here. Do not edit those fields by hand (plugin `validate_planning` fails `HAND_BUMP`).
 
 Do not delete this file.
 

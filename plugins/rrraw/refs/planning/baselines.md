@@ -51,7 +51,7 @@ Market SemVer: patch = compatible; minor = additive public surface; major = brea
 |-----|----------|---------|
 | Skill (Discover or Plan; future Execute) | **docs patch** on freeze / lock-target / obligation-preserving edit; **product patch** on ship/hotfix; **track** open-next after confirm | hand-edit `track` / frozen rev / pins / mint_hash |
 | Compose | prose/items only; no version fields | all version fields |
-| PR CI (setup-installed) | FAIL on `HAND_BUMP`, `STALE_PIN`, … | mint or classify track major/minor |
+| Plugin `validate_planning.sh` (skill-invoked) | FAIL on `HAND_BUMP`, `STALE_PIN`, … | mint or classify track major/minor; install host CI |
 
 ### Rejected patterns
 
@@ -59,7 +59,8 @@ Market SemVer: patch = compatible; minor = additive public surface; major = brea
 |---------|------------|
 | Shared patch across product and docs | Patches must diverge independently |
 | Per-doc SEMVER as the human version | Humans talk track; `doc_rev` is pin identity only |
-| CI minting or failing major/minor policy | Skill judgment after confirm; CI is mechanical only |
+| Plugin validator minting or failing major/minor policy | Skill judgment after confirm; validator is mechanical only |
+| Host-repo PR CI for planning validation | Plugin owns validate at skill runtime; host keeps artifacts only ([setup.md](setup.md)) |
 | Inline forward markers (`[0.2]` tags inside living `0.1` files) | Dual systems, digest death, noisy diffs, task races, per-doc SemVer creep |
 | Every PRD / doc tweak → track minor | **0.999 failure mode** — use docs patch instead |
 | Immutable full-tree CoW (`docs/0.1/`, `docs/0.2/` as default) | Heavy duplication; weak patch-on-shipped-track — compliance zip-per-release only, not default |
@@ -407,18 +408,18 @@ Skill on each resolve (does not wait for the agent to notice): if `rrr-status.ya
 
 Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one line). Do not create `AGENTS.md` (or successors) from nothing.
 
-## CI / validator — mechanical only (PR-scoped)
+## Validator — mechanical only (plugin-runtime)
 
 `validate_planning.sh` may FAIL these. It must not mint versions and must not FAIL "this looks like a minor."
 
-**Authoritative scope is the pull request.** Framework `--setup` wires a host-repo PR check ([setup.md](setup.md)). Local pre-push / agent preflight may run the same script optionally — local-only validation is **insufficient**. Hand-edit of mint fields must fail the **merge**, not hope an agent notices.
+**Authoritative scope is the plugin run** (skill steps: rewrite, compose gates, explicit validate, optional agent preflight from the plugin package). Framework `--setup` does **not** wire host-repo PR/Actions checks ([setup.md](setup.md)). Host CI for planning validation is **out of scope** — consumer repos store `docs/rr/` artifacts only.
 
 | Check | When | Owner |
 |-------|------|-------|
-| `HAND_BUMP`, `STALE_PIN`, `PARENT_UNFROZEN`, `REV_WHILE_OPEN`, maturity codes | **PR** CI on planning paths (`docs/rr/**`) | `validate_planning*` installed by **framework setup** |
-| Same codes | Optional local pre-push / agent preflight | same script |
+| `HAND_BUMP`, `STALE_PIN`, `PARENT_UNFROZEN`, `REV_WHILE_OPEN`, maturity codes | When plugin runs `validate_planning.sh` on phase dirs | `validate_planning*` in the **plugin** package |
+| Same codes | Optional agent/local preflight from plugin root | same script |
 | patch vs open-next vs unfreeze | On `--change` / upstream freeze | skill judgment |
-| Unlock / product ship policy | Before minting `next` or shipping product | skill (not CI classification) |
+| Unlock / product ship policy | Before minting `next` or shipping product | skill (not validator classification) |
 
 | Code | Condition |
 |------|-----------|
@@ -429,13 +430,14 @@ Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one lin
 | `INVALID_MATURITY` | Frontmatter or `levels.<stem>.maturity` set to a value other than `code-extraction` \| `draft` |
 | `CODE_EXTRACTION_FROZEN` | Integer `rev` / `doc_rev` while maturity is still `code-extraction` |
 
-Removed from CI (never emit): `NEXT_LOCKED`, `CURRENT_NOT_PATCH`. Independent patches (`product 0.1.3` / `docs 0.1.7`) are valid. `future.md` and `agent.plan.md` are not cascade input. `challenge` / `next_challenge` are judgment/process only — never a script FAIL.
+Removed from validator (never emit): `NEXT_LOCKED`, `CURRENT_NOT_PATCH`. Independent patches (`product 0.1.3` / `docs 0.1.7`) are valid. `future.md` and `agent.plan.md` are not cascade input. `challenge` / `next_challenge` are judgment/process only — never a script FAIL.
 
 ## What this ref does not do
 
 - Tickets, technical docs, or `.mdc` rule files.
 - A second `lines.yaml`.
 - Shared patch; per-doc SEMVER as the human version; inline `[N.M]` forward markers; track bump on every PRD edit.
-- CI minting or failing major/minor policy.
+- Validator minting or failing major/minor policy.
+- Host-repo PR CI for planning validation (plugin-runtime only).
 - Auto-unfreeze; bump on compose; silent rediscover.
 - Version procedure in `rr-humanize`, git helpers, or `rr-test`.

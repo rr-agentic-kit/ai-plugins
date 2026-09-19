@@ -228,10 +228,6 @@ EXECUTE_SLICE_REQUIRED_FIELDS: frozenset[str] = frozenset(
         "pins",
     }
 )
-PR_VALIDATE_WORKFLOW_REL = Path(".github") / "workflows" / "rrr-validate-planning.yml"
-PR_VALIDATE_WORKFLOW_TEMPLATE_PATH = (
-    PLUGIN_ROOT / "refs" / "planning" / "ci" / "validate-planning.github.yml"
-)
 CHALLENGE_STATUSES = frozenset({"dirty", "clean", "dirty-accepted"})
 CHALLENGE_KEYS = ("challenge", "next_challenge")
 MINT_EXCLUDED_KEYS = frozenset(
@@ -299,7 +295,6 @@ SETUP_SECTIONS: tuple[str, ...] = (
     "plan status.yaml",
     "cascade format",
     "cascade versioning",
-    "pr validate workflow",
 )
 FRONTMATTER_KEYS: tuple[str, ...] = (
     "doc_type",

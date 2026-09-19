@@ -29,6 +29,7 @@ Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sittin
 - Artifact-type advice (skill vs command, process checklist) that is not a product to plan
 - Inventing docs to run research or challenge — those actions require existing docs ([input-resolution.md](refs/input-resolution.md))
 - Starting Plan without frozen BRD + `business-case.yaml` — [input-resolution.md](refs/input-resolution.md) Entry gate
+- Expecting host-repo PR/Actions to validate `docs/rr/` — that is plugin-runtime only (`validate_planning.sh` when skills run)
 
 ## Procedure
 
@@ -46,7 +47,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | `optimize` | step 5b (completes `write`) | `write` only |
 | `research`, `challenge` | step 5 (completes `write`) | `write` only |
 
-2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start Plan compose. Default `output_dir` = `docs/rr/{track}/plan/`.
+2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start Plan compose. Do **not** install host CI/Actions for planning validation — validate only when the plugin runs `validate_planning.sh`. Default `output_dir` = `docs/rr/{track}/plan/`.
 
 3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
 

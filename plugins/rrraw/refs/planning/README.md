@@ -6,7 +6,7 @@
 |-----|------|
 | [baselines.md](baselines.md) | **Version law** — track, docs/product patches, pins, unlock, ship ceremony, rejected patterns |
 | [challenge-layers.md](challenge-layers.md) | Challenge tiers, freeze-suggest, risk-accept, solid-subset advance |
-| [setup.md](setup.md) | `--setup` bootstrap + **PR-scoped** `validate_planning` wire |
+| [setup.md](setup.md) | `--setup` bootstrap of `docs/rr/` (no host CI wire); plugin-runtime `validate_planning` |
 | [output-formats.md](output-formats.md) | Layout, status, handoff YAML shapes |
 | [project-lexicon.md](project-lexicon.md) | Host `docs/GLOSSARY.md` + `ACRONYMS.md` silent harvest |
 | [agent-config.md](agent-config.md) / [agent.plan.md](agent.plan.md) | Injection + tripwire template |

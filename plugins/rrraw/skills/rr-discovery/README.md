@@ -30,13 +30,14 @@ Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`
 
 - Proving a bet before PRD (`--discover` / `--executive-summary` / `--mrd` / `--brd`)
 - Reverse Discover docs from shipped code (`--from-code`)
-- Bootstrap or repair `docs/` (`--setup`) — does not start discover
+- Bootstrap or repair `docs/` (`--setup`) — does not start discover; does **not** install host planning CI
 - Continue a paused Discover session (`--resume` selector) or challenge ES/MRD/BRD (`--challenge`)
 
 ### Avoid when
 
 - Need Plan (PRD / research / feature backlog) → `rr-planner`
 - Implementation, code review, tickets, analytics/CI (unless intent is Discover docs from source)
+- Expecting the host repo’s Actions to validate planning docs — plugin-runtime only
 
 ## Philosophy
 

@@ -37,7 +37,7 @@ Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX;
 - Frozen BRD + `business-case.yaml` exist and you need Plan (`--prd`, `--change`, `--freeze-slice`)
 - Research or challenge **Plan** docs (`--research`, `--challenge`) with scoped load
 - Plan docs hit soft/hard token tiers (`--optimize`) or ambient hook attention
-- Shared `--setup` or continue a paused Plan session (`--resume` selector)
+- Shared `--setup` or continue a paused Plan session (`--resume` selector) — `--setup` does **not** install host planning CI
 
 ### Avoid when
 
@@ -46,6 +46,7 @@ Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX;
 - Asking for sprint planning / velocity as Plan process
 - Asking this skill to invent a release/version plan this pass
 - Expecting silent auto-rewrite of fat docs without AskQuestion
+- Expecting the host repo’s Actions to validate planning docs — plugin-runtime only
 
 ## Philosophy
 

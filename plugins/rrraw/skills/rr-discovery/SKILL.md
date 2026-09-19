@@ -24,6 +24,7 @@ Prove a product (venture or internal) exists before naming Plan capabilities. Ow
 
 - PRD compose, RICE/stories, research reports, feature backlog → `rr-planner`
 - Implementation, code review, tickets, launch calendars, analytics/CI (except `--from-code` when intent is Discover docs from source)
+- Expecting host-repo PR/Actions to validate `docs/rr/` — that is plugin-runtime only (`validate_planning.sh` when skills run)
 - Architecture / `tech.md` mechanism authorship as Discover deliverable
 - Jumping to features before freeze — park via [note-sessions.md](refs/note-sessions.md)
 
@@ -44,7 +45,7 @@ Phrases: `refs/planning/progress.md` on every invocation.
 
 If `payload.chain` includes `challenge`, run step 4 after last freeze and before step 6.
 
-2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>` from **this skill’s plugin root** (same package as `SKILL.md` / `scripts/` — not an older cache version). Completes `write`. Do not start discover. Default `output_dir` = `docs/rr/{track}/discovery/`.
+2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>` from **this skill’s plugin root** (same package as `SKILL.md` / `scripts/` — not an older cache version). Completes `write`. Do not start discover. Do **not** install host CI/Actions for planning validation — validate only when the plugin runs `validate_planning.sh`. Default `output_dir` = `docs/rr/{track}/discovery/`.
 
 3. **discover** — Load [project-posture.md](refs/project-posture.md) (includes `domain_context`). Done: that ref's persist condition.
    - **Ideation gate** — If problem space without concrete idea → load [ideation.md](refs/ideation.md) before L1 compose; else skip. Persist OST/assumptions/pretotype when produced (humanize session artifacts via [compose-prose.md](refs/compose-prose.md)). **Skip entirely when `action` is `from-code`.**
