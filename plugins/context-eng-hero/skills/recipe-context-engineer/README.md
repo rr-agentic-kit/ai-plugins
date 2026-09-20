@@ -88,6 +88,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 - **STATIC SKIPPED** — audit continues judgment; write paths block until static PASS or user accepts draft-only
 - **Minimum draft** — smallest template-shaped draft that satisfies clarify; refs only when FAIL proves the gap
 - **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits (lean JSON → `render_ce_report.py`) + gated apply; promote leaves unstaged dirty (parent-only executors; not catalog agents)
+- **Inline executor authoring** — parent-only Task executors SoT: `refs/design/inline-executor.md`; exemplar = `refs/executors/compliance.md` + `opportunity.md` under improve
 - **Question tool fallback** — AskQuestion preferred; text-mode channel mandatory when tool/harness missing (`refs/questioning.md`)
 
 ## Constraints

@@ -14,6 +14,9 @@
 | `design/skill.md` | `create-2-clarify`, `create-3-draft` (skills) |
 | `design/command.md` | `create-3-draft` (commands) |
 | `design/agent.md` | `create-3-draft` (agents) |
+| `design/inline-executor.md` | `create-3-draft` (`refs/executors/*.md` or orchestrator gaining Task spawn) |
+| `templates/executor.template.md` | `create-3-draft` (inline executor) |
+| `templates/task-prompt.template.md` | `create-3-draft` (orchestrator parent spawning Tasks) |
 | `gate-prompts.md` | `create-2-clarify` (skills: skill-ux-delivery), `create-5-close` |
 | `readme-spec.md` | `create-3-draft` (skill folders) |
 | `templates/readme.template.md` | `create-3-draft` (skill README) |

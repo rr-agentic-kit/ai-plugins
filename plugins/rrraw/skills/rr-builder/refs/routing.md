@@ -13,6 +13,8 @@ Exact one nested `SKILL.md` **Read**. Stop at that skill’s done-when. Do **not
 | `tester` | `rr-tester/SKILL.md` | Forward test payload; parent does not re-parse conflicts |
 | `security` | `rr-security-auditor/SKILL.md` | Report-only |
 | `review` | `rr-review/SKILL.md` | Nested `--code|--test|--security|--all|--fix|--ci` per `rr-review/refs/params.md` |
+| `refactor` | `rr-refactor/SKILL.md` | Fixed-point behavior-invariant refactor; `Task` `refactor-collector` only when >50 files per `rr-refactor/refs/agent-index.md` |
+| `add_endless_test` | `rr-test-endless/SKILL.md` | Coverage-first multi-epoch loop; `Task` for gateway + leaf agents per `rr-test-endless/refs/orchestration.md` |
 
 After review `--ci` findings: **Read** `skills/rr-ci/SKILL.md` for forge POST. Do not open PR from other lanes.
 
@@ -28,7 +30,7 @@ Local worktree / destructive git during review `--fix`: **Read** `skills/rr-git/
 | **plan** | [plan-knowledge.md](plan-knowledge.md) + [plan-schema.md](plan-schema.md) |
 | **build** | Full `rr-coder/SKILL.md` **and** `rr-tester/SKILL.md` |
 | **review** | Full `rr-review/SKILL.md` with forced `--fix --all` |
-| **refactor** | TBD stub — see slice-pipeline |
+| **refactor** | Full `rr-refactor/SKILL.md` — scope = MR ∩ step-touched paths; see [slice-pipeline.md](slice-pipeline.md) |
 | **step_validate** / **task_validate** | [task-validate.md](task-validate.md) |
 | **ship** | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` |
 | **slice_validate** | [slice-validate.md](slice-validate.md) |
@@ -59,4 +61,4 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Opening PR/MR inside builder without **rr-ci** (including mid-slice **ship** — hand off, do not invent forge CLI).
 - Skipping planned **ship** after validate when `ship_after` is not `never`.
 - Using **rr-builder** for exec-summary / PRD authoring → **rr-planner**.
-- Inventing a **refactor** stage procedure while TBD.
+- **`Task`** for refactor fix worker (fix is inline only per `rr-refactor/refs/inline-fix.md`).

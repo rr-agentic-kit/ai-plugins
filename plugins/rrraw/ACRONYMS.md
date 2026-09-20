@@ -33,5 +33,5 @@
 | L3 | Prepare layer 3 — PR division map | rr-prepare; no forge open |
 | WBS | Work Breakdown Structure | rr-prepare ordered task tree under `docs/rr/tasks/` |
 | NL | Natural Language | Parent/user invoke without an explicit path or flag |
-| TBD | To Be Defined | Builder **refactor** stage stub — skip/stop; no invented procedure |
+| TBD | To Be Defined | Reserved for unspecified future builder stages — **refactor** is implemented via **rr-refactor** |
 | Sonar | SonarQube / SonarCloud analysis | rr-ci `--fix --sonar` + `sonar-list-issues` |

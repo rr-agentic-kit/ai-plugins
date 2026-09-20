@@ -148,5 +148,5 @@ Shared layout SoT: `design/design-core.md` **Shared knowledge layout**.
 |------|----|
 | What a sub-skill is | Reusable **orchestrated** procedure with its own routing/TodoWrite |
 | What it is not | A dump for shared rubrics/templates—use skill `refs/` or plugin-level `refs/<pack>/` |
-| Parent + Task agents | Document inject/load list in action or orchestration refs (point to `chat-orchestration.md` once) |
+| Parent + Task agents / inline executors | Document inject/load contract per `design/inline-executor.md` (action Ref index + `skill.orchestration.agent-inject`) |
 | Same orchestrator | Agents MUST NOT re-invoke this parent skill for the job the parent already owns |

@@ -50,6 +50,20 @@ Same as Skill, plus audit `skill-ref.*` / `ref-file.*` rows when editing the pac
 | Frontmatter extras | `agent.fm.no-false-security`, `agent.access.portable-default` |
 | `description` | `agent.description.recommended-length`, `agent.description.invoke-fit` |
 
+## Inline executor (`templates/executor.template.md`)
+
+Parent-only `refs/executors/<role>.md`. Reuses agent judgment ids; skip frontmatter-only rows.
+
+| Marker / section | Rubric id(s) |
+|------------------|--------------|
+| No YAML frontmatter | `inline-executor.no-frontmatter` |
+| **Role** | `agent.role.domain` |
+| **Tools and boundaries** | `agent.boundaries.tools`, `agent.fence.body-required` |
+| **Stop conditions** | `agent.stop.conditions` |
+| **Inputs** | `agent.inputs` |
+| **Outputs** | `agent.outputs.format`, `agent.outputs.no-template-echo` |
+| **Orchestration** | `agent.orchestration.subagents` |
+
 ## Rule
 
 | Section | Rubric id(s) |

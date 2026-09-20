@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any
 
 import emit
-from errors import GitError
 from gitutil import has_uncommitted_changes, repo_root, run_git
 from paths import ci_dir, ci_rel
 
@@ -126,53 +125,56 @@ def _try_regen_locks(conflicts: list[str], log: Path) -> bool:
 
     regen_log = log.open("a", encoding="utf-8")
     try:
-        if "pnpm-lock.yaml" in conflicts or (root / "pnpm-lock.yaml").exists():
-            if shutil.which("pnpm") and (root / "package.json").is_file():
-                regen_log.write("\n# pnpm install\n")
-                regen_log.flush()
-                proc = subprocess.run(
-                    ["pnpm", "install"],
-                    cwd=root,
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                regen_log.write(proc.stdout)
-                regen_log.write(proc.stderr)
-                if proc.returncode != 0:
-                    return False
-                run_git(["add", "--", "pnpm-lock.yaml"], check=False)
-        if "Cargo.lock" in conflicts or (
-            (root / "Cargo.toml").is_file() and "Cargo.lock" in conflicts
+        if (
+            ("pnpm-lock.yaml" in conflicts or (root / "pnpm-lock.yaml").exists())
+            and shutil.which("pnpm")
+            and (root / "package.json").is_file()
         ):
-            if shutil.which("cargo"):
-                regen_log.write("\n# cargo generate-lockfile\n")
-                regen_log.flush()
-                proc = subprocess.run(
-                    ["cargo", "generate-lockfile"],
-                    cwd=root,
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                regen_log.write(proc.stdout)
-                regen_log.write(proc.stderr)
-                if proc.returncode != 0:
-                    return False
-                run_git(["add", "--", "Cargo.lock"], check=False)
-        if "package-lock.json" in conflicts:
-            if shutil.which("npm") and (root / "package.json").is_file():
-                proc = subprocess.run(
-                    ["npm", "install", "--package-lock-only"],
-                    cwd=root,
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                regen_log.write(proc.stdout + proc.stderr)
-                if proc.returncode != 0:
-                    return False
-                run_git(["add", "--", "package-lock.json"], check=False)
+            regen_log.write("\n# pnpm install\n")
+            regen_log.flush()
+            proc = subprocess.run(
+                ["pnpm", "install"],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            regen_log.write(proc.stdout)
+            regen_log.write(proc.stderr)
+            if proc.returncode != 0:
+                return False
+            run_git(["add", "--", "pnpm-lock.yaml"], check=False)
+        if "Cargo.lock" in conflicts and shutil.which("cargo"):
+            regen_log.write("\n# cargo generate-lockfile\n")
+            regen_log.flush()
+            proc = subprocess.run(
+                ["cargo", "generate-lockfile"],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            regen_log.write(proc.stdout)
+            regen_log.write(proc.stderr)
+            if proc.returncode != 0:
+                return False
+            run_git(["add", "--", "Cargo.lock"], check=False)
+        if (
+            "package-lock.json" in conflicts
+            and shutil.which("npm")
+            and (root / "package.json").is_file()
+        ):
+            proc = subprocess.run(
+                ["npm", "install", "--package-lock-only"],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            regen_log.write(proc.stdout + proc.stderr)
+            if proc.returncode != 0:
+                return False
+            run_git(["add", "--", "package-lock.json"], check=False)
     finally:
         regen_log.close()
 

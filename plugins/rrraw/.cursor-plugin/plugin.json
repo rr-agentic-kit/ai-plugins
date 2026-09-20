@@ -35,5 +35,6 @@
     "./skills/rr-git/",
     "./skills/rr-ci/"
   ],
+  "agents": "./agents/",
   "hooks": "./hooks/cursor.json"
 }

@@ -20,10 +20,11 @@ step_index: null | integer   # 0-based into Steps; omit when not in a task-step 
 step_plan_done: false | true   # current step_index only; reset on step advance
 step_build_done: false | true
 step_review_done: false | true
+step_refactor_done: false | true
 ---
 ```
 
-Cursor algorithm SoT: [../../refs/slice-pipeline.md](../../refs/slice-pipeline.md). Do not infer the three `step_*_done` flags from body prose.
+Cursor algorithm SoT: [../../refs/slice-pipeline.md](../../refs/slice-pipeline.md). Do not infer the four `step_*_done` flags from body prose.
 
 ## Body sections (required)
 

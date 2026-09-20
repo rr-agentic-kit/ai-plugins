@@ -87,6 +87,15 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **argument-hint** — Declared in frontmatter when args are expected
 - **No internal ref paths** — Body delegates to skill action; no `refs/` or `plugins/` paths in user-facing body
 
+### Inline executor
+
+- **Not under `agents/`** — Parent-only role lives in `refs/executors/<role>.md`; no YAML discovery frontmatter (`design/inline-executor.md`)
+- **Caller Load table** — **Inputs** documents required vs stable hard-links vs variant inject; parent documents inject list on orchestrator (`skill.orchestration.agent-inject`)
+- **Spawn type** — `generalPurpose` + Read executor + Caller Load; not catalog subagent types
+- **Lean emit** — When report is SCRIPTABLE: `emit: lean-json` + `lean_out` scratch path; parent renders — executor does not paste template bodies
+- **No nested Task** — Single-shot; parent owns merge and write gates
+- **No parent re-invoke** — Executor MUST NOT invoke orchestrating skill for same job
+
 ### Agent
 
 - **Body tool fence** — Allowlist or denylist with MUST/MUST NOT in body; not "use tools as needed"; frontmatter tools alone FAIL (`design/agent.md`)

@@ -69,3 +69,5 @@ Do **not** paste the template body into this executor file.
 ## Orchestration
 
 Single-shot. Parent may spawn this executor in parallel with `opportunity`. No nested Task. No write gates.
+
+See `design/inline-executor.md` for inline executor authoring SoT.

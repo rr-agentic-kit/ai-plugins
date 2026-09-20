@@ -1,5 +1,7 @@
 # Improve → compliance Task prompt template
 
+Improve-specific instance of `templates/task-prompt.template.md` (generic SoT for new orchestrator parents).
+
 Fill placeholders; spawn as `generalPurpose` Task. Executor: `refs/executors/compliance.md`.
 
 ```text

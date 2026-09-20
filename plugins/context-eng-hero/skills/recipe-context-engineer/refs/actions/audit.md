@@ -12,7 +12,7 @@
 | `failure-patterns.md` | `audit-4-merge` |
 | `templates/audit-output.template.md` | `audit-5-report` |
 | `close-contract.md` | `audit-5-report` |
-| Type rubric in `rubrics/<type>.rubric.md` (+ `rubrics/skill-ref.rubric.md` for Skill+Ref packs) | `audit-3-judgment` |
+| Type rubric in `rubrics/<type>.rubric.md` (+ `rubrics/skill-ref.rubric.md` for Skill+Ref packs; `rubrics/inline-executor.rubric.md` when type is inline executor) | `audit-3-judgment` |
 
 ## Steps
 

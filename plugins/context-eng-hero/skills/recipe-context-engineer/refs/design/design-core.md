@@ -51,11 +51,7 @@ Picker for where judgment/templates live when a parent skill Tasks agents (or mu
 
 **Stop-rule:** Parent-only executors that must not ambient-discover **must not** ship under `agents/`. Under the owning skill, short role stems (`compliance`, `opportunity`) are fine; never bare global nouns in the `agents/` catalog. Task spawn with Caller Load of a skill ref is valid; `agents/` is **discovery registration**, not a prerequisite for isolated Task execution.
 
-Companion rules:
-
-- Parent skill/action owns workflow; agents/executors are single-shot (no nested skill invoke for the same orchestrator).
-- Parallel diagnosis: multiple Task calls in one turn; merge in parent (`actions/improve.md` is the exemplar — `refs/executors/compliance.md` + `opportunity.md`).
-- Variant paths (type rubric, method ref) → **inject in Task payload**; stable set may be hard-linked in executor/agent Inputs.
+Companion rules (inline executor implementation): `design/inline-executor.md`.
 
 ## Degrees of freedom
 

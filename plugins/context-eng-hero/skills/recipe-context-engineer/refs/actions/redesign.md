@@ -15,6 +15,9 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 | `design/skill.md` | `redesign-3-apply` (skills) |
 | `design/command.md` | `redesign-3-apply` (commands) |
 | `design/agent.md` | `redesign-3-apply` (agents) |
+| `design/inline-executor.md` | `redesign-2-plan`, `redesign-3-apply` (`refs/executors/*.md` or orchestrator gaining Task spawn) |
+| `templates/executor.template.md` | `redesign-3-apply` (inline executor) |
+| `templates/task-prompt.template.md` | `redesign-3-apply` (orchestrator parent spawning Tasks) |
 | `readme-spec.md` | `redesign-3-apply` (skill folders) |
 | `lexicon-spec.md` | `redesign-3-apply` (ACRONYMS + GLOSSARY) |
 | `templates/acronyms.template.md` | `redesign-3-apply` (ACRONYMS.md) |

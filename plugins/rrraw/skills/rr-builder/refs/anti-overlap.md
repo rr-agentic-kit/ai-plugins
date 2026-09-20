@@ -44,11 +44,14 @@
 |-------|----------------------|
 | rr-prepare | rr-planner (product Plan/DEC), rr-coder (implement); owns tech plan + lazy tech ADR gaps + task WBS under `docs/rr/tasks/`; also orchestrate **prepare** stage |
 | rr-coder | rr-tester (test strategy), rr-security-auditor (OWASP depth), rr-prepare (task decomposition); plan stage = knowledge only |
-| rr-tester | rr-coder (production design), rr-review orchestration |
+| rr-tester | rr-coder (production design), rr-review orchestration, rr-test-endless (multi-epoch loop) |
+| rr-test-endless | rr-tester (one-off flags), rr-review `--test --fix` (MR review) |
 | rr-security-auditor | rr-coder CPNNN, full test coverage |
 | rr-review | rr-ci POST mechanics, host-specific forge/MR scripts; orchestrate review forces `--fix --all` |
 
 **rr-prepare stop phrase:** "Tech plan / task WBS only — use **rr-prepare**; product Plan stays **rr-planner**; code stays **rr-coder**."
+
+**rr-test-endless stop phrase:** "Multi-epoch test perfection loop — use **`rr-builder --add-endless-test`**; one-off test work stays **rr-tester**; MR test-review stays **rr-review**."
 
 ## Host-agnostic contract
 

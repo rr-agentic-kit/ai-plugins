@@ -10,6 +10,13 @@ SKILL_SECTIONS = {"Purpose", "When to use", "Procedure"}
 SKILL_README_SECTIONS = {"Why", "What", "When"}
 COMMAND_SECTIONS = {"Input contract", "Execution", "Output"}
 AGENT_SECTIONS = {"Role", "Tools and boundaries", "Stop conditions", "Outputs"}
+INLINE_EXECUTOR_SECTIONS = {
+    "Role",
+    "Tools and boundaries",
+    "Stop conditions",
+    "Inputs",
+    "Outputs",
+}
 RULE_SECTIONS = {"Intent", "Requirements", "Scope", "Exceptions"}
 WORKFLOW_SECTIONS = {
     "Outcome",
@@ -24,6 +31,7 @@ _SECTION_MAP = {
     "skill-readme": SKILL_README_SECTIONS,
     "command": COMMAND_SECTIONS,
     "agent": AGENT_SECTIONS,
+    "inline-executor": INLINE_EXECUTOR_SECTIONS,
     "rule": RULE_SECTIONS,
     "workflow": WORKFLOW_SECTIONS,
 }

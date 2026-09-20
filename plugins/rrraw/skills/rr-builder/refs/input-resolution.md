@@ -7,7 +7,7 @@
 | Mode | Trigger | Behavior |
 |------|---------|----------|
 | **Orchestrate** | `--auto` / `--manual` / `--next` / `--full`, or **no** explicit lane flag | Resolve slice/task cursor → run drive×scope loop ([slice-pipeline.md](slice-pipeline.md)) |
-| **Handoff** | `--prepare` \| `--coder` \| `--tester` \| `--security` \| `--review` | Classify → load **one** nested skill → stop at its done-when (no pipeline advance beyond that skill) |
+| **Handoff** | `--prepare` \| `--coder` \| `--tester` \| `--security` \| `--review` \| `--refactor` \| `--add-endless-test` | Classify → load **one** nested skill → stop at its done-when (no pipeline advance beyond that skill) |
 
 **Explicit lane flag wins** over drive/scope flags and over `builder_stage` / cursor. When handoff wins, ignore `drive` / `scope` (omit from payload or one-line note: drive/scope ignored for handoff).
 
@@ -21,6 +21,8 @@
 | `--tester` | handoff | `handoff` | `tester` |
 | `--security` (without `--review`) | handoff | `handoff` | `security` |
 | `--review` | handoff | `handoff` | `review` (+ nested review flags) |
+| `--refactor` | handoff | `handoff` | `refactor` |
+| `--add-endless-test` | handoff | `handoff` | `add_endless_test` |
 
 ### Drive × scope (orchestrate only)
 
@@ -70,6 +72,18 @@ Rules mirror `rr-review/refs/params.md`. Incompatible `--fix` + `--ci` → stop 
 
 When `lane: tester`, pass through normalized flags per `rr-tester/refs/input-resolution.md`. Parent does not re-parse the test conflict matrix.
 
+## Endless test flags (under `--add-endless-test` handoff)
+
+When `lane: add_endless_test`, normalize per `rr-test-endless/refs/input-resolution.md` into `payload.endless_test`. Parent does not run the orchestration loop — hand off to **rr-test-endless** only. Drive/scope ignored.
+
+## Refactor flags (under `--refactor` handoff)
+
+When `lane: refactor`, normalize per `rr-refactor/refs/input-resolution.md` into `payload.refactor`. Parent does not run the epoch loop — hand off to **rr-refactor** only. Drive/scope ignored.
+
+| NL pattern | Lane |
+|------------|------|
+| "refactor my MR", "behavior-invariant refactor", "clean up god methods on this branch" | `refactor` handoff when clearly refactor-only |
+
 ## Plan / slice path
 
 | Input | Payload |
@@ -88,8 +102,9 @@ When `lane: tester`, pass through normalized flags per `rr-tester/refs/input-res
 | "auto next", "auto one stage" | `mode: orchestrate`, `drive: auto`, `scope: next` |
 | "manual", "step by step", "confirm each stage" | `mode: orchestrate`, `drive: manual` (scope stays default `full` unless “next only”) |
 | "prepare slice", "decompose execute-slice", "tech plan for slice" | Prefer handoff `prepare` if clearly prepare-only; else orchestrate (cursor may land on prepare) |
-| "implement", "refactor", "write tests only", "OWASP audit", "review my PR" **with** clear single-lane intent | AskQuestion once if ambiguous between handoff vs orchestrate; else map to matching handoff lane |
-| Ambiguous | AskQuestion once: orchestrate (auto/manual × next/full) \| prepare \| coder \| tester \| security \| review |
+| "implement", "write tests only", "OWASP audit", "review my PR", "endless test", "perfect tests loop" **with** clear single-lane intent | AskQuestion once if ambiguous between handoff vs orchestrate; else map to matching handoff lane |
+| "refactor my MR", "behavior-invariant refactor", "phased refactor on this branch" | handoff `refactor` when clearly refactor-only (not full-slice orchestrate) |
+| Ambiguous | AskQuestion once: orchestrate (auto/manual × next/full) \| prepare \| coder \| tester \| security \| review \| refactor |
 
 ## Prepare path
 
@@ -107,13 +122,15 @@ prepare:
 mode: orchestrate | handoff
 drive: auto | manual          # orchestrate only; default manual; omit or ignore on handoff
 scope: next | full            # orchestrate only; default full; omit or ignore on handoff
-lane: null | prepare | coder | tester | security | review
+lane: null | prepare | coder | tester | security | review | refactor | add_endless_test
 builder_stage: null | prepare | plan | build | review | refactor | step_validate | task_validate | slice_validate | delivered
 step_index: null | integer
 plan_path: null | string
 prepare: null | { kernel_path, slice_id }
 review: null | { lanes, outcome, scope, paths }
 test: null | object   # rr-tester normalized payload
+endless_test: null | { max_epochs, max_parallel, start, scope }   # rr-test-endless
+refactor: null | { scope, paths, epoch_cap }   # rr-refactor
 security_scope: null | { scope, paths }
 code_scope: null | { scope, paths, plan_excerpt }
 ```

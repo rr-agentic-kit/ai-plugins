@@ -73,6 +73,7 @@ Load these only when the active action Ref index names them (create/design/extra
 | `refs/design/skill.md` | Authoring skills (invoke + allowed-tools) |
 | `refs/design/command.md` | Authoring commands |
 | `refs/design/agent.md` | Authoring plugin agents |
+| `refs/design/inline-executor.md` | Authoring parent-only Task executors (`refs/executors/`) |
 | `refs/frontmatter-schemas.md` | Frontmatter field SoT (draft/gates) |
 | `refs/readme-spec.md` | Skill folder README (bidirectional spec) |
 | `refs/lexicon-spec.md` | Plugin/skill ACRONYMS + GLOSSARY companions |

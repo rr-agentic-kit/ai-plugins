@@ -16,6 +16,9 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 | `design/skill.md` | `fix-3-apply` (skills) |
 | `design/command.md` | `fix-3-apply` (commands) |
 | `design/agent.md` | `fix-3-apply` (agents) |
+| `design/inline-executor.md` | `fix-2-plan`, `fix-3-apply` (`refs/executors/*.md`, `skill.orchestration.agent-inject` FAIL, or Task spawn touch) |
+| `templates/executor.template.md` | `fix-3-apply` (inline executor) |
+| `templates/task-prompt.template.md` | `fix-3-apply` (orchestrator parent spawning Tasks) |
 | `readme-spec.md` | `fix-3-apply` (skill folders) |
 | `lexicon-spec.md` | `fix-2-plan`, `fix-3-apply` (`acronyms.*` / `glossary.*` FAILs) |
 | `templates/acronyms.template.md` | `fix-3-apply` (missing/wrong ACRONYMS.md) |

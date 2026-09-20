@@ -1,6 +1,6 @@
 ---
 name: rr-builder
-description: Slice build orchestrator (drive×scope; default --manual --full) or lane handoff via --prepare/--coder/--tester/--security/--review. Not rr-planner/rr-ci.
+description: Slice build orchestrator (drive×scope; default --manual --full) or lane handoff via --prepare/--coder/--tester/--security/--review/--refactor/--add-endless-test. Not rr-planner/rr-ci.
 ---
 
 # rr-builder
@@ -15,7 +15,7 @@ description: Slice build orchestrator (drive×scope; default --manual --full) or
 
 - Continue or resume a frozen slice (orchestrate: no lane flag; defaults `drive=manual`, `scope=full`)
 - Run without confirms (`--auto`) or only the cursor stage (`--next`)
-- Explicit single-lane work: `--prepare` / `--coder` / `--tester` / `--security` / `--review`
+- Explicit single-lane work: `--prepare` / `--coder` / `--tester` / `--security` / `--review` / `--refactor` / `--add-endless-test`
 - Task-step plan (knowledge only) or build (code + tests) under orchestrate
 - Multi-lane review with fix under orchestrate review (`--fix --all` forced) or explicit `--review`
 
@@ -34,7 +34,7 @@ See [refs/anti-overlap.md](refs/anti-overlap.md).
 
 TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the run spans 3+ steps; omit for a single unambiguous handoff.
 
-**Task agents:** N/A — no Task spawn; nested skills are path-loaded `Read`s only.
+**Task agents:** N/A for most handoffs — nested skills are path-loaded `Read`s only. **Exceptions:** `--add-endless-test` → **rr-test-endless** owns `Task` dispatch to `agents/test-endless/*` per `rr-test-endless/refs/orchestration.md`; `--refactor` → **rr-refactor** may `Task` `refactor-collector` when >50 files per `rr-refactor/refs/agent-index.md` (fix stays inline).
 
 **Delivery channels:** Prefer AskQuestion for missing kernel/`slice_id`, ambiguous mode, manual confirm/ready-pick, plan-stage feature-branch probe (not on `main`/`master`), and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
 
@@ -54,6 +54,8 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
 | Tester | [rr-tester/SKILL.md](rr-tester/SKILL.md) | no |
 | Security | [rr-security-auditor/SKILL.md](rr-security-auditor/SKILL.md) | no |
 | Review hub | [rr-review/SKILL.md](rr-review/SKILL.md) | no |
+| Refactor | [rr-refactor/SKILL.md](rr-refactor/SKILL.md) | no |
+| Endless add-test | [rr-test-endless/SKILL.md](rr-test-endless/SKILL.md) | no |
 
 Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
 
