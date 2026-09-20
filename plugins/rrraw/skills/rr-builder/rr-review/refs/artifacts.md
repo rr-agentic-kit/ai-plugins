@@ -10,7 +10,17 @@
 
 **Mint:** List existing `.ai/review/yyyymmdd-*` dirs for today; next = max `NN` + 1 (or `01` if none). No hour/minute.
 
-## Layout
+## Scratch vs terminal
+
+| Layer | Path | Role |
+|-------|------|------|
+| **Scratch** | `.ai/review/{runId}/` | Brief, assess, challenge, fixing-plan, in-run `report.md` — always |
+| **Task terminal** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md` | Orchestrate review when parent supplies `slice_id` + `{NNNN}` + step cursor — **Write** after endless success (same body skeleton as `report.md`) |
+| **Handoff terminal** | `REVIEW_DIR/report.md` | Explicit `--review` **without** task/step cursor — keep scratch report as the announce path |
+
+Optional Steps pointer on `{NNNN}.md`: `→ review: \`{NNNN}-{step}.review.md\``.
+
+## Layout (scratch)
 
 | Rule | Value |
 |------|--------|
@@ -19,7 +29,7 @@
 | Lane dirs | **None** — all files flat under the run dir |
 | Filename | Locked type stem only — **do not** embed `runId` or short-branch |
 | Multi-chunk | Suffix assess (and its challenge sidecar) with chunk slug (`/` → `--`) |
-| Endless | Suffix assess (and challenge) with epoch: `code-assess-e{n}.md` / `code-assess-e{n}-challenge.md` (`n` = 1-based epoch). Multi-chunk + endless: `code-assess-e{n}-<chunk>.md`. Final `report.md` overwritten each epoch |
+| Endless | Suffix assess (and challenge) with epoch: `code-assess-e{n}.md` / `code-assess-e{n}-challenge.md` (`n` = 1-based epoch). Multi-chunk + endless: `code-assess-e{n}-<chunk>.md`. Scratch `report.md` overwritten each epoch |
 
 ```
 .ai/review/{runId}/
@@ -29,7 +39,7 @@
   security-audit.md              # multi-chunk: security-audit-<chunk>.md
   code-assess-e1.md              # endless epoch stems (e{n}); non-endless uses unsuffixed
   fixing-plan.md                 # when outcome=fix and scope is large
-  report.md                      # overwritten each endless epoch
+  report.md                      # scratch merge; overwritten each endless epoch
   scope-preflight.json           # ci only; json exception to *.md
   code-assess-challenge.md       # {assess-stem}-challenge.md
   test-assess-challenge.md
@@ -38,9 +48,10 @@
 
 ## Path + filename matrix
 
-| Artifact | Filename | Body template |
-|----------|----------|---------------|
-| Merged report | `report.md` | Skeleton below |
+| Artifact | Filename / path | Body template |
+|----------|-----------------|---------------|
+| Scratch merged report | `REVIEW_DIR/report.md` | Skeleton below |
+| Task terminal (orchestrate) | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md` | Same skeleton as `report.md` |
 | CI preflight | `scope-preflight.json` | **rr-ci** envelope — point only; schema owned by rr-ci |
 | Brief | `brief.md` | [brief-output.md](brief-output.md) |
 | Code assess | `code-assess.md` | Skeleton below — CP emit + [`architecture.md`](../../rr-coder/refs/architecture.md) `## Architecture` |
@@ -55,7 +66,7 @@ Endless examples: `code-assess-e2.md` + `code-assess-e2-challenge.md`; multi-chu
 
 ## Body skeletons
 
-### `report.md`
+### `report.md` / `{NNNN}-{step}.review.md`
 
 ```markdown
 # Review report
@@ -67,6 +78,7 @@ Endless examples: `code-assess-e2.md` + `code-assess-e2-challenge.md`; multi-chu
 - **Brief path:** REVIEW_DIR/brief.md
 - **Goal source:** <brief GOAL or unresolved>
 - **Review decision:** <pass | warnings | blocked | fix-applied | ci-handed-off | max-epochs>
+- **Scratch:** `.ai/review/<runId>/` (optional pointer)
 
 ## Code
 <summary or link to code-assess*.md; keep rows only>
@@ -106,7 +118,7 @@ Locked filename: **`{assess-stem}-challenge.md`** in the same `REVIEW_DIR` (e.g.
 
 ## `.gitignore` (consumer repos)
 
-Recommended: ignore `.ai/` (or at least `.ai/review/` and `.ai/ci/`) for local-only AI output.
+Recommended: ignore `.ai/` (or at least `.ai/review/` and `.ai/ci/`) for local-only AI output. Task terminals under `docs/rr/tasks/` are durable — do **not** gitignore them.
 
 ## Related
 

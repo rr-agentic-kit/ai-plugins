@@ -26,13 +26,95 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 
 | Stage | What builder does | Loads | Executes code? | Done-when |
 |-------|-------------------|-------|----------------|-----------|
-| **plan** | Ensure feature branch ([feature-branch.md](feature-branch.md)), then produce/enrich step plan + assessment only | [plan-knowledge.md](plan-knowledge.md) allowlist (includes feature-branch) | **No** app source (git branch create/checkout OK) | Branch settled + sidecar `{NNNN}-{step}.plan.md` complete per [plan-schema.md](plan-schema.md) (incl. **Ship**); set `step_plan_done: true` |
+| **plan** | Ensure feature branch ([feature-branch.md](feature-branch.md)), then produce/enrich step plan + assessment only | [plan-knowledge.md](plan-knowledge.md) allowlist (includes feature-branch) | **No** app source (git branch create/checkout OK) | Branch settled + sidecar `{NNNN}-{step}.plan.md` complete per [plan-schema.md](plan-schema.md) (Verify = checkboxes; incl. **Ship**); set `step_plan_done: true` |
 | **build** | Implement the step | Current `{NNNN}-{step}.plan.md` + minimal task Goal/Obligations if needed; full **rr-coder** + **rr-tester** (code **and** tests for the step). **Do not** Read other steps’ `.plan.md` files or inlined plan prose from the task body | **Yes** | Code + tests for the step land; step verify checks runnable; set `step_build_done: true` |
-| **refactor** | Behavior-invariant coder-rule refactor on step **build-touched** MR scope | **rr-refactor** (`epoch_cap: 5` default) | Via inline fix path | Terminal `report.md` under `.ai/refactor/<runId>/`; set `step_refactor_done: true` (or skip note when scope empty — see below) |
-| **review** | Full multi-lane review with fix, endless until clear | **rr-review** with **`--fix --all --endless`** (forced) | Via review fix path | Endless exit success (clear or warnings-only-security) per `rr-review/refs/endless.md`; set `step_review_done: true` |
-| **step-validate** / **task-validate** | Rubric: Goal / Verify (+ Forge/PR when shippable; Ship-intent review when `never`) | [task-validate.md](task-validate.md) | No (assessment) | PASS/FAIL per [task-validate.md](task-validate.md); forge-miss FAIL → **ship** then re-validate |
+| **refactor** | Behavior-invariant coder-rule refactor on step **build-touched** MR scope | **rr-refactor** (`epoch_cap: 5` default) | Via inline fix path | Skip or converge + lean `{NNNN}-{step}.refactor.md` written; set `step_refactor_done: true` (see below) |
+| **review** | Full multi-lane review with fix, endless until clear | **rr-review** with **`--fix --all --endless`** (forced) | Via review fix path | Endless exit success **and** task sidecar `{NNNN}-{step}.review.md` present; set `step_review_done: true` |
+| **step-validate** / **task-validate** | Rubric + persist report; mark Verify checkboxes on item PASS | [task-validate.md](task-validate.md) | No (assessment) | Report at `{NNNN}-{step}.validate.md` / `{NNNN}.task-validate.md` with plan + per-item PASS/FAIL; forge-miss FAIL → **ship** then re-validate |
 | **ship** | Resolve branch/base; hand off **rr-ci**; return to validate | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` | Via rr-ci only | [ship.md](ship.md) done-when; set `step_ship_done: true` when step-scoped; re-enter validate |
-| **slice validate** | Rubric: did **slice** hit slice goal / AC | [slice-validate.md](slice-validate.md) | No (assessment) | PASS/FAIL against execute-slice / pinned AC |
+| **slice validate** | Rubric: did **slice** hit slice goal / AC; persist report | [slice-validate.md](slice-validate.md) | No (assessment) | `docs/rr/tasks/{slice_id}/slice-validate.md` with plan + per-item PASS/FAIL |
+
+### Stage procedures (orchestrate)
+
+#### plan
+
+| | |
+|--|--|
+| **Loads** | [plan-knowledge.md](plan-knowledge.md) only (includes [feature-branch.md](feature-branch.md), [plan-schema.md](plan-schema.md)) |
+| **Inputs** | `{NNNN}.md` Steps item at `step_index`; slice kernel for context if needed |
+| **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.plan.md` + Steps pointer `→ plan: \`…\`` |
+| **Done-when** | Branch settled; six sections present; **Verify hooks** are `- [ ]` checkboxes; `step_plan_done: true` |
+| **Hard-stops** | Still on `main`/`master` without ensure; missing Ship; Verify as free prose |
+| **Nested** | None (knowledge allowlist — not rr-coder) |
+
+#### build
+
+| | |
+|--|--|
+| **Loads** | Current `{NNNN}-{step}.plan.md` (only plan among plans); thin Goal/Obligations; `rr-coder/SKILL.md` + `rr-tester/SKILL.md` |
+| **Inputs** | Plan Goal/Approach/Verify hooks; allowlisted code/test refs as coder/tester require |
+| **Durable output** | Application source + tests (no new task sidecar required) |
+| **Done-when** | Step code+tests land; Verify hooks runnable; `step_build_done: true` |
+| **Hard-stops** | Missing plan sidecar; inventing scope beyond Non-goals |
+| **Nested** | **rr-coder**, **rr-tester** |
+
+#### refactor
+
+| | |
+|--|--|
+| **Loads** | `rr-refactor/SKILL.md`; scope rule below |
+| **Inputs** | MR ∩ **build-touched** paths; `epoch_cap: 5` |
+| **Scratch** | Optional `.ai/refactor/<runId>/` (`state.json`, epochs) — not durable SoT |
+| **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md` (lean note); optional `→ refactor:` pointer |
+| **Done-when** | Empty intersection → skip note + `step_refactor_done: true`; else converge/skip-or-partial + lean note written + `step_refactor_done: true` |
+| **Hard-stops** | Collector/verify unrecoverable stop per rr-refactor (ends chain) |
+| **Nested** | **rr-refactor** (`--refactor` handoff: chat lean summary only, no required `report.md`) |
+
+#### review
+
+| | |
+|--|--|
+| **Loads** | `rr-review/SKILL.md`; force `--fix --all --endless` |
+| **Inputs** | Step MR/workspace scope; brief sources; `max_epochs` default 5 |
+| **Scratch** | `.ai/review/<runId>/` (brief/assess/challenge/`report.md`) |
+| **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md`; optional `→ review:` pointer |
+| **Done-when** | Endless success (clear or warnings-security-only) **and** task review sidecar present; `step_review_done: true` |
+| **Hard-stops** | Epoch cap without clear; unchallenged report; empty allowlist |
+| **Nested** | **rr-review** → rr-coder / rr-tester / rr-security-auditor lanes |
+
+#### step-validate / task-validate
+
+| | |
+|--|--|
+| **Loads** | [task-validate.md](task-validate.md) |
+| **Inputs** | Plan Verify checkboxes (step) or task Verify/Goal/Obligations (task); Ship block; evidence from prior stages |
+| **Durable output** | `{NNNN}-{step}.validate.md` or `{NNNN}.task-validate.md` — Validation plan + per-item PASS/FAIL |
+| **Marking** | Item PASS → flip matching `- [x]` on plan/task Verify; FAIL leaves `- [ ]` (report SoT for FAIL) |
+| **Done-when** | Report written; overall PASS only if all required items PASS |
+| **Hard-stops** | Non-forge FAIL; forge-miss → **ship** then re-enter (not a permanent stop under auto) |
+| **Nested** | None (assessment); forge probe via **rr-ci** preflight when shippable |
+
+#### ship
+
+| | |
+|--|--|
+| **Loads** | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` |
+| **Inputs** | Plan **Ship** (`branch` / `ship_after` / `base`) |
+| **Durable output** | Open PR/MR via rr-ci; `active_ship_branch` / `ship_base_branch` on summary |
+| **Done-when** | [ship.md](ship.md); `step_ship_done: true` when step-scoped; return to validate |
+| **Hard-stops** | rr-ci failure / missing branch |
+| **Nested** | **rr-ci** |
+
+#### slice validate
+
+| | |
+|--|--|
+| **Loads** | [slice-validate.md](slice-validate.md) |
+| **Inputs** | Kernel + task-summary + all `{NNNN}.task-validate.md` PASS |
+| **Durable output** | `docs/rr/tasks/{slice_id}/slice-validate.md` |
+| **Done-when** | Report PASS → `builder_stage: delivered` |
+| **Hard-stops** | Any rubric FAIL → leave `slice_validate` |
+| **Nested** | None |
 
 ### Knowledge load vs full-skill handoff
 
@@ -40,8 +122,8 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 |--------------|----------|
 | **plan** (orchestrate) | **Read** only [plan-knowledge.md](plan-knowledge.md). Run [feature-branch.md](feature-branch.md) ensure **first**. Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run rr-coder/rr-tester implement procedures. |
 | **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `rr-coder/SKILL.md` and `rr-tester/SKILL.md` and follow them for the step (code + tests). |
-| **refactor** (orchestrate) | **Read** `rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
-| **review** (orchestrate) | **Read** `rr-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). |
+| **refactor** (orchestrate) | **Read** `rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Durable: lean `{NNNN}-{step}.refactor.md`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
+| **review** (orchestrate) | **Read** `rr-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). Durable terminal: `{NNNN}-{step}.review.md` (scratch under `.ai/review/`). |
 | **ship** (orchestrate) | **Read** [ship.md](ship.md), then `skills/rr-ci/SKILL.md`. Do **not** invent forge CLI in builder. |
 | Explicit lane flag | Full-skill **handoff** — see [routing.md](routing.md). No pipeline advance past that skill’s done-when. |
 
@@ -70,7 +152,7 @@ When stage is **refactor** (not `--refactor` handoff):
 
 1. Resolve MR file list (rr-review MR recipe in `rr-review/refs/params.md`).
 2. Narrow to files touched during the current step's **build** only (`git diff` against pre-build snapshot or merge-base + step path hints from `{NNNN}-{step}.plan.md`). Do **not** intersect with review-touched paths.
-3. **Empty intersection** → **skip** refactor with note; set `step_refactor_done: true` — do **not** stop the slice.
+3. **Empty intersection** → **skip** refactor with lean `{NNNN}-{step}.refactor.md` (status `skipped`) or chat skip note; set `step_refactor_done: true` — do **not** stop the slice.
 4. Pass resolved scope as `payload.refactor.paths` + `scope: MR` + `epoch_cap: 5` to **rr-refactor**.
 
 ### Mid-flight migration (review-before-refactor → refactor-before-review)

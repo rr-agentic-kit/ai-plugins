@@ -9,7 +9,7 @@ description: Slice build orchestrator (drive×scope; default --auto --step) or l
 
 ## Purpose
 
-**Orchestrate** building a pin-complete execute-slice for software engineers: prepare → per-task plan/build/refactor/review/validate → optional planned **ship** (rr-ci handoff) → slice validate → **delivered** residual. Drive (`--auto` \| `--manual`) × scope (`--next` \| `--step` \| `--task` \| `--slice`) control confirm gates and how far one run advances. With an explicit lane flag, **hand off** to exactly one nested skill and stop (drive/scope ignored). Artifacts: `docs/rr/tasks/` (prepare/execute cursor), `.ai/review/<runId>/` (review), `.ai/refactor/<runId>/` (refactor).
+**Orchestrate** building a pin-complete execute-slice for software engineers: prepare → per-task plan/build/refactor/review/validate → optional planned **ship** (rr-ci handoff) → slice validate → **delivered** residual. Drive (`--auto` \| `--manual`) × scope (`--next` \| `--step` \| `--task` \| `--slice`) control confirm gates and how far one run advances. With an explicit lane flag, **hand off** to exactly one nested skill and stop (drive/scope ignored). **Durable** artifacts under `docs/rr/tasks/` (tasks, plan/refactor/review/validate sidecars). **Scratch:** `.ai/review/<runId>/`, `.ai/refactor/<runId>/` (in-run only; not terminal SoT).
 
 ## When to use
 

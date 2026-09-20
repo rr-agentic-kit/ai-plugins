@@ -48,5 +48,6 @@ Evaluate **OR**:
 
 ## Chat / report
 
-- Success: announce `Report written: .ai/review/<runId>/report.md` with decision `pass` or `warnings`.
-- Cap: same path; decision not pass/warnings-success; note epochs exhausted.
+- Success (orchestrate with task/step cursor): announce `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md` with decision `pass` or `warnings` (scratch still under `.ai/review/<runId>/`).
+- Success (handoff without cursor): announce `Report written: .ai/review/<runId>/report.md` with decision `pass` or `warnings`.
+- Cap: announce the same terminal path used for the run; decision not pass/warnings-success; note epochs exhausted; orchestrate leaves `step_review_done` unset.

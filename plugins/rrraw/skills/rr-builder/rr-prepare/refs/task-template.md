@@ -30,15 +30,32 @@ Cursor algorithm SoT: [../../refs/slice-pipeline.md](../../refs/slice-pipeline.m
 
 | Section | Content |
 |---------|---------|
-| **Goal** | One observable outcome for this capability atom |
-| **Obligations** | Constitution cites + **cited tech ADRs** + delta obligations |
+| **Goal** | One observable outcome for this capability atom (cited prose OK; checklistable only when already discrete criteria) |
+| **Obligations** | Constitution cites + **cited tech ADRs** + delta obligations (cited prose OK) |
 | **Read-first** | Paths/symbols/docs to open before coding |
-| **Steps** | Ordered implementer steps (mechanism-bearing only). Plan stage writes sidecar `{NNNN}-{step}.plan.md` per [plan-schema.md](../../refs/plan-schema.md) (`step` = 1-based); after plan, add a one-line pointer on that item (`→ plan: \`{NNNN}-{step}.plan.md\``) — do **not** inline the five plan sections here |
-| **Verify / done** | How to know the atom is done (product AC refs OK) |
+| **Steps** | Ordered implementer steps (mechanism-bearing only). Plan stage writes sidecar `{NNNN}-{step}.plan.md` per [plan-schema.md](../../refs/plan-schema.md) (`step` = 1-based); after plan, add a one-line pointer on that item (`→ plan: \`{NNNN}-{step}.plan.md\``) — do **not** inline the six plan sections here. Optional later: `→ review: \`…\`` / `→ refactor: \`…\`` pointers |
+| **Verify / done** | **Markdown checklist** — each criterion is `- [ ] …` (product AC refs OK). See checkbox contract below |
 | **Non-goals** | Explicit exclusions for this task |
 | **Open risks** | Residual risks / `pending_tech` blockers |
 
 Markdown + YAML only — no XML DSL.
+
+### Verify / done (checkbox contract)
+
+**Verify / done** is the markable set for **task-validate** (with Goal / Obligations / Ship gates as additional rubric rows — see [task-validate.md](../../refs/task-validate.md)).
+
+```markdown
+## Verify / done
+
+- [ ] AC-3.1 evidenced by integration test green
+- [ ] `docs/rr/tasks/{slice_id}/task-summary.md` row status = detailed and delivered
+```
+
+| Rule | Detail |
+|------|--------|
+| Shape | Each item `- [ ]` or `- [x]`. No free-prose-only Verify section |
+| Who marks | **task-validate** (and **step-validate** for plan Verify hooks) flips matching items to `- [x]` on that item’s **PASS**; FAIL leaves `- [ ]` and records FAIL in the validate report (report is SoT for FAIL evidence) |
+| Empty | At least one checkbox required |
 
 ## Id allocation
 

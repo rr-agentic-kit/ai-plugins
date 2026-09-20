@@ -15,7 +15,7 @@ Write the six required sections to:
 | `{NNNN}` | Zero-padded task id (same stem as `{NNNN}.md`) |
 | `{step}` | **1-based** Steps list item (`step_index + 1`). Cursor `step_index` on `{NNNN}.md` stays **0-based**. |
 
-After writing the sidecar, add a one-line pointer on that Steps item in `{NNNN}.md` (e.g. `→ plan: \`{NNNN}-{step}.plan.md\``). Do **not** paste the five sections into the task body.
+After writing the sidecar, add a one-line pointer on that Steps item in `{NNNN}.md` (e.g. `→ plan: \`{NNNN}-{step}.plan.md\``). Do **not** paste the six sections into the task body.
 
 Optional frontmatter on the plan file: `task_id`, `step`, `step_index`, `slice_id`.
 
@@ -23,12 +23,29 @@ Optional frontmatter on the plan file: `task_id`, `step`, `step_index`, `slice_i
 
 | Section | Content |
 |---------|---------|
-| **Goal of step** | One observable outcome for this step only |
-| **Approach** | Mechanism-bearing plan (files/symbols/seams); cite allowlist refs used |
-| **Risks** | Residual risks / unknowns that could block build |
-| **Verify hooks** | How build will prove the step (commands, assertions, AC ids) |
-| **Non-goals** | Explicit exclusions for this step |
+| **Goal of step** | One observable outcome for this step only (prose OK) |
+| **Approach** | Mechanism-bearing plan (files/symbols/seams); cite allowlist refs used (prose OK) |
+| **Risks** | Residual risks / unknowns that could block build (prose OK) |
+| **Verify hooks** | **Markdown checklist only** — each hook is `- [ ] …` (commands, assertions, AC ids). Not free-prose bullets. See checkbox contract below |
+| **Non-goals** | Explicit exclusions for this step (prose OK) |
 | **Ship** | Mid-slice / task ship intent — see table below (required; use `ship_after: never` when the step is **not shippable**) |
+
+### Verify hooks (checkbox contract)
+
+**Verify hooks** is the markable set for **step-validate**. Goal / Approach / Risks / Non-goals stay prose; only Verify is checkboxes.
+
+```markdown
+## Verify hooks
+
+- [ ] `pytest tests/foo -q` exits 0
+- [ ] AC-3.1: create returns 201 with body id
+```
+
+| Rule | Detail |
+|------|--------|
+| Shape | Each item `- [ ]` (unchecked) or `- [x]` (checked). No bare `-` bullets in this section |
+| Who marks | **step-validate** flips matching items to `- [x]` on that item’s **PASS**; FAIL leaves `- [ ]` and records FAIL in the validate report ([task-validate.md](task-validate.md) — report is SoT for FAIL evidence) |
+| Empty | At least one checkbox required; empty Verify section = plan incomplete |
 
 ### Ship (required)
 
@@ -55,10 +72,10 @@ Record after feature-branch ensure. Do **not** invent a second branch naming sch
 
 ## Anti-patterns
 
-- Dumping the five plan sections into `{NNNN}.md` body or an adjacent `### Plan` block (bloated task context)
+- Dumping the six plan sections into `{NNNN}.md` body or an adjacent `### Plan` block (bloated task context)
 - Pasting full language matrices or implement Procedures into the plan body
 - Editing application source “to explore”
-- Omitting **Verify hooks** (pushes invent into build)
+- Omitting **Verify hooks** or writing them as free prose instead of `- [ ]` checkboxes (pushes invent into build; breaks step-validate marking)
 - Using 0-based `{step}` in the filename (filename step is always 1-based)
 - Writing the plan (or setting `step_plan_done`) while still on `main`/`master` without creating `feat/{NNNN}-{step}-{short-desc}`
 - Inventing non-conforming branch names (`feat/<prose>`, slice-only prefixes)

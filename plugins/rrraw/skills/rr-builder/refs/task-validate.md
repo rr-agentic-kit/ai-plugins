@@ -2,21 +2,41 @@
 
 **Audience:** `rr-builder` orchestration for **step-validate** (per task-step) and **task-validate** (after all steps). Assessment only — no application source edits.
 
+## Persist paths (canonical)
+
+| Scope | Path |
+|-------|------|
+| **step-validate** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.validate.md` |
+| **task-validate** | `docs/rr/tasks/{slice_id}/{NNNN}.task-validate.md` |
+
+`{step}` is **1-based** (same as plan sidecar). Write the report **before** advancing cursor on PASS.
+
 ## Inputs
 
 | Input | Source |
 |-------|--------|
 | Task artifact | `docs/rr/tasks/{slice_id}/{NNNN}.md` |
-| Goal / Obligations / Verify | Task body (task-validate) or current step plan Goal / Verify hooks (step-validate) |
+| Goal / Obligations / Verify | Task body (task-validate) or current step plan Goal / **Verify hooks** checkboxes (step-validate) |
 | Ship block | Current `{NNNN}-{step}.plan.md` **Ship** (step-validate); any step with pending `ship_after: task_validate` (task-validate) |
 | Evidence | Diffs, test results, step notes from build/refactor/review; forge probe when shippable |
+
+## Validation plan (derive checklist)
+
+Build the report’s **Validation plan** from:
+
+| Scope | Source items |
+|-------|--------------|
+| **step-validate** | Plan **Verify hooks** (`- [ ]` items) + Goal of step + Obligations (if cited for the step) + **Forge / PR** when shippable + **Ship intent** when `never` |
+| **task-validate** | Task **Verify / done** checkboxes + Goal + Obligations + Open risks / Non-goals gates + **Forge / PR** for any pending `ship_after: task_validate` + **Ship intent** review when `never` |
+
+Do **not** invent criteria absent from plan/task. Each plan/task checkbox becomes one report row.
 
 ## Rubric
 
 | Check | PASS when | FAIL when |
 |-------|-----------|-----------|
 | **Goal** | Observable Goal outcome is met in the working tree / runnable verify | Goal unmet or only partially delivered without explicit Non-goals carve-out |
-| **Verify / done** | Every Verify / done criterion is evidenced (command output, artifact, or cited proof) | Any Verify item missing, skipped, or contradicted |
+| **Verify hooks / Verify / done** | Every checklist criterion is evidenced (command output, artifact, or cited proof) | Any Verify item missing, skipped, or contradicted |
 | **Obligations** | Cited constitution / tech ADR / delta obligations still hold for changed surfaces | Obligation violated or silently ignored |
 | **Non-goals** | Non-goals were not implemented as scope creep | Non-goal work shipped as if in-scope |
 | **Open risks** | Residual risks either closed or explicitly carried with owner | Blocking `pending_tech` / open risk ignored as if done |
@@ -25,9 +45,41 @@
 
 **Shippable** means plan `ship_after` is `step_validate` or `task_validate`. When `never`, skip the **Forge / PR** row entirely — Goal/Verify/Obligations/Non-goals/Open risks + **Ship intent** review only.
 
-## Verdict
+## Report body
 
-Emit one line: `step-validate: PASS | FAIL` or `task-validate: PASS | FAIL` plus ≤5 bullets of evidence (cite section + proof).
+```markdown
+# Step validate — {NNNN} step {step}
+# (or) # Task validate — {NNNN}
+
+## Validation plan
+- [ ] <derived item 1>
+- [ ] <derived item 2>
+…
+
+## Results
+
+| Item | Verdict | Evidence |
+|------|---------|----------|
+| <Verify hooks / done text or rubric row> | PASS \| FAIL | <cite proof> |
+…
+
+step-validate: PASS | FAIL
+# (or) task-validate: PASS | FAIL
+```
+
+- Per-item column is **PASS** or **FAIL** only (no soft grades).
+- Final line must be exactly `step-validate: PASS | FAIL` or `task-validate: PASS | FAIL`.
+- Overall **PASS** only when **all** required items PASS.
+
+## Checkbox marking
+
+On each item **PASS** that maps to a plan **Verify hooks** or task **Verify / done** checkbox → flip that source item to `- [x]` in `{NNNN}-{step}.plan.md` or `{NNNN}.md`.
+
+On item **FAIL** → leave source `- [ ]`; FAIL evidence lives in this report (report is SoT for FAIL).
+
+Do not mark Goal/Obligations/Non-goals prose as checkboxes unless those sections already use checklist items.
+
+## Verdict / cursor
 
 On **FAIL**:
 - Leave `builder_stage` at `step_validate` or `task_validate`; do **not** advance `step_index` / next task / slice validate.
@@ -35,6 +87,8 @@ On **FAIL**:
 - Other FAIL reasons → hard stop for `scope: step|task|slice` chaining (do not auto-ship).
 
 On **PASS** with `ship_after: never`: treat `step_ship_done` as satisfied for advance (nothing to ship).
+
+Chat: announce the persisted path (`…validate.md` or `…task-validate.md`).
 
 ## Out of scope
 

@@ -8,7 +8,7 @@ Execute needs one entry that owns pipeline cursor (prepare → plan → build �
 
 ## What
 
-Owns flag/NL normalization, **orchestrate vs handoff** mode, drive×scope run loop, stage→load contracts, plan-stage **feature branch ensure** (`feat/{NNNN}-{step}-{short-desc}`), plan **Ship** intent (`ship_after` / stacked `base`), and on-demand load of `rr-prepare`, `rr-coder`, `rr-tester`, `rr-security-auditor`, `rr-review`, `rr-refactor`, or **rr-ci** on **ship**. Prepare/execute cursor under `docs/rr/tasks/`; review artifacts under `.ai/review/<runId>/`; refactor under `.ai/refactor/<runId>/`.
+Owns flag/NL normalization, **orchestrate vs handoff** mode, drive×scope run loop, stage→load contracts, plan-stage **feature branch ensure** (`feat/{NNNN}-{step}-{short-desc}`), plan **Ship** intent (`ship_after` / stacked `base`), and on-demand load of `rr-prepare`, `rr-coder`, `rr-tester`, `rr-security-auditor`, `rr-review`, `rr-refactor`, or **rr-ci** on **ship**. **Durable** under `docs/rr/tasks/` (prepare/execute cursor + `{NNNN}-{step}.{plan,refactor,review,validate}.md` + task/slice validate reports). **Scratch:** `.ai/review/<runId>/`, `.ai/refactor/<runId>/`.
 
 **Out of scope:** squash/worktree/prune (those stay **rr-git**); inventing forge CLI (those stay **rr-ci**); README tone rewrites. Mis-invocation redirects live under **Avoid when** only.
 
@@ -58,10 +58,12 @@ Defaults: orchestrate without drive/scope → `auto` × `step`. Lone `--manual` 
 - **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; under `--slice` the ready list marks cursor stage **`(next)`**; silent chain only with `--auto`
 - **Refactor before review** — clean build-touched scope first; orchestrate review is `--fix --all --endless`
 - **One nested skill (or stage knowledge set) per stage turn** — never preload all lane skills
-- **Plan ≠ build** — plan stage loads knowledge only; no application source edits; plan lands in `{NNNN}-{step}.plan.md` (1-based step) so build loads one step’s plan, not a bloated task body
+- **Plan ≠ build** — plan stage loads knowledge only; no application source edits; plan lands in `{NNNN}-{step}.plan.md` with **Verify hooks** as `- [ ]` checkboxes so build loads one step’s plan, not a bloated task body
 - **Feature branch at plan start** — on `main`/`master`, create `feat/{NNNN}-{step}-{short-desc}` before writing the plan; otherwise AskQuestion (stay / new from base / rename / abort) — never invent alternate names or defer to post-build
 - **Ship is planned** — each step plan’s **Ship** sets `branch`, `ship_after`, `base`; `never` = non-shippable (no Forge/PR gate); shippable validate requires an open PR; forge open is **rr-ci** via **ship** before that validate can PASS; `prior_open_pr` stacks onto the latest still-open PR in the `pr_group` chain
-- **Review under orchestrate is `--fix --all --endless`** — report-only review uses explicit `--review` without `--fix`
+- **Refactor lean note** — orchestrate writes `{NNNN}-{step}.refactor.md`; `.ai/refactor/` is scratch only (no required `report.md`)
+- **Review under orchestrate is `--fix --all --endless`** — terminal `{NNNN}-{step}.review.md`; scratch under `.ai/review/`; report-only review uses explicit `--review` without `--fix`
+- **Validate reports mark checkboxes** — step/task/slice validate persist reports with plan + PASS/FAIL; item PASS flips `- [x]` on plan/task Verify
 - **Delivered → residual rr-ci** — mid-slice ships already handed off; delivered only covers unshipped remainder
 
 ## UX
@@ -80,7 +82,7 @@ Ambiguous mode → AskQuestion once (orchestrate drive×scope \| prepare \| code
 
 ### Output
 
-Nested skill / stage owns artifacts; prepare writes `docs/rr/tasks/`; review runs write under `.ai/review/<runId>/`; refactor runs write under `.ai/refactor/<runId>/`; validate stages emit PASS/FAIL verdicts; **ship** persists `active_ship_branch` / `ship_base_branch` then hands off **rr-ci**.
+Nested skill / stage owns artifacts; prepare writes `docs/rr/tasks/`; orchestrate review/refactor/validate write task sidecars under `docs/rr/tasks/`; `.ai/review/` and `.ai/refactor/` are scratch; validate reports include plan + per-item PASS/FAIL; **ship** persists `active_ship_branch` / `ship_base_branch` then hands off **rr-ci**.
 
 ### Close
 

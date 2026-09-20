@@ -11,7 +11,7 @@ user-invocable: false
 
 ## Purpose
 
-Orchestrate multi-lane code / test / security review in the **parent session** and persist artifacts under **`.ai/review/<runId>/`**. Lane rubrics live in **rr-coder**, **rr-tester**, **rr-security-auditor**. Optional **`--endless`** loops assess→Challenge→fix→re-assess until clear or epoch cap.
+Orchestrate multi-lane code / test / security review in the **parent session**. Scratch (brief/assess/challenge) lives under **`.ai/review/<runId>/`**. **Orchestrate** with task/step cursor: terminal report → `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md`. **Handoff `--review`** without cursor: terminal stays `REVIEW_DIR/report.md`. Lane rubrics live in **rr-coder**, **rr-tester**, **rr-security-auditor**. Optional **`--endless`** loops assess→Challenge→fix→re-assess until clear or epoch cap.
 
 ## When to use
 
@@ -90,12 +90,12 @@ When **`endless: false`**: run steps 6–9 once (below).
 
 When **`endless: true`**: for `epoch = 1..max_epochs`:
 
-1. **assess** (step 6) with epoch-stamped stems (`code-assess-e{n}.md` — [artifacts.md](artifacts.md)).
+1. **assess** (step 6) with epoch-stamped stems (`code-assess-e{n}.md` — [refs/artifacts.md](refs/artifacts.md)).
 2. **Challenge** (step 7).
-3. Evaluate [endless.md](endless.md) exit rules **before** burning a fix epoch when already clear.
-4. If not clear and epoch allows: **fix** (step 8) per [fix-routing.md](fix-routing.md), then continue.
+3. Evaluate [refs/endless.md](refs/endless.md) exit rules **before** burning a fix epoch when already clear.
+4. If not clear and epoch allows: **fix** (step 8) per [refs/fix-routing.md](refs/fix-routing.md), then continue.
 5. **merge** (step 9) — overwrite `report.md` each epoch.
-6. On clear / warnings-security-only → exit success. On cap without clear → stop per endless.md (orchestrate leaves `step_review_done` unset).
+6. On clear / warnings-security-only → exit success. On cap without clear → stop per [refs/endless.md](refs/endless.md) (orchestrate leaves `step_review_done` unset).
 
 #### 6. assess
 
@@ -115,7 +115,10 @@ Parent session. **`Read`** [refs/severity-triage.md](refs/severity-triage.md) + 
 
 #### 9. merge
 
-Write **`REVIEW_DIR/report.md`** per body skeleton in [refs/artifacts.md](refs/artifacts.md) — sections per lane; header: Scope, Mode, Run id, Brief path, Goal source, Review decision. Chat: `Report written: .ai/review/<runId>/report.md`.
+1. Write **`REVIEW_DIR/report.md`** (scratch) per body skeleton in [refs/artifacts.md](refs/artifacts.md) — sections per lane; header: Scope, Mode, Run id, Brief path, Goal source, Review decision. Overwrite each endless epoch.
+2. **Terminal path:**
+   - Parent supplies `slice_id` + `{NNNN}` + step (orchestrate review) → also **Write** `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md` (same skeleton; optional Steps pointer `→ review: \`…\``). Chat: that task path.
+   - Else (handoff `--review` without cursor) → chat: `Report written: .ai/review/<runId>/report.md`.
 
 ## Stop conditions
 
@@ -123,4 +126,4 @@ Write **`REVIEW_DIR/report.md`** per body skeleton in [refs/artifacts.md](refs/a
 - `outcome: ci` + no open PR/MR
 - Assess failed for lane needed by `--fix` → skip lane fix; note in report
 - `--ci` + unchallenged blocker-tier rows → refuse POST
-- Endless epoch cap without clear/warnings-security-only → stop per [endless.md](endless.md)
+- Endless epoch cap without clear/warnings-security-only → stop per [refs/endless.md](refs/endless.md)

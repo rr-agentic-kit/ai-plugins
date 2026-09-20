@@ -1,12 +1,12 @@
 # rr-refactor
 
-Fixed-point phased refactor for **`rr-builder --refactor`** and orchestrate **refactor** stage — behavior-invariant coder-rule cleanup with durable epoch artifacts.
+Fixed-point phased refactor for **`rr-builder --refactor`** and orchestrate **refactor** stage — behavior-invariant coder-rule cleanup with optional scratch epochs and a lean durable note.
 
 ## Why
 
 Production code accumulates structural violations (god methods, visibility drift, dead code) that block maintainability without changing product behavior. **rr-refactor** drives an expanded MR or repo scope through repeated assess → triage → inline fix → verify cycles until **two consecutive** full-scope assessments report zero auto-fixable findings. Audience: parent **rr-builder** after handoff (`lane: refactor`) or orchestrate refactor stage.
 
-**Done-when:** terminal **`report.md`** under **`.ai/refactor/<runId>/`** with **`Status: complete`**, or **`partial`** / **`stopped`** with documented reason per **`refs/artifacts.md`**.
+**Done-when:** converge / skip / partial / stopped per **`refs/artifacts.md`** + (orchestrate) lean **`{NNNN}-{step}.refactor.md`**. No required **`REFACTOR_DIR/report.md`**.
 
 ## What
 
@@ -39,7 +39,7 @@ Mechanical tool seeds (Checkstyle/Biome/Spotless) plus mandatory LLM assess pack
 
 - **Behavior-invariant** — tests must pass after each verified epoch; rollback on verify failure.
 - **Eval-first convergence** — two consecutive zero-fix assessments on stable expanded scope; single clean pass is insufficient.
-- **Artifact-backed state** — every epoch writes assess, manifest, and state JSON; no silent phase completion.
+- **Scratch epochs** — `.ai/refactor/<runId>/` holds `state.json` / assess / manifest; durable SoT is the lean task note (orchestrate) or chat summary (handoff).
 - **Inline fix seam** — collector may **`Task`** only for large multi-module assess; fix always runs in orchestrator session.
 - **Thin parent** — SKILL holds invariant procedure; refs hold params, disk layout, disposition, and execute detail.
 - **Production-source filter** — exclude test roots, generated output, vendored trees unless explicitly targeted.
@@ -60,11 +60,11 @@ Validate param block from **`refs/params.md`**; normalize parent payload via **`
 
 ### Output
 
-Epoch artifacts under **`.ai/refactor/<runId>/`**; terminal chat line **`Report written: .ai/refactor/<runId>/report.md`**.
+Optional scratch under **`.ai/refactor/<runId>/`**; orchestrate **Write** lean **`docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md`**; handoff without cursor → chat lean summary only.
 
 ### Close
 
-Terminal **`report.md`**; parent sets **`step_refactor_done: true`** (or skip note when orchestrate scope empty).
+Convergence status + lean note/summary; parent sets **`step_refactor_done: true`** (or skip note when orchestrate scope empty).
 
 ## Design notes
 
@@ -80,6 +80,7 @@ Terminal **`report.md`**; parent sets **`step_refactor_done: true`** (or skip no
 - Epoch cap default **5** (`--epoch-cap`).
 - Phase apply order **1→8** per **`refs/fix-disposition.md`**.
 - Missing required ref → stop: `missing ref: <path>`.
+- **`report.md` under `.ai/refactor/` is never a done-when.**
 
 ## Notes
 
@@ -87,7 +88,7 @@ Terminal **`report.md`**; parent sets **`step_refactor_done: true`** (or skip no
 |------|------|
 | `SKILL.md` | Orchestrator procedure |
 | `refs/params.md` | CLI grammar + param block |
-| `refs/artifacts.md` | Disk layout, helpers, terminal convergence |
+| `refs/artifacts.md` | Scratch layout, lean task note, terminal convergence |
 | `refs/leaf-contract.md` | Collector Task envelope + merge |
 | `refs/inline-fix.md` | Inline execute SoT |
 | `refs/fix-disposition.md` | Phase-specific fix rules |

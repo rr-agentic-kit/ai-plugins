@@ -37,11 +37,10 @@ When resolved scope exceeds 50 production-source files:
 
 ## Canonical layout
 
-**Root:** `.ai/refactor/{runId}/`
+**Root:** `.ai/refactor/{runId}/` — **optional scratch** for in-run state. **No** required terminal `report.md`.
 
 ```text
 .ai/refactor/{runId}/
-  report.md                    # merged terminal report (required at end)
   scope.json                   # initial + expanded scope (required after step scope)
   epochs/
     epoch-001-assess.json      # full-scope assessment (all phases, all in-scope files)
@@ -50,6 +49,7 @@ When resolved scope exceeds 50 production-source files:
     epoch-002-manifest.json
     …
   state.json                   # convergence tracker (required after first assess)
+  report.md                    # OPTIONAL legacy/debug only — not a done-when
 ```
 
 | Artifact | Path | Required when |
@@ -58,7 +58,8 @@ When resolved scope exceeds 50 production-source files:
 | Assessment | `epochs/epoch-{NNN}-assess.json` | End of every assess step (including confirmation passes) |
 | Manifest | `epochs/epoch-{NNN}-manifest.json` | After triage, before execute |
 | State | `state.json` | After the first assess; update after every epoch and at terminal status |
-| Report | `report.md` | Terminal step |
+| Scratch report | `report.md` | **Never required** — optional debug dump only |
+| Lean task note | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md` | Orchestrate refactor when parent supplies cursor (see below) |
 
 **Epoch numbering:** `001`, `002`, … zero-padded three digits. One epoch = full-scope assess → triage/manifest → optional execute → verify → scope expansion. Reassessment starts the next epoch.
 
@@ -198,28 +199,39 @@ Manifest items carry the complete finding shape plus `status`, `attempts`, and `
 
 Partial **`terminal_reason`** values: `epoch_cap_remaining` | `confirmation_pending` | `repeated_no_progress`.
 
-## report.md
+## Lean task note (orchestrate durable output)
 
-Header: **Scope**, **Run id**, **Epochs**, **Status**, **Remaining auto-fixable** (count + fingerprints).
+**Path:** `docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md` (`{step}` 1-based).
 
-When `Status: partial` and `Remaining auto-fixable: 0`, include the terminal reason (for example, `confirmation_pending`).
+No plan sidecar. No required `REFACTOR_DIR/report.md`. Handoff without cursor: emit the same shape in chat only.
 
-Sections:
+```markdown
+# Refactor — {NNNN} step {step}
 
-1. **Fixed** — fingerprints resolved this run
-2. **Remaining auto-fixable** — only when `partial` or `stopped`
-3. **Clarified** — `clarify` dispositions applied
-4. **Escalated** — `escalate_human` with short rationale
+- **Status:** complete | partial | stopped | skipped
+- **Scope:** <paths / MR ∩ build-touched>
+- **Epochs:** <n run / epoch_cap>
+- **Remaining auto-fixable:** <count> (<fingerprints or none>)
+- **Scratch:** `.ai/refactor/<runId>/` (optional; omit when skipped with no run)
 
-**Do not** use ambiguous `PASS/FIXED — N` phase lines. Per-epoch tables may list phase × counts; terminal **Status** follows **Terminal convergence** above.
+## Summary
+- <bullet: what changed or why skipped>
+- <bullet: residual / escalate notes when partial|stopped>
+```
+
+Optional Steps pointer on `{NNNN}.md`: `→ refactor: \`{NNNN}-{step}.refactor.md\``.
+
+## report.md (optional scratch only)
+
+If written for debug: header **Scope**, **Run id**, **Epochs**, **Status**, **Remaining auto-fixable** (count + fingerprints). Sections: Fixed / Remaining / Clarified / Escalated. **Not** a done-when gate.
 
 ## Task prompt fields
 
-Pass the envelope in **`refs/leaf-contract.md`** on every collector **`Task`**. Chat terminal line: **`Report written: .ai/refactor/<runId>/report.md`**.
+Pass the envelope in **`refs/leaf-contract.md`** on every collector **`Task`**. Chat terminal: announce lean task note path (orchestrate) or paste lean summary (handoff).
 
 ## `.gitignore` (consumer repos)
 
-- **Recommended:** ignore **`.ai/refactor/`** or entire **`.ai/`** for local-only AI output.
+- **Recommended:** ignore **`.ai/refactor/`** or entire **`.ai/`** for local-only AI output. Lean notes under `docs/rr/tasks/` are durable — do **not** gitignore them.
 
 ## Related
 

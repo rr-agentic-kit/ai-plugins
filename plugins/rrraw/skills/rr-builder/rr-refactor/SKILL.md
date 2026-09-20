@@ -11,7 +11,7 @@ user-invocable: false
 
 ## Purpose
 
-Drive expanded production-source scope to **two consecutive** full-scope assessments with **`remaining_fix: 0`**, using durable artifacts under **`.ai/refactor/<runId>/`**. Behavior-invariant refactoring only — tests must pass after each epoch. **`PLUGIN_ROOT`** = installed **rrraw** plugin root.
+Drive expanded production-source scope to **two consecutive** full-scope assessments with **`remaining_fix: 0`**. Optional in-run scratch under **`.ai/refactor/<runId>/`** (`state.json`, epochs). **Orchestrate:** durable output is a lean chat-style note `docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md`. **Handoff `--refactor`** without cursor: chat summary only (same lean shape — no required `REFACTOR_DIR/report.md`). Behavior-invariant refactoring only — tests must pass after each epoch. **`PLUGIN_ROOT`** = installed **rrraw** plugin root.
 
 ## When to use
 
@@ -33,7 +33,7 @@ Every run validates a param block from **`refs/params.md`** (parent handoff or o
 
 **Delivery channels:** Prefer AskQuestion for empty MR scope, collector Task failure after retry, and verify failure after rollback. Text-mode: same options as short prose; do not stall waiting for a widget.
 
-TodoWrite **`merge: false`** before step 3 — `refactor-parse`, `refactor-scope`, `refactor-epoch-loop`, `refactor-report`. Exactly one **`in_progress`**; **`merge: true`** on completion.
+TodoWrite **`merge: false`** before step 3 — `refactor-parse`, `refactor-scope`, `refactor-epoch-loop`, `refactor-close`. Exactly one **`in_progress`**; **`merge: true`** on completion.
 
 ### 1. parse
 
@@ -67,13 +67,18 @@ Write **`state.json`** after every assess. Do not mark phases or an epoch comple
 
 After each assess, increment `consecutive_zero_fix_assessments` when `remaining_fix: 0`; otherwise reset it to `0`. Reset `consecutive_zero_fix_assessments` to `0` whenever verified edits change `expanded_files`; the next assessment may start a new clean sequence.
 
-### 5. report
+### 5. close
 
-**`Write`** **`REFACTOR_DIR/report.md`** per **`refs/artifacts.md`**. Chat: **`Report written: .ai/refactor/<runId>/report.md`**.
+Terminal convergence from **`state.json`** (and optional scratch under **`REFACTOR_DIR`**) per **`refs/artifacts.md`** § Terminal convergence — **no** required `report.md`.
+
+| Mode | Durable output |
+|------|----------------|
+| **Orchestrate** (parent supplies `slice_id` + `{NNNN}` + step) | **Write** lean `docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md` per **`refs/artifacts.md`** § Lean task note. Optional Steps pointer `→ refactor: \`…\``. Chat: that path |
+| **Handoff** without cursor | Chat summary only — same lean shape (status, scope, epochs, summary bullets); do **not** require `REFACTOR_DIR/report.md` |
 
 ## Convergence
 
-Terminal **`status`**, **`terminal_reason`**, **`remaining_fix`**, and **`no_progress`** semantics: **`refs/artifacts.md`** § Terminal convergence ( **`state.json`**, **`report.md`** ) + param default **`epoch_cap: 5`**.
+Terminal **`status`**, **`terminal_reason`**, **`remaining_fix`**, and **`no_progress`** semantics: **`refs/artifacts.md`** § Terminal convergence (`state.json`) + param default **`epoch_cap: 5`**.
 
 **Gates (summary):** **`complete`** only when expanded scope is **stable** and **two consecutive** full-scope assessments report **`remaining_fix: 0`** (tests alone insufficient). **`partial`** / **`stopped`** — per artifacts ref.
 
@@ -130,5 +135,7 @@ If a required definition or ref is missing or unreadable, stop: `missing ref: <p
 
 ## Done-when
 
-- Terminal **`report.md`** written under **`.ai/refactor/<runId>/`**
+- Convergence reached (`complete` / `partial` / `stopped` / skip) per **`refs/artifacts.md`**
+- **Orchestrate:** lean `{NNNN}-{step}.refactor.md` written (or skip note when scope empty per slice-pipeline)
+- **Handoff:** chat lean summary emitted
 - Orchestrate stage: parent sets **`step_refactor_done: true`** (or skip note when scope empty per slice-pipeline)

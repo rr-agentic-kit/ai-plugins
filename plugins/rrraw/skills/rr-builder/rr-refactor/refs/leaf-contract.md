@@ -38,8 +38,9 @@ Task error, `error: <reason>`, malformed JSON, or missing expected `CHUNK_ID` di
 
 ## Callback
 
-Terminal orchestrator chat:
+Terminal orchestrator chat (orchestrate with cursor → lean path; else lean summary):
 
 ```text
-Report written: .ai/refactor/<runId>/report.md
+Refactor note: docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md
+# or chat-only lean summary when handoff has no cursor
 ```

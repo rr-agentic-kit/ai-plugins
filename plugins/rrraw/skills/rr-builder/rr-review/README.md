@@ -1,10 +1,10 @@
 # rr-review
 
-Multi-lane review hub for **rr-builder**. Persists artifacts under **`.ai/review/<runId>/`**.
+Multi-lane review hub for **rr-builder**. Scratch under **`.ai/review/<runId>/`**; orchestrate terminal under **`docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md`**.
 
 ## Why
 
-Code, test, and security assess need one orchestrator that briefs, chunks, Challenges, and merges — without embedding forge POST scripts. Done when `REVIEW_DIR/report.md` exists (and optional `--fix` / `--endless` / `--ci` outcome completed).
+Code, test, and security assess need one orchestrator that briefs, chunks, Challenges, and merges — without embedding forge POST scripts. Done when endless/report outcome completes and the terminal path is written: task sidecar when orchestrate supplies cursor, else `REVIEW_DIR/report.md` for handoff without cursor.
 
 ## What
 
@@ -32,6 +32,7 @@ Parses lanes, mints `runId`, builds brief, chunks large scope, assesses via nest
 - **Challenge before consumers** — unchallenged challengeable rows stop the report
 - **Keep-only** — consumers use Challenge `keep` rows; dropped observations stay dropped
 - **Endless until clear** — `--endless` re-assesses after fix until code+test zero-keep (or security-only `warnings`) or `--max-epochs` (default 5)
+- **Scratch vs durable** — `.ai/review/` is in-run; orchestrate task terminal is the durable report
 - **Forge handoff** — `--ci` loads **rr-ci** after Challenge; review does not embed glab/gh scripts
 - **Parent session** — assess/Challenge runs inline
 
@@ -51,7 +52,7 @@ Empty allowlist → ask once or stop. Optional linked ticket misses must not blo
 
 ### Output
 
-Flat locked filenames under `REVIEW_DIR` (see `refs/artifacts.md`); endless uses epoch-suffixed assess stems; merged `REVIEW_DIR/report.md` (overwritten each endless epoch); chat announces report path.
+Flat locked filenames under `REVIEW_DIR` scratch (see `refs/artifacts.md`); endless uses epoch-suffixed assess stems; merged scratch `report.md` each epoch; orchestrate also writes `{NNNN}-{step}.review.md`; chat announces the terminal path.
 
 ### Close
 
@@ -63,7 +64,8 @@ Flat locked filenames under `REVIEW_DIR` (see `refs/artifacts.md`); endless uses
 - `--fix` and `--ci` are mutually exclusive
 - `--endless` requires `--fix`; incompatible with `--ci`
 - Orchestrate review always forces `--fix --all --endless`
-- `REVIEW_DIR` = `.ai/review/<runId>/` (`runId` = `yyyymmdd-NN` local)
+- Scratch `REVIEW_DIR` = `.ai/review/<runId>/` (`runId` = `yyyymmdd-NN` local)
+- Orchestrate done-when requires task review sidecar when cursor present
 - Security lane is report-only on `--fix`
 - `disable-model-invocation: true` / `user-invocable: false`
 
