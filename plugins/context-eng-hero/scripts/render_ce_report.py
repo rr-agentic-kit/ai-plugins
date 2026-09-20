@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -49,12 +50,20 @@ def _reports_dir(plugin_root: Path) -> Path:
     )
 
 
+def _safe_cli_path(path: Path) -> Path:
+    """Canonicalize CLI paths and confine them to the process cwd (S8707)."""
+    resolved = Path(os.path.realpath(path))
+    base = Path(os.path.realpath(os.getcwd()))
+    if resolved != base and not resolved.is_relative_to(base):
+        raise ValueError(f"path {str(path)!r} is outside the allowed directory")
+    return resolved
+
+
 def _load(path: Path | None) -> dict[str, Any]:
-    raw = (
-        sys.stdin.read()
-        if path is None or str(path) == "-"
-        else path.read_text(encoding="utf-8")
-    )
+    if path is None or str(path) == "-":
+        raw = sys.stdin.read()
+    else:
+        raw = _safe_cli_path(path).read_text(encoding="utf-8")
     data = json.loads(raw)
     if not isinstance(data, dict):
         raise ValueError("payload must be a JSON object")
@@ -126,14 +135,11 @@ def main() -> int:
         data = _load(args.infile)
         _validate(data, schema_path)
         body = _render(args.kind, data, reports_dir)
-        args.outfile.parent.mkdir(parents=True, exist_ok=True)
-        args.outfile.write_text(body.rstrip() + "\n", encoding="utf-8")
-    except SystemExit as exc:
-        code = exc.code
-        return int(code) if isinstance(code, int) else 2
+        outfile = _safe_cli_path(args.outfile)
+        outfile.parent.mkdir(parents=True, exist_ok=True)
+        outfile.write_text(body.rstrip() + "\n", encoding="utf-8")
     except (
         OSError,
-        json.JSONDecodeError,
         KeyError,
         TypeError,
         ValueError,
@@ -141,7 +147,7 @@ def main() -> int:
     ) as exc:
         print(f"render_ce_report error: {exc}", file=sys.stderr)
         return 2
-    print(f"wrote {args.outfile}")
+    print(f"wrote {outfile}")
     return 0
 
 

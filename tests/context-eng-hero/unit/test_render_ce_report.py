@@ -26,12 +26,13 @@ def _run(kind: str, payload: dict, tmp_path: Path) -> subprocess.CompletedProces
             str(SCRIPT),
             kind,
             "--in",
-            str(src),
+            src.name,
             "--out",
-            str(out),
+            out.name,
         ],
         check=False,
         capture_output=True,
+        cwd=tmp_path,
         text=True,
     )
 
@@ -162,3 +163,25 @@ def test_render_invalid_payload_exit_2(tmp_path: Path) -> None:
     err = proc.stderr
     assert "validation error" in err
     assert "required" in err.lower() or "summary" in err
+
+
+def test_render_rejects_path_outside_cwd(tmp_path: Path) -> None:
+    outside = tmp_path.parent / "escape-payload.json"
+    outside.write_text("{}", encoding="utf-8")
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "compliance",
+            "--in",
+            str(outside),
+            "--out",
+            "out.md",
+        ],
+        check=False,
+        capture_output=True,
+        cwd=tmp_path,
+        text=True,
+    )
+    assert proc.returncode == 2
+    assert "outside the allowed directory" in proc.stderr
