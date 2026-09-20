@@ -11,8 +11,11 @@ Conditional procedure when skill **Classify** + **Clarify** ends with writing a 
 | `classify.md` | `design-1-classify` |
 | `advisory.md` | `design-2-clarify` |
 | `frontmatter-schemas.md` | `design-3-draft` |
-| `instruction-design.md` | `design-3-draft` |
-| `skill-invocation.md` | `design-3-draft` (skills) |
+| `design/design-core.md` | `design-3-draft` |
+| `design/skill.md` | `design-2-clarify`, `design-3-draft` (skills) |
+| `design/command.md` | `design-3-draft` (commands) |
+| `design/agent.md` | `design-3-draft` (agents) |
+| `gate-prompts.md` | `design-2-clarify` (skills: skill-ux-delivery) |
 | `readme-spec.md` | `design-3-draft` (skill folders) |
 | `templates/readme.template.md` | `design-3-draft` (skill README) |
 | `lexicon-spec.md` | `design-3-draft` (ACRONYMS + GLOSSARY) |
@@ -40,14 +43,15 @@ If the user only wanted guidance, **AskQuestion**: finish here or run **create**
 
 ### Step 2: `design-2-clarify`
 
-- **Outcome:** Outcome, audience, and failure mode resolved or open questions listed.
-- **Done when:** `questioning.md` satisfied; ready to draft or gaps explicit.
+- **Outcome:** Outcome, audience, failure mode, and (for skills) **invoke mode** + **skill UX (input/delivery)** resolved or open questions listed.
+- **Done when:** `questioning.md` satisfied; skills: invoke mode **and** skill UX via **skill-ux-delivery** (`gate-prompts.md`) resolved or deferred as open questions; ready to draft or gaps explicit.
 
 ### Step 3: `design-3-draft`
 
 - **Outcome:** Template-shaped draft at approved plugin-relative path.
-- **Done when:** Full draft in memory/working copy; markers replaced per `template-required-map.md`; eval-first minimum when FAIL list supplied.
+- **Done when:** Full draft in memory/working copy; markers replaced per `template-required-map.md`; eval-first minimum when FAIL list supplied; skills: empty `ACRONYMS.md` + `GLOSSARY.md` companions ship if missing; **Delivery channels** from skill-UX choice wired into README **UX** + SKILL Orchestration / Execution rules (or one-line N/A if no enumerable forks).
 - **Skill folder draft order:** Same as **create**—README spec first if missing; `SKILL.md` from README when both ship; ensure `ACRONYMS.md` + `GLOSSARY.md` at resolved path per `lexicon-spec.md`. If write target is only README, use **extract** ingestion rules on existing `SKILL.md`.
+- **Delivery from UX gate:** Same as **create**—inject Delivery channels constraint from skill-UX choice; do not rewrite Purpose/When/Procedure from that gate alone.
 - **README ↔ SKILL derivation:** Same reconstructability map as **create** (`readme-spec.md` table). README-only write: follow **extract** section map. SKILL-only write from existing README: derive per create map—do not invent parallel spec.
 
 ### Step 4: `design-4-gates`

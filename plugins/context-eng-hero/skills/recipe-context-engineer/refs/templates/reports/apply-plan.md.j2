@@ -1,0 +1,27 @@
+{# Combined apply plan — scaffolding only. #}
+{%- macro lane(rows) -%}
+| Source | Id | Absorb | Intent (≤1 line) |
+|--------|-----|--------|------------------|
+{%- if rows %}
+{%- for row in rows %}
+| {{ row.source }} | `{{ row.id }}` | {{ row.absorb | default("fix", true) }} | {{ row.intent }} |
+{%- endfor %}
+{%- else %}
+| — | — | — | (empty) |
+{%- endif %}
+{%- endmacro -%}
+## Combined apply plan
+
+### Reports (required)
+- Compliance: `{{ reports.compliance }}`
+- Opportunity: `{{ reports.opportunity }}`
+- This plan: `{{ reports.apply_plan }}`
+
+### Fix lane
+{{ lane(fix) }}
+
+### Redesign lane
+{{ lane(redesign) }}
+
+### Dropped
+- {{ dropped | default("Keep notes; Absorb `defer`; Deferred; Impact `low`", true) }}

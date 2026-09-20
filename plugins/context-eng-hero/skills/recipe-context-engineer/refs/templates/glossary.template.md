@@ -2,4 +2,4 @@
 
 | Term | Meaning (this plugin) | Not confused with | Notes |
 |------|----------------------|-------------------|-------|
-| <!-- overloaded term, or None yet --> | <!-- canonical sense here --> | <!-- common alternate --> | <!-- optional --> |
+| <!-- overloaded plugin-wide sense (not flags/templates/schema); or None yet --> | <!-- canonical sense here --> | <!-- common alternate --> | <!-- optional --> |

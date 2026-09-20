@@ -11,7 +11,7 @@ Used by **Action: learn** step 1. Intake proceeds with stated assumptions per `q
   | **Write-handover** | Where `LEARN-HANDOVER.*` is persisted | **User project** (`docs/rr/LEARN-HANDOVER.<skill>.md` or project root) |
   | **Absorb-into** | Where fix/redesign edits land | **Plugin source** checkout only — never `~/.claude/plugins/cache/**` |
 - **Miss source** (one or more):
-  - This chat’s **run** (default)—failed steps, human patches, **and/or** friction signals (excess serial tools/Reads, invent-vs-procedure), or
+  - This chat’s **run** (default)—failed steps, human patches, **and/or** friction signals (unnecessary tools/Reads, serial where Ref index co-names peers, invent-vs-procedure, token/interaction waste), or
   - User **problem statement** (seeded description of what went wrong / what they added manually / where the run hurt).
 
 ## AskQuestion (when ambiguous)

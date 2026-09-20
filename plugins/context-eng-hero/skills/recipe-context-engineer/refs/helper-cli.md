@@ -19,14 +19,52 @@ Anthropic agent-skills guidance: scripts are **executed**, not loaded as docs.
 - Repeatable multi-step workflow where the agent would otherwise invent the same shell chain every time
 - Deterministic structure checks (see plugin `scripts/audit_static.py` as reference)
 - Fat CLI that polls internally so the agent waits one invocation
+- **Report scaffolding + severity math** from lean JSON (see **Lean emit + schema + render** below; CE exemplar `scripts/render_ce_report.py`)
 
 **Not for:** one-off `git`/`glab` calls documented once; general SDK layers; inline bash chains that belong in a single documented command.
+
+### Improve helpers (plugin root)
+
+| Invoke | Role |
+|--------|------|
+| `python3 scripts/audit_static.py . <rel>` | Static gate |
+| `python3 scripts/render_ce_report.py <kind> --in <json> --out <md>` | Validate lean JSON against `templates/reports/<kind>.schema.json`, Jinja-render markdown; agent must not Write full bodies |
+| `git add -- $(cat .ai/learning/ce-improve/<run-id>/touch-list.txt)` | After Write-gate Approve promote only — scoped stage; never `git add -A` |
+
+Exit **2** from `render_ce_report.py` = schema/JSON error — fix lean JSON from stderr `path: message` lines and re-run.
+
+## Lean emit + schema + render
+
+Reusable recipe for **targets** (and CE’s own `--improve` path). Compact copy agents can point at without loading Jinja: `templates/reports/README.md`.
+
+**Trigger:** agent would otherwise paste large report/scaffold markdown, reinvent severity/table math, or re-emit the same report shape every turn (**SCRIPTABLE** waste in `improvement-patterns.md`).
+
+**Contract**
+
+| Role | Does |
+|------|------|
+| Task / subagent | Emits **lean JSON** only (+ one-line status) |
+| `refs/templates/reports/<kind>.schema.json` | Output contract — agents **Read** this only |
+| Parent / thin `scripts/render_*.py` | Validate with jsonschema → Jinja-render human markdown |
+| `*.md.j2` | Scaffolding SoT — **never** load into agent context as docs |
+
+**Target layout**
+
+```text
+skills/<target>/refs/templates/reports/<kind>.schema.json
+skills/<target>/refs/templates/reports/<kind>.md.j2
+skills/<target>/scripts/render_<domain>.py   # or shared plugin helper when appropriate
+```
+
+Document invoke + exit **2** = fix JSON in the skill Procedure (and `allowed-tools: Bash(python3 scripts/render_…*)` when Claude turn grants are needed). Prefer this absorb over “add more prose procedure” when ranking **SCRIPTABLE** report waste under create / fix / redesign / improve.
+
+**CE kinds:** `compliance`, `opportunity`, `apply-plan`, `reflection` — schemas under `templates/reports/`.
 
 ## Design goals
 
 1. **One agent shell call per workflow step** — collapse chains into one entry point.
 2. **Stable stdout** — JSON envelope or fixed columns when the agent branches on output; stderr for human progress only.
-3. **Domain logic in Python** — state machines, poll loops, preflight; thin transport.
+3. **Domain logic in Python** — state machines, poll loops, preflight, schema validate + render; thin transport.
 4. **Fixture-driven tests** — when tests exist in monorepo; installed plugin may ship without pytest (see plugin root `CLAUDE.md`).
 
 ## SKILL authoring pattern
@@ -49,6 +87,7 @@ allowed-tools: Bash(python3 scripts/my_tool.py*)
 - **SKILL.md** — invariant procedure + when to run which script.
 - **`refs/<variant>.md`** — variant flags or output interpretation—linked **one hop** from SKILL **Progressive disclosure**; ref does not link to further refs.
 - **`scripts/`** — implementation; README lists subcommands only.
+- **Lean report kinds** — agents Read `*.schema.json`; execute render script; never Read `*.md.j2` / script source as docs.
 
 ## Forcing test
 

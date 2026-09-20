@@ -17,6 +17,8 @@ Platform: commands cannot execute other commands (`chat-orchestration.md`).
 |-------|----------------|
 | Audit PASS | Ship, or run behavior test if unverified |
 | Audit FAIL | Fix every FAIL in this report |
+| Audit-redesign ranked | Absorb via fix and/or redesign, run improve, or done |
+| After improve write | Audit again, run behavior test, or done |
 | Test probe FAIL (same contract) | Fix using probe ids from this report |
 | Test FAIL (wrong outcome/capability) | Redesign |
 | After create / fix / redesign write | Audit again, run behavior test, or done |
@@ -32,7 +34,7 @@ Platform: commands cannot execute other commands (`chat-orchestration.md`).
 | extract (file write) | Same as create |
 | extract (chat-only) | Provenance + optional **Next Up**; no write gates |
 | learn | **post-learn-routing** or **Next Up**; verb-only: Incorporate with this handover |
-| audit, test, diff | `post-*-routing` or **Next Up** only |
+| audit, audit-redesign, improve, test, diff | Matching `post-*-routing` or **Next Up** only |
 | design | Shared write gates; **Next Up** if no post-design gate |
 
 After close: if the user picks a follow-on, re-enter **Act**—do not defer to slash copy-paste.

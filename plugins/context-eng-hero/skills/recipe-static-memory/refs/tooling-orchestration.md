@@ -46,9 +46,9 @@ After groups **A** (Communication) and **B** (Role), run **Tooling orchestration
 
 Follow-up (if auto): free text or pick from Phase A suggestions → one **trigger phrase** + **capability id** (skill path, agent name, or `server.tool`).
 
-## Output shape in `CLAUDE.md` §6
+## Output shape in always-on §6
 
-Compact **trigger table** (not prose essay):
+Compact **trigger table** (not prose essay)—in user-global always-on (often via `CLAUDE.md` `@` import):
 
 ```markdown
 ## Tooling & agents
@@ -64,12 +64,12 @@ Compact **trigger table** (not prose essay):
 
 ## Synthesis rules
 
-- Cap at ~15 rows; defer rare cases to “ask user.”
+- Cap at ~15 rows; defer rare cases to “ask user.” Apply the 90% bar—no preference dump.
 - Triggers must be **observable** (phrase, file pattern, task class)—not “when appropriate.”
-- Project-only skills belong in **project** `CLAUDE.md` tooling section, not user-global.
-- Deduplicate: orchestration ≠ “read CONTRIBUTING first” (that’s **Context before action** in comm).
+- Project-only skills belong in **project** `AGENTS.md` (or a situational pack with Read trigger), not user-global.
+- Deduplicate: orchestration ≠ “read CONTRIBUTING first” (that’s a **where-to-look** / docs pointer).
 - User may **waive** §6 on design only with explicit opt-in (“no installed plugins / I drive tools manually”).
 
 ## Project scope (design/review)
 
-Shorter pass: repo-local plugins, `AGENTS.md` subagents, CI vendor—after `project-init-flow.md` explore. Align with `agents-md-bridge.md` (parallel instruction files, not vendor-specific paths).
+Shorter pass: repo-local plugins, CI vendor—after `project-init-flow.md` explore. Align with `agents-md-bridge.md` + `situation-groups.md`. Do not invent packs for tooling catalogs.

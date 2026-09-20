@@ -2,6 +2,8 @@
 
 Reusable **AskQuestion** patterns for Context Engineer orchestration. Checkpoint box format: `refs/ui-brand.md`.
 
+**Delivery:** Prefer AskQuestion for these patterns; always fall back to the same options as numbered/labeled prose when the tool or harness is unavailable — see `questioning.md` **Delivery channels**. Do not stall or claim the tool is “unavailable” as product truth.
+
 ## Rules
 
 - `header` max 12 characters
@@ -9,6 +11,7 @@ Reusable **AskQuestion** patterns for Context Engineer orchestration. Checkpoint
 - 2–4 options per prompt; always include a freeform escape ("Other" / "Something else")
 - If user types freeform instead of selecting, map intent and continue—do not re-ask the same gate
 - One gate at a time; do not stack multiple AskQuestion calls in one turn unless the first answer requires a follow-up
+- Text-mode delivery of a gate still counts as that gate; route maps below apply unchanged
 
 ---
 
@@ -18,12 +21,28 @@ Skill intake when action is unclear (ambient invoke or vague request).
 
 - **question:** "What do you want to do with this artifact?"
 - **header:** "Action"
-- **options:** Audit it | Fix or improve | Create new | Something else
+- **options:** Audit it | Improve it | Create new | Something else
 - **Route map:**
-  - Audit it → **audit**
-  - Fix or improve → if outcome change unclear, run **fix-vs-redesign** first; else **fix**
+  - Audit it → **audit** (freeform may pick **audit-redesign** for improvement-only diagnosis)
+  - Improve it → **improve** (requires declared path)
   - Create new → **create**
-  - Something else → infer from freeform (extract, test, diff, redesign, learn, design assist) or one clarifying question
+  - Something else → infer from freeform (fix, redesign, extract, test, diff, learn, audit-redesign, design assist) or one clarifying question; if outcome change unclear for edits, run **fix-vs-redesign** first
+
+---
+
+## Pattern: skill-ux-delivery
+
+Create/design clarify for skills—after invoke mode, before draft. Interaction shape only; not Purpose/Procedure content.
+
+- **question:** "How should this skill take input and deliver results?"
+- **header:** "Skill UX"
+- **options:** Gates + reports | Text-first | Minimal clarify | Other
+- **Route map:**
+  - **Gates + reports** → Prefer AskQuestion for forks; mandatory text-mode same options (**Delivery channels** in `questioning.md`); staged report/close. Draft README **UX → Clarify/Close** + SKILL **Orchestration** / Execution rules accordingly.
+  - **Text-first** → Prose clarify by default; optional AskQuestion when tool present. Still document Delivery channels if any enumerable gate appears.
+  - **Minimal clarify** → Open asks / assumptions; no gate graph. If draft has no enumerable forks: one-line N/A (“no AskQuestion gates”) so audit can PASS. If a fork appears later: document Delivery channels.
+  - **Other** → Freeform escape; map intent; store as open question or custom shape note—do not invent Purpose/Procedure content.
+- Never rewrite Purpose / When / Procedure from this gate alone.
 
 ---
 
@@ -57,17 +76,35 @@ Freeform escape maps to edit (describe override) or abort.
 
 ---
 
+## Pattern: approve-apply-plan
+
+After `improve-3-merge` persists `apply-plan.md` and **before** any target-path mutation (`improve-4` / `improve-5`).
+
+- **question:** "Approve this apply plan? (reports linked — no target writes yet)"
+- **header:** "Apply plan?"
+- **options:** Approve plan | Edit plan | Abort improve
+- **Route map:**
+  - Approve plan → `improve-4-apply-fix` (draft off-path only)
+  - Edit plan → user adjusts lanes/intents; re-persist `apply-plan.md`; re-ask once
+  - Abort improve → no draft; no target Write; **post-improve-routing** / Next Up
+- **Packet (required before AskQuestion):** markdown links to `compliance.md`, `opportunity.md`, and `apply-plan.md` under `.ai/learning/ce-improve/<run-id>/`. Missing any → do not ask.
+
+Used by `refs/actions/improve.md` step `improve-3-merge`.
+
+---
+
 ## Pattern: approve-revise-abort
 
-Pre-write confirmation after gates pass on draft content.
+Pre-write confirmation after gates pass on **draft** content (promote → target only on Approve).
 
 - **question:** "Approve this draft for write?"
 - **header:** "Approve?"
 - **options:** Approve | Request changes | Abort
 - **Route map:**
-  - Approve → write to approved path
-  - Request changes → revise draft; re-run gates from static
-  - Abort → no write; offer **post-fix-routing** or **post-create-routing** as appropriate
+  - Approve → promote draft to approved path
+  - Request changes → revise draft; re-run gates from static; targets unchanged
+  - Abort → no promote; restore/discard draft; targets unchanged; offer **post-fix-routing** or **post-create-routing** as appropriate
+- **Packet (required before AskQuestion):** lean summary + links to diagnosis/apply-plan/draft artifacts when this action produced them (improve: Reports + apply-plan + draft). Missing required improve links → do not ask.
 
 Used by `refs/actions/shared-write-gates.md` **Write gate**.
 
@@ -89,11 +126,55 @@ If verdict PASS and user picks fix, confirm they want polish-only (**fix**) vs c
 
 ---
 
+## Pattern: post-audit-redesign-routing
+
+After audit-redesign report is emitted.
+
+- **question:** "Improvement report ready. What next?"
+- **header:** "Next"
+- **options:** Absorb via fix | Absorb via redesign | Done for now
+- **Route map:**
+  - Absorb via fix → **fix** (pass ranked `absorb: fix` ids + path; skip defer/low)
+  - Absorb via redesign → **redesign** (pass ranked `absorb: redesign` ids + path)
+  - Done for now → end with **Next Up** block only; no further action
+
+Freeform may request **improve** (full parallel + gated apply) or compliance **audit** instead.
+
+---
+
+## Pattern: post-improve-routing
+
+After improve completes (gates passed and file written, diagnosis-only with empty apply list, or user declined write).
+
+- **question:** "Improve complete. What next?"
+- **header:** "Next"
+- **options:** Audit again | Run behavior test | Done for now
+- **Route map:**
+  - Audit again → **audit**
+  - Run behavior test → **test**
+  - Done for now → end with **Next Up** block only
+
+---
+
 ## Pattern: post-fix-routing
 
 After fix completes (gates passed and file written, or user declined write).
 
 - **question:** "Fix complete. What next?"
+- **header:** "Next"
+- **options:** Audit again | Run behavior test | Done for now
+- **Route map:**
+  - Audit again → **audit**
+  - Run behavior test → **test**
+  - Done for now → end with **Next Up** block only
+
+---
+
+## Pattern: post-redesign-routing
+
+After redesign completes (gates passed and file written, or user declined write).
+
+- **question:** "Redesign complete. What next?"
 - **header:** "Next"
 - **options:** Audit again | Run behavior test | Done for now
 - **Route map:**

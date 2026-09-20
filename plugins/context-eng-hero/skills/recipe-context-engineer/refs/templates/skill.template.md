@@ -3,6 +3,7 @@ name: your-skill-id
 description: One sentence ≤160. Auto-invoke: third-person WHAT + WHEN + trigger keywords. Self-invoke: outcome only—no audit/fix verbs.
 # disable-model-invocation: true   # Self-invoke / slash-or-parent (uncomment when chosen)
 # user-invocable: false              # Claude Code: hide / menu (optional; never sole control)
+# allowed-tools: Bash(python3 scripts/audit_static.py*)  # Claude turn grant only when needed
 ---
 
 # <!-- REQUIRED (static.sections.required): skill title -->
@@ -33,4 +34,5 @@ description: One sentence ≤160. Auto-invoke: third-person WHAT + WHEN + trigge
 
 ## Orchestration
 
+<!-- REQUIRED when clarify/close uses AskQuestion or enumerable gates (skill.clarify.delivery-channels): Prefer AskQuestion; mandatory text-mode same options — questioning.md Delivery channels. If no gates: one-line N/A (“no AskQuestion gates”). -->
 <!-- OPTIONAL (skill.orchestration.todo-mapping): AskQuestion/Todo/Task per chat-orchestration.md -->

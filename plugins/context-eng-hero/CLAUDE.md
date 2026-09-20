@@ -15,8 +15,8 @@ Do not reference paths outside this plugin tree unless the user explicitly provi
 ## Python runtime
 
 - **Version:** CPython **3.14+** for `scripts/audit_static.py` (modern syntax in script code).
-- **Dependencies:** [`scripts/requirements.txt`](scripts/requirements.txt) (`pyyaml>=6.0,<7`).
-- **Bootstrap:** Before the first static audit, if `import yaml` fails, from **plugin root**:
+- **Dependencies:** [`scripts/requirements.txt`](scripts/requirements.txt) (`pyyaml>=6.0,<7`, `jinja2>=3.1,<4`, `jsonschema>=4.23,<5`).
+- **Bootstrap:** Before the first static audit or report render, if `import yaml` / `jinja2` / `jsonschema` fails, from **plugin root**:
 
   ```bash
   python3 -m pip install -r scripts/requirements.txt
@@ -31,8 +31,10 @@ Do not reference paths outside this plugin tree unless the user explicitly provi
   python3 scripts/audit_static.py . <relative-path>
   ```
 
-- If install or run still fails: report **STATIC SKIPPED** with reason — do not silently omit static checks.
-- The skill does not execute Python — the agent shell runs the script for audit and write-path gates.
+- **Improve report render:** `python3 scripts/render_ce_report.py <kind> --in <json> --out <md>` (kinds: `compliance`, `opportunity`, `apply-plan`, `reflection`). Exit **2** = schema/JSON error — fix lean JSON and re-run.
+
+- If install or run still fails: report **STATIC SKIPPED** with reason — do not silently omit static checks. For render failures, fix JSON (do not invent full markdown).
+- The skill does not execute Python — the agent shell runs the script for audit, report render, and write-path gates.
 
 ## No pytest in this tree
 

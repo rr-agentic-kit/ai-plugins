@@ -12,13 +12,15 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 | `advisory.md` | `fix-2-plan` (scope check only) |
 | `ui-brand.md` | `fix-1-read` (banner) |
 | `frontmatter-schemas.md` | `fix-3-apply` |
-| `instruction-design.md` | `fix-2-plan` |
-| `skill-invocation.md` | `fix-3-apply` (skills) |
+| `design/design-core.md` | `fix-2-plan` |
+| `design/skill.md` | `fix-3-apply` (skills) |
+| `design/command.md` | `fix-3-apply` (commands) |
+| `design/agent.md` | `fix-3-apply` (agents) |
 | `readme-spec.md` | `fix-3-apply` (skill folders) |
 | `lexicon-spec.md` | `fix-2-plan`, `fix-3-apply` (`acronyms.*` / `glossary.*` FAILs) |
 | `templates/acronyms.template.md` | `fix-3-apply` (missing/wrong ACRONYMS.md) |
 | `templates/glossary.template.md` | `fix-3-apply` (missing/wrong GLOSSARY.md) |
-| `helper-cli.md` | `fix-3-apply` (when `scripts/`) |
+| `helper-cli.md` | `fix-3-apply` (when `scripts/`; SCRIPTABLE report waste → lean-emit recipe) |
 | `template-required-map.md` | `fix-3-apply` |
 | `templates/<type>.template.md` (per `classify.md`) | `fix-3-apply` |
 | Prior audit or test report | `fix-1-read` if supplied |
@@ -42,7 +44,7 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 ### Step 3: `fix-3-apply`
 
 - **Outcome:** Edits applied to draft.
-- **Done when:** All planned fixes applied in memory or working copy—including lexicon companion creates/updates when those ids failed.
+- **Done when:** All planned fixes applied in memory or working copy—including lexicon companion creates/updates when those ids failed. When absorbing **SCRIPTABLE** report/scaffold waste, apply `helper-cli.md` **Lean emit + schema + render** rather than expanding prose scaffolding.
 
 ### Step 4: `fix-4-gates`
 
@@ -54,6 +56,17 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 - **Outcome:** User routed to next action or done.
 - **Done when:** **post-fix-routing** AskQuestion per `gate-prompts.md`; on selection, skill continues; else **Next Up** per `close-contract.md`.
 
+## Nested under improve
+
+When parent `improve` injects path + failure source from the merge plan (compliance FAIL ids ∪ Ranked Absorb `fix`):
+
+1. Treat `fix-1-read` done-when as satisfied — no AskQuestion for Missing failure source; skip FIX banner and `fix-5-close`.
+2. **Load only:** this file’s Steps 2–3 (`fix-2-plan`, `fix-3-apply`) plus `fix-intake.md` Mapping rule; type design/frontmatter/readme/lexicon refs only if a planned edit touches that surface.
+3. **Do not** TodoWrite `fix-*` step ids — parent owns `improve-1…6` only.
+4. **Gates:** If redesign lane is empty, parent runs `shared-write-gates.md` once on this draft; else return draft to parent for combine — do not run `fix-4-gates` yourself.
+
+Standalone fix (user-invoked, no improve parent) uses the full Ref index and Steps 1–5 above.
+
 ## Stop
 
-No scope expansion. When audit-led, fix **every** FAIL (critical, major, minor)—no "critical only" shortcut.
+No scope expansion. When audit-led, fix **every** FAIL (critical, major, minor)—no "critical only" shortcut. Same for every Ranked Absorb `fix` id when that is the failure source.

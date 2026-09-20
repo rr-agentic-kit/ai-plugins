@@ -1,6 +1,9 @@
 ---
 name: your-command-id
 description: User-facing outcome in one sentence ≤160.
+# argument-hint: "[path] [--flag]"   # Claude: when slash expects args
+# allowed-tools: Read, Grep          # Claude: side-effect narrowing only when needed
+# model: sonnet                      # Claude: omit unless product requires pin
 ---
 
 # <!-- REQUIRED: command heading -->
@@ -18,4 +21,3 @@ Execute **Action: …** in skill **<!-- REQUIRED: skill id -->**.
 ## Output
 
 <!-- REQUIRED (command.output.shape): shape of response -->
-

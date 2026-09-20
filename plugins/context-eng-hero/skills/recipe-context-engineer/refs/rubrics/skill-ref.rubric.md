@@ -19,6 +19,9 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 | id | Severity | PASS when |
 |----|----------|-----------|
 | `skill-ref.refs.unique` | major | No two refs duplicate the same constraint without unique extension |
+| `skill.clarify.delivery-channels` | major | Pack SKILL (Procedure/Orchestration/close): if AskQuestion or enumerable gates → states text-mode fallback (same options as prose; no stall). If no gates: one-line N/A. Same id as `skill.rubric.md` |
+| `skill.orchestration.agent-inject` | major | If pack actions Task agents: inject/load contract present (or N/A). Same id as `skill.rubric.md` |
+| `skill.subskill.no-file-share-only` | major | Sub-skill not used only as file share for rubrics/templates. Same id as `skill.rubric.md` |
 
 ### Minor
 
@@ -33,4 +36,4 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 | `skill.acronyms.present` | minor | Pack has `ACRONYMS.md` at plugin root (or skill sibling if standalone) per `lexicon-spec.md` |
 | `skill.acronyms.coverage` | minor | Domain acronyms in SKILL/refs appear in `ACRONYMS.md` with correct expansions |
 | `skill.glossary.present` | minor | Pack has `GLOSSARY.md` at resolved path |
-| `skill.glossary.coverage` | minor | Overloaded plugin terms in SKILL/refs have canonical senses in `GLOSSARY.md` |
+| `skill.glossary.coverage` | minor | In-scope overloaded plugin-wide senses in SKILL/refs have canonical senses in `GLOSSARY.md` (not flags/templates/schema); never FAIL for undocumented excluded-class tokens |
