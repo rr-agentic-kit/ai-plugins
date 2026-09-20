@@ -29,7 +29,7 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 | improve | Parallel compliance + opportunity audits, then absorb under write gates | Declared path; want diagnose-and-apply (`--improve`) |
 | fix | Minimal edits for existing intent | Audit or test FAIL; same outcome and scope |
 | redesign | Change outcome/scope + write gates | Wrong capability, audience, or outcome |
-| learn | Approved gap package from a live run miss—patch or friction (no skill edits) | Live run miss (patch or friction); fold learning back via fix/redesign |
+| learn | Gap package from a live run miss—patch or friction (no skill edits); no topics gate; `--learn --auto` runs without AskQuestion stops | Live run miss (patch or friction); fold learning back via fix/redesign |
 | test | Behavior probe report | Verify agent behavior against prompts |
 | diff | Two-path tradeoff summary | Compare two approaches or paths |
 | design | Inline write from classify/clarify | Classify/clarify done; user requests file write this turn |
@@ -42,7 +42,7 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 - Auditing, improving, fixing, creating, extracting, testing, comparing, or learning from a live run miss (patch or friction) on a scoped definition
 - Clarifying outcome, audience, and failure modes before authoring
 - Generating or updating a skill README from an existing `SKILL.md` (**extract**)
-- Packaging gaps after a live run miss (patch or friction) so fix/redesign can absorb without re-deriving the miss (**learn**)
+- Packaging gaps after a live run miss (patch or friction) so fix/redesign can absorb without re-deriving the miss (**learn**); topics are internal → handover (no approve gate); `--learn --auto` skips AskQuestion stops
 
 ### Avoid when
 
@@ -54,7 +54,7 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 
 - **Eval-first** — thicken from observed compliance FAILs and ranked improvement opportunities, not anticipated rules
 - **Two-level audit** — compliance (`audit`: binary ship/write gate) stays separate from improvement (`audit-redesign`: ranked Keep/Improve/Restructure); `--improve` runs both then applies absorb hints (fix then redesign) under write gates
-- **Live-miss → learn → absorb** — diagnose existing skill gaps from a live run miss (patch or friction); fix/redesign folds the handover in
+- **Live-miss → learn → absorb** — diagnose existing skill gaps from a live run miss (patch or friction); packages handover without a topics gate; fix/redesign folds the handover in; `--learn --auto` runs learn without AskQuestion stops (does not auto-start absorb)
 - **Scoped-only** — one declared artifact path per session; never ambient repo review
 - **Spec/executor split** — README = human spec; `SKILL.md` = Procedure and action refs
 - **Gates-before-write** — static → reflection → pre-ship → approve before any file write
@@ -71,7 +71,7 @@ Read user message and editor context; route plain requests to classified action 
 
 ### Clarify
 
-AskQuestion (or text-mode same options) on path/action/type/invoke/skill-UX; create/design: **skill-ux-delivery** after invoke — SoT `refs/questioning.md`.
+AskQuestion (or text-mode same options) on path/action/type/invoke/skill-UX; create/design: **skill-ux-delivery** after invoke — SoT `refs/questioning.md`. Learn: no topics approve gate; `--learn --auto` skips remaining learn confirms.
 
 ### Output
 

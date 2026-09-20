@@ -46,7 +46,7 @@ Full quality matrix (Black, Mypy, Bandit, pip-audit, coverage, Sonar): see `CONT
 | Authoring skills, commands, rubrics | `plugins/context-eng-hero/skills/recipe-context-engineer/SKILL.md` |
 | Static memory / AGENTS packs | `plugins/context-eng-hero/skills/recipe-static-memory/SKILL.md` |
 | Dual-runtime plugin hooks (Cursor + Claude) | `.agents/hooks.md` |
-| CI, pre-commit, Sonar, fork setup | `CONTRIBUTING.md` |
+| CI, lefthook, Sonar, fork setup | `CONTRIBUTING.md` |
 | Install / marketplace usage | `README.md` |
 | Per-plugin features | that plugin’s `README.md` |
 

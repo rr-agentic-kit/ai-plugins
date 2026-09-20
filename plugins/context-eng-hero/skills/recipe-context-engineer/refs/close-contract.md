@@ -33,7 +33,7 @@ Platform: commands cannot execute other commands (`chat-orchestration.md`).
 | create, fix, redesign | Matching `post-*-routing` gate or **Next Up** |
 | extract (file write) | Same as create |
 | extract (chat-only) | Provenance + optional **Next Up**; no write gates |
-| learn | **post-learn-routing** or **Next Up**; verb-only: Incorporate with this handover |
+| learn | **post-learn-routing** unless `--auto` → **Next Up**; verb-only: Incorporate with this handover |
 | audit, audit-redesign, improve, test, diff | Matching `post-*-routing` or **Next Up** only |
 | design | Shared write gates; **Next Up** if no post-design gate |
 

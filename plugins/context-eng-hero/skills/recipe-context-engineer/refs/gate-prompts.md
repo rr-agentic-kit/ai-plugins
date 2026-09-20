@@ -60,22 +60,6 @@ When user wants changes but scope is ambiguous.
 
 ---
 
-## Pattern: approve-learn-topics
-
-After learn topics report is emitted (`learn-3-topics`).
-
-- **question:** "Approve these learn topics for handover?"
-- **header:** "Topics"
-- **options:** Approve selected | Edit topics | Abort learn
-- **Route map:**
-  - Approve selected → **learn-4-handover** with current selection
-  - Edit topics → user reselects / drops / rewrites locus; re-emit report; re-ask once
-  - Abort learn → no handover write; **Next Up** only
-
-Freeform escape maps to edit (describe override) or abort.
-
----
-
 ## Pattern: approve-apply-plan
 
 After `improve-3-merge` persists `apply-plan.md` and **before** any target-path mutation (`improve-4` / `improve-5`).
@@ -186,14 +170,14 @@ After redesign completes (gates passed and file written, or user declined write)
 
 ## Pattern: post-learn-routing
 
-After learn handover is written (or chat-only draft accepted).
+After learn handover is written (or chat-only draft accepted). **Skip when `--auto`** → emit **Next Up** only (no AskQuestion).
 
 - **question:** "Learn package ready. What next?"
 - **header:** "Next"
 - **options:** Incorporate now | Revise topics | Done for now
 - **Route map:**
-  - Incorporate now → **fix** if all approved topics preserve outcome; **redesign** if any topic changes outcome/audience/capabilities; pass user-project `LEARN-HANDOVER.*` (or chat handover) as failure/delta source; edit **plugin source** only
-  - Revise topics → return to **learn-3-topics**; re-gate **approve-learn-topics**
+  - Incorporate now → **fix** if all selected topics preserve outcome; **redesign** if any topic changes outcome/audience/capabilities; pass user-project `LEARN-HANDOVER.*` (or chat handover) as failure/delta source; edit **plugin source** only
+  - Revise topics → return to **learn-3-topics** (internal rebuild) → **learn-4-handover** rewrite → re-ask **post-learn-routing** (no approve gate)
   - Done for now → end with **Next Up** block only; note handover path if written
 
 ---

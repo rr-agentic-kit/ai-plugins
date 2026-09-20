@@ -42,7 +42,7 @@ Every invocation follows this loop. Compress steps only when the user message al
             Done when: matching post-*-routing gate or Next Up emitted
 ```
 
-**Intent seeding:** User states an action ("audit this", "fix the skill", "learn from this miss", `--improve` / "improve this `<path>`") → skip step 3, go to step 5. `--improve` / improve-this still requires a declared path.
+**Intent seeding:** User states an action ("audit this", "fix the skill", "learn from this miss", `--learn` / `--learn --auto`, `--improve` / "improve this `<path>`") → skip step 3, go to step 5. `--improve` / improve-this still requires a declared path. `--learn --auto` skips learn AskQuestion confirms (bind defaults when signals present; no **post-learn-routing** — **Next Up** after handover).
 
 **No deferral:** After step 6, if the user picks a follow-on, re-enter at step 5—do not tell them to type a command.
 
@@ -103,7 +103,7 @@ Load these only when the active action Ref index names them (create/design/extra
 | improve | Parallel audits → merge → fix then redesign under write gates | `refs/actions/improve.md` |
 | fix | Minimal edits for existing intent | `refs/actions/fix.md` |
 | redesign | Change outcome/scope + write gates | `refs/actions/redesign.md` |
-| learn | Approved gap package from a live run miss—patch or friction (no skill edits) | `refs/actions/learn.md` |
+| learn | Gap package from a live run miss—patch or friction (no skill edits); `--learn --auto` skips confirms | `refs/actions/learn.md` |
 | test | Behavior probe report | `refs/actions/test.md` |
 | diff | Two-path tradeoff summary | `refs/actions/diff.md` |
 | design | Inline write from classify/clarify | `refs/actions/design.md` |
