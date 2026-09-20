@@ -8,7 +8,7 @@ Keep GitLab-only `glab`/MCP and `.gitlab-ci.yml` patterns out of the forge-agnos
 
 ## What
 
-Routes MR create/update, pipeline debug, inline threads, CI quality/security reports, and pre-merge checks through **glab** or GitLab MCP.
+Routes MR upsert (create if missing, update if exists), pipeline debug, inline threads, CI quality/security reports, and pre-merge checks through **glab** or GitLab MCP.
 
 **Out of scope:** GitHub/`gh`, local-only git, publish/deploy mechanics (siblings), inventing `rr-ci` subcommands.
 
@@ -29,7 +29,7 @@ Routes MR create/update, pipeline debug, inline threads, CI quality/security rep
 - `disable-model-invocation` — load by path from parent only
 - Do not invent `glab` flags or `rr-ci` subcommands — parent `SCRIPTS-SPEC.md`
 - Inline / `new_line` rules: [refs/inline-comments.md](refs/inline-comments.md)
-- Default MR create flags: SKILL Procedure step 4 (not duplicated in [refs/cli.md](refs/cli.md))
+- Default MR ship flags: SKILL **Default MR ship** (not duplicated in [refs/cli.md](refs/cli.md))
 
 ## Notes
 

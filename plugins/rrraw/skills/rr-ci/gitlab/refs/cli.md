@@ -4,7 +4,7 @@ Do not copy `glab --help` into context. Run `glab <command> --help` for flags.
 
 ## MR title and description
 
-Parent skill `refs/pr-mr-templates.md`. Default create flags: nested SKILL **Procedure** (Default MR create).
+Parent skill `refs/pr-mr-templates.md`. Default create flags: nested SKILL **Default MR ship**.
 
 ## Issues
 

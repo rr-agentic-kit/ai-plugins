@@ -34,6 +34,7 @@ Parent **rr-ci** already selected GitLab. Do not load for GitHub remotes.
 |------|------------|
 | glab syntax | [refs/cli.md](refs/cli.md) |
 | **Issue create** | Steps **Issue create** below |
+| **MR ship** | `mr-add-preflight` then **Default MR ship** below |
 | Inline MR threads | [refs/inline-comments.md](refs/inline-comments.md) |
 | Resolve open MR | [refs/mr-resolve.md](refs/mr-resolve.md) |
 | Failed pipeline | `debug-pipeline` `[MR_IID]` — branch on `result.status`, `result.error_lines`, `result.failed_job_id` |
@@ -51,7 +52,7 @@ Parent **rr-ci** already selected GitLab. Do not load for GitHub remotes.
 
 **Fallback (no matching row):** Use the named `rr-ci` subcommand from parent `SCRIPTS-SPEC.md` if listed; else stop — do not invent `glab` flags or issue workflows.
 
-Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: false`, auth missing, no MR when MR required).
+Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: false`, auth missing, preflight escalate).
 
 ### Issue create
 
@@ -59,14 +60,25 @@ Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: fal
 2. AskQuestion (or prose options): **Create as drafted** | **Edit draft** | **Abort**. Stop on Abort.
 3. On approve: `glab issue create --repo <forge-target> -t "…" -d "…"` (omit `--repo` when target is cwd origin). Syntax: [refs/cli.md](refs/cli.md). Done: issue URL reported. Stop: create fails or auth missing.
 
-5. **Default MR create** (after preflight `ready_create`): `glab mr create --fill --yes --draft --squash-before-merge --remove-source-branch` unless the user asked otherwise. Title/description from parent templates. Done: MR created or user declined. Stop: preflight not `ready_create`, or create fails.
-6. **Pre-merge** (when asked) — stop at first failure:
+### Default MR ship
 
-1. `glab mr view` — pipeline, approvals, conflicts  
-2. Pipeline success (else `debug-pipeline`)  
-3. `pipeline-security-reports` — `merge_blocked`  
-4. Unresolved threads  
-5. Required approvals  
+For `--create-mr` / `--update-mr` / `--create-pr-mr` / `--update-pr-mr` / prose “create|open|update MR” — **one upsert path**. Title/body: parent step **title** (after `--draft` gate if any, prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). After `mr-add-preflight`, branch on `result.status`:
+
+- **`exists`** — push commits if needed; `glab mr update` with title/description from disk when they should change. Done: existing MR URL (`result.mr_url`). Never open a second MR for the branch.
+- **`ready_create`** — `glab mr create --fill --yes --squash-before-merge --remove-source-branch` plus title/description (**no** forge `--draft` unless user asked for forge-draft status). Done: MR created. Stop: create fails.
+- Other preflight statuses (`error`, `no_commits`, `escalate_*`, `needs_branch_from_default`) → stop or escalate per envelope; do not invent a create.
+
+Skill `--draft` is the parent human gate — not this row’s forge `--draft` flag.
+
+### Pre-merge
+
+When asked — stop at first failure:
+
+1. `glab mr view` — pipeline, approvals, conflicts
+2. Pipeline success (else `debug-pipeline`)
+3. `pipeline-security-reports` — `merge_blocked`
+4. Unresolved threads
+5. Required approvals
 
 **Pre-merge report:** Pipeline, security, discussions, approvals, merge ready/blocked, one-line verdict. Done: report emitted. Stop: first failing gate above.
 
@@ -76,3 +88,4 @@ Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: fal
 - Do not invent `rr-ci` subcommands — parent `SCRIPTS-SPEC.md`.
 - Do not invent `glab` flags — only [refs/cli.md](refs/cli.md) + task rows above.
 - Inline comment / `new_line` rules: [refs/inline-comments.md](refs/inline-comments.md).
+- Create/update ship routes are aliases; never invent a second MR for the same branch.

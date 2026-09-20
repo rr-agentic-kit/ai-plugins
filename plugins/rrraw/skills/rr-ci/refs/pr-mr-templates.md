@@ -65,3 +65,15 @@ Revisit the below-the-fold section after pushes that change user-visible behavio
 
 - GitHub: `gh pr create` / `gh pr edit` with the body file.
 - GitLab: `glab mr create` / `glab mr update -d`.
+
+### `--draft` disk gate (parent ship)
+
+When the invoke includes `--draft` (or prose asks to draft title/description first):
+
+1. Write **`.ai/ci/pr-mr-title.txt`** (title only, one line) and **`.ai/ci/pr-mr-body.md`** (full description per sections above).
+2. Report both paths. AskQuestion (or prose): **Ship** | **Keep draft only** | **I'll edit**.
+3. **Keep draft only** → stop; leave files.
+4. **I'll edit** → do not rewrite the files; after the user continues, **re-read** both paths and use that content (user edition wins). AskQuestion again.
+5. **Ship** → nested forge upsert uses the current disk title/body. Add forge `gh`/`glab` `--draft` only if the user also asked for forge-draft status (separate from this skill flag).
+
+Without `--draft`, authoring may still write a body file for CLI `--body-file`; no AskQuestion gate.

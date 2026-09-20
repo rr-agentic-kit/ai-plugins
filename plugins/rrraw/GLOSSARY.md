@@ -39,7 +39,7 @@
 | doc_drift | Mark on task-summary when brownfield code ahead of Plan/ADRs | Generic docs debt / stale README | Reverse-derive mechanism; do not invent parallel greenfield |
 | runId | Daily id for one rr-review run (`yyyymmdd-NN` local) | CI job id / forge pipeline id | Mint: max `NN` for today + 1 (or `01`) |
 | REVIEW_DIR | Artifact root `.ai/review/<runId>/` for one review run | `.rr-builder/` (retired); **`.ai/ci/`** (rr-ci sidecars) | Flat locked filenames + merged `report.md` |
-| CI_DIR | Sidecar root `.ai/ci/` for rr-ci CLI/skill disk writes | `.ai/review/` (rr-review) | e.g. `job-<id>.log` from `debug-pipeline --save-log` |
+| CI_DIR | Sidecar root `.ai/ci/` for rr-ci CLI/skill disk writes | `.ai/review/` (rr-review) | e.g. `job-<id>.log`; `--draft` ship → `pr-mr-title.txt` / `pr-mr-body.md` |
 | forge target | `owner/repo` (or forge path) for `gh`/`glab` when it differs from cwd `detect-remote` origin | `REPO_ROOT` local work tree only | Set in rr-ci `forge` step; pass `--repo` |
 | nested skill | Path-loaded child under `skills/rr-builder/` (rr-prepare, rr-coder, …) | Top-level `skills/<name>/` marketplace skill | `name` must equal leaf folder; static matches parent of `SKILL.md` |
 | keep | Challenge disposition: row survives for report/fix/POST | Soft demote without Challenge | Consumers must ignore non-keep rows |

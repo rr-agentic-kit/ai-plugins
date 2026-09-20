@@ -5,8 +5,9 @@ Official docs: [GitHub CLI](https://cli.github.com/manual/). This ref is flags a
 ```bash
 gh auth status
 gh pr view
-gh pr create --draft --fill --title "..." --body-file body.md
-gh pr edit --title "..." --body-file body.md
+gh pr create --fill --title "..." --body-file .ai/ci/pr-mr-body.md
+gh pr create --draft --fill --title "..." --body-file .ai/ci/pr-mr-body.md
+gh pr edit --title "..." --body-file .ai/ci/pr-mr-body.md
 gh pr checks
 gh pr review --approve
 gh pr review --request-changes --body "..."
