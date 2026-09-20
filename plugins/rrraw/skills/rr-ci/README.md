@@ -8,9 +8,9 @@ One forge-agnostic ship path: detect GitHub vs GitLab, author PR/MR title/descri
 
 ## What
 
-Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pipeline/review CLI helpers, and routing into nested forge / publish / deployment skills. Ship path may commit/push when creating or updating a PR/MR. Forge **target** may differ from cwd origin when the user names `owner/repo`.
+Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pipeline/review CLI helpers, **`--fix --sonar`** (scripted Sonar issue list + agent remediations), and routing into nested forge / publish / deployment skills. Ship path may commit/push when creating or updating a PR/MR. Forge **target** may differ from cwd origin when the user names `owner/repo`.
 
-**Out of scope:** employer/internal cluster catalogs, required tracker keys in titles, Renovate onboarding CLI, local-only git (→ rr-git), implement/review code (→ rr-builder), inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` as JSON-CLI subcommands (those are skill invoke routes only).
+**Out of scope:** employer/internal cluster catalogs, required tracker keys in titles, Renovate onboarding CLI, local-only git (→ rr-git), general implement/review (→ rr-builder; Sonar-only remediations are in-scope under `--fix --sonar`), inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` as JSON-CLI subcommands (those are skill invoke routes only).
 
 ## When
 
@@ -20,12 +20,13 @@ Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pip
 - Named routes: `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` (or `--create-pr-mr` / `--update-pr-mr`) — all mean upsert; combine with `--draft` to gate title/body on disk
 - Drafting or creating a GitHub/GitLab issue (same or other `owner/repo`)
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
+- `--fix --sonar` to remediate open SonarQube issues on a PR/branch (no human issue dump)
 - Publishing artifacts or deploying via Helm/K8s/GitOps
 
 ### Avoid when
 
 - Local git only (rebase, worktree, conflicts, merged branch cleanup) with no PR/MR → `rr-git`
-- Implement, refactor, tests, or multi-lane code review → `rr-builder`
+- General implement, refactor, tests, or multi-lane code review → `rr-builder` (Sonar-only under `--fix --sonar` stays here)
 - Employer/internal catalogs (pinned versions, cluster inventories, required tracker keys)
 
 ## Philosophy
@@ -39,7 +40,7 @@ Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pip
 
 ### Invoke
 
-Slash `/rr-ci` with `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` (or `-pr-mr` aliases) — same upsert ship; optional `--draft` writes `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` and AskQuestions next steps. Nested forge skills are path-loaded only.
+Slash `/rr-ci` with `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` (or `-pr-mr` aliases) — same upsert ship; optional `--draft` writes `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` and AskQuestions next steps. `--fix --sonar` remediates Sonar issues (default: open PR/MR for current branch; optional `--pr`/`--branch`). Nested forge skills are path-loaded only.
 
 ### Intake
 
@@ -51,7 +52,7 @@ Enumerable forks (forge unknown, task-shape, forge target, `--draft` Ship|Keep|E
 
 ### Output
 
-PR/MR or issue URL; pipeline/debug envelopes from CLI when that was the ask.
+PR/MR or issue URL; pipeline/debug envelopes from CLI when that was the ask; Sonar fix summary counts (`fixed`/`skipped`/`failed`) — not a full issue table.
 
 ### Close
 
@@ -60,7 +61,7 @@ After issue create or PR/MR ship: report URL; do not invent follow-on forge comm
 ## Constraints
 
 - **Invoke:** Nested skills are `disable-model-invocation`; load by path from this skill only
-- **CLI:** JSON envelope — [scripts/README.md](scripts/README.md), frozen surface [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md); issue create uses allowlisted `gh`/`glab` in nested forge skills
+- **CLI:** JSON envelope — [scripts/README.md](scripts/README.md), frozen surface [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md); issue create uses allowlisted `gh`/`glab` in nested forge skills; `sonar-list-issues` needs `sonarqube-cli` on PATH
 - **Disk:** Sidecar files under **`.ai/ci/`** only (e.g. `debug-pipeline --save-log` → `.ai/ci/job-<id>.log`; `--draft` ship → `pr-mr-title.txt` / `pr-mr-body.md`)
 - **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
 - **Eval-first:** Fix FAIL audit ids only when polishing; forge-issue expansion is a capability redesign (re-audit after absorb)

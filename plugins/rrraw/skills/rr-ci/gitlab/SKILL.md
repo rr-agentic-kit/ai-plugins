@@ -39,6 +39,7 @@ Parent **rr-ci** already selected GitLab. Do not load for GitHub remotes.
 | Resolve open MR | [refs/mr-resolve.md](refs/mr-resolve.md) |
 | Failed pipeline | `debug-pipeline` `[MR_IID]` — branch on `result.status`, `result.error_lines`, `result.failed_job_id` |
 | CI code-quality | `code-quality-reports` — `result.reports.count`, `result.reports.nodes` |
+| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues` (default: open MR for current branch) |
 | Pipeline security | `pipeline-security-reports` — `result.merge_blocked`, `result.findings.*` |
 | Bulk resolve threads | `mr-skip-threads` |
 | MR add preflight | `mr-add-preflight` |

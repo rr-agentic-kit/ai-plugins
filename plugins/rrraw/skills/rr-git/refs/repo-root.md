@@ -8,16 +8,20 @@
 
 ## Resolve (order)
 
-1. **Explicit** — `--repo <path>` or `-C <path>` (workspace-relative or absolute). Validate as below.
-2. **Shorthand** — first token is an existing directory → validate.
-3. **Default** — `git rev-parse --show-toplevel` in the current cwd. If it fails → **stop**. Do not walk parents to guess a repo.
+1. **Explicit** — `--repo <path>` or `-C <path>` (workspace-relative or absolute). Validate via helper below.
+2. **Shorthand** — first token is an existing directory → validate via helper.
+3. **Default** — omit `--candidate` (cwd toplevel). If helper exits non-zero → **stop**. Do not walk parents to guess a repo.
 
-## Validate user-supplied `candidate`
+## Helper
 
-1. `TOP="$(git -C "$candidate" rev-parse --show-toplevel 2>/dev/null)"` — empty → abort.
-2. `ABS="$(cd "$candidate" && pwd -P)"` — `cd` fails → abort.
-3. If `ABS` ≠ `TOP` → abort: pass the repository root, not a subdirectory. Mention `TOP`.
-4. Set `REPO_ROOT="$TOP"`.
+From `$REPO_ROOT` candidate or cwd, run (plugin-root relative):
+
+```bash
+python3 <rrraw-plugin>/skills/rr-git/scripts/resolve_repo_root.py
+python3 <rrraw-plugin>/skills/rr-git/scripts/resolve_repo_root.py --candidate <path>
+```
+
+Parse stdout: `status`, `repo_root` (on ok). Exit `0` = set `REPO_ROOT` from `repo_root`. Exit `1` = abort (`error`/`message`/`remediation`). Details: [scripts/README.md](../scripts/README.md). Do **not** reinvent `rev-parse` / `pwd -P` invent chains.
 
 ## Execute
 

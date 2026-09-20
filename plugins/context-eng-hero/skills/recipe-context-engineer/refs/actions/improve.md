@@ -20,7 +20,7 @@ Under write gates:
 1. **approve-apply-plan** after `improve-3-merge` — before any target-path mutation
 2. **approve-revise-abort** after shared write gates — before promoting draft → target
 
-After Write-gate **Approve** (promote succeeded): **scoped git stage** of the improve **touch list** only — see `shared-write-gates.md` Write gate. Never `git commit` / PR from improve. Abort → no git stage.
+After Write-gate **Approve** (promote succeeded): leave promoted paths as **unstaged** working-tree changes (default `git status`). Never `git add`, `git commit`, or PR from improve. Abort → no promote.
 
 ## Report scratch (read-budget)
 
@@ -31,7 +31,7 @@ Per improve run, create `.ai/learning/ce-improve/<run-id>/` under the **user pro
 | `compliance.json` / `opportunity.json` | Lean executor payloads (Task return / stdin to render) |
 | `compliance.md` / `opportunity.md` | Full reports via `python3 scripts/render_ce_report.py` — **not** agent `Write` of full bodies |
 | `apply-plan.json` / `apply-plan.md` | Merged plan lean + rendered |
-| `touch-list.txt` | Newline-separated repo-relative paths improve wrote/promoted (for scoped `git add`) |
+| `touch-list.txt` | Newline-separated repo-relative paths improve wrote/promoted (inventory + close narrative only — **not** for `git add`) |
 | `draft/` | Off-path draft tree (optional mirror of target relatives) |
 
 Chat after audits: status + Verdict / ranked counts + **links** to rendered `.md` files — **do not** paste full report bodies.
@@ -72,10 +72,10 @@ python3 scripts/render_ce_report.py apply-plan --in …/apply-plan.json --out �
 | `templates/improve-opportunity-task.template.md` | `improve-2-parallel-audits` (opportunity Task prompt) |
 | `templates/improve-apply-plan.template.md` | `improve-3-merge` (markdown shape; prefer render) |
 | `failure-patterns.md` | Inject into `compliance` Task (recommended) |
-| `helper-cli.md` | Report render / touch-list git stage |
+| `helper-cli.md` | Report render / touch-list inventory |
 | `actions/fix.md` | `improve-4-apply-fix` |
 | `actions/redesign.md` | `improve-5-apply-redesign` |
-| `actions/shared-write-gates.md` | After apply drafts (one combined write approve + scoped git stage) |
+| `actions/shared-write-gates.md` | After apply drafts (one combined write approve; promote leaves unstaged dirty) |
 | `gate-prompts.md` | `improve-3-merge` (**approve-apply-plan**); write gate; `improve-6-close` |
 | `close-contract.md` | `improve-6-close` |
 | Executors: `executors/compliance.md`, `executors/opportunity.md` | `improve-2-parallel-audits` (Read via Caller Load — not catalog agents) |
@@ -91,12 +91,12 @@ python3 scripts/render_ce_report.py apply-plan --in …/apply-plan.json --out �
 ### Step 2: `improve-2-parallel-audits`
 
 - **Outcome:** Both diagnosis reports **persisted** (lean JSON + rendered markdown) and linked.
-- **Done when:** In **one turn**, spawn two **`generalPurpose`** Tasks (wait for both). Do **not** use named catalog subagent types from `agents/`—these executors are skill refs only. Fill prompts from `templates/improve-compliance-task.template.md` and `templates/improve-opportunity-task.template.md` (required Caller Load fields + injected refs + **`emit: lean-json`**).
-  1. **compliance** — template + `{ path, type, plugin_root }` + type rubric (+ skill-ref rubric if Skill+Ref) + `actions/audit.md` + `templates/reports/compliance.schema.json` (+ `failure-patterns.md`).
-  2. **opportunity** — template + `{ path, type, plugin_root }` + `actions/audit-redesign.md` + `rubrics/audit-redesign.rubric.md` + `improvement-patterns.md` + `templates/reports/opportunity.schema.json` (+ optional compliance skim when already returned).
+- **Done when:** In **one turn**, spawn two **`generalPurpose`** Tasks (wait for both). Do **not** use named catalog subagent types from `agents/`—these executors are skill refs only. Fill prompts from `templates/improve-compliance-task.template.md` and `templates/improve-opportunity-task.template.md` (required Caller Load fields + injected refs + **`emit: lean-json`** + **`lean_out`** scratch paths).
+  1. **compliance** — template + `{ path, type, plugin_root, lean_out }` + type rubric (+ skill-ref rubric if Skill+Ref) + `actions/audit.md` + `templates/reports/compliance.schema.json` (+ `failure-patterns.md`).
+  2. **opportunity** — template + `{ path, type, plugin_root, lean_out }` + `actions/audit-redesign.md` + `rubrics/audit-redesign.rubric.md` + `improvement-patterns.md` + `templates/reports/opportunity.schema.json` (+ optional compliance skim when already returned).
 - Emit liveness before waits: `◆ Parallel audits (compliance + opportunity)…`.
-- Collect **lean JSON** from each Task (status + payload). If either status is `failed`, stop with clarifications—do not apply.
-- **Parent persist (no full-body Write):** write `compliance.json` / `opportunity.json`; run `scripts/render_ce_report.py` for each → `.md`. On exit **2**, fix JSON from stderr and re-run (never Write full `.md`). Chat: one-line status each + Verdict / ranked-count summary + **markdown links**. **read-budget:** do not re-paste full report bodies into chat or into agent `Write` tool args.
+- Collect status from each Task. Prefer Task **Write** of lean JSON to Caller Load `lean_out` (scratch `compliance.json` / `opportunity.json`); chat return = status + Verdict/fail-or-ranked counts + `lean_out` path — **not** a full JSON dump. If the harness cannot Write from Task, parent persists lean JSON from the Task return **once** to scratch, then drops the payload from further chat. If either status is `failed`, stop with clarifications—do not apply.
+- **Parent render:** run `scripts/render_ce_report.py` for each → `.md`. On exit **2**, fix JSON from stderr and re-run (never Write full `.md`). After each render, if the `.md` has smashed tables (header line immediately followed by `||`), treat as render failure — fix j2/JSON and re-run; **do not** link broken reports in gates. Chat: one-line status each + Verdict / ranked-count summary + **markdown links**. **read-budget / stop-rule:** never re-paste full report bodies or lean JSON into chat when scratch `.md`/`.json` exist; never re-table apply-plan lanes in chat when `apply-plan.md` is well-formed.
 
 ### Step 3: `improve-3-merge`
 
@@ -105,7 +105,7 @@ python3 scripts/render_ce_report.py apply-plan --in …/apply-plan.json --out �
   - **fix list:** every compliance Findings FAIL id (all severities) ∪ Ranked rows with Absorb `fix` (Impact high|medium)
   - **redesign list:** Ranked rows with Absorb `redesign` (Impact high|medium)
   - **Dropped:** Keep notes, Absorb `defer`, Deferred rows, Impact `low`
-- Present in chat: link to `apply-plan.md` + Reports links + lane tables (no full report dump). Empty both lists → skip to `improve-6-close` with diagnosis-only Next Up (no write).
+- Present in chat: **link** to `apply-plan.md` + Reports links + fix/redesign **counts** only — do **not** re-table lanes when `apply-plan.md` is well-formed. Empty both lists → skip to `improve-6-close` with diagnosis-only Next Up (no write).
 - **Gate:** **approve-apply-plan** per `gate-prompts.md`. Abort → no draft, no target Write, still close. Approve → continue to apply steps.
 
 ### Step 4: `improve-4-apply-fix`
@@ -120,21 +120,21 @@ python3 scripts/render_ce_report.py apply-plan --in …/apply-plan.json --out �
 - **Outcome:** Absorb `redesign` opportunities applied to the **draft** set (or skipped).
 - **Done when:** If redesign list empty → mark completed. Else run `actions/redesign.md` **Nested under improve** short path against the redesign list. **Nested intake:** treat full `redesign-1-clarify` / `redesign-intake.md` done-when as satisfied from the merge plan—delta brief = Ranked Absorb `redesign` opportunity detail; skip **all** redesign-intake AskQuestions (outcome/audience/capabilities/failure modes/breaking-change); record breaking-change assumption once in the apply plan. **TodoWrite:** only `improve-1…6` — do not spawn `redesign-*` todos. Merge with any fix draft into one candidate artifact set; keep `touch-list.txt` complete.
 - **Same stop-rule** as improve-4: no target-path promotion yet.
-- **Gates:** Run `shared-write-gates.md` once on the combined **draft**. One **approve-revise-abort** for the whole plan — AskQuestion **must** include Reports + apply-plan + draft links. On **Approve** → promote draft → target paths → **scoped `git add --` paths in `touch-list.txt` only** (never `git add -A`). On **Abort** → discard draft / restore only if a restore intermediary was used; **target paths unchanged**; **no git stage**; still close with Next Up.
+- **Gates:** Run `shared-write-gates.md` once on the combined **draft**. One **approve-revise-abort** for the whole plan — AskQuestion **must** include Reports + apply-plan + draft links. On **Approve** → promote draft → target paths; leave **unstaged** (default dirty `git status`); **never** `git add` / `git commit`. On **Abort** → discard draft / restore only if a restore intermediary was used; **target paths unchanged**; still close with Next Up.
 
 ### Step 6: `improve-6-close`
 
 - **Outcome:** User routed after improve.
-- **Done when:** **post-improve-routing** AskQuestion per `gate-prompts.md`; follow-ups verb-only per `close-contract.md`. Close narrative cites **paths** to persisted reports (and apply-plan) — not full report bodies. Note whether scoped git stage ran.
+- **Done when:** **post-improve-routing** AskQuestion per `gate-prompts.md`; follow-ups verb-only per `close-contract.md`. Close narrative cites **paths** to persisted reports (and apply-plan) — not full report bodies. Note promote left paths unstaged (or Abort).
 
 ## Stop
 
 - No ambient improve without a declared path.
-- Executors never Write; parent owns lean persist, **render script**, apply drafts, gates, and scoped git stage.
+- Executors never Write **except** improve `lean_out` under `.ai/learning/ce-improve/<run-id>/` when Caller Load names it. Parent owns **render script**, apply drafts, and gates.
 - Do not auto-apply Deferred / Keep / Absorb `defer` / Impact `low`.
 - Do not spawn a third “write agent”; parent executes fix/redesign **Nested under improve** short paths.
 - Nested apply: TodoWrite **only** `improve-1…6`; never nest `fix-*` / `redesign-*` todo lists.
 - **No target-path Write before approve-apply-plan.** **No target-path promotion before Write-gate Approve.**
-- **No `git commit` / forge PR from improve.** Scoped `git add` of touch list only after Approve promote.
-- **read-budget:** never paste full compliance/opportunity reports into chat or agent `Write` when scratch + render script exist — link rendered files.
+- **No `git add` / `git commit` / forge PR from improve.** Promote leaves unstaged dirty; touch-list is inventory only.
+- **read-budget:** never paste full compliance/opportunity reports or lean JSON into chat when scratch + render exist — link rendered files; never re-table well-formed `apply-plan.md`.
 - **Snapshot is not a success criterion.**

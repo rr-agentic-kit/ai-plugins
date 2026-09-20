@@ -13,6 +13,7 @@ Skill owns *when* to run; [scripts/README.md](scripts/README.md) owns *how*. Thi
 | `detect-remote` | `result.forge` (`github` \| `gitlab` \| `unknown`); `result.host`; `result.owner`; `result.repo` |
 | `debug-pipeline` | optional IID/PR number, `--save-log` → `.ai/ci/job-<id>.log` + `result.log_path`; `result.status`; `result.error_lines`; `result.failed_job_id` |
 | `code-quality-reports` | `result.reports.count` + `result.reports.nodes` |
+| `sonar-list-issues` | forge-agnostic; default scope = open PR/MR for current branch; `result.project`, `result.total`, `result.issues[]` (`key`, `rule`, `severity`, `type`, `file`, `line`, `message`, `status`); optional `pull_request` / `branch`; flags `-p/--project`, `--pull-request`, `--branch`, `--statuses`; errors `no_open_pr`, `forge_unknown`, `sonar_not_found` |
 | `pipeline-security-reports` | `result.status` ∈ `clean` \| `blocking_findings` \| `no_pipeline` \| `no_reports`; `result.findings.*`; `result.merge_blocked` |
 | `mr-skip-threads` | `[IID]`, `--dry-run`; `unresolved_count` / `ok_count` / `fail_count` |
 | `mr-add-preflight` | `--continue-anyway`, `--same-name-push`, `--branch-name`, `--commit-all`, `--commit-staged`; `result.status` ∈ `exists` \| `error` \| `no_commits` \| `escalate_merged` \| `escalate_upstream` \| `needs_branch_from_default` \| `ready_create`; plus `mr_url`, `message`, `upstream`, `staged_hint` |

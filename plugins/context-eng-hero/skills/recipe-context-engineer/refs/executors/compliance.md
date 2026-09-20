@@ -14,7 +14,8 @@ Does **not** Write/Edit. Does **not** invoke `recipe-context-engineer` or any sk
 
 - MUST Read the target path, caller-injected refs under `skills/recipe-context-engineer/refs/`, and type rubric path(s) from Inputs.
 - MUST run Bash only as `python3 scripts/audit_static.py*` (or `.venv/bin/python …`) from `plugin_root` after PyYAML bootstrap if needed—same contract as `actions/audit.md` step `audit-2-static`.
-- MUST NOT Write, Edit, or otherwise mutate files.
+- Under improve with `lean_out`: MAY Write **only** that scratch JSON path. MUST NOT Edit/Write target skill paths or any other files.
+- Without `lean_out`: MUST NOT Write or Edit.
 - MUST NOT prompt the user — put clarifications as short markdown bullets instead.
 - MUST NOT re-score improvement opportunities or run audit-redesign judgment.
 - MUST NOT discover or invoke skills; execute only the injected procedure + refs.
@@ -44,6 +45,7 @@ Caller Load (parent Task prompt / payload):
 | `refs.template` | yes | `skills/recipe-context-engineer/refs/templates/audit-output.template.md` (shape SoT) |
 | `refs.lean_schema` | when improve | `skills/recipe-context-engineer/refs/templates/reports/compliance.schema.json` |
 | `emit` | when improve | `lean-json` |
+| `lean_out` | when improve | Absolute path under `.ai/learning/ce-improve/<run-id>/compliance.json` — Write lean JSON here; chat return stays tiny |
 | `refs.failure_patterns` | recommended | `skills/recipe-context-engineer/refs/failure-patterns.md` |
 
 Stable hard-links (executor may Read without re-injection): `actions/audit.md`, `templates/audit-output.template.md`, `templates/reports/compliance.schema.json`, `failure-patterns.md`. Parent **must** still inject the **type rubric** path. Never Read `*.md.j2`.
@@ -57,7 +59,7 @@ Stable hard-links (executor may Read without re-injection): `actions/audit.md`, 
 
 ## Outputs
 
-- **Improve:** lean JSON envelope (`kind: compliance`) + one-line status. Do **not** emit full markdown in the Task return (parent renders).
+- **Improve:** Write lean JSON envelope (`kind: compliance`) to `lean_out` when provided; chat return = status + Verdict/fail_count + path — **not** full JSON. Do **not** emit full markdown in the Task return (parent renders).
 - **Standalone:** full report per `refs.template`.
 
 Do **not** paste the template body into this executor file.

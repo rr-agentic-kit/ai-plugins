@@ -47,7 +47,20 @@ _APPLY_PLAN: dict[str, Any] = {
         "opportunity": "a/opportunity.md",
         "apply_plan": "a/apply-plan.md",
     },
-    "fix": [],
+    "fix": [
+        {
+            "source": "compliance",
+            "id": "skill.x",
+            "absorb": "fix",
+            "intent": "one-line intent",
+        },
+        {
+            "source": "opportunity",
+            "id": "imp.load.y",
+            "absorb": "fix",
+            "intent": "second intent",
+        },
+    ],
     "redesign": [],
 }
 
@@ -143,7 +156,7 @@ def _run_main(
             _COMPLIANCE,
             ("Critical: 2/2", "skill-ref.readme.philosophy", "Verdict: FAIL"),
         ),
-        ("apply-plan", _APPLY_PLAN, ("(empty)",)),
+        ("apply-plan", _APPLY_PLAN, ("skill.x", "imp.load.y", "one-line intent")),
         (
             "opportunity",
             _OPPORTUNITY,
@@ -174,6 +187,14 @@ def test_render_main_happy(
     text = (tmp_path / f"{kind}.md").read_text(encoding="utf-8")
     for needle in must_contain:
         assert needle in text
+    # GFM table rows must be newline-separated (not glued with '||')
+    assert "||" not in text
+
+
+def test_assert_rejects_smashed_table() -> None:
+    smashed = "| Source | Id |\n" "|--------|----|| compliance | `x` | fix | one |\n"
+    with pytest.raises(ValueError, match="smashed markdown table"):
+        r._assert_markdown_tables_ok(smashed)
 
 
 def test_render_main_stdin(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

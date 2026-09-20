@@ -15,8 +15,11 @@ import mr_review_submit
 import mr_skip_threads
 import pending_reviews
 import pipeline_security_reports
+import sonar_list_issues
 from emit import fail
 from forge import detect
+
+_FORGE_AGNOSTIC = frozenset({"detect-remote", "sonar-list-issues"})
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -40,13 +43,14 @@ def _build_parser() -> argparse.ArgumentParser:
     mr_ci_review_preflight.add_parser(subparsers)
     mr_review_submit.add_parser(subparsers)
     pending_reviews.add_parser(subparsers)
+    sonar_list_issues.add_parser(subparsers)
     return parser
 
 
 def _resolve_forge(args: argparse.Namespace) -> str:
     if args.forge:
         return args.forge
-    if args.command == "detect-remote":
+    if args.command in _FORGE_AGNOSTIC:
         return ""
     return detect().forge
 
@@ -54,7 +58,7 @@ def _resolve_forge(args: argparse.Namespace) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    if args.command == "detect-remote":
+    if args.command in _FORGE_AGNOSTIC:
         return cast(int, args.handler(args))
     forge = _resolve_forge(args)
     if forge == "unknown":

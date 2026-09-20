@@ -38,6 +38,7 @@ Parent **rr-ci** already selected GitHub. Do not load for GitLab remotes.
 | Review comments on diff lines | [refs/inline-comments.md](refs/inline-comments.md) |
 | Failed Actions run | `debug-pipeline` `[PR_NUMBER]` — `result.status`, `result.error_lines`, `result.failed_job_id` (check-run / job id) |
 | Code scanning / quality | `code-quality-reports` |
+| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues` (default: open PR for current branch) |
 | Security / Dependabot / code scanning | `pipeline-security-reports` — treat `merge_blocked` as merge-state dirty when GitHub reports failing required checks |
 | Resolve review threads | `mr-skip-threads` |
 | PR add preflight | `mr-add-preflight` |

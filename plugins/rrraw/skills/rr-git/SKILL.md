@@ -56,4 +56,4 @@ TodoWrite `merge: false` with ids `resolve-root`, `load-ref`, `execute` when the
 
 ## Orchestration
 
-Single-shot when one git command. Multi-step: TodoWrite ids above. No slash-command chaining. Enumerable forks (load-ref fallback): Prefer AskQuestion; text-mode same options; no stall.
+Single-shot when one git command. Multi-step: TodoWrite ids above. No slash-command chaining. Enumerable forks (load-ref fallback): Prefer AskQuestion; text-mode same options; no stall. Task agents: N/A — this skill does not spawn or inject Task agents.

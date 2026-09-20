@@ -4,12 +4,14 @@
 # Dirty-tree / merged+dirty AskQuestion orchestration: clean-local-branches.md.
 #
 # Usage:
+#   clean-merged-local-branches.sh --worktree-status
 #   clean-merged-local-branches.sh --plan
 #   clean-merged-local-branches.sh --delete
 #   clean-merged-local-branches.sh --plan --checkout-base
 #   clean-merged-local-branches.sh --delete --base main
 #
 # Flags:
+#   --worktree-status       Emit dirty/start_branch/base/start_merged only (allows dirty)
 #   --plan                  Classify only; print deleted/deleted_how candidates
 #   --delete                Classify then delete confirmed branches
 #   --base <name>           Override base (default: master, then main)
@@ -27,17 +29,19 @@ REPO_ROOT=""
 usage() {
   cat <<'EOF'
 Usage:
+  clean-merged-local-branches.sh --worktree-status
   clean-merged-local-branches.sh --plan
   clean-merged-local-branches.sh --delete
 
 Flags:
+  --worktree-status       Classify dirty tree / start-branch merge state (allows dirty)
   --plan                  Classify only
   --delete                Classify and delete confirmed branches
   --base <name>           Override base branch (default: auto-detect master, then main)
   --checkout-base         Checkout $BASE when worktree is clean and HEAD is elsewhere
   --skip-validation       Skip pre-flight checks and pull (fetch only; for manual testing)
 
-Requires a clean worktree (unless --skip-validation).
+--plan/--delete require a clean worktree (unless --skip-validation).
 EOF
 }
 
@@ -270,8 +274,33 @@ emit_results() {
   printf 'kept_count=%s\n' "${kept_count}"
 }
 
+emit_worktree_status() {
+  local dirty="no"
+  local start_branch start_merged="no"
+  if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+    dirty="yes"
+  fi
+  start_branch="$(git branch --show-current 2>/dev/null || true)"
+  if [[ -z "${start_branch}" ]]; then
+    start_branch="detached"
+  fi
+  if [[ "${start_branch}" != "detached" ]] \
+    && git merge-base --is-ancestor "${start_branch}" "origin/${BASE_BRANCH}" 2>/dev/null; then
+    start_merged="yes"
+  fi
+  printf 'status=ok\n'
+  printf 'dirty=%s\n' "${dirty}"
+  printf 'start_branch=%s\n' "${start_branch}"
+  printf 'base=%s\n' "${BASE_BRANCH}"
+  printf 'start_merged=%s\n' "${start_merged}"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --worktree-status)
+      MODE="worktree-status"
+      shift
+      ;;
     --plan)
       MODE="plan"
       shift
@@ -303,7 +332,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -n "${MODE}" ]] || fail_with "usage" "require --plan or --delete" "$(usage)"
+[[ -n "${MODE}" ]] || fail_with "usage" "require --worktree-status, --plan, or --delete" "$(usage)"
 
 if ! REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
   fail_with "not_repo" "not inside a git work tree" "cd to a repository root or pass -C."
@@ -312,6 +341,13 @@ cd "${REPO_ROOT}"
 
 if ! auto_detect_base; then
   fail_with "no_base" "could not detect base (no origin/master or origin/main)" "Pass --base <name>."
+fi
+
+if [[ "${MODE}" == "worktree-status" ]]; then
+  # Fetch so origin/$BASE exists for start_merged when possible; ignore failure.
+  git fetch origin --prune >/dev/null 2>&1 || true
+  emit_worktree_status
+  exit 0
 fi
 
 if [[ "${SKIP_VALIDATION}" -eq 0 ]]; then

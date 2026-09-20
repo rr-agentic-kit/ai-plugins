@@ -1,9 +1,9 @@
 {# Pre-write reflection — scaffolding only. #}
-{%- if result == "PASSED" -%}
-{%- set next_line = "PASSED: proceed to pre-ship, then write" -%}
-{%- else -%}
-{%- set next_line = "FAILED: revise draft; re-run static → reflection → pre-ship" -%}
-{%- endif -%}
+{% if result == "PASSED" %}
+{% set next_line = "PASSED: proceed to pre-ship, then write" %}
+{% else %}
+{% set next_line = "FAILED: revise draft; re-run static → reflection → pre-ship" %}
+{% endif -%}
 ## Pre-write reflection
 
 - Target: `{{ target }}`
@@ -11,11 +11,10 @@
 - Result: **{{ result }}**
 
 ### Deep reflect
-{%- if deep_reflect %}
-{%- for line in deep_reflect %}
-{{ loop.index }}. {{ line }}
-{%- endfor %}
-{%- endif %}
+{% if deep_reflect -%}
+{% for line in deep_reflect %}{{ loop.index }}. {{ line }}
+{% endfor -%}
+{% endif %}
 
 ### Harness summary
 - Reliable: {{ (harness_summary or {}).reliable | default("", true) }}
@@ -26,21 +25,17 @@
 
 | id | Severity | PASS/FAIL | Evidence |
 |----|----------|-----------|----------|
-{%- for row in judgment %}
-| {{ row.id }} | {{ row.severity }} | {{ row.result }} | {{ row.evidence }} |
-{%- else %}
-| — | — | — | (none) |
-{%- endfor %}
+{% for row in judgment %}| {{ row.id }} | {{ row.severity }} | {{ row.result }} | {{ row.evidence }} |
+{% else %}| — | — | — | (none) |
+{% endfor %}
 
 ### Harness checks
 
 | id | Severity | PASS/FAIL | Evidence |
 |----|----------|-----------|----------|
-{%- for row in harness %}
-| {{ row.id }} | {{ row.severity }} | {{ row.result }} | {{ row.evidence }} |
-{%- else %}
-| — | — | — | (none) |
-{%- endfor %}
+{% for row in harness %}| {{ row.id }} | {{ row.severity }} | {{ row.result }} | {{ row.evidence }} |
+{% else %}| — | — | — | (none) |
+{% endfor %}
 
 ### Top patterns
 - {{ top_patterns | default("(none)", true) }}

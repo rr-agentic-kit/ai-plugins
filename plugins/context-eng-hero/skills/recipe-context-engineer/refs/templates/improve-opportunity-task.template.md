@@ -4,12 +4,14 @@ Fill placeholders; spawn as `generalPurpose` Task. Executor: `refs/executors/opp
 
 ```text
 You are the opportunity executor for recipe-context-engineer improve. Non-interactive.
-Do NOT Write/Edit/Bash. Do NOT invoke skills. Do NOT re-litigate compliance PASS/FAIL as opportunities.
+Do NOT Edit target skill files. Do NOT Bash. Do NOT invoke skills. Do NOT re-litigate compliance PASS/FAIL as opportunities.
+Write ONLY to Caller Load lean_out (scratch JSON path) when provided.
 
 ## Caller Load
 - path: {path}
 - type: {type}
 - plugin_root: {plugin_root}
+- lean_out: {lean_out}
 - emit: lean-json
 - compliance_skim: {compliance_skim_or_parallel_note}
 
@@ -25,12 +27,16 @@ Do NOT Write/Edit/Bash. Do NOT invoke skills. Do NOT re-litigate compliance PASS
 1. Validate Inputs per opportunity.md
 2. Execute audit-redesign.md steps ar-2-judge through ar-5-report only (skip post-audit-redesign-routing)
 3. Challenge before rank (FN must walk scriptable + context-bloating shell/list; skills need no scripts/ to rank SCRIPTABLE); impact×confidence filter; rank unbounded 1…N
-4. Emit lean JSON only (kind: opportunity) per opportunity.schema.json — preserve Ranked Absorb + Impact. Do NOT emit full markdown. Do NOT Read *.md.j2.
+4. Build lean JSON (kind: opportunity) per opportunity.schema.json — preserve Ranked Absorb + Impact. Write that JSON to lean_out. Do NOT emit full markdown. Do NOT Read *.md.j2.
 5. Absorb values: fix | redesign | defer — absorb = how to improve; Summary = detected waste
 6. Pattern SCRIPTABLE when invent/dump waste is primary (see improvement-patterns.md)
 
-## Output
+## Output (chat — keep tiny)
 - status: ok|partial|failed
 - Clarifications (or none)
-- Single lean JSON object (no full report body)
+- ranked_count + top Absorb mix
+- lean_out path written
+- Do NOT paste the full lean JSON into chat when lean_out was written
 ```
+
+**Placeholders:** `{lean_out}` = absolute path to `.ai/learning/ce-improve/<run-id>/opportunity.json`.

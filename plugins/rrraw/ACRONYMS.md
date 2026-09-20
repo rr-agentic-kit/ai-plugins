@@ -34,3 +34,4 @@
 | WBS | Work Breakdown Structure | rr-prepare ordered task tree under `docs/rr/tasks/` |
 | NL | Natural Language | Parent/user invoke without an explicit path or flag |
 | TBD | To Be Defined | Builder **refactor** stage stub — skip/stop; no invented procedure |
+| Sonar | SonarQube / SonarCloud analysis | rr-ci `--fix --sonar` + `sonar-list-issues` |

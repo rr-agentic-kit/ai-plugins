@@ -28,10 +28,8 @@ Anthropic agent-skills guidance: scripts are **executed**, not loaded as docs.
 | Invoke | Role |
 |--------|------|
 | `python3 scripts/audit_static.py . <rel>` | Static gate |
-| `python3 scripts/render_ce_report.py <kind> --in <json> --out <md>` | Validate lean JSON against `templates/reports/<kind>.schema.json`, Jinja-render markdown; agent must not Write full bodies |
-| `git add -- $(cat .ai/learning/ce-improve/<run-id>/touch-list.txt)` | After Write-gate Approve promote only — scoped stage; never `git add -A` |
-
-Exit **2** from `render_ce_report.py` = schema/JSON error — fix lean JSON from stderr `path: message` lines and re-run.
+| `python3 scripts/render_ce_report.py <kind> --in <json> --out <md>` | Validate lean JSON against `templates/reports/<kind>.schema.json`, Jinja-render markdown; agent must not Write full bodies. Exit **2** = schema/JSON error **or** smashed markdown tables (fix JSON/j2, re-run). |
+| `.ai/learning/ce-improve/<run-id>/touch-list.txt` | After Write-gate Approve promote — inventory of promoted paths for close narrative only; **never** `git add` |
 
 ## Lean emit + schema + render
 

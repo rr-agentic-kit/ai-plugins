@@ -87,7 +87,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 - **Dual close surface** — skill uses AskQuestion; commands may name slash as user homework only
 - **STATIC SKIPPED** — audit continues judgment; write paths block until static PASS or user accepts draft-only
 - **Minimum draft** — smallest template-shaped draft that satisfies clarify; refs only when FAIL proves the gap
-- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits (lean JSON → `render_ce_report.py`) + gated apply + scoped git stage of touch list (parent-only executors; not catalog agents)
+- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits (lean JSON → `render_ce_report.py`) + gated apply; promote leaves unstaged dirty (parent-only executors; not catalog agents)
 - **Question tool fallback** — AskQuestion preferred; text-mode channel mandatory when tool/harness missing (`refs/questioning.md`)
 
 ## Constraints
@@ -96,7 +96,7 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 |-------|------|
 | **Invoke** | `disable-model-invocation: true` — slash or explicit `Read` of `SKILL.md` |
 | **Eval-first** | Thicken from observed audit/test FAILs—not anticipated rules or mandatory research |
-| **Write gates** | Static → pre-write reflection → pre-ship → approve-revise-abort; `--improve` then scoped `git add` of touch list only |
+| **Write gates** | Static → pre-write reflection → pre-ship → approve-revise-abort; `--improve` promote leaves touch-list paths unstaged (never `git add`) |
 | **Paths** | Plugin-relative only; no `..` or absolute paths in authored content |
 | **README ↔ SKILL** | README = spec; SKILL = executor. Extract derives README from SKILL constraints, not Procedure paste |
 | **Lexicon** | `ACRONYMS.md` + `GLOSSARY.md` at plugin root (or skill sibling if standalone); harvest overloaded plugin-wide senses (not flags/templates); empty tables allowed |

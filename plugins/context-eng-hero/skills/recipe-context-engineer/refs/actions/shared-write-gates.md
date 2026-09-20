@@ -11,7 +11,7 @@ Used by **create**, **fix**, **redesign**, **design**, **extract** (file write),
 | `pre-ship-checklist.md` | Pre-ship gate |
 | `gate-prompts.md` | Write gate (approve-revise-abort) |
 | Type rubric in `rubrics/<type>.rubric.md` | Pre-write reflection gate only |
-| `helper-cli.md` | Improve: render reflection / scoped git stage |
+| `helper-cli.md` | Improve: render reflection / touch-list inventory |
 
 Record **draft hash** (path + content fingerprint) when static PASSes. Pre-ship 1.1 reuses that result—do not re-run `audit_static.py` unless the draft changed after static.
 
@@ -45,13 +45,13 @@ Record **draft hash** (path + content fingerprint) when static PASSes. Pre-ship 
 - **Done when:** If static, reflection, and pre-ship all PASSED: run **approve-revise-abort** AskQuestion per `gate-prompts.md`.
   - **Packet (required before AskQuestion):** lean patch summary + reflection one-liner + links to any diagnosis/apply-plan/draft files that exist for this action (improve: Reports + `apply-plan.md` + draft dir + `touch-list.txt`). Missing required improve links → do not ask; repair packet first.
   - **Approve** → promote draft → approved target path(s); emit patch + reflection summaries.
-    - **Improve only — scoped git stage:** After promote, ensure `touch-list.txt` lists every repo-relative path just written. Run `git add -- $(cat touch-list.txt)` (or equivalent path-args form) from the **user project** git root. Stage **only** those paths — never `git add -A`, never stage unrelated dirty files. Do **not** `git commit`.
-  - **Request changes** → revise draft; re-run gates from **Static gate**; targets stay at pre-promote state; **no** git stage.
-  - **Abort** → **no promote**; discard scratch draft / restore only if an optional restore intermediary exists; **prior target disk state unchanged**; **no** git stage.
+    - **Improve only:** After promote, ensure `touch-list.txt` lists every repo-relative path just written (inventory for close narrative). Leave paths **unstaged** — default dirty `git status`. **Never** `git add` / `git commit` / `git add -A`.
+  - **Request changes** → revise draft; re-run gates from **Static gate**; targets stay at pre-promote state.
+  - **Abort** → **no promote**; discard scratch draft / restore only if an optional restore intermediary exists; **prior target disk state unchanged**.
 - If any prior gate FAILED: `PRE-WRITE REFLECTION FAILED` or `PRE-SHIP FAILED` as appropriate; prior target disk state unchanged unless user wants draft-only.
 
 ## Stop (all hosting actions)
 
 - Do **not** treat “draft already written to the final path” as Approve.
 - On Abort, targets must match pre-draft state.
-- Improve: filesystem snapshot is **not** a success criterion; scoped `git add` of the touch list **is** required after Approve promote.
+- Improve: filesystem snapshot is **not** a success criterion; after Approve promote, leave touch-list paths **unstaged** (never `git add`).
