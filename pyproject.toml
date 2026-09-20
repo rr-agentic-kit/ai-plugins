@@ -61,7 +61,7 @@ module = "tests.*"
 disallow_untyped_defs = false
 
 [tool.coverage.run]
-source = ["audit_static", "validate_planning_script", "scripts"]
+source = ["audit_static", "render_ce_report", "validate_planning_script", "scripts"]
 relative_files = true
 omit = ["*/__main__.py"]
 
