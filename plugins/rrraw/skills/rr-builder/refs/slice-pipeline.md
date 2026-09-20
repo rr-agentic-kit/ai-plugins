@@ -11,10 +11,10 @@ slice ready
           task detail              # rr-prepare L2 (+ steps breakdown)
           → [ per task-step:
                 plan → build → review → refactor → step-validate
-                  → [ ship? ]      # if plan Ship.ship_after = step_validate
+                  ⇄ [ ship? ]      # shippable: forge-miss → ship → re-validate (before PASS)
               ]
           → task-validate
-          → [ ship? ]              # if a step’s Ship.ship_after = task_validate
+          ⇄ [ ship? ]              # ship_after = task_validate: same forge loop
         ]
   → slice validate
   → slice delivered              # residual ship boundary → rr-ci when nothing shipped mid-slice
@@ -30,8 +30,8 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | **build** | Implement the step | Current `{NNNN}-{step}.plan.md` + minimal task Goal/Obligations if needed; full **rr-coder** + **rr-tester** (code **and** tests for the step). **Do not** Read other steps’ `.plan.md` files or inlined plan prose from the task body | **Yes** | Code + tests for the step land; step verify checks runnable; set `step_build_done: true` |
 | **review** | Full multi-lane review with fix | **rr-review** with **`--fix --all`** (forced) | Via review fix path | Review run complete; fix applied per review; set `step_review_done: true` |
 | **refactor** | Behavior-invariant coder-rule refactor on step-touched MR scope | **rr-refactor** (`epoch_cap: 5` default) | Via inline fix path | Terminal `report.md` under `.ai/refactor/<runId>/`; set `step_refactor_done: true` (or skip note when scope empty — see below) |
-| **step-validate** / **task-validate** | Rubric: Goal / Verify for step scope or full task | [task-validate.md](task-validate.md) | No (assessment) | PASS/FAIL; then maybe **ship** per plan Ship |
-| **ship** | Resolve branch/base; hand off **rr-ci** | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` | Via rr-ci only | [ship.md](ship.md) done-when; set `step_ship_done: true` when step-scoped |
+| **step-validate** / **task-validate** | Rubric: Goal / Verify (+ Forge/PR when shippable; Ship-intent review when `never`) | [task-validate.md](task-validate.md) | No (assessment) | PASS/FAIL per [task-validate.md](task-validate.md); forge-miss FAIL → **ship** then re-validate |
+| **ship** | Resolve branch/base; hand off **rr-ci**; return to validate | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` | Via rr-ci only | [ship.md](ship.md) done-when; set `step_ship_done: true` when step-scoped; re-enter validate |
 | **slice validate** | Rubric: did **slice** hit slice goal / AC | [slice-validate.md](slice-validate.md) | No (assessment) | PASS/FAIL against execute-slice / pinned AC |
 
 ### Knowledge load vs full-skill handoff
@@ -57,7 +57,7 @@ Prefer extending existing prepare artifacts — no third parallel state file.
 | `step_build_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done` |
 | `step_review_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done` |
 | `step_refactor_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done`; reset when advancing `step_index` |
-| `step_ship_done` | `{NNNN}.md` frontmatter | `true` \| `false` — step-scoped ship; treat as `true` when plan `ship_after: never` (nothing to ship). Reset when advancing `step_index` |
+| `step_ship_done` | `{NNNN}.md` frontmatter | `true` \| `false` — step-scoped ship; treat as `true` when plan `ship_after: never` (non-shippable — nothing to ship; does **not** waive Goal/Verify). Reset when advancing `step_index` |
 | `active_ship_branch` | `task-summary.md` | Last resolved ship head branch (from plan Ship / feature-branch) |
 | `ship_base_branch` | `task-summary.md` | Last resolved PR/MR base (`default` branch name or prior open tip) |
 | `prepare_status` | `task-summary.md` | Existing: `l1` \| `l2` \| `complete` — still authoritative for prep completeness |
@@ -83,12 +83,14 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
 4. **`step_plan_done: true` and `step_build_done` ≠ `true`** → **build**.
 5. **`step_build_done: true` and `step_review_done` ≠ `true`** → **review** (`--fix --all`).
 6. **`step_review_done: true` and `step_refactor_done` ≠ `true`** → **refactor** (full **rr-refactor** per scope rule above).
-7. **`step_refactor_done: true`** → **step-validate** (until PASS/FAIL recorded for this step).
-8. **After step-validate PASS** — Read plan Ship for this step:
-   - `ship_after: step_validate` and `step_ship_done` ≠ `true` → **ship**.
-   - else → treat `step_ship_done` as satisfied for advance; go to 9.
+7. **`step_refactor_done: true`** → **step-validate** (until PASS recorded for this step).
+8. **While on step-validate** — Run [task-validate.md](task-validate.md) for step scope (incl. Ship-intent review when `never`; Forge/PR when shippable):
+   - **Forge / PR FAIL** and `ship_after: step_validate` and `step_ship_done` ≠ `true` → **ship** ([ship.md](ship.md)); after ship done-when → return here (re-validate). Under `drive: auto`, chain ship → re-validate without asking.
+   - Other **FAIL** → leave `builder_stage: step_validate`; hard-stop `--full` chaining.
+   - **PASS** and `ship_after: never` → `step_ship_done` satisfied; go to 9.
+   - **PASS** and shippable → open PR already proven; `step_ship_done` should be `true`; go to 9. Do **not** enter ship after PASS for `ship_after: step_validate`.
 9. **Advance** — If more steps remain: next `step_index`, set `step_plan_done` / `step_build_done` / `step_review_done` / `step_refactor_done` / `step_ship_done` to `false`. If no more steps → **task-validate**.
-10. **After task-validate PASS** — If any step plan in this task has `ship_after: task_validate` and that ship not yet done → **ship** (use that step’s Ship block; if several, AskQuestion once). Else → next task or step 11.
+10. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Other FAIL → hard stop. **PASS** → next task or step 11.
 11. **All tasks validated** → **slice validate**.
 12. **Slice validate PASS** → stop: **slice delivered** → point engineer to **rr-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
 

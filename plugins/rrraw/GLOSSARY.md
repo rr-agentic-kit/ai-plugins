@@ -15,13 +15,14 @@
 | prepare | Builder tech plan: execute-slice → `docs/rr/tasks/` + lazy tech ADRs | Product Plan / rr-planner; implement (rr-coder) | Nested under rr-builder; stop after L3; also orchestrate **prepare** stage |
 | orchestrate | Builder advances slice pipeline (prepare→…→optional ship→delivered) under drive×scope | Handoff (one nested skill then stop) | Dual-mode invariant with handoff; default `manual` × `full` |
 | handoff | Builder loads one nested skill on `--prepare`/`--coder`/`--tester`/`--security`/`--review` and stops | Orchestrate / drive×scope pipeline advance | No silent re-entry to orchestrate in the same run; drive/scope ignored |
-| task-step | Ordered implementer step inside a prepare task’s **Steps** | Full capability atom / prepare task | Pipeline runs plan→build→review→validate→optional ship per step |
+| task-step | Ordered implementer step inside a prepare task’s **Steps** | Full capability atom / prepare task | Pipeline: plan→build→review→validate⇄ship (shippable) per step |
 | plan (builder) | Task-step stage: enrich step plan + assessment (incl. **Ship**); **plan-knowledge allowlist only**; no app source edits | rr-planner **plan** phase / product Plan | Output shape: [plan-schema.md](skills/rr-builder/refs/plan-schema.md) |
 | build (builder) | Task-step stage: implement code + tests via full rr-coder + rr-tester | Generic “build the app”; CI build job | Executes source; after plan done-when |
 | review (builder) | Task-step / handoff review: rr-review; orchestrate review forces `--fix --all` | Casual code glance; Challenge (Discover) | Explicit `--review` may be report-only |
 | delivered | Slice validate PASS — residual ship boundary → **rr-ci** for unshipped work | Mid-slice **ship** stage; “done” chat without AC | Builder does not open PR/MR; planned ships already handed off |
-| ship (builder) | Orchestrate stage: resolve plan **Ship** branch/base → hand off **rr-ci** | Forge CLI inside builder; slice **delivered** only | After matching validate when `ship_after` ≠ `never` |
-| ship_after | Plan Ship field: `step_validate` \| `task_validate` \| `never` | Always-ship / CI `after_script` | Required on every step plan |
+| ship (builder) | Orchestrate stage: resolve plan **Ship** branch/base → hand off **rr-ci**; then re-enter validate | Forge CLI inside builder; slice **delivered** only | Entered when shippable validate hits Forge/PR miss (`ship_after` ≠ `never`) — not after PASS |
+| ship_after | Plan Ship field: `step_validate` \| `task_validate` \| `never` | Always-ship / CI `after_script` | Required on every step plan; `never` = non-shippable (no Forge/PR gate) |
+| shippable | Step/task with `ship_after` of `step_validate` or `task_validate` | Feature branch alone; `never` | Validate PASS requires open PR/MR for `Ship.branch` |
 | prior_open_pr | Plan Ship `base`: tip of latest still-open PR in same `pr_group` chain | Always base = default branch | Stacked PRs; fall back to default if none open |
 | capability atom | Smallest prepare task that delivers observable value (or unlocks it) | Full PRD leaf; pure rename | Grain rubric in rr-prepare |
 | Sonar fix | rr-ci `--fix --sonar`: scripted issue list + agent remediations; no human issue dump | Cursor sonar-list/fix slash skills; CI `code-quality-reports` | Envelope via `sonar-list-issues` |

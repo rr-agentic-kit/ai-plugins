@@ -59,6 +59,9 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Inventing plan/build/review/ship completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
 - Auto-chaining prepare → build without cursor/done-when.
 - Opening PR/MR inside builder without **rr-ci** (including mid-slice **ship** — hand off, do not invent forge CLI).
-- Skipping planned **ship** after validate when `ship_after` is not `never`.
+- Emitting shippable **step-validate** / **task-validate** PASS without an open PR for `Ship.branch`.
+- Requiring Forge/PR when `ship_after: never` was confirmed (non-shippable).
+- Skipping planned **ship** when shippable validate fails the Forge/PR gate (`ship_after` is not `never`).
+- Shipping only *after* validate PASS when the forge gate is what blocks PASS (wrong order).
 - Using **rr-builder** for exec-summary / PRD authoring → **rr-planner**.
 - **`Task`** for refactor fix worker (fix is inline only per `rr-refactor/refs/inline-fix.md`).

@@ -39,7 +39,7 @@ Defaults: orchestrate without drive/scope → `manual` × `full`. Lone `--auto` 
 - Prepare a pin-complete slice into ordered tasks
 - Implement, test, security-audit, or review a scoped change without full-slice orchestrate
 - Need task/slice Goal·Verify / AC validation before ship
-- Mid-slice or task-scoped PR via plan **Ship** → orchestrate **ship** → **rr-ci**
+- Mid-slice or task-scoped PR via plan **Ship** → forge-miss on validate → **ship** → **rr-ci** → re-validate
 
 ### Avoid when
 
@@ -55,7 +55,7 @@ Defaults: orchestrate without drive/scope → `manual` × `full`. Lone `--auto` 
 - **One nested skill (or stage knowledge set) per stage turn** — never preload all lane skills
 - **Plan ≠ build** — plan stage loads knowledge only; no application source edits; plan lands in `{NNNN}-{step}.plan.md` (1-based step) so build loads one step’s plan, not a bloated task body
 - **Feature branch at plan start** — on `main`/`master`, create `feat/{NNNN}-{step}-{short-desc}` before writing the plan; otherwise AskQuestion (stay / new from base / rename / abort) — never invent alternate names or defer to post-build
-- **Ship is planned** — each step plan’s **Ship** sets `branch`, `ship_after`, `base`; `prior_open_pr` stacks onto the latest still-open PR in the `pr_group` chain; forge open is **rr-ci** via **ship** stage
+- **Ship is planned** — each step plan’s **Ship** sets `branch`, `ship_after`, `base`; `never` = non-shippable (no Forge/PR gate); shippable validate requires an open PR; forge open is **rr-ci** via **ship** before that validate can PASS; `prior_open_pr` stacks onto the latest still-open PR in the `pr_group` chain
 - **Review under orchestrate is `--fix --all`** — report-only review uses explicit `--review` without `--fix`
 - **Delivered → residual rr-ci** — mid-slice ships already handed off; delivered only covers unshipped remainder
 
@@ -79,7 +79,7 @@ Nested skill / stage owns artifacts; prepare writes `docs/rr/tasks/`; review run
 
 ### Close
 
-Stop per drive×scope loop (stage done-when, delivered, hard stop, or decline). Handoff does not auto-advance the pipeline. Planned **ship** after validate → **rr-ci**. Slice validate PASS → **delivered** → residual **rr-ci** only. Load **rr-ci** also after review `--ci`.
+Stop per drive×scope loop (stage done-when, delivered, hard stop, or decline). Handoff does not auto-advance the pipeline. Shippable validate forge-miss → **ship** → **rr-ci** → re-validate. Slice validate PASS → **delivered** → residual **rr-ci** only. Load **rr-ci** also after review `--ci`.
 
 ## Constraints
 

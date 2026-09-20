@@ -28,7 +28,7 @@ Optional frontmatter on the plan file: `task_id`, `step`, `step_index`, `slice_i
 | **Risks** | Residual risks / unknowns that could block build |
 | **Verify hooks** | How build will prove the step (commands, assertions, AC ids) |
 | **Non-goals** | Explicit exclusions for this step |
-| **Ship** | Mid-slice / task ship intent — see table below (required; use `ship_after: never` when not shipping) |
+| **Ship** | Mid-slice / task ship intent — see table below (required; use `ship_after: never` when the step is **not shippable**) |
 
 ### Ship (required)
 
@@ -36,9 +36,11 @@ Record after feature-branch ensure. Do **not** invent a second branch naming sch
 
 | Field | Values | Meaning |
 |-------|--------|---------|
-| `branch` | Exact branch name string | Feature branch this step builds/ships on |
-| `ship_after` | `step_validate` \| `task_validate` \| `never` | When orchestrate enters **ship** ([ship.md](ship.md)) |
-| `base` | `default` \| `prior_open_pr` | PR/MR base: default branch, or tip of latest **still-open** PR in the same `pr_group` ship chain |
+| `branch` | Exact branch name string | Feature branch this step builds on (and ships on when shippable) |
+| `ship_after` | `step_validate` \| `task_validate` \| `never` | **Shippable** (`step_validate` / `task_validate`): forge open via **ship** before that validate can PASS. **`never`:** non-shippable — skip ship stage and Forge/PR gate; still run Goal/Verify |
+| `base` | `default` \| `prior_open_pr` | PR/MR base: default branch, or tip of latest **still-open** PR in the same `pr_group` ship chain (ignored when `never`) |
+
+**Ship-intent review (plan stage):** `never` is valid when this step will not open a PR. If Goal/Approach/pr_group clearly imply a forge open this step, AskQuestion once: keep `never` \| set `step_validate` or `task_validate` \| abort — do not silently coerce.
 
 ## Done-when
 
@@ -62,3 +64,5 @@ Record after feature-branch ensure. Do **not** invent a second branch naming sch
 - Inventing non-conforming branch names (`feat/<prose>`, slice-only prefixes)
 - Omitting **Ship** (or leaving `branch` / `ship_after` / `base` blank)
 - Setting `Ship.branch` to something other than the settled feature-branch name
+- Using `ship_after: never` for a step that is intended to open a PR this step (wrong non-shippable label)
+- Requiring an open PR when `ship_after: never` was confirmed (inventing a forge gate for non-shippable work)

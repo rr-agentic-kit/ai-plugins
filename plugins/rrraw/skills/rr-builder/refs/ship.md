@@ -1,14 +1,14 @@
 # Ship stage (planned mid-slice / task ship)
 
-**Audience:** `rr-builder` orchestrate **ship** stage after a matching validate PASS when the step plan’s **Ship** section says so. Forge create stays **rr-ci** — this stage resolves branch/base and hands off.
+**Audience:** `rr-builder` orchestrate **ship** when the step plan’s **Ship** section is shippable and forge open is still needed. Forge create stays **rr-ci** — this stage resolves branch/base and hands off.
 
 ## When
 
 | Plan `ship_after` | Trigger |
 |-------------------|---------|
-| `never` | Skip — do not enter **ship** |
-| `step_validate` | After **step-validate: PASS** for this step, before advancing `step_index` |
-| `task_validate` | After **task-validate: PASS** for the task, using this step’s Ship block |
+| `never` | Skip — do not enter **ship** (non-shippable; validate has no Forge/PR gate) |
+| `step_validate` | When step-validate **Forge / PR** FAILs (or Goal/Verify green but no open PR yet) and `step_ship_done` ≠ `true` — **before** step-validate can PASS. After ship done-when → re-enter **step-validate** (do not advance `step_index`). Do **not** wait for step-validate PASS to ship. |
+| `task_validate` | When task-validate **Forge / PR** FAILs for this Ship block (or equivalent forge miss) and task-scoped ship not done — **before** task-validate can PASS. After ship → re-enter **task-validate**. |
 
 ## Inputs
 
@@ -28,6 +28,7 @@
 3. **Persist** on `task-summary.md` frontmatter: `active_ship_branch`, `ship_base_branch` (resolved values).
 4. **Handoff** — `Read` `skills/rr-ci/SKILL.md`; pass branch = `active_ship_branch`, base = `ship_base_branch`. Stop at rr-ci PR/MR done-when. **Do not** invent gh/glab flags here.
 5. Set `step_ship_done: true` on `{NNNN}.md` (for `ship_after: step_validate`) or clear pending task-level ship marker after task ship.
+6. **Return** — re-enter the matching validate stage (`step_validate` or `task_validate`); do not advance past validate on ship alone.
 
 ## Done-when
 
@@ -35,6 +36,7 @@
 - Cursor ship fields persisted.
 - **rr-ci** handoff completed or engineer declined (manual) / hard-stopped.
 - `step_ship_done: true` when this was a step-scoped ship.
+- Validate stage re-entered (or engineer declined continue).
 
 ## Stop / anti-trigger
 
@@ -42,6 +44,7 @@
 - Do **not** invent branch names here — naming SoT is [feature-branch.md](feature-branch.md); Ship only records them.
 - Do **not** ship when `ship_after: never`.
 - Do **not** treat slice **delivered** as the only ship path — mid-slice ship is first-class when planned.
+- Do **not** require validate PASS before ship when the forge gate is what blocks PASS.
 
 ## Non-goals
 
