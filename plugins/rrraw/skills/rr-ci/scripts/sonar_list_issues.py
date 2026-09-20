@@ -9,6 +9,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote, urlencode
 
 import emit
 from errors import GhError, GitError, GlabError
@@ -20,6 +21,8 @@ from glab import default_glab
 COMMAND = "sonar-list-issues"
 _PROJECT_KEY_RE = re.compile(r"^[a-zA-Z0-9_\-\.:]+$")
 _BRANCH_RE = re.compile(r"^[a-zA-Z0-9_\-\./]+$")
+_PROPS_NAME = "sonar-project.properties"
+_PROPS_GLOB_DEPTH = ("*", "*/*", "*/*/*")
 
 
 class SonarError(Exception):
@@ -101,18 +104,7 @@ def lean_reshape(result: dict[str, Any]) -> dict[str, Any]:
     return lean
 
 
-def _resolve_project_key(explicit: str | None) -> str:
-    if explicit:
-        key = explicit.strip()
-        if not _PROJECT_KEY_RE.fullmatch(key):
-            raise SonarError(f"invalid project key: {key!r}", code="invalid_project")
-        return key
-    props = Path(repo_root()) / "sonar-project.properties"
-    if not props.is_file():
-        raise SonarError(
-            "missing -p/--project and no sonar.projectKey in properties",
-            code="missing_project",
-        )
+def _project_key_from_properties(props: Path) -> str | None:
     for line in props.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if stripped.startswith("sonar.projectKey="):
@@ -122,8 +114,46 @@ def _resolve_project_key(explicit: str | None) -> str:
             raise SonarError(
                 f"invalid project key in properties: {key!r}", code="invalid_project"
             )
+    return None
+
+
+def _discover_properties_files(root: Path) -> list[Path]:
+    found: list[Path] = []
+    root_props = root / _PROPS_NAME
+    if root_props.is_file():
+        found.append(root_props)
+    for pattern in _PROPS_GLOB_DEPTH:
+        for path in sorted(root.glob(f"{pattern}/{_PROPS_NAME}")):
+            if path.is_file() and path not in found:
+                found.append(path)
+    return found
+
+
+def _resolve_project_key(explicit: str | None) -> str:
+    if explicit:
+        key = explicit.strip()
+        if not _PROJECT_KEY_RE.fullmatch(key):
+            raise SonarError(f"invalid project key: {key!r}", code="invalid_project")
+        return key
+    root = Path(repo_root())
+    candidates: list[tuple[str, str]] = []
+    for props in _discover_properties_files(root):
+        key = _project_key_from_properties(props)
+        if key is None:
+            continue
+        rel = str(props.relative_to(root))
+        candidates.append((rel, key))
+    if len(candidates) == 1:
+        return candidates[0][1]
+    if len(candidates) > 1:
+        detail = ", ".join(f"{path}={key}" for path, key in candidates)
+        raise SonarError(
+            f"multiple sonar.projectKey candidates: {detail}; pass -p/--project",
+            code="ambiguous_project",
+        )
     raise SonarError(
-        "sonar-project.properties has no sonar.projectKey",
+        "missing -p/--project and no sonar.projectKey in properties "
+        f"(searched repo root and depth≤3 */{_PROPS_NAME})",
         code="missing_project",
     )
 
@@ -154,16 +184,16 @@ def _open_pr_for_current_branch() -> str:
     branch = current_branch()
     remote = detect()
     if remote.forge == "github":
+        # `gh pr view` takes branch as positional; `--head` is not a valid flag.
         raw = default_gh().cli(
             [
                 "pr",
                 "view",
+                branch,
                 "--json",
                 "number",
                 "--jq",
                 ".number",
-                "--head",
-                branch,
             ]
         )
         number = raw.strip()
@@ -203,20 +233,36 @@ def _resolve_scope(
     return _open_pr_for_current_branch(), None
 
 
-def _run_sonar(
+def _parse_issues_payload(stdout: str, project: str) -> tuple[list[dict[str, Any]], int]:
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError as exc:
+        raise SonarError(
+            f"sonar stdout not JSON: {exc}", code="sonar_parse_error"
+        ) from exc
+
+    raw_issues = payload.get("issues") if isinstance(payload, dict) else None
+    if not isinstance(raw_issues, list):
+        raise SonarError("sonar JSON missing issues[]", code="sonar_parse_error")
+
+    issues = [
+        _normalize_issue(item, project) for item in raw_issues if isinstance(item, dict)
+    ]
+    total = (
+        payload.get("paging", {}).get("total") if isinstance(payload, dict) else None
+    )
+    if not isinstance(total, int):
+        total = len(issues)
+    return issues, total
+
+
+def _run_sonar_list(
     *,
     project: str,
     pull_request: str | None,
     branch: str | None,
     statuses: str,
-) -> dict[str, Any]:
-    if shutil.which("sonar") is None:
-        raise SonarError(
-            "sonarqube-cli (`sonar`) not on PATH — install/auth before --fix --sonar",
-            code="sonar_not_found",
-        )
-    pull_request, branch = _resolve_scope(pull_request, branch)
-
+) -> tuple[list[dict[str, Any]], int]:
     cmd = [
         "sonar",
         "list",
@@ -244,26 +290,75 @@ def _run_sonar(
             completed.stderr or completed.stdout or ""
         ).strip() or "sonar list issues failed"
         raise SonarError(detail, code="sonar_cli_failed")
+    return _parse_issues_payload(completed.stdout, project)
 
-    try:
-        payload = json.loads(completed.stdout)
-    except json.JSONDecodeError as exc:
-        raise SonarError(
-            f"sonar stdout not JSON: {exc}", code="sonar_parse_error"
-        ) from exc
 
-    raw_issues = payload.get("issues") if isinstance(payload, dict) else None
-    if not isinstance(raw_issues, list):
-        raise SonarError("sonar JSON missing issues[]", code="sonar_parse_error")
-
-    issues = [
-        _normalize_issue(item, project) for item in raw_issues if isinstance(item, dict)
-    ]
-    total = (
-        payload.get("paging", {}).get("total") if isinstance(payload, dict) else None
+def _run_sonar_api_search(
+    *,
+    project: str,
+    pull_request: str | None,
+    branch: str | None,
+    statuses: str,
+) -> tuple[list[dict[str, Any]], int]:
+    """Fallback when `sonar list issues` returns empty but issues exist via API."""
+    params: dict[str, str] = {
+        "componentKeys": project,
+        "ps": "500",
+        "statuses": statuses,
+    }
+    if pull_request:
+        params["pullRequest"] = str(pull_request)
+    if branch:
+        params["branch"] = branch
+    endpoint = f"/api/issues/search?{urlencode(params, quote_via=quote)}"
+    completed = subprocess.run(
+        ["sonar", "api", "get", endpoint],
+        check=False,
+        capture_output=True,
+        text=True,
     )
-    if not isinstance(total, int):
-        total = len(issues)
+    if completed.returncode != 0:
+        detail = (
+            completed.stderr or completed.stdout or ""
+        ).strip() or "sonar api issues search failed"
+        raise SonarError(detail, code="sonar_cli_failed")
+    return _parse_issues_payload(completed.stdout, project)
+
+
+def _run_sonar(
+    *,
+    project: str,
+    pull_request: str | None,
+    branch: str | None,
+    statuses: str,
+) -> dict[str, Any]:
+    if shutil.which("sonar") is None:
+        raise SonarError(
+            "sonarqube-cli (`sonar`) not on PATH — install/auth before --fix --sonar",
+            code="sonar_not_found",
+        )
+    pull_request, branch = _resolve_scope(pull_request, branch)
+
+    issues, total = _run_sonar_list(
+        project=project,
+        pull_request=pull_request,
+        branch=branch,
+        statuses=statuses,
+    )
+    # `sonar list issues` can return total=0 while /api/issues/search still has OPEN
+    # findings for the same PR (observed SonarCloud). Fall back once when empty.
+    if total == 0 and (pull_request or branch):
+        try:
+            api_issues, api_total = _run_sonar_api_search(
+                project=project,
+                pull_request=pull_request,
+                branch=branch,
+                statuses=statuses,
+            )
+        except SonarError:
+            api_issues, api_total = issues, total
+        if api_total > 0:
+            issues, total = api_issues, api_total
 
     result: dict[str, Any] = {
         "project": project,
