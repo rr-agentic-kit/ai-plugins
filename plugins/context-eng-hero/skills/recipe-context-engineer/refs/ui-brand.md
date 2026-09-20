@@ -14,6 +14,8 @@ Use for major action transitions. Banner rules are **26** `━` characters wide.
 **Stage names (uppercase):**
 - `CLASSIFY`
 - `AUDIT`
+- `AUDIT-REDESIGN`
+- `IMPROVE`
 - `FIX`
 - `CREATE`
 - `EXTRACT`

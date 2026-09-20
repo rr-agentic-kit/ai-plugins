@@ -11,7 +11,7 @@
 | Command body lists `refs/actions/...` or `plugins/...` | **Avoid** | Leaks layout; skill **Run:** loads procedures |
 | Command body: chain slashes as **only** routing | **No** | Forbidden |
 
-Close surfaces: `close-contract.md`. Invoke modes: `skill-invocation.md` (single source).
+Close surfaces: `close-contract.md`. Invoke modes: `design/skill.md` (single source).
 
 ---
 
@@ -30,14 +30,16 @@ Close surfaces: `close-contract.md`. Invoke modes: `skill-invocation.md` (single
 
 | Goal | Do in chat | Do not |
 |------|------------|--------|
-| Missing type or clarify fields | **AskQuestion** (2–4 options) | Open-ended ask when choices are enumerable |
+| Missing type or clarify fields | **AskQuestion** (2–4 options); text fallback per `questioning.md` **Delivery channels** | Open-ended ask when choices are enumerable; stall when AskQuestion is missing |
 | Research patterns before design | **Task** `subagentType: explore` (parallel OK) | Load entire repo in parent |
 
 Routing and actions: skill **Actions** table + `gate-prompts.md`.
 
-**AskQuestion:** classify/clarify, fix/redesign intake, workflow branches.
+**AskQuestion:** classify/clarify, fix/redesign intake, workflow branches. Prefer the tool; **mandatory** text-mode channel with the same options when the tool/harness is absent (Plan mode, Composer Auto, ACP). See `questioning.md` **Delivery channels**.
 
 **Task / subagents:** isolated context; parallel = multiple Task calls in one message.
+
+**Task + Caller Load:** For independent diagnosis, spawn parallel Tasks in one turn and merge in the parent. Inject ref paths (and variant rubrics) in the Task payload; list stable refs in executor Inputs. Executors MUST NOT re-invoke the orchestrating skill for the same job. Task isolation does **not** require `agents/` catalog registration—parent-only specs live under skill `refs/executors/`. Exemplar: `actions/improve.md` (`compliance` + `opportunity`). Shared layout SoT: `design/design-core.md` **Shared knowledge layout**.
 
 ---
 
@@ -46,8 +48,8 @@ Routing and actions: skill **Actions** table + `gate-prompts.md`.
 Required **## Orchestration** in **workflow** templates; optional elsewhere unless multi-step:
 
 - **User invocation**: slash(es), required args
-- **Agent tools**: when to use AskQuestion, TodoWrite, Task
+- **Agent tools**: when to use AskQuestion, TodoWrite, Task; AskQuestion paths must document the text-mode fallback in `questioning.md` **Delivery channels**
 - **Workflow execution**: TodoWrite one item per `todo_id` before step 1
-- **Invoke modes:** see `skill-invocation.md`
+- **Invoke modes:** see `design/skill.md`
 
 **Rubric:** workflow `todo_id` and orchestration are **critical**; other types use judgment ids in `rubrics/*.rubric.md`.

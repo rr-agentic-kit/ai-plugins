@@ -10,6 +10,16 @@ Emit at **learn-3-topics**. Cap **7** topics. Only `skill_gap` rows default-sele
 - Failed action(s): `<action-id(s)>`
 - Miss: <1–2 sentences>
 
+## Tool/read economy
+
+Inventory from the missed run / problem statement (not extra skill Reads). Feed findings into Topics as `friction:` evidence or Auto-dropped “economy: no gap”.
+
+- Tools used: `<list>`
+- Files Read: `<list>`
+- Necessary?: `yes` \| `over-read` \| `invent`
+- Token cut?: `<one line → topic id or none>`
+- Interaction cut?: `<one line → topic id or none>`
+
 ## Topics
 
 | Id | Class | Evidence | Missing locus | Proposed absorb | Confidence |

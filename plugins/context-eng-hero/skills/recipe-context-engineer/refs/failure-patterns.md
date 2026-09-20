@@ -10,8 +10,8 @@ Use these labels in **audit** narrative findings. Map each failed check **id** (
 | **REDUNDANT** | Duplicates another artifact or co-loaded ref without unique extension | `*.refs.no-body-echo`, `*.refs.unique-contribution`, `*.refs.load-efficiency`, `harness.consistent.no-cross-echo` |
 | **DISCOVERY** | `description` too generic; false positives/negatives likely | `*.discovery.*` |
 | **CONTRACT** | Missing or ambiguous input/output/stop for invokers | `command.input.*`, `agent.outputs.*` |
-| **SAFETY** | Absolute paths, `..`, command-chaining-only routing, or unsafe defaults | `static.paths.*`, `*.routing.no-chain-only` |
-| **ORCHESTRATION** | Multi-step flow without TodoWrite/AskQuestion mapping where required | `*.orchestration.*`, `workflow.steps.todo-id` |
+| **SAFETY** | Absolute paths, `..`, command-chaining-only routing, unsafe defaults, or false-security plugin fields | `static.paths.*`, `*.routing.no-chain-only`, `agent.fm.no-false-security`, `agent.fence.body-required` |
+| **ORCHESTRATION** | Multi-step flow without TodoWrite/AskQuestion mapping where required; AskQuestion without text-mode Delivery channels | `*.orchestration.*`, `*.clarify.delivery-channels`, `workflow.steps.todo-id` |
 | **NOISE** | Long prose with little constraint value; should be ref or deleted | `*.noise.signal-ratio` |
 | **FORMAT** | Output shape not pinned; hard to verify success | `command.output.shape`, `agent.outputs.format` |
 

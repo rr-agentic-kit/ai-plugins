@@ -3,14 +3,14 @@
 **Version:** 0.0.2  
 **License:** Unlicense (see repo root `LICENSE`)
 
-Design and validate **skills**, **commands**, **rules**, **agents**, and **workflows**—and author **user-global / project CLAUDE.md** static memory.
+Design and validate **skills**, **commands**, **rules**, **agents**, and **workflows**—and author **project / user-global agent instruction packs** (`AGENTS.md` + optional `.agents/` situational packs; Claude `CLAUDE.md` pointer).
 
 ## Skills (recipe-* convention)
 
 | Skill | Path | Role |
 |-------|------|------|
 | **recipe-context-engineer** | `skills/recipe-context-engineer/SKILL.md` | Plugin artifacts: classify, clarify, actions (create, audit, fix, …) |
-| **recipe-static-memory** | `skills/recipe-static-memory/SKILL.md` | User-global and project `CLAUDE.md` (design, review, fix) |
+| **recipe-static-memory** | `skills/recipe-static-memory/SKILL.md` | Project (default) / user-global `AGENTS.md` packs (design, review, fix) |
 
 ### Skill vs command
 
@@ -46,9 +46,20 @@ Design and validate **skills**, **commands**, **rules**, **agents**, and **workf
 
 | Slash (Cursor) | Claude Code | Purpose |
 |----------------|-------------|---------|
-| `/static-memory-design` | `/context-eng-hero:static-memory-design` | Full CLAUDE.md from scratch (exhaustive comm+role for user-global) |
-| `/static-memory-review` | `/context-eng-hero:static-memory-review` | Section walkthrough: accept / edit / deep-dive |
+| `/static-memory-design` | `/context-eng-hero:static-memory-design` | Full `AGENTS.md` (+ `CLAUDE.md` `@` pointer) from scratch; default scope=project |
+| `/static-memory-review` | `/context-eng-hero:static-memory-review` | Section walkthrough; may delete low-leverage; optional packs |
 | `/static-memory-fix` | `/context-eng-hero:static-memory-fix` | Symptom-led minimal patch |
+
+### Static memory layout (project default)
+
+```text
+CLAUDE.md          # @AGENTS.md (+ optional @.agents/local.md)
+AGENTS.md          # Always-on: ~90%-leverage only (inclusion bar)
+.agents/{group}.md # Optional situational packs — names derived per repo; never @-imported
+.agents/local.md   # Gitignored personal override (sole .agents @ exception)
+```
+
+**Inclusion bar:** agent contract, not project bible—pointer to README/CONTRIBUTING over paste. Zero packs is valid.
 
 ### Static memory routing
 
@@ -56,7 +67,7 @@ Design and validate **skills**, **commands**, **rules**, **agents**, and **workf
 |-----------|-------|
 | No file / full rewrite | `/static-memory-design` |
 | File exists; systematic audit | `/static-memory-review` |
-| Claude misbehaved (symptom + path) | `/static-memory-fix` |
+| Agent misbehaved (symptom + path) | `/static-memory-fix` |
 | Plugin skill/command authoring | `/context-engineer` or `/context-engineer-create` |
 
 Full routing: `skills/recipe-static-memory/SKILL.md` **Routing**.
@@ -109,9 +120,9 @@ claude --plugin-dir ./plugins/context-eng-hero
 
 - Give action commands a **REQUIRED** path or goal per the command file. If missing, ask once.
 - Use `/context-engineer` when you need type choice + clarify gates before picking an action slash.
-- Use `/static-memory-*` for user-global or project `CLAUDE.md`—not for files under `plugins/`.
+- Use `/static-memory-*` for project (default) or user-global instruction packs—not for files under `plugins/`.
 - **Audit** verdict is **PASS** only when every static and judgment check passes—no numeric score.
-- **Write** paths for plugin artifacts run **pre-write reflection** after static and before pre-ship. User `CLAUDE.md` writes use **confirm-before-write** in static action refs.
+- **Write** paths for plugin artifacts run **pre-write reflection** after static and before pre-ship. Memory-file writes use **confirm-before-write** in static action refs.
 
 The skill descriptions intentionally avoid ambient audit/fix triggers; use the matching slash when you mean that verb.
 

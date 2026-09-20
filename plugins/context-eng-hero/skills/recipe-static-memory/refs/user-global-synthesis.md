@@ -20,9 +20,13 @@ Parse the user prompt first; only ask about buckets not already answered.
 - Mark stale indicators: “Review quarterly” on fast-changing tooling if user wants.
 - Line budget: ~100 lines total unless comm/role import split approved.
 
+## Inclusion bar (user scope)
+
+Still apply the 90% bar: cross-repo prefs that almost always help—not a preference dump. Rare workflows stay out or become situational packs only when justified.
+
 ## Project leak check (review / fix)
 
 Flag in user-global:
 
 - Repo-specific package names, internal URLs, ticket systems
-- “In this codebase we use X” → belongs in project `CLAUDE.md`
+- “In this codebase we use X” → belongs in project `AGENTS.md`

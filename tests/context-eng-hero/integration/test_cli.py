@@ -54,6 +54,9 @@ def test_cli_skill_fails_on_fixture(mini_plugin, plugin_root, repo_root):
         repo_root=repo_root,
     )
     assert proc.returncode == 1
+    combined = proc.stdout + proc.stderr
+    assert "static.name.path-match" in combined
+    assert "FAIL" in combined
 
 
 def test_cli_json_format(plugin_root, repo_root):

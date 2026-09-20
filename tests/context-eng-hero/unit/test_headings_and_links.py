@@ -5,11 +5,29 @@ from __future__ import annotations
 from pathlib import Path
 
 import audit_static as m
+import pytest
+from audit_static.links import link_scheme
 
 
 def test_headings_present_trims_whitespace():
     body = "##  Purpose \n\n## When to use\n"
     assert m.headings_present(body) == {"Purpose", "When to use"}
+
+
+@pytest.mark.parametrize(
+    ("target", "expected"),
+    [
+        ("https://example.com", "https"),
+        ("HTTP://example.com", "http"),
+        ("mailto:a@b.c", "mailto"),
+        ("sibling.md", None),
+        ("#section", None),
+        ("", None),
+        ("relative/path.md", None),
+    ],
+)
+def test_link_scheme(target: str, expected: str | None):
+    assert link_scheme(target) == expected
 
 
 def test_resolve_link_skips_external_and_anchor(plugin_root: Path):

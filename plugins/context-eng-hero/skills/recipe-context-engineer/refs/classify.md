@@ -10,7 +10,7 @@ Pick the **narrowest** type. Load at orchestration step 2 and action classify st
 | **Skill+Ref** | Base SKILL.md + `refs/` (or `references/`) loaded per progressive disclosure—variant or deep-dive refs |
 | **Ref file** | Skill-private `refs/*.md` (or `references/*.md`) — not an entry point; loaded because parent SKILL / action Ref index names it |
 | **Command** | Named slash entry with fixed input/output contract |
-| **Agent** | Role with tools, boundaries, and stop conditions |
+| **Agent** | Isolated-role Task executor with Role / Tools and boundaries / Stop / Inputs / Outputs (`agents/` or `agents/<group>/`) |
 | **Rule** | Always-on or glob-scoped constraint |
 | **Workflow** | Multi-step orchestration with delegation and per-step outputs |
 
@@ -24,7 +24,7 @@ Do not merge types. A folder with SKILL.md + `refs/` is **Skill+Ref**, not plain
 | `skills/<name>/SKILL.md` + `refs/` or `references/` | Skill+Ref |
 | `skills/<name>/refs/<topic>.md` (no SKILL edit) | Ref file |
 | `commands/<name>.md` | Command |
-| `agents/<name>.md` | Agent |
+| `agents/<name>.md` or `agents/<group>/<name>.md` | Agent |
 | `.cursor/rules/*.mdc` or `rules/` | Rule |
 | `*workflow*.md` with Steps + Delegation | Workflow |
 
@@ -38,6 +38,7 @@ Templates: `templates/skill.template.md` (Skill or Skill+Ref), `templates/ref-fi
 |--------|--------|
 | Audit verdict FAIL | **fix** + audit report |
 | Test probe FAIL, same contract | **fix** + test report |
+| User: `--improve` / improve this `<path>` | **improve** (declared path required) |
 | Live run miss (patch or friction) on existing skill | **learn** → then **fix** or **redesign** from handover |
 | Learn handover (approved topics preserve outcome) | **fix** + user-project `LEARN-HANDOVER.*` → **plugin source** |
 | Learn handover (any topic changes outcome/audience/capabilities) | **redesign** + user-project `LEARN-HANDOVER.*` → **plugin source** |
@@ -45,6 +46,8 @@ Templates: `templates/skill.template.md` (Skill or Skill+Ref), `templates/ref-fi
 | User: add step, remove gate, change audience | **redesign** |
 | User: wording, typo, violates own stop rule | **fix** |
 | Extract → production with resolved open questions | **redesign** (first ship) or **fix** (polish only) |
+| Ranked audit-redesign `absorb: fix` only | **fix** + opportunity ids |
+| Ranked audit-redesign `absorb: redesign` | **redesign** + opportunity ids |
 
 When ambiguous → **fix-vs-redesign** gate (`gate-prompts.md`).
 

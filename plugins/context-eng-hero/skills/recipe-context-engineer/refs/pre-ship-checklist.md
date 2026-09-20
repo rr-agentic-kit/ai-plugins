@@ -22,7 +22,7 @@ For each item: **PASS** or **FAIL** with one line of evidence (quote or line ref
 | # | Check |
 |---|--------|
 | 2.1 | Folder/file naming matches conventions (skill folder = `name`, command stem = `name`, etc.) |
-| 2.2 | Skill `description` matches invoke mode (`skill-invocation.md`); no ambient action verbs when `disable-model-invocation: true` |
+| 2.2 | Skill `description` matches invoke mode (`design/skill.md`); no ambient action verbs when `disable-model-invocation: true` |
 | 2.3 | Paths in doc are relative; no `..` |
 | 2.4 | Skill README (if folder ships): has **Why**, **What**, **When** with `### Use when` and `### Avoid when`; orchestrator README has **Actions** table; no anti-trigger duplication across **What** and **Avoid when**; does not restate **Procedure** (`readme-spec.md`) |
 | 2.5 | `ACRONYMS.md` at resolved path (plugin root or skill sibling): exists; H1 + table with **Acronym** + **Expansion** columns (`lexicon-spec.md`) |
@@ -51,6 +51,7 @@ For each item: **PASS** or **FAIL** with one line of evidence (quote or line ref
 | 5.1 | Workflows: every step has `todo_id`; **Orchestration** requires TodoWrite before execution |
 | 5.2 | Multi-step commands/skills: **Progress** or procedure maps steps to TodoWrite ids **or** one-line single-shot N/A |
 | 5.3 | If N/A claimed: section states why—not empty |
+| 5.4 | If Procedure/Orchestration/close uses AskQuestion or enumerable gates: **Delivery channels** stated (prefer AskQuestion; text-mode same options; no stall). If no gates: one-line N/A (`skill.clarify.delivery-channels` / command/workflow parallels) |
 
 ---
 
