@@ -1,6 +1,6 @@
 ---
 name: rr-builder
-description: Slice build orchestrator (drive×scope; default --manual --full) or lane handoff via --prepare/--coder/--tester/--security/--review/--refactor/--add-endless-test. Not rr-planner/rr-ci.
+description: Slice build orchestrator (drive×scope; default --auto --step) or lane handoff via --prepare/--coder/--tester/--security/--review/--refactor/--add-endless-test. Not rr-planner/rr-ci.
 ---
 
 # rr-builder
@@ -9,15 +9,15 @@ description: Slice build orchestrator (drive×scope; default --manual --full) or
 
 ## Purpose
 
-**Orchestrate** building a pin-complete execute-slice for software engineers: prepare → per-task plan/build/review/validate → optional planned **ship** (rr-ci handoff) → slice validate → **delivered** residual. Drive (`--auto` \| `--manual`) × scope (`--next` \| `--full`) control confirm gates and how far one run advances. With an explicit lane flag, **hand off** to exactly one nested skill and stop (drive/scope ignored). Artifacts: `docs/rr/tasks/` (prepare/execute cursor), `.ai/review/<runId>/` (review).
+**Orchestrate** building a pin-complete execute-slice for software engineers: prepare → per-task plan/build/refactor/review/validate → optional planned **ship** (rr-ci handoff) → slice validate → **delivered** residual. Drive (`--auto` \| `--manual`) × scope (`--next` \| `--step` \| `--task` \| `--slice`) control confirm gates and how far one run advances. With an explicit lane flag, **hand off** to exactly one nested skill and stop (drive/scope ignored). Artifacts: `docs/rr/tasks/` (prepare/execute cursor), `.ai/review/<runId>/` (review), `.ai/refactor/<runId>/` (refactor).
 
 ## When to use
 
-- Continue or resume a frozen slice (orchestrate: no lane flag; defaults `drive=manual`, `scope=full`)
-- Run without confirms (`--auto`) or only the cursor stage (`--next`)
+- Continue or resume a frozen slice (orchestrate: no lane flag; defaults `drive=auto`, `scope=step`)
+- Run without confirms (`--auto`), only the cursor stage (`--next`), one task-step (`--step`), one task (`--task`), or until delivered (`--slice`)
 - Explicit single-lane work: `--prepare` / `--coder` / `--tester` / `--security` / `--review` / `--refactor` / `--add-endless-test`
 - Task-step plan (knowledge only) or build (code + tests) under orchestrate
-- Multi-lane review with fix under orchestrate review (`--fix --all` forced) or explicit `--review`
+- Multi-lane endless review with fix under orchestrate review (`--fix --all --endless` forced) or explicit `--review`
 
 ## When not to use
 
@@ -38,7 +38,7 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
 
 **Delivery channels:** Prefer AskQuestion for missing kernel/`slice_id`, ambiguous mode, manual confirm/ready-pick, plan-stage feature-branch probe (not on `main`/`master`), and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
 
-1. **resolve** — Load [refs/input-resolution.md](refs/input-resolution.md). Normalize flags / NL into `payload.mode` (`orchestrate` \| `handoff`), `payload.drive` / `payload.scope` (orchestrate defaults: `manual` × `full`), optional `payload.lane`, and slice/task cursor fields. Explicit lane → omit/ignore drive/scope. Done: payload emitted or one AskQuestion.
+1. **resolve** — Load [refs/input-resolution.md](refs/input-resolution.md). Normalize flags / NL into `payload.mode` (`orchestrate` \| `handoff`), `payload.drive` / `payload.scope` (orchestrate defaults: `auto` × `step`), optional `payload.lane`, and slice/task cursor fields. Explicit lane → omit/ignore drive/scope. Done: payload emitted or one AskQuestion.
 2. **mode** — If explicit lane flag → **handoff**. Else → **orchestrate** (probe cursor per [refs/slice-pipeline.md](refs/slice-pipeline.md)). Explicit flag wins over cursor. Done: exactly one mode.
 3. **load** — Follow [refs/routing.md](refs/routing.md):
    - **Handoff:** `Read` only the matching nested `SKILL.md` once.

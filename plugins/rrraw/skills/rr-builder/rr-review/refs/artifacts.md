@@ -19,6 +19,7 @@
 | Lane dirs | **None** — all files flat under the run dir |
 | Filename | Locked type stem only — **do not** embed `runId` or short-branch |
 | Multi-chunk | Suffix assess (and its challenge sidecar) with chunk slug (`/` → `--`) |
+| Endless | Suffix assess (and challenge) with epoch: `code-assess-e{n}.md` / `code-assess-e{n}-challenge.md` (`n` = 1-based epoch). Multi-chunk + endless: `code-assess-e{n}-<chunk>.md`. Final `report.md` overwritten each epoch |
 
 ```
 .ai/review/{runId}/
@@ -26,8 +27,9 @@
   code-assess.md                 # multi-chunk: code-assess-<chunk>.md
   test-assess.md                 # multi-chunk: test-assess-<chunk>.md
   security-audit.md              # multi-chunk: security-audit-<chunk>.md
+  code-assess-e1.md              # endless epoch stems (e{n}); non-endless uses unsuffixed
   fixing-plan.md                 # when outcome=fix and scope is large
-  report.md
+  report.md                      # overwritten each endless epoch
   scope-preflight.json           # ci only; json exception to *.md
   code-assess-challenge.md       # {assess-stem}-challenge.md
   test-assess-challenge.md
@@ -49,6 +51,8 @@
 
 Multi-chunk examples: `code-assess-src--foo.md` + `code-assess-src--foo-challenge.md`.
 
+Endless examples: `code-assess-e2.md` + `code-assess-e2-challenge.md`; multi-chunk: `code-assess-e2-src--foo.md` + `code-assess-e2-src--foo-challenge.md`.
+
 ## Body skeletons
 
 ### `report.md`
@@ -57,11 +61,12 @@ Multi-chunk examples: `code-assess-src--foo.md` + `code-assess-src--foo-challeng
 # Review report
 
 - **Scope:** <paths / MR|PR / branch>
-- **Mode:** report | fix | ci
+- **Mode:** report | fix | ci | endless-fix
 - **Run id:** <yyyymmdd-NN>
+- **Epoch:** <n of max_epochs when endless; else omit>
 - **Brief path:** REVIEW_DIR/brief.md
 - **Goal source:** <brief GOAL or unresolved>
-- **Review decision:** <pass | warnings | blocked | fix-applied | ci-handed-off>
+- **Review decision:** <pass | warnings | blocked | fix-applied | ci-handed-off | max-epochs>
 
 ## Code
 <summary or link to code-assess*.md; keep rows only>
@@ -106,6 +111,7 @@ Recommended: ignore `.ai/` (or at least `.ai/review/` and `.ai/ci/`) for local-o
 ## Related
 
 - Params: [params.md](params.md)
+- Endless: [endless.md](endless.md)
 - Brief: [brief-output.md](brief-output.md)
 - Fix routing: [fix-routing.md](fix-routing.md)
 - Challenge: [severity-triage.md](severity-triage.md)

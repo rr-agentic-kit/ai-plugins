@@ -9,7 +9,7 @@
 | Task artifact | `docs/rr/tasks/{slice_id}/{NNNN}.md` |
 | Goal / Obligations / Verify | Task body (task-validate) or current step plan Goal / Verify hooks (step-validate) |
 | Ship block | Current `{NNNN}-{step}.plan.md` **Ship** (step-validate); any step with pending `ship_after: task_validate` (task-validate) |
-| Evidence | Diffs, test results, step notes from build/review; forge probe when shippable |
+| Evidence | Diffs, test results, step notes from build/refactor/review; forge probe when shippable |
 
 ## Rubric
 
@@ -32,7 +32,7 @@ Emit one line: `step-validate: PASS | FAIL` or `task-validate: PASS | FAIL` plus
 On **FAIL**:
 - Leave `builder_stage` at `step_validate` or `task_validate`; do **not** advance `step_index` / next task / slice validate.
 - If FAIL is **Forge / PR** only and `ship_after` matches this validate scope → next ready stage is **ship** ([ship.md](ship.md)); under `drive: auto`, enter **ship** then re-enter this validate stage.
-- Other FAIL reasons → hard stop for `--full` chaining (do not auto-ship).
+- Other FAIL reasons → hard stop for `scope: step|task|slice` chaining (do not auto-ship).
 
 On **PASS** with `ship_after: never`: treat `step_ship_done` as satisfied for advance (nothing to ship).
 

@@ -12,7 +12,7 @@ Exact one nested `SKILL.md` **Read**. Stop at that skill’s done-when. Do **not
 | `coder` | `rr-coder/SKILL.md` | Implement/refactor only for scoped request |
 | `tester` | `rr-tester/SKILL.md` | Forward test payload; parent does not re-parse conflicts |
 | `security` | `rr-security-auditor/SKILL.md` | Report-only |
-| `review` | `rr-review/SKILL.md` | Nested `--code|--test|--security|--all|--fix|--ci` per `rr-review/refs/params.md` |
+| `review` | `rr-review/SKILL.md` | Nested `--code|--test|--security|--all|--fix|--ci|--endless` per `rr-review/refs/params.md` |
 | `refactor` | `rr-refactor/SKILL.md` | Fixed-point behavior-invariant refactor; `Task` `refactor-collector` only when >50 files per `rr-refactor/refs/agent-index.md` |
 | `add_endless_test` | `rr-test-endless/SKILL.md` | Coverage-first multi-epoch loop; `Task` for gateway + leaf agents per `rr-test-endless/refs/orchestration.md` |
 
@@ -29,14 +29,14 @@ Local worktree / destructive git during review `--fix`: **Read** `skills/rr-git/
 | **prepare** | Full `rr-prepare/SKILL.md` |
 | **plan** | [plan-knowledge.md](plan-knowledge.md) + [plan-schema.md](plan-schema.md) |
 | **build** | Full `rr-coder/SKILL.md` **and** `rr-tester/SKILL.md` |
-| **review** | Full `rr-review/SKILL.md` with forced `--fix --all` |
-| **refactor** | Full `rr-refactor/SKILL.md` — scope = MR ∩ step-touched paths; see [slice-pipeline.md](slice-pipeline.md) |
+| **refactor** | Full `rr-refactor/SKILL.md` — scope = MR ∩ **build-touched** paths; see [slice-pipeline.md](slice-pipeline.md) |
+| **review** | Full `rr-review/SKILL.md` with forced `--fix --all --endless` |
 | **step_validate** / **task_validate** | [task-validate.md](task-validate.md) |
 | **ship** | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` |
 | **slice_validate** | [slice-validate.md](slice-validate.md) |
 | **delivered** | Stop — point to **rr-ci** for residual unshipped work |
 
-Run loop (auto/manual × next/full, readiness, cursor): [slice-pipeline.md](slice-pipeline.md).
+Run loop (auto/manual × next/step/task/slice, readiness, cursor): [slice-pipeline.md](slice-pipeline.md).
 
 ### Review lane delegation (inside rr-review)
 
@@ -56,7 +56,7 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Re-entering **orchestrate** after an explicit handoff in the same run.
 - Writing application source during **plan** stage.
 - Dumping rr-coder Required Knowledge / language matrices on **plan** (use [plan-knowledge.md](plan-knowledge.md) only).
-- Inventing plan/build/review/ship completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
+- Inventing plan/build/refactor/review/ship completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
 - Auto-chaining prepare → build without cursor/done-when.
 - Opening PR/MR inside builder without **rr-ci** (including mid-slice **ship** — hand off, do not invent forge CLI).
 - Emitting shippable **step-validate** / **task-validate** PASS without an open PR for `Ship.branch`.

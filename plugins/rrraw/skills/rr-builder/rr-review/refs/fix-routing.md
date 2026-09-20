@@ -14,6 +14,14 @@ Parent session applies fixes.
 
 Multi-lane `--fix`: typically code then test unless user requests test-only.
 
+## Endless re-entry
+
+When `endless: true` and [endless.md](endless.md) has not yet exited success:
+
+1. Complete this fix pass for code/test keeps.
+2. Return to **rr-review** assess + Challenge for the **next epoch** (new epoch-stamped assess stems).
+3. Do **not** treat security-only keeps as fix work — they contribute to `warnings` exit, not another code/test fix pass.
+
 ## Plan artifact
 
 When fix scope is large, write **`REVIEW_DIR/fixing-plan.md`** (see [artifacts.md](artifacts.md)).

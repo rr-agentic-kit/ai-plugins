@@ -16,7 +16,7 @@ Drive expanded production-source scope to **two consecutive** full-scope assessm
 ## When to use
 
 - **`rr-builder --refactor`** handoff (parent sets `lane: refactor`)
-- Orchestrate **refactor** stage after review (post-review, pre-step-validate)
+- Orchestrate **refactor** stage after build, before review (pre-review, pre-step-validate)
 - God methods/classes, magic numbers, visibility drift, dead code, stack Prefer/Avoid cleanup
 
 ## When not to use

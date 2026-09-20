@@ -23,7 +23,7 @@ Mechanical tool seeds (Checkstyle/Biome/Spotless) plus mandatory LLM assess pack
 ### Use when
 
 - **`rr-builder --refactor`** handoff with validated param block
-- Orchestrate **refactor** stage after review (post-review, pre-step-validate)
+- Orchestrate **refactor** stage after build, before review (pre-review, pre-step-validate)
 - God methods/classes, magic numbers, visibility drift, dead code, stack Prefer/Avoid cleanup on MR or repo scope
 
 ### Avoid when

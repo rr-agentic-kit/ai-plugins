@@ -15,12 +15,12 @@ files_likely: []
 pr_group: null
 adr_refs: []
 status: detailed
-builder_stage: null | prepare | plan | build | review | refactor | step_validate | task_validate
+builder_stage: null | prepare | plan | build | refactor | review | step_validate | task_validate
 step_index: null | integer   # 0-based into Steps; omit when not in a task-step stage
 step_plan_done: false | true   # current step_index only; reset on step advance
 step_build_done: false | true
-step_review_done: false | true
 step_refactor_done: false | true
+step_review_done: false | true
 ---
 ```
 

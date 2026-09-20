@@ -1,6 +1,6 @@
 ---
 name: rr-review
-description: "Multi-lane review under .ai/review/<runId>/. Via --review (+ nested flags) or orchestrate review (forces --fix --all)."
+description: "Multi-lane review under .ai/review/<runId>/. Via --review (+ nested flags) or orchestrate review (forces --fix --all --endless)."
 disable-model-invocation: true
 user-invocable: false
 ---
@@ -11,13 +11,13 @@ user-invocable: false
 
 ## Purpose
 
-Orchestrate multi-lane code / test / security review in the **parent session** and persist artifacts under **`.ai/review/<runId>/`**. Lane rubrics live in **rr-coder**, **rr-tester**, **rr-security-auditor**.
+Orchestrate multi-lane code / test / security review in the **parent session** and persist artifacts under **`.ai/review/<runId>/`**. Lane rubrics live in **rr-coder**, **rr-tester**, **rr-security-auditor**. Optional **`--endless`** loops assess→Challenge→fix→re-assess until clear or epoch cap.
 
 ## When to use
 
 - Multi-lane review via **rr-builder** `--review` with nested `--code`, `--test`, `--security`, or `--all`
-- Optional nested `--fix` (inline apply) or `--ci` (handoff to **rr-ci** after Challenge)
-- Builder orchestrate **review** stage — parent **forces** `--fix --all` (engineers wanting report-only use explicit `--review` without `--fix`)
+- Optional nested `--fix` (inline apply), `--endless` (fix loop until clear), or `--ci` (handoff to **rr-ci** after Challenge)
+- Builder orchestrate **review** stage — parent **forces** `--fix --all --endless` (engineers wanting report-only use explicit `--review` without `--fix`)
 - Review intent from **rr-builder** when `payload.lane` is `review`
 
 ## When not to use
@@ -35,15 +35,16 @@ Standalone PR open or pipeline-only debug → **rr-ci** without review.
 | [refs/chunking.md](refs/chunking.md) | Large scope |
 | [refs/severity-triage.md](refs/severity-triage.md) | Challenge step |
 | [refs/fix-routing.md](refs/fix-routing.md) | `--fix` |
+| [refs/endless.md](refs/endless.md) | When `endless: true` |
 | [refs/maintenance-hunk-exclusion.md](refs/maintenance-hunk-exclusion.md) | Challenge sweep |
 
 ## Procedure
 
-TodoWrite `merge: false` with ids matching steps below when the run spans 3+ steps.
+TodoWrite `merge: false` with ids matching steps below when the run spans 3+ steps. When `endless`, use `merge: true` per epoch after the first; exactly one `in_progress`.
 
 ### 1. parse
 
-Confirm param block from [refs/params.md](refs/params.md). Default lanes: `[code, test, security]`. **Abort:** `--fix` + `--ci`; unknown flag.
+Confirm param block from [refs/params.md](refs/params.md). Default lanes: `[code, test, security]`. **Abort:** `--fix` + `--ci`; `--endless` + `--ci`; `--endless` without `--fix` (unless forced); unknown flag.
 
 ### 2. id
 
@@ -83,15 +84,28 @@ Per chunk, ordered lane list:
 | Production + tests | + `test` when test ∈ lanes |
 | Test-only | `test` only |
 
-### 6. assess
+### 6–9. assess → Challenge → branch → merge
+
+When **`endless: false`**: run steps 6–9 once (below).
+
+When **`endless: true`**: for `epoch = 1..max_epochs`:
+
+1. **assess** (step 6) with epoch-stamped stems (`code-assess-e{n}.md` — [artifacts.md](artifacts.md)).
+2. **Challenge** (step 7).
+3. Evaluate [endless.md](endless.md) exit rules **before** burning a fix epoch when already clear.
+4. If not clear and epoch allows: **fix** (step 8) per [fix-routing.md](fix-routing.md), then continue.
+5. **merge** (step 9) — overwrite `report.md` each epoch.
+6. On clear / warnings-security-only → exit success. On cap without clear → stop per endless.md (orchestrate leaves `step_review_done` unset).
+
+#### 6. assess
 
 For each chunk × lane, **`Read`** nested skill and produce assess artifact under `REVIEW_DIR` (see [refs/artifacts.md](refs/artifacts.md)). Forward **`BRIEF_PATH`**; when `outcome: ci`, use **`READ_REF`** via `git show` for context reads.
 
-### 7. Challenge
+#### 7. Challenge
 
 Parent session. **`Read`** [refs/severity-triage.md](refs/severity-triage.md) + lane binding refs + [refs/maintenance-hunk-exclusion.md](refs/maintenance-hunk-exclusion.md). Persist **`{assess-stem}-challenge.md`** per lane (see [refs/artifacts.md](refs/artifacts.md)). Consumers use **`keep` only**. Unchallenged challengeable rows → **Stopped:** `unchallenged report`.
 
-### 8. branch (outcome)
+#### 8. branch (outcome)
 
 | `outcome` | Action |
 |-----------|--------|
@@ -99,7 +113,7 @@ Parent session. **`Read`** [refs/severity-triage.md](refs/severity-triage.md) + 
 | `fix` | **`Read`** [refs/fix-routing.md](refs/fix-routing.md) — inline fix per plan; reuse **rr-tester** agents for test lane writes when needed |
 | `ci` | **`Read`** `skills/rr-ci/SKILL.md` — inline POST, pipeline security reports, review submit → step 9 |
 
-### 9. merge
+#### 9. merge
 
 Write **`REVIEW_DIR/report.md`** per body skeleton in [refs/artifacts.md](refs/artifacts.md) — sections per lane; header: Scope, Mode, Run id, Brief path, Goal source, Review decision. Chat: `Report written: .ai/review/<runId>/report.md`.
 
@@ -109,3 +123,4 @@ Write **`REVIEW_DIR/report.md`** per body skeleton in [refs/artifacts.md](refs/a
 - `outcome: ci` + no open PR/MR
 - Assess failed for lane needed by `--fix` → skip lane fix; note in report
 - `--ci` + unchallenged blocker-tier rows → refuse POST
+- Endless epoch cap without clear/warnings-security-only → stop per [endless.md](endless.md)

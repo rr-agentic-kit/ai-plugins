@@ -10,7 +10,7 @@ slice ready
     → [ per task:
           task detail              # rr-prepare L2 (+ steps breakdown)
           → [ per task-step:
-                plan → build → review → refactor → step-validate
+                plan → build → refactor → review → step-validate
                   ⇄ [ ship? ]      # shippable: forge-miss → ship → re-validate (before PASS)
               ]
           → task-validate
@@ -28,8 +28,8 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 |-------|-------------------|-------|----------------|-----------|
 | **plan** | Ensure feature branch ([feature-branch.md](feature-branch.md)), then produce/enrich step plan + assessment only | [plan-knowledge.md](plan-knowledge.md) allowlist (includes feature-branch) | **No** app source (git branch create/checkout OK) | Branch settled + sidecar `{NNNN}-{step}.plan.md` complete per [plan-schema.md](plan-schema.md) (incl. **Ship**); set `step_plan_done: true` |
 | **build** | Implement the step | Current `{NNNN}-{step}.plan.md` + minimal task Goal/Obligations if needed; full **rr-coder** + **rr-tester** (code **and** tests for the step). **Do not** Read other steps’ `.plan.md` files or inlined plan prose from the task body | **Yes** | Code + tests for the step land; step verify checks runnable; set `step_build_done: true` |
-| **review** | Full multi-lane review with fix | **rr-review** with **`--fix --all`** (forced) | Via review fix path | Review run complete; fix applied per review; set `step_review_done: true` |
-| **refactor** | Behavior-invariant coder-rule refactor on step-touched MR scope | **rr-refactor** (`epoch_cap: 5` default) | Via inline fix path | Terminal `report.md` under `.ai/refactor/<runId>/`; set `step_refactor_done: true` (or skip note when scope empty — see below) |
+| **refactor** | Behavior-invariant coder-rule refactor on step **build-touched** MR scope | **rr-refactor** (`epoch_cap: 5` default) | Via inline fix path | Terminal `report.md` under `.ai/refactor/<runId>/`; set `step_refactor_done: true` (or skip note when scope empty — see below) |
+| **review** | Full multi-lane review with fix, endless until clear | **rr-review** with **`--fix --all --endless`** (forced) | Via review fix path | Endless exit success (clear or warnings-only-security) per `rr-review/refs/endless.md`; set `step_review_done: true` |
 | **step-validate** / **task-validate** | Rubric: Goal / Verify (+ Forge/PR when shippable; Ship-intent review when `never`) | [task-validate.md](task-validate.md) | No (assessment) | PASS/FAIL per [task-validate.md](task-validate.md); forge-miss FAIL → **ship** then re-validate |
 | **ship** | Resolve branch/base; hand off **rr-ci**; return to validate | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` | Via rr-ci only | [ship.md](ship.md) done-when; set `step_ship_done: true` when step-scoped; re-enter validate |
 | **slice validate** | Rubric: did **slice** hit slice goal / AC | [slice-validate.md](slice-validate.md) | No (assessment) | PASS/FAIL against execute-slice / pinned AC |
@@ -40,8 +40,8 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 |--------------|----------|
 | **plan** (orchestrate) | **Read** only [plan-knowledge.md](plan-knowledge.md). Run [feature-branch.md](feature-branch.md) ensure **first**. Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run rr-coder/rr-tester implement procedures. |
 | **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `rr-coder/SKILL.md` and `rr-tester/SKILL.md` and follow them for the step (code + tests). |
-| **review** (orchestrate) | **Read** `rr-review/SKILL.md`; force `--fix --all` regardless of user omission. |
-| **refactor** (orchestrate) | **Read** `rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. |
+| **refactor** (orchestrate) | **Read** `rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
+| **review** (orchestrate) | **Read** `rr-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). |
 | **ship** (orchestrate) | **Read** [ship.md](ship.md), then `skills/rr-ci/SKILL.md`. Do **not** invent forge CLI in builder. |
 | Explicit lane flag | Full-skill **handoff** — see [routing.md](routing.md). No pipeline advance past that skill’s done-when. |
 
@@ -51,52 +51,71 @@ Prefer extending existing prepare artifacts — no third parallel state file.
 
 | Field | Where | Values / notes |
 |-------|--------|----------------|
-| `builder_stage` | `{NNNN}.md` frontmatter (active task) and/or `task-summary.md` | `prepare` \| `plan` \| `build` \| `review` \| `refactor` \| `step_validate` \| `ship` \| `task_validate` \| `slice_validate` \| `delivered` |
+| `builder_stage` | `{NNNN}.md` frontmatter (active task) and/or `task-summary.md` | `prepare` \| `plan` \| `build` \| `refactor` \| `review` \| `step_validate` \| `ship` \| `task_validate` \| `slice_validate` \| `delivered` |
 | `step_index` | `{NNNN}.md` frontmatter | 0-based index into that task’s **Steps** (omit when stage is prepare / task_validate / slice_validate / delivered) |
 | `step_plan_done` | `{NNNN}.md` frontmatter | `true` \| `false` — applies to current `step_index`; reset to `false` when advancing `step_index` |
 | `step_build_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done` |
-| `step_review_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done` |
 | `step_refactor_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done`; reset when advancing `step_index` |
+| `step_review_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done`; may be reset to `false` after mid-flight refactor migration (see below) |
 | `step_ship_done` | `{NNNN}.md` frontmatter | `true` \| `false` — step-scoped ship; treat as `true` when plan `ship_after: never` (non-shippable — nothing to ship; does **not** waive Goal/Verify). Reset when advancing `step_index` |
 | `active_ship_branch` | `task-summary.md` | Last resolved ship head branch (from plan Ship / feature-branch) |
 | `ship_base_branch` | `task-summary.md` | Last resolved PR/MR base (`default` branch name or prior open tip) |
 | `prepare_status` | `task-summary.md` | Existing: `l1` \| `l2` \| `complete` — still authoritative for prep completeness |
 
-Update fields when a stage’s done-when passes — **before** looping or stopping. Do not invent a second cursor store. Do **not** infer plan/build/review/refactor/ship completion from prose alone — use the booleans (+ Ship section for whether ship applies).
+Update fields when a stage’s done-when passes — **before** looping or stopping. Do not invent a second cursor store. Do **not** infer plan/build/refactor/review/ship completion from prose alone — use the booleans (+ Ship section for whether ship applies).
 
 ### Orchestrate refactor scope rule
 
 When stage is **refactor** (not `--refactor` handoff):
 
 1. Resolve MR file list (rr-review MR recipe in `rr-review/refs/params.md`).
-2. Narrow to files touched during the current step's **build** + **review** (`git diff` against pre-build snapshot or merge-base + step path hints from `{NNNN}-{step}.plan.md`).
+2. Narrow to files touched during the current step's **build** only (`git diff` against pre-build snapshot or merge-base + step path hints from `{NNNN}-{step}.plan.md`). Do **not** intersect with review-touched paths.
 3. **Empty intersection** → **skip** refactor with note; set `step_refactor_done: true` — do **not** stop the slice.
 4. Pass resolved scope as `payload.refactor.paths` + `scope: MR` + `epoch_cap: 5` to **rr-refactor**.
 
+### Mid-flight migration (review-before-refactor → refactor-before-review)
+
+If cursor shows `step_review_done: true` and `step_refactor_done: false` (legacy order mid-flight):
+
+1. Run **refactor** per scope rule above.
+2. After refactor done-when (or skip), **reset** `step_review_done: false`.
+3. Next probe picks **review** so review re-runs on cleaned code.
+
 ## Cursor algorithm
 
-Probe order — **first match wins** (this is the **next** stage for `scope: next`, and the head of the remaining path for `scope: full`). Read only frontmatter fields above + current step plan **Ship** when noted — do **not** invent completion from scanning step markdown narrative.
+Probe order — **first match wins** (this is the **next** stage for `scope: next`, and the head of the remaining path for `scope: step` / `task` / `slice`). Read only frontmatter fields above + current step plan **Ship** when noted — do **not** invent completion from scanning step markdown narrative.
 
 1. **No pin-complete kernel / no `slice_id`** → stop or AskQuestion (need plan freeze / path).
 2. **Missing / incomplete prepare** (`outlined` rows, or `prepare_status` ≠ `complete`) → stage **prepare** → load **rr-prepare**.
 3. **Active task** has next **task-step** with `step_plan_done` ≠ `true` → **plan**.
 4. **`step_plan_done: true` and `step_build_done` ≠ `true`** → **build**.
-5. **`step_build_done: true` and `step_review_done` ≠ `true`** → **review** (`--fix --all`).
-6. **`step_review_done: true` and `step_refactor_done` ≠ `true`** → **refactor** (full **rr-refactor** per scope rule above).
-7. **`step_refactor_done: true`** → **step-validate** (until PASS recorded for this step).
+5. **`step_build_done: true` and `step_refactor_done` ≠ `true`** → **refactor** (full **rr-refactor** per scope rule above; apply mid-flight migration reset after done-when when prior `step_review_done` was `true`).
+6. **`step_refactor_done: true` and `step_review_done` ≠ `true`** → **review** (`--fix --all --endless`).
+7. **`step_review_done: true`** → **step-validate** (until PASS recorded for this step).
 8. **While on step-validate** — Run [task-validate.md](task-validate.md) for step scope (incl. Ship-intent review when `never`; Forge/PR when shippable):
    - **Forge / PR FAIL** and `ship_after: step_validate` and `step_ship_done` ≠ `true` → **ship** ([ship.md](ship.md)); after ship done-when → return here (re-validate). Under `drive: auto`, chain ship → re-validate without asking.
-   - Other **FAIL** → leave `builder_stage: step_validate`; hard-stop `--full` chaining.
+   - Other **FAIL** → leave `builder_stage: step_validate`; hard-stop chaining under `scope: step|task|slice`.
    - **PASS** and `ship_after: never` → `step_ship_done` satisfied; go to 9.
    - **PASS** and shippable → open PR already proven; `step_ship_done` should be `true`; go to 9. Do **not** enter ship after PASS for `ship_after: step_validate`.
-9. **Advance** — If more steps remain: next `step_index`, set `step_plan_done` / `step_build_done` / `step_review_done` / `step_refactor_done` / `step_ship_done` to `false`. If no more steps → **task-validate**.
+9. **Advance** — If more steps remain: next `step_index`, set `step_plan_done` / `step_build_done` / `step_refactor_done` / `step_review_done` / `step_ship_done` to `false`. If no more steps → **task-validate**.
 10. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Other FAIL → hard stop. **PASS** → next task or step 11.
 11. **All tasks validated** → **slice validate**.
 12. **Slice validate PASS** → stop: **slice delivered** → point engineer to **rr-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
 
 Explicit lane flag wins over this cursor even if `builder_stage` says otherwise ([input-resolution.md](input-resolution.md)).
 
-## Readiness set (`drive: manual`, `scope: full`)
+**Endless review hard-stop:** if review exits at `--max-epochs` without clear/warnings-security-only → leave `step_review_done` unset; hard-stop the orchestrate chain (do not advance to step-validate).
+
+## Scope stop boundaries
+
+| `scope` | Stop when |
+|---------|-----------|
+| `next` | Cursor-next stage done-when met (no chaining) |
+| `step` | Current task-step reaches step-validate PASS (incl. ship→re-validate if shippable). If cursor is still **prepare**, complete prepare then stop (do not enter first step). |
+| `task` | Active task reaches task-validate PASS (all its steps + task-validate). |
+| `slice` | Slice validate PASS → delivered (or hard stop). Replaces retired `--full`. |
+
+## Readiness set (`drive: manual`, `scope: slice`)
 
 From the cursor algorithm over **remaining** stages until **delivered**:
 
@@ -106,7 +125,7 @@ From the cursor algorithm over **remaining** stages until **delivered**:
 | **blocked** | Stage whose prior done-when is unmet — list with prereq for guidance; **not** offered as runnable |
 | **`(next)`** | Suffix on the ready item that the cursor algorithm would pick under `scope: next` — exactly one label when a next stage exists |
 
-Linear pipeline usually yields **one** ready stage (that item is also **`(next)`**). Still list the remaining blocked path. AskQuestion **only** among the ready set — never offer blocked stages as executable choices. When presenting the ready list (AskQuestion options or prose), mark that cursor stage as e.g. `build (next)` so the engineer sees which choice `--next` would have run.
+Linear pipeline usually yields **one** ready stage (that item is also **`(next)`**). Still list the remaining blocked path. AskQuestion **only** among the ready set — never offer blocked stages as executable choices. When presenting the ready list (AskQuestion options or prose), mark that cursor stage as e.g. `build (next)` so the engineer sees which choice `--next` would have run. Under `manual` × `step` / `task`, present only stages within the current scope boundary the same way.
 
 ## Orchestrate run loop (drive × scope)
 
@@ -117,18 +136,22 @@ resolve flags + cursor
   → probe cursor / readiness set
   → decide drive × scope:
        auto × next  → execute next stage → stop at done-when
-       auto × full  → execute next stage → if not delivered and not hard stop → re-probe → repeat
-       manual × next → show next stage (AskQuestion confirm/edit) → execute that one → stop (or wait if user continues)
-       manual × full → show ready vs blocked (cursor stage marked (next)) → AskQuestion among ready → execute chosen → re-list until decline / delivered / hard stop
+       auto × step  → execute → re-probe → repeat until step boundary (or hard stop)
+       auto × task  → chain until task-validate PASS (or hard stop)
+       auto × slice → chain until delivered (or hard stop)
+       manual × next → show next stage (AskQuestion confirm/edit) → execute that one → stop
+       manual × step|task|slice → AskQuestion before each stage; under slice keep ready-vs-blocked with (next); stop at scope boundary
 ```
 
 | Cell | Behavior |
 |------|----------|
 | **auto × next** | Run cursor-next stage (may load multiple nested skills/refs **in order** within that stage’s done-when). Persist cursor. **Stop** — do not chain. |
-| **auto × full** | Same execute as next, then **loop**: re-probe → next stage until **delivered** or hard stop (validate FAIL, missing kernel, refactor stop, user cancel). Silent chaining requires `drive: auto`. |
+| **auto × step** | Same execute as next, then **loop** until current task-step reaches step-validate PASS (incl. ship→re-validate). If cursor is **prepare**, complete prepare then **stop** (do not enter first step). |
+| **auto × task** | Chain stages until active task reaches task-validate PASS (all its steps + task-validate), or hard stop. |
+| **auto × slice** | Chain stages until **delivered** or hard stop (validate FAIL, missing kernel, refactor stop, endless review max-epochs, user cancel). Silent chaining requires `drive: auto`. |
 | **manual × next** | Present only the next logical stage; wait for confirm/change; execute that one; then wait again or stop if user declines. **Never** execute without confirm. |
-| **manual × full** | List remaining stages as **ready** vs **blocked** (+ prereq); mark the cursor stage **`(next)`**; AskQuestion among **ready** only; execute chosen; re-list. **Never** offer blocked as runnable. |
+| **manual × step** / **task** / **slice** | Same boundaries as auto counterparts; AskQuestion before each stage execute. Under `slice`, list remaining stages as **ready** vs **blocked** (+ prereq); mark the cursor stage **`(next)`**; AskQuestion among **ready** only; execute chosen; re-list until decline / delivered / hard stop / boundary. **Never** offer blocked as runnable. |
 
-**Hard stop** ends any loop: stage failure, validate FAIL, missing inputs, conflicting flags, user decline. Persist `builder_stage` / `step_index` / `step_*_done` after each successful done-when before the next probe.
+**Hard stop** ends any loop: stage failure, validate FAIL, missing inputs, conflicting flags, endless review epoch cap without clear exit, user decline. Persist `builder_stage` / `step_index` / `step_*_done` after each successful done-when before the next probe.
 
 **Handoff:** skip this loop — [routing.md](routing.md) handoff table; stop at nested done-when. Drive/scope do not mutate handoff lanes.

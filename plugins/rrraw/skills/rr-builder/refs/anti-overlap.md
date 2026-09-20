@@ -16,7 +16,7 @@
 
 **When builder hands off:** (1) orchestrate **ship** after planned validate ([ship.md](ship.md) — mid-slice or task-scoped); (2) **slice delivered** residual; (3) **rr-review** `--ci`.
 
-**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--full`) and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **rr-ci** — does **not** invent forge CLI.
+**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--step`/`--task`/`--slice`) and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **rr-ci** — does **not** invent forge CLI.
 
 **rr-builder does not:** open MR/PR except by handing off to **rr-ci** (ship stage, delivered residual, or review `--ci`).
 
@@ -47,7 +47,7 @@
 | rr-tester | rr-coder (production design), rr-review orchestration, rr-test-endless (multi-epoch loop) |
 | rr-test-endless | rr-tester (one-off flags), rr-review `--test --fix` (MR review) |
 | rr-security-auditor | rr-coder CPNNN, full test coverage |
-| rr-review | rr-ci POST mechanics, host-specific forge/MR scripts; orchestrate review forces `--fix --all` |
+| rr-review | rr-ci POST mechanics, host-specific forge/MR scripts; orchestrate review forces `--fix --all --endless` |
 
 **rr-prepare stop phrase:** "Tech plan / task WBS only — use **rr-prepare**; product Plan stays **rr-planner**; code stays **rr-coder**."
 
