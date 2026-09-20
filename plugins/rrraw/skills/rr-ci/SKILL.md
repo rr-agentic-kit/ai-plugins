@@ -1,6 +1,6 @@
 ---
 name: rr-ci
-description: Forge router for PR/MR ship (upsert via --create|update-[pr|mr]), issues, CI debug, publish, deploy; --fix --sonar remediates Sonar issues.
+description: Forge router for PR/MR ship (upsert via --create|update-[pr|mr]), issues, CI debug, publish, deploy; --fix --sonar remediates Sonar issues; --pull-dependabot merges origin/dependabot/** with verify.
 ---
 
 # rr-ci
@@ -19,14 +19,15 @@ description: Forge router for PR/MR ship (upsert via --create|update-[pr|mr]), i
 | PR/MR title/body | [refs/pr-mr-templates.md](refs/pr-mr-templates.md) |
 | Pipeline fix anti-patterns | [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) |
 | Sonar remediations (`--fix --sonar`) | [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) |
+| Dependabot remote merges (`--pull-dependabot`) | [refs/pull-dependabot.md](refs/pull-dependabot.md) |
 | Review thread disposition | [refs/review-comment-triage.md](refs/review-comment-triage.md) |
-| Shape detail (draft / sonar / issue / ship) | [refs/task-shapes.md](refs/task-shapes.md) when step 0 needs more than classify |
+| Shape detail (draft / sonar / issue / ship / pull-dependabot) | [refs/task-shapes.md](refs/task-shapes.md) when step 0 needs more than classify |
 
 Procedure step **load** follows this table; do not invent nested paths.
 
 ## Purpose
 
-Own the **ship path** (commit/push when creating or updating a PR/MR), **forge tracker issues** (draft → approve → create), **generic CI** (title/description, pipeline debug, review helpers), and **Sonar-scoped remediations** via `--fix --sonar`. Detect the remote forge and **Read** the nested skill. Keep GitHub-only and GitLab-only facts out of this file.
+Own the **ship path** (commit/push when creating or updating a PR/MR), **forge tracker issues** (draft → approve → create), **generic CI** (title/description, pipeline debug, review helpers), **Sonar-scoped remediations** via `--fix --sonar`, and **Dependabot remote batch-merge** via `--pull-dependabot`. Detect the remote forge and **Read** the nested skill. Keep GitHub-only and GitLab-only facts out of this file.
 
 ## When to use
 
@@ -37,6 +38,7 @@ Own the **ship path** (commit/push when creating or updating a PR/MR), **forge t
 - Author PR/MR **title** and **description**
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
 - **`--fix --sonar`** — auto-remediate open SonarQube issues for a PR or branch (scripted list; agent applies edits)
+- **`--pull-dependabot`** — batch-merge `origin/dependabot/**` into the current branch with verify (GitHub only)
 - Publish artifacts to a static or registry destination
 - Deploy via Helm, Kubernetes, Argo CD, or similar
 
@@ -51,19 +53,19 @@ Own the **ship path** (commit/push when creating or updating a PR/MR), **forge t
 
 TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` when shipping a PR/MR or running 3+ CLI commands. Single CLI call: skip TodoWrite. Shape-specific TodoWrite ids: see [refs/task-shapes.md](refs/task-shapes.md).
 
-0. **task-shape** — Classify: **ship** (named routes or prose PR/MR upsert) | **`--draft`** (with ship) | **`--fix --sonar`** | **issue** | **CI / review / publish / deploy**. Load [refs/task-shapes.md](refs/task-shapes.md) only when the shape needs draft-gate, sonar, issue, or ship-route detail beyond this line. Done: shape recorded. Stop: shape unclear after one AskQuestion (Issue | PR/MR ship | Sonar fix | CI/other).
+0. **task-shape** — Classify: **ship** (named routes or prose PR/MR upsert) | **`--draft`** (with ship) | **`--fix --sonar`** | **`--pull-dependabot`** | **issue** | **CI / review / publish / deploy**. Load [refs/task-shapes.md](refs/task-shapes.md) only when the shape needs draft-gate, sonar, pull-dependabot, issue, or ship-route detail beyond this line. Done: shape recorded. Stop: shape unclear after one AskQuestion (Issue | PR/MR ship | Sonar fix | Pull Dependabot | CI/other).
 
 1. **root** — Resolve `REPO_ROOT` via plugin-relative `skills/rr-git/refs/repo-root.md`. Load `skills/rr-git/refs/safety.md` **only when** this ship may rewrite history, force-push, reset/clean, or discard work — not on clean upsert of an already-pushed branch. Done: cwd/`git -C` is the repo root (local work tree for git ops). Issue create on another forge project does **not** require that path to be a clone of the target.
 
-2. **forge** — Run `rr-ci detect-remote` ([scripts/README.md](scripts/README.md)). Branch on `result.forge`: `github` | `gitlab` | `unknown`. If `unknown`, AskQuestion: GitHub | GitLab (no Other). **Forge target probe:** if the user named `owner/repo` (or equivalent URL) and it differs from `result.owner`/`result.repo`, set **forge target** to that `owner/repo` and pass it to the nested skill (`gh --repo` / `glab --repo`); do not silently use cwd origin. If ambiguous which repo → one AskQuestion (cwd origin | named `owner/repo`). Done: forge + forge target selected. Stop: user declines or forge is neither GitHub nor GitLab — say “GitHub/GitLab only.” **Skip** for `--fix --sonar` (CLI resolves PR via origin; forge bind only if user needs an override AskQuestion).
+2. **forge** — Run `rr-ci detect-remote` ([scripts/README.md](scripts/README.md)). Branch on `result.forge`: `github` | `gitlab` | `unknown`. If `unknown`, AskQuestion: GitHub | GitLab (no Other). **Forge target probe:** if the user named `owner/repo` (or equivalent URL) and it differs from `result.owner`/`result.repo`, set **forge target** to that `owner/repo` and pass it to the nested skill (`gh --repo` / `glab --repo`); do not silently use cwd origin. If ambiguous which repo → one AskQuestion (cwd origin | named `owner/repo`). Done: forge + forge target selected. Stop: user declines or forge is neither GitHub nor GitLab — say “GitHub/GitLab only.” **Skip** for `--fix --sonar` (CLI resolves PR via origin; forge bind only if user needs an override AskQuestion). For **`--pull-dependabot`:** require `github` (stop if not).
 
-3. **title** — **PR/MR only.** Load [refs/pr-mr-templates.md](refs/pr-mr-templates.md). Author title + description per that ref. For `--draft` gate vs in-context draft, follow [refs/task-shapes.md](refs/task-shapes.md) `--draft` section. Skip for **issue** and **`--fix --sonar`**.
+3. **title** — **PR/MR only.** Load [refs/pr-mr-templates.md](refs/pr-mr-templates.md). Author title + description per that ref. For `--draft` gate vs in-context draft, follow [refs/task-shapes.md](refs/task-shapes.md) `--draft` section. Skip for **issue**, **`--fix --sonar`**, and **`--pull-dependabot`**.
 
-4. **load** — In **one** tool turn after forge bind: Read the nested forge skill **and** that forge’s `refs/cli.md`, and run `mr-add-preflight` when the task is PR/MR ship. Do not invent-search for skill flags as `rr-ci` JSON-CLI subcommands — ship routes are task-shape only (not SCRIPTS-SPEC). For `github` / `gitlab`, run the forge skill’s matching task row. For **`--fix --sonar`:** Read [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) (and forge skill only if PR number must be resolved).
+4. **load** — In **one** tool turn after forge bind: Read the nested forge skill **and** that forge’s `refs/cli.md`, and run `mr-add-preflight` when the task is PR/MR ship. Do not invent-search for skill flags as `rr-ci` JSON-CLI subcommands — ship routes are task-shape only (not SCRIPTS-SPEC). For `github` / `gitlab`, run the forge skill’s matching task row. For **`--fix --sonar`:** Read [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) (and forge skill only if PR number must be resolved). For **`--pull-dependabot`:** Read [refs/pull-dependabot.md](refs/pull-dependabot.md) only (no forge nested skill).
 
 **Fallback (no matching row):** CLI-only via [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md). If policy or forge-specific steps are still required → AskQuestion or stop. Do not invent nested skill behavior.
 
-5. **execute** — Follow the nested skill or Sonar ref; invoke CLI commands from [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md) or the forge skill’s allowlisted `gh`/`glab` rows. Happy-path upsert: keep tool turns tight (batch Reads/Shells; skip unused probes). **`--fix --sonar`:** run `sonar-list-issues --lean` once, then apply fixes per [refs/sonar-fix.md](refs/sonar-fix.md). Stop on first hard failure (`ok: false`, auth missing, preflight escalate, user declines issue create / keeps draft only).
+5. **execute** — Follow the nested skill or Sonar / pull-dependabot ref; invoke CLI commands from [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md) or the forge skill’s allowlisted `gh`/`glab` rows. Happy-path upsert: keep tool turns tight (batch Reads/Shells; skip unused probes). **`--fix --sonar`:** run `sonar-list-issues --lean` once, then apply fixes per [refs/sonar-fix.md](refs/sonar-fix.md). **`--pull-dependabot`:** run per [refs/pull-dependabot.md](refs/pull-dependabot.md) (one `pull-dependabot` shell; escalate only). Stop on first hard failure (`ok: false`, auth missing, preflight escalate, user declines issue create / keeps draft only).
 
 ## Invariants
 
@@ -73,10 +75,11 @@ TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` wh
 - **Ship routes:** `--create-*` / `--update-*` are aliases for the same upsert ship — skill invoke/task-shape flags, **not** `rr-ci` JSON-CLI subcommands unless added to [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md). Never open a second PR/MR for the same branch.
 - **`--draft` + ship:** human gate via `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md`; user disk edits win; distinct from forge draft status unless user asks for that on ship.
 - **`--fix --sonar`:** list + remediations per [refs/sonar-fix.md](refs/sonar-fix.md); Sonar-scoped only — not general implement.
+- **`--pull-dependabot`:** CLI loop + escalate per [refs/pull-dependabot.md](refs/pull-dependabot.md); GitHub-only; no invent merge chains; no invent `dependabot.yml` directory rewrites.
 - **Disk sidecars:** Any file this skill or its CLI writes (job traces, dumps, PR/MR drafts) lands under **`.ai/ci/`** at the target repo root — never cwd clutter. Review run artifacts stay under `.ai/review/` (**rr-review**).
 - **No Renovate onboarding CLI** in this plugin. Do not add per-repo Renovate CI unless the user asked.
 - Nested `gitlab` / `github` / `publish` / `deployment` skills are **not** plugin-listed; load them by path only.
 
 ## Orchestration
 
-AskQuestion when: forge is `unknown`; task-shape is unclear; forge target is ambiguous; `--draft` ship next-steps; Sonar `no_open_pr` and user must pick `--branch` or abort; or nested issue path needs draft approval. Delivery channels: prefer AskQuestion for enumerable options; same options as short prose if the tool/harness is unavailable — do not stall. Nested skills are `disable-model-invocation`; do not wait for the user to @-mention them. Task agents: N/A.
+AskQuestion when: forge is `unknown`; task-shape is unclear; forge target is ambiguous; `--draft` ship next-steps; Sonar `no_open_pr` and user must pick `--branch` or abort; pull-dependabot escalate (close stale PRs \| leave); or nested issue path needs draft approval. Delivery channels: prefer AskQuestion for enumerable options; same options as short prose if the tool/harness is unavailable — do not stall. Nested skills are `disable-model-invocation`; do not wait for the user to @-mention them. Task agents: N/A.

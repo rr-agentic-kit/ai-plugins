@@ -17,11 +17,14 @@ import mr_skip_threads
 import pending_reviews
 import pipeline_security_reports
 import pre_merge_status
+import pull_dependabot
 import sonar_list_issues
 from emit import fail
 from forge import detect
 
-_FORGE_AGNOSTIC = frozenset({"detect-remote", "sonar-list-issues"})
+_FORGE_AGNOSTIC = frozenset(
+    {"detect-remote", "sonar-list-issues", "pull-dependabot"}
+)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -48,6 +51,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pending_reviews.add_parser(subparsers)
     pre_merge_status.add_parser(subparsers)
     sonar_list_issues.add_parser(subparsers)
+    pull_dependabot.add_parser(subparsers)
     return parser
 
 

@@ -8,9 +8,9 @@ One forge-agnostic ship path: detect GitHub vs GitLab, author PR/MR title/descri
 
 ## What
 
-Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pipeline/review CLI helpers, **`--fix --sonar`** (scripted Sonar issue list + agent remediations), and routing into nested forge / publish / deployment skills. Ship path may commit/push when creating or updating a PR/MR. Forge **target** may differ from cwd origin when the user names `owner/repo`.
+Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pipeline/review CLI helpers, **`--fix --sonar`** (scripted Sonar issue list + agent remediations), **`--pull-dependabot`** (batch-merge `origin/dependabot/**` with verify), and routing into nested forge / publish / deployment skills. Ship path may commit/push when creating or updating a PR/MR. Forge **target** may differ from cwd origin when the user names `owner/repo`.
 
-**Out of scope:** see **Avoid when**; also Renovate onboarding CLI, inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` as JSON-CLI subcommands (those are skill invoke routes only).
+**Out of scope:** see **Avoid when**; also Renovate onboarding CLI, inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` as JSON-CLI subcommands (those are skill invoke routes only), inventing `dependabot.yml` directory rewrites.
 
 ## When
 
@@ -21,6 +21,7 @@ Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pip
 - Drafting or creating a GitHub/GitLab issue (same or other `owner/repo`)
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
 - `--fix --sonar` to remediate open SonarQube issues on a PR/branch (no human issue dump)
+- `--pull-dependabot` to merge `origin/dependabot/**` into the current branch with a verify command (GitHub only)
 - Publishing artifacts or deploying via Helm/K8s/GitOps
 
 ### Avoid when
@@ -40,7 +41,7 @@ Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pip
 
 ### Invoke
 
-Slash `/rr-ci` with `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` (or `-pr-mr` aliases) — same upsert ship; optional `--draft` writes `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` and AskQuestions next steps. `--fix --sonar` remediates Sonar issues (default: open PR/MR for current branch; optional `--pr`/`--branch`). Nested forge skills are path-loaded only.
+Slash `/rr-ci` with `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` (or `-pr-mr` aliases) — same upsert ship; optional `--draft` writes `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` and AskQuestions next steps. `--fix --sonar` remediates Sonar issues (default: open PR/MR for current branch; optional `--pr`/`--branch`). `--pull-dependabot` batch-merges Dependabot remotes (`--verify-cmd` required unless `--dry-run`). Nested forge skills are path-loaded only.
 
 ### Intake
 
@@ -48,11 +49,11 @@ Need repo root + forge remote; optional `owner/repo` when not cwd origin.
 
 ### Clarify
 
-Enumerable forks (forge unknown, task-shape, forge target, `--draft` Ship|Keep|Edit, issue draft approve): AskQuestion preferred; same options as short prose if the tool is unavailable.
+Enumerable forks (forge unknown, task-shape, forge target, `--draft` Ship|Keep|Edit, issue draft approve, pull-dependabot escalate Close|Leave): AskQuestion preferred; same options as short prose if the tool is unavailable.
 
 ### Output
 
-PR/MR or issue URL; pipeline/debug envelopes from CLI when that was the ask; Sonar fix summary counts (`fixed`/`skipped`/`failed`) — not a full issue table.
+PR/MR or issue URL; pipeline/debug envelopes from CLI when that was the ask; Sonar fix summary counts (`fixed`/`skipped`/`failed`) — not a full issue table; pull-dependabot `summary` counts only (point at `.ai/ci/pull-dependabot/` logs on escalate).
 
 ### Close
 

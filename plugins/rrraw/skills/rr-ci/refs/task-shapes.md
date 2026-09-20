@@ -28,6 +28,15 @@ Sonar remediations. Skip root `title` / forge bind unless PR lookup needs an ove
 
 TodoWrite ids: `root`, `load`, `execute` (skip forge/title unless scope needs forge PR lookup).
 
+## `--pull-dependabot`
+
+Batch-merge `origin/dependabot/**`. Skip root `title`. Forge bind required (must be `github`).
+
+1. Load [pull-dependabot.md](pull-dependabot.md).
+2. Run `rr-ci pull-dependabot --verify-cmd '<cmd>'` (optional `--dry-run` first). Escalate per that ref only.
+
+TodoWrite ids: `root`, `forge`, `load`, `execute` (skip `title`).
+
 ## issue
 
 Skip root step `title` / [pr-mr-templates.md](pr-mr-templates.md). After forge bind, load forge skill and run its **Issue create** row. TodoWrite ids: `root`, `forge`, `load`, `execute`.

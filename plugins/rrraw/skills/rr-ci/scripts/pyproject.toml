@@ -24,4 +24,5 @@ only-include = [
   "mr_review_submit_graphql.py", "mr_review_submit_support.py",
   "mr_skip_threads.py", "mr_ci_review_preflight.py",
   "pending_reviews.py", "pending_reviews_graphql.py", "paths.py",
+  "pull_dependabot.py",
 ]
