@@ -5,50 +5,26 @@ from __future__ import annotations
 from pathlib import Path
 
 import audit_static as m
+import pytest
 
 
-def test_skill_path():
-    rel = Path("skills/recipe-context-engineer/SKILL.md")
-    assert m.detect_type(rel) == "skill"
-
-
-def test_command_path():
-    rel = Path("commands/context-engineer-audit.md")
-    assert m.detect_type(rel) == "command"
-
-
-def test_agent_path():
-    rel = Path("agents/foo.md")
-    assert m.detect_type(rel) == "agent"
-
-
-def test_rule_mdc():
-    assert m.detect_type(Path("rules/x.mdc")) == "rule"
-
-
-def test_rule_cursor_dir():
-    assert m.detect_type(Path(".cursor/rules/x.mdc")) == "rule"
-
-
-def test_workflow_by_stem():
-    assert m.detect_type(Path("docs/release-workflow.md")) == "workflow"
-
-
-def test_default_workflow():
-    assert m.detect_type(Path("docs/notes.md")) == "workflow"
-
-
-def test_ref_file_shallow():
-    assert m.detect_type(Path("skills/x/refs/foo.md")) == "ref-file"
-
-
-def test_ref_file_nested_doc_standards():
-    assert m.detect_type(Path("skills/x/refs/doc-standards/es.md")) == "ref-file"
-
-
-def test_acronyms_path():
-    assert m.detect_type(Path("ACRONYMS.md")) == "acronyms"
-
-
-def test_glossary_path():
-    assert m.detect_type(Path("GLOSSARY.md")) == "glossary"
+@pytest.mark.parametrize(
+    ("rel", "expected"),
+    [
+        ("skills/recipe-context-engineer/SKILL.md", "skill"),
+        ("skills/x/README.md", "skill-readme"),
+        ("skills/x/refs/foo.md", "ref-file"),
+        ("skills/x/refs/doc-standards/es.md", "ref-file"),
+        ("skills/x/references/foo.md", "ref-file"),
+        ("commands/context-engineer-audit.md", "command"),
+        ("agents/foo.md", "agent"),
+        ("rules/x.mdc", "rule"),
+        (".cursor/rules/x.mdc", "rule"),
+        ("docs/release-workflow.md", "workflow"),
+        ("docs/notes.md", "workflow"),
+        ("ACRONYMS.md", "acronyms"),
+        ("GLOSSARY.md", "glossary"),
+    ],
+)
+def test_detect_type(rel: str, expected: str):
+    assert m.detect_type(Path(rel)) == expected

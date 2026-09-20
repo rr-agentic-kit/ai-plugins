@@ -61,8 +61,8 @@ Coverage (matches CI + SonarCloud):
 
 ```bash
 uv run pytest tests/ -v \
-  --cov=plugins/context-eng-hero/scripts/audit_static \
-  --cov=plugins/rrraw/scripts/validate_planning_script \
+  --cov=plugins/context-eng-hero/scripts \
+  --cov=plugins/rrraw/scripts \
   --cov=scripts \
   --cov-report=term-missing \
   --cov-report=xml

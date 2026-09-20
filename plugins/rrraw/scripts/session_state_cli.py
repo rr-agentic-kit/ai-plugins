@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Session-state checkpoint CLI — project and mutate without loading the whole file into agent context.
+"""Session-state checkpoint CLI — project and mutate without loading
+the whole file into agent context.
 
 Invoke (from plugin root, with PYTHONPATH=scripts or via session_state.sh):
   python3 scripts/session_state_cli.py view --path <phase>/session-state.json
@@ -9,19 +10,26 @@ Invoke (from plugin root, with PYTHONPATH=scripts or via session_state.sh):
 Stdout: one JSON envelope per call. Agents MUST NOT Read the checkpoint file whole;
 use this CLI (or an equivalent projection). Full dump requires --i-know (anti-pattern).
 """
+
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import sys
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 
-def _envelope(command: str, *, ok: bool, result: Any = None, error: dict | None = None) -> int:
-    json.dump({"command": command, "ok": ok, "result": result, "error": error}, sys.stdout)
+def _envelope(
+    command: str, *, ok: bool, result: Any = None, error: dict | None = None
+) -> int:
+    json.dump(
+        {"command": command, "ok": ok, "result": result, "error": error}, sys.stdout
+    )
     sys.stdout.write("\n")
     sys.stdout.flush()
     return 0 if ok else 1
@@ -41,17 +49,17 @@ def _load(path: Path) -> dict[str, Any]:
 
 def _atomic_write(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=".session-state.", suffix=".json", dir=str(path.parent))
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=".session-state.", suffix=".json", dir=str(path.parent)
+    )
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
             f.write("\n")
         os.replace(tmp_name, path)
     except Exception:
-        try:
+        with contextlib.suppress(OSError):
             os.unlink(tmp_name)
-        except OSError:
-            pass
         raise
 
 
@@ -103,7 +111,11 @@ def cmd_view(args: argparse.Namespace) -> int:
             "note_sessions": data.get("note_sessions"),
         }
         # Never include item_registry in presets (largest bloat).
-    return _envelope("view", ok=True, result={"path": str(path), "preset": preset, "projection": result})
+    return _envelope(
+        "view",
+        ok=True,
+        result={"path": str(path), "preset": preset, "projection": result},
+    )
 
 
 def cmd_get(args: argparse.Namespace) -> int:
@@ -121,12 +133,15 @@ def cmd_get(args: argparse.Namespace) -> int:
             return _fail(
                 "get",
                 "READ_BUDGET",
-                "item_registry blocked by default (use --allow-registry only when minting ids)",
+                "item_registry blocked by default "
+                "(use --allow-registry only when minting ids)",
             )
         if key not in data:
             return _fail("get", "KEY_MISSING", f"missing top-level key: {key}")
         out[key] = data[key]
-    return _envelope("get", ok=True, result={"path": str(path), "keys": keys, "projection": out})
+    return _envelope(
+        "get", ok=True, result={"path": str(path), "keys": keys, "projection": out}
+    )
 
 
 def cmd_dump(args: argparse.Namespace) -> int:
@@ -134,13 +149,18 @@ def cmd_dump(args: argparse.Namespace) -> int:
         return _fail(
             "dump",
             "READ_BUDGET",
-            "full dump forbidden for agents; use view/get, or pass --i-know (anti-pattern)",
+            "full dump forbidden for agents; use view/get, "
+            "or pass --i-know (anti-pattern)",
         )
     path = Path(args.path)
     if not path.is_file():
         return _fail("dump", "MISSING_CHECKPOINT", f"not found: {path}")
     data = _load(path)
-    return _envelope("dump", ok=True, result={"path": str(path), "data": data, "warning": "full dump"})
+    return _envelope(
+        "dump",
+        ok=True,
+        result={"path": str(path), "data": data, "warning": "full dump"},
+    )
 
 
 def _parse_json_arg(raw: str, command: str) -> tuple[Any | None, int | None]:
@@ -158,7 +178,9 @@ def cmd_append_decision(args: argparse.Namespace) -> int:
     if err is not None:
         return err
     if not isinstance(obj, dict):
-        return _fail("append-decision", "INVALID_JSON", "decision must be a JSON object")
+        return _fail(
+            "append-decision", "INVALID_JSON", "decision must be a JSON object"
+        )
     data = _load(path)
     decisions = data.setdefault("decisions", [])
     if not isinstance(decisions, list):
@@ -172,7 +194,11 @@ def cmd_append_decision(args: argparse.Namespace) -> int:
     return _envelope(
         "append-decision",
         ok=True,
-        result={"path": str(path), "id": obj.get("id"), "decisions_len": len(decisions)},
+        result={
+            "path": str(path),
+            "id": obj.get("id"),
+            "decisions_len": len(decisions),
+        },
     )
 
 
@@ -184,7 +210,9 @@ def cmd_append_assumption(args: argparse.Namespace) -> int:
     if err is not None:
         return err
     if not isinstance(obj, dict):
-        return _fail("append-assumption", "INVALID_JSON", "assumption must be a JSON object")
+        return _fail(
+            "append-assumption", "INVALID_JSON", "assumption must be a JSON object"
+        )
     data = _load(path)
     assumptions = data.setdefault("assumptions", [])
     if not isinstance(assumptions, list):
@@ -218,7 +246,9 @@ def cmd_set_checkpoint(args: argparse.Namespace) -> int:
     if err is not None:
         return err
     if not isinstance(patch, dict):
-        return _fail("set-checkpoint", "INVALID_JSON", "checkpoint patch must be an object")
+        return _fail(
+            "set-checkpoint", "INVALID_JSON", "checkpoint patch must be an object"
+        )
     data = _load(path)
     cp = data.setdefault("checkpoint", {})
     if not isinstance(cp, dict):
@@ -235,7 +265,9 @@ def cmd_set_checkpoint(args: argparse.Namespace) -> int:
         if isinstance(meta, dict):
             meta["raw_history_path"] = args.raw_history_path
     _atomic_write(path, data)
-    return _envelope("set-checkpoint", ok=True, result={"path": str(path), "checkpoint": cp})
+    return _envelope(
+        "set-checkpoint", ok=True, result={"path": str(path), "checkpoint": cp}
+    )
 
 
 def cmd_append_level_fact(args: argparse.Namespace) -> int:
@@ -248,7 +280,9 @@ def cmd_append_level_fact(args: argparse.Namespace) -> int:
         return _fail("append-level-fact", "SHAPE", "level_facts is not an object")
     bucket = facts.setdefault(args.level, [])
     if not isinstance(bucket, list):
-        return _fail("append-level-fact", "SHAPE", f"level_facts.{args.level} is not a list")
+        return _fail(
+            "append-level-fact", "SHAPE", f"level_facts.{args.level} is not a list"
+        )
     bucket.append(args.text)
     _atomic_write(path, data)
     return _envelope(
@@ -275,7 +309,11 @@ def cmd_append_completed(args: argparse.Namespace) -> int:
     return _envelope(
         "append-completed",
         ok=True,
-        result={"path": str(path), "id": args.id, "levels_completed_len": len(completed)},
+        result={
+            "path": str(path),
+            "id": args.id,
+            "levels_completed_len": len(completed),
+        },
     )
 
 
@@ -291,7 +329,9 @@ def cmd_set_resolution(args: argparse.Namespace) -> int:
     data = _load(path)
     data["resolution"] = obj
     _atomic_write(path, data)
-    return _envelope("set-resolution", ok=True, result={"path": str(path), "resolution": obj})
+    return _envelope(
+        "set-resolution", ok=True, result={"path": str(path), "resolution": obj}
+    )
 
 
 def cmd_set_metadata(args: argparse.Namespace) -> int:
@@ -311,10 +351,14 @@ def cmd_set_metadata(args: argparse.Namespace) -> int:
         if err is not None:
             return err
         if not isinstance(patch, dict):
-            return _fail("set-metadata", "INVALID_JSON", "metadata patch must be an object")
+            return _fail(
+                "set-metadata", "INVALID_JSON", "metadata patch must be an object"
+            )
         meta.update(patch)
     _atomic_write(path, data)
-    return _envelope("set-metadata", ok=True, result={"path": str(path), "metadata": meta})
+    return _envelope(
+        "set-metadata", ok=True, result={"path": str(path), "metadata": meta}
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -324,11 +368,15 @@ def build_parser() -> argparse.ArgumentParser:
     def add_path(sp: argparse.ArgumentParser) -> None:
         sp.add_argument("--path", required=True, help="Path to session-state.json")
 
-    v = sub.add_parser("view", help="Project resume/status/tail preset (default resume)")
+    v = sub.add_parser(
+        "view", help="Project resume/status/tail preset (default resume)"
+    )
     add_path(v)
     v.add_argument("--preset", choices=("resume", "status", "tail"), default="resume")
     v.add_argument("--decisions", type=int, default=3, help="Tail length for decisions")
-    v.add_argument("--assumptions", type=int, default=5, help="Tail length for assumptions")
+    v.add_argument(
+        "--assumptions", type=int, default=5, help="Tail length for assumptions"
+    )
     v.set_defaults(func=cmd_view)
 
     g = sub.add_parser("get", help="Project named top-level keys")
@@ -348,7 +396,9 @@ def build_parser() -> argparse.ArgumentParser:
     ad.add_argument("--updated", default=None)
     ad.set_defaults(func=cmd_append_decision)
 
-    aa = sub.add_parser("append-assumption", help="Append or upsert assumptions[] by id")
+    aa = sub.add_parser(
+        "append-assumption", help="Append or upsert assumptions[] by id"
+    )
     add_path(aa)
     aa.add_argument("--json", required=True)
     aa.set_defaults(func=cmd_append_assumption)
@@ -360,13 +410,17 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--raw-history-path", default=None)
     sc.set_defaults(func=cmd_set_checkpoint)
 
-    alf = sub.add_parser("append-level-fact", help="Append string to level_facts[level]")
+    alf = sub.add_parser(
+        "append-level-fact", help="Append string to level_facts[level]"
+    )
     add_path(alf)
     alf.add_argument("--level", required=True)
     alf.add_argument("--text", required=True)
     alf.set_defaults(func=cmd_append_level_fact)
 
-    ac = sub.add_parser("append-completed", help="Append id to checkpoint.levels_completed")
+    ac = sub.add_parser(
+        "append-completed", help="Append id to checkpoint.levels_completed"
+    )
     add_path(ac)
     ac.add_argument("--id", required=True)
     ac.set_defaults(func=cmd_append_completed)
@@ -390,8 +444,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
-        return args.func(args)
-    except Exception as e:  # noqa: BLE001 — envelope all failures for agent parsing
+        func: Callable[[argparse.Namespace], int] = args.func
+        return func(args)
+    except Exception as e:
         return _fail(getattr(args, "command", "session_state"), "EXCEPTION", str(e))
 
 

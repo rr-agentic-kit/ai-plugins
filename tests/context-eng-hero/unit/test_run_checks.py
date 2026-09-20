@@ -6,35 +6,15 @@ from pathlib import Path
 
 import audit_static as m
 import pytest
-from conftest import all_pass, result_by_id
+from audit_static import models as models_mod
+from audit_static.models import AuditContext
+from conftest import FIXTURE_CASES, all_pass, result_by_id
 
 
 @pytest.mark.parametrize(
     ("case", "rel_path", "expect_pass"),
-    [
-        ("skill_valid", "skills/my-skill/SKILL.md", True),
-        ("skill_bad_name", "skills/my-skill/SKILL.md", False),
-        ("skill_missing_sections", "skills/my-skill/SKILL.md", False),
-        ("skill_bad_yaml", "skills/my-skill/SKILL.md", False),
-        ("skill_no_opening_delim", "skills/my-skill/SKILL.md", False),
-        ("skill_parent_path", "skills/my-skill/SKILL.md", False),
-        ("skill_broken_link", "skills/my-skill/SKILL.md", False),
-        ("skill_valid_link", "skills/my-skill/SKILL.md", True),
-        ("skill_http_link", "skills/my-skill/SKILL.md", False),
-        ("skill_long_description", "skills/my-skill/SKILL.md", False),
-        ("command_valid", "commands/my-cmd.md", True),
-        ("command_missing_output", "commands/my-cmd.md", False),
-        ("workflow_valid", "docs/my-workflow.md", True),
-        ("workflow_no_fm", "docs/plain-workflow.md", True),
-        ("ref_file_no_fm", "skills/my-skill/refs/foo.md", True),
-        (
-            "ref_file_no_fm",
-            "skills/my-skill/refs/doc-standards/es.md",
-            True,
-        ),
-        ("agent_valid", "agents/my-agent.md", True),
-        ("rule_valid", "rules/my-rule.mdc", True),
-    ],
+    FIXTURE_CASES,
+    ids=[f"{c}-{p}" for c, p, _ in FIXTURE_CASES],
 )
 def test_fixture_trees(mini_plugin, case: str, rel_path: str, expect_pass: bool):
     root = mini_plugin(case)
@@ -60,6 +40,18 @@ def test_path_outside_plugin(mini_plugin, tmp_path):
     )
 
 
+def test_models_load_size_cap(mini_plugin, monkeypatch):
+    root = mini_plugin("skill_valid")
+    monkeypatch.setattr(models_mod, "MAX_READ_BYTES", 10)
+    loaded = AuditContext.load(root, "skills/my-skill/SKILL.md")
+    assert isinstance(loaded, list)
+    row = result_by_id(loaded, "static.file.size")
+    assert row["result"] == "FAIL"
+    assert "exceeds size cap" in row["evidence"]
+    # Early bail: only the size check, no runner rows.
+    assert [r["id"] for r in loaded] == ["static.file.size"]
+
+
 @pytest.mark.parametrize(
     ("case", "rel_path", "check_id"),
     [
@@ -80,6 +72,31 @@ def test_path_outside_plugin(mini_plugin, tmp_path):
             "static.paths.no-parent-segment",
         ),
         (
+            "skill_absolute_path",
+            "skills/my-skill/SKILL.md",
+            "static.paths.no-absolute",
+        ),
+        (
+            "skill_bad_name_format",
+            "skills/my-skill/SKILL.md",
+            "static.name.format",
+        ),
+        (
+            "skill_missing_description",
+            "skills/my-skill/SKILL.md",
+            "static.keys.required",
+        ),
+        (
+            "skill_missing_description",
+            "skills/my-skill/SKILL.md",
+            "static.description.present",
+        ),
+        (
+            "skill_medium_description",
+            "skills/my-skill/SKILL.md",
+            "static.description.recommended-length",
+        ),
+        (
             "skill_broken_link",
             "skills/my-skill/SKILL.md",
             "static.links.internal-resolve",
@@ -95,12 +112,29 @@ def test_path_outside_plugin(mini_plugin, tmp_path):
             "static.description.max-length",
         ),
         ("command_missing_output", "commands/my-cmd.md", "static.sections.required"),
+        (
+            "workflow_missing_todo",
+            "docs/my-workflow.md",
+            "static.workflow.todo-id",
+        ),
+        (
+            "workflow_duplicate_todo",
+            "docs/my-workflow.md",
+            "static.workflow.todo-id",
+        ),
     ],
 )
 def test_specific_check_fails(mini_plugin, case: str, rel_path: str, check_id: str):
     root = mini_plugin(case)
     results = m.run_checks(root, rel_path)
     assert result_by_id(results, check_id)["result"] == "FAIL"
+
+
+def test_workflow_todo_fail_evidence(mini_plugin):
+    missing = m.run_checks(mini_plugin("workflow_missing_todo"), "docs/my-workflow.md")
+    assert "no todo_id" in result_by_id(missing, "static.workflow.todo-id")["evidence"]
+    dup = m.run_checks(mini_plugin("workflow_duplicate_todo"), "docs/my-workflow.md")
+    assert "duplicate" in result_by_id(dup, "static.workflow.todo-id")["evidence"]
 
 
 def test_workflow_optional_frontmatter_passes(mini_plugin):

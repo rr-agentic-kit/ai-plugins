@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Any
 
 from . import ENCODING_NAME
 
 
 @lru_cache(maxsize=1)
-def _encoding():  # type: ignore[no-untyped-def]
+def _encoding() -> Any:
     import tiktoken
 
     return tiktoken.get_encoding(ENCODING_NAME)

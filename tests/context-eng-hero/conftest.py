@@ -15,6 +15,38 @@ PLUGIN_ROOT = REPO_ROOT / "plugins" / PLUGIN_NAME
 FIXTURES_DIR = PLUGIN_TEST_ROOT / "fixtures"
 SCRIPTS_DIR = PLUGIN_ROOT / "scripts"
 
+# Explicit (case, relative_path, expect_pass) — shared by unit + integration.
+FIXTURE_CASES: list[tuple[str, str, bool]] = [
+    ("skill_valid", "skills/my-skill/SKILL.md", True),
+    ("skill_bad_name", "skills/my-skill/SKILL.md", False),
+    ("skill_missing_sections", "skills/my-skill/SKILL.md", False),
+    ("skill_bad_yaml", "skills/my-skill/SKILL.md", False),
+    ("skill_no_opening_delim", "skills/my-skill/SKILL.md", False),
+    ("skill_parent_path", "skills/my-skill/SKILL.md", False),
+    ("skill_broken_link", "skills/my-skill/SKILL.md", False),
+    ("skill_valid_link", "skills/my-skill/SKILL.md", True),
+    ("skill_http_link", "skills/my-skill/SKILL.md", False),
+    ("skill_long_description", "skills/my-skill/SKILL.md", False),
+    ("skill_absolute_path", "skills/my-skill/SKILL.md", False),
+    ("skill_bad_name_format", "skills/my-skill/SKILL.md", False),
+    ("skill_missing_description", "skills/my-skill/SKILL.md", False),
+    ("skill_medium_description", "skills/my-skill/SKILL.md", False),
+    ("command_valid", "commands/my-cmd.md", True),
+    ("command_missing_output", "commands/my-cmd.md", False),
+    ("workflow_valid", "docs/my-workflow.md", True),
+    ("workflow_no_fm", "docs/plain-workflow.md", True),
+    ("workflow_missing_todo", "docs/my-workflow.md", False),
+    ("workflow_duplicate_todo", "docs/my-workflow.md", False),
+    ("ref_file_no_fm", "skills/my-skill/refs/foo.md", True),
+    (
+        "ref_file_no_fm",
+        "skills/my-skill/refs/doc-standards/es.md",
+        True,
+    ),
+    ("agent_valid", "agents/my-agent.md", True),
+    ("rule_valid", "rules/my-rule.mdc", True),
+]
+
 sys.path.insert(0, str(SCRIPTS_DIR))
 import audit_static  # noqa: E402
 

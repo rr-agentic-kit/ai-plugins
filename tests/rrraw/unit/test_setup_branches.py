@@ -97,7 +97,7 @@ def test_setup_cascade_format_fails_when_blockquote_remains(
     phase.mkdir()
     (phase / "brd.md").write_text(
         "---\n"
-        'doc_type: brd\n'
+        "doc_type: brd\n"
         'track: "0.1"\n'
         'doc_rev: "?"\n'
         "pins: {}\n"

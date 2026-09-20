@@ -3,51 +3,45 @@
 from __future__ import annotations
 
 import audit_static as m
+import pytest
 
 
-def test_valid_yaml():
-    text = "---\nname: a\ndescription: b\n---\n\n# Body\n"
+@pytest.mark.parametrize(
+    ("text", "expect_fm", "body_substr"),
+    [
+        (
+            "---\nname: a\ndescription: b\n---\n\n# Body\n",
+            {"name": "a", "description": "b"},
+            "# Body",
+        ),
+        ("---\n---\n\n# Body\n", {}, "# Body"),
+    ],
+    ids=["valid_yaml", "empty_block"],
+)
+def test_frontmatter_happy(text: str, expect_fm: dict, body_substr: str):
     fm, body, err = m.parse_frontmatter(text)
     assert err is None
-    assert fm == {"name": "a", "description": "b"}
-    assert body.startswith("# Body")
+    assert fm == expect_fm
+    assert body_substr in body
 
 
-def test_missing_opening_delimiter():
-    fm, body, err = m.parse_frontmatter("name: x\n\n# Body")
-    assert fm is None
-    assert err == "missing opening --- delimiter"
-    assert body == "name: x\n\n# Body"
-
-
-def test_missing_closing_delimiter():
-    text = "---\nname: a\n"
-    fm, _, err = m.parse_frontmatter(text)
-    assert fm is None
-    assert err == "missing closing --- delimiter"
-
-
-def test_invalid_yaml():
-    text = "---\nname: [\n---\n\n# Body\n"
-    fm, _, err = m.parse_frontmatter(text)
+@pytest.mark.parametrize(
+    ("text", "err_substr", "expect_body"),
+    [
+        ("name: x\n\n# Body", "missing opening --- delimiter", "name: x\n\n# Body"),
+        ("---\nname: a\n", "missing closing --- delimiter", None),
+        ("---\nname: [\n---\n\n# Body\n", "YAML parse error", None),
+        ("---\n- list\n---\n\n# Body\n", "frontmatter must be a YAML mapping", None),
+    ],
+    ids=["no_open", "no_close", "bad_yaml", "non_mapping"],
+)
+def test_frontmatter_errors(text: str, err_substr: str, expect_body: str | None):
+    fm, body, err = m.parse_frontmatter(text)
     assert fm is None
     assert err is not None
-    assert "YAML parse error" in err
-
-
-def test_non_mapping_root():
-    text = "---\n- list\n---\n\n# Body\n"
-    fm, _, err = m.parse_frontmatter(text)
-    assert fm is None
-    assert err == "frontmatter must be a YAML mapping"
-
-
-def test_empty_frontmatter_block():
-    text = "---\n---\n\n# Body\n"
-    fm, body, err = m.parse_frontmatter(text)
-    assert err is None
-    assert fm == {}
-    assert "# Body" in body
+    assert err_substr in err
+    if expect_body is not None:
+        assert body == expect_body
 
 
 def test_no_pyyaml(monkeypatch):
