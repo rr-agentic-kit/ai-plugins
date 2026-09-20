@@ -4,10 +4,11 @@
 
 ## Always Read (in order)
 
-1. [../rr-coder/refs/code.principles.md](../rr-coder/refs/code.principles.md)
-2. [../rr-tester/refs/shared-heuristics.md](../rr-tester/refs/shared-heuristics.md)
-3. [../rr-tester/refs/contracts.md](../rr-tester/refs/contracts.md)
-4. [plan-schema.md](plan-schema.md) — output shape before writing the step plan
+1. [feature-branch.md](feature-branch.md) — ensure `feat/{NNNN}-{step}-{short-desc}` **before** writing the plan
+2. [../rr-coder/refs/code.principles.md](../rr-coder/refs/code.principles.md)
+3. [../rr-tester/refs/shared-heuristics.md](../rr-tester/refs/shared-heuristics.md)
+4. [../rr-tester/refs/contracts.md](../rr-tester/refs/contracts.md)
+5. [plan-schema.md](plan-schema.md) — output shape before writing the step plan
 
 ## Conditional (one hop, only when predicate holds)
 

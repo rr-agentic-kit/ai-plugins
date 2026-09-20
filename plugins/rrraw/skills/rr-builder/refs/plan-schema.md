@@ -31,13 +31,14 @@ Optional frontmatter on the plan file: `task_id`, `step`, `step_index`, `slice_i
 
 ## Done-when
 
+0. Feature branch settled per [feature-branch.md](feature-branch.md) (**before** writing the sidecar).
 1. Sidecar `{NNNN}-{step}.plan.md` exists at the path above.
 2. All five sections present and non-empty; assessment is enough for **build** to start without inventing scope.
 3. `{NNNN}.md` Steps item has the pointer only (no inlined five-section plan).
-4. **No** application source edits this stage.
+4. **No** application source edits this stage (git branch create/checkout for the step is allowed — not application source).
 5. Then set `step_plan_done: true` on `{NNNN}.md` (see [slice-pipeline.md](slice-pipeline.md) cursor persistence).
 
-**Probe:** Do not set `step_plan_done: true` from prose inside `{NNNN}.md` alone — the sidecar must exist with the five sections.
+**Probe:** Do not set `step_plan_done: true` from prose inside `{NNNN}.md` alone — the sidecar must exist with the five sections **and** the feature-branch gate must have passed.
 
 ## Anti-patterns
 
@@ -46,3 +47,5 @@ Optional frontmatter on the plan file: `task_id`, `step`, `step_index`, `slice_i
 - Editing application source “to explore”
 - Omitting **Verify hooks** (pushes invent into build)
 - Using 0-based `{step}` in the filename (filename step is always 1-based)
+- Writing the plan (or setting `step_plan_done`) while still on `main`/`master` without creating `feat/{NNNN}-{step}-{short-desc}`
+- Inventing non-conforming branch names (`feat/<prose>`, slice-only prefixes)

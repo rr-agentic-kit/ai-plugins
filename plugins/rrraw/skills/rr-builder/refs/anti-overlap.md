@@ -24,7 +24,11 @@
 
 **Owns:** Local git safety, worktrees, squash, conflict resolution, merged branch cleanup.
 
-**rr-builder may Read** `skills/rr-git/refs/safety.md` or worktree refs during review `--fix`; it does not replace **rr-git** for standalone git tasks.
+**rr-builder owns (narrow):** At orchestrate **plan** start, **ensure** the task-step feature branch per [feature-branch.md](feature-branch.md) (`feat/{NNNN}-{step}-{short-desc}`). That is create/checkout (+ optional rename after AskQuestion) only.
+
+**rr-builder may Read** `skills/rr-git/refs/safety.md` when the feature-branch probe chooses rename/`-D`, or worktree refs during review `--fix`. It does **not** replace **rr-git** for squash, worktrees, prune, or standalone git tasks.
+
+**Stop phrase (standalone git):** "Local git only — use **rr-git**." (Does not apply to the plan-stage feature-branch ensure.)
 
 ## rr-humanize
 

@@ -24,7 +24,7 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 
 | Stage | What builder does | Loads | Executes code? | Done-when |
 |-------|-------------------|-------|----------------|-----------|
-| **plan** | Produce/enrich step plan + assessment only | [plan-knowledge.md](plan-knowledge.md) allowlist only | **No** | Sidecar `{NNNN}-{step}.plan.md` complete per [plan-schema.md](plan-schema.md); set `step_plan_done: true`; **no** application source edits |
+| **plan** | Ensure feature branch ([feature-branch.md](feature-branch.md)), then produce/enrich step plan + assessment only | [plan-knowledge.md](plan-knowledge.md) allowlist (includes feature-branch) | **No** app source (git branch create/checkout OK) | Branch settled + sidecar `{NNNN}-{step}.plan.md` complete per [plan-schema.md](plan-schema.md); set `step_plan_done: true` |
 | **build** | Implement the step | Current `{NNNN}-{step}.plan.md` + minimal task Goal/Obligations if needed; full **rr-coder** + **rr-tester** (code **and** tests for the step). **Do not** Read other steps’ `.plan.md` files or inlined plan prose from the task body | **Yes** | Code + tests for the step land; step verify checks runnable; set `step_build_done: true` |
 | **review** | Full multi-lane review with fix | **rr-review** with **`--fix --all`** (forced) | Via review fix path | Review run complete; fix applied per review; set `step_review_done: true` |
 | **refactor** | **TBD** | — | — | Stub: **skip** or stop with `refactor stage not specified` — do **not** invent procedure |
@@ -35,7 +35,7 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 
 | Stage / mode | Behavior |
 |--------------|----------|
-| **plan** (orchestrate) | **Read** only [plan-knowledge.md](plan-knowledge.md). Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run rr-coder/rr-tester implement procedures. |
+| **plan** (orchestrate) | **Read** only [plan-knowledge.md](plan-knowledge.md). Run [feature-branch.md](feature-branch.md) ensure **first**. Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run rr-coder/rr-tester implement procedures. |
 | **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `rr-coder/SKILL.md` and `rr-tester/SKILL.md` and follow them for the step (code + tests). |
 | **review** (orchestrate) | **Read** `rr-review/SKILL.md`; force `--fix --all` regardless of user omission. |
 | Explicit lane flag | Full-skill **handoff** — see [routing.md](routing.md). No pipeline advance past that skill’s done-when. |

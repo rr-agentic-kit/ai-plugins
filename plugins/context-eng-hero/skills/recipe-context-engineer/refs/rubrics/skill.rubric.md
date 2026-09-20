@@ -40,4 +40,4 @@ Map judgment FAILs to labels in `failure-patterns.md` for narrative. Evaluate **
 | `skill.acronyms.present` | minor | `ACRONYMS.md` exists at resolved path per `lexicon-spec.md` (plugin root or skill sibling); H1 + table shape |
 | `skill.acronyms.coverage` | minor | Domain acronyms used in the artifact/pack have expansions in `ACRONYMS.md` (skip ubiquitous HTTP/JSON/URL unless redefined); wrong expansions FAIL |
 | `skill.glossary.present` | minor | `GLOSSARY.md` exists at resolved path; H1 + table with Term + Meaning columns |
-| `skill.glossary.coverage` | minor | Overloaded terms used with a plugin-specific sense are defined in `GLOSSARY.md`; wrong or missing sense FAIL |
+| `skill.glossary.coverage` | minor | In-scope overloaded plugin-wide senses (not flags/templates/schema tokens) are defined in `GLOSSARY.md`; wrong or missing in-scope sense FAIL — never FAIL for undocumented flags/templates/schema |

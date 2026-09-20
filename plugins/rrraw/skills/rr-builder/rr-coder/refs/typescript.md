@@ -1,7 +1,7 @@
-# TypeScript 5.7 Standards
+# TypeScript Standards (5.7+ / 6.x)
 
 ## Version
-TypeScript 5.7+ with `strict: true`. Target ES2022+.
+TypeScript 5.7+ with `strict: true`. Target ES2022+. Treat **6.x** as current when the project already pins it.
 
 ## tsconfig Essentials
 
@@ -16,12 +16,21 @@ TypeScript 5.7+ with `strict: true`. Target ES2022+.
     "verbatimModuleSyntax": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"]
   }
 }
 ```
 
 `moduleResolution: "node"` + `module: "ESNext"` causes infinite compilation hang — always use `"bundler"` or `"nodenext"`.
+
+**TS 6.x `types`:** Default is an **empty** `types` array — `@types/*` is no longer auto-included. If Node globals (`process`, `Buffer`, `__dirname`) are needed, set `"types": ["node"]` (and keep `@types/node` as a **devDependency** aligned with the project’s Node major). Use the project package manager (`pnpm` / `npm` / `yarn` per lockfile)—do not invent a different one from IDE hints.
+
+### Root / tooling configs in `include`
+
+Framework-generated tsconfigs (e.g. SvelteKit `.svelte-kit/tsconfig.json`) often list `src/**` and `vite.config.*` only. Root tooling files (`drizzle.config.ts`, Playwright under `config/`, scripts as `.ts`) are **outside** that `include` → IDE reports `Cannot find name 'process'` even when `@types/node` and `types: ["node"]` are correct.
+
+**Prefer:** extend the app `tsconfig.json` `include` to list those files (mirror the generated include paths; paths are relative to the extending config). **Alt:** `import { env } from 'node:process'` (or `/// <reference types="node" />`) when keeping the file outside the project is intentional.
 
 ## Prefer / Avoid
 
@@ -168,6 +177,18 @@ async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
 | `JSON.parse()` unvalidated | Returns `any`, no runtime safety | Validate with schema (Zod, Valibot, ArkType) |
 | `delete obj.key` | Leaves `undefined`, breaks `exactOptionalPropertyTypes` | Destructure or create new object |
 | Mutable default params | Shared reference mutation | `readonly` or spread copy |
+| `Cannot find name 'process'` → blind `@types/node` install | File may be outside tsconfig `include`, or TS6 omitted `types: ["node"]` | Run **Node types probe** below before installing or rewriting imports |
+| IDE says `npm i @types/node` on a pnpm/yarn repo | Wrong package manager; dep may already exist | Honor lockfile; verify `package.json` first |
+
+## Node types probe (implement / fix)
+
+Before adding `@types/node` or rewriting `process` imports, check in order:
+
+1. Is `@types/node` already a devDependency? Is `"types": ["node"]` (or equivalent) in the active tsconfig?
+2. Is the failing file listed under that project’s `include` (or covered by a glob)? Framework-generated includes often omit root tooling configs.
+3. Only then: add `@types/node` + `types: ["node"]`, **or** add the file to `include`, **or** use `node:process` / a triple-slash reference.
+
+**Anti-trigger:** Do not treat the IDE’s stock “install `@types/node` via npm” tip as the diagnosis when step 1 already passes.
 
 ## Logging / Diagnostics
 

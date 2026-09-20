@@ -36,4 +36,4 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 | `skill.acronyms.present` | minor | Pack has `ACRONYMS.md` at plugin root (or skill sibling if standalone) per `lexicon-spec.md` |
 | `skill.acronyms.coverage` | minor | Domain acronyms in SKILL/refs appear in `ACRONYMS.md` with correct expansions |
 | `skill.glossary.present` | minor | Pack has `GLOSSARY.md` at resolved path |
-| `skill.glossary.coverage` | minor | Overloaded plugin terms in SKILL/refs have canonical senses in `GLOSSARY.md` |
+| `skill.glossary.coverage` | minor | In-scope overloaded plugin-wide senses in SKILL/refs have canonical senses in `GLOSSARY.md` (not flags/templates/schema); never FAIL for undocumented excluded-class tokens |

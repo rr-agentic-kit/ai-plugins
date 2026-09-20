@@ -29,10 +29,10 @@ Apply production code standards (SOLID, CPNNN rubric, architecture, observabilit
 
 ## Procedure
 
-Single-shot implement with known stack: TodoWrite N/A.
+Single-shot implement with known stack: TodoWrite N/A. Delivery channels: N/A — no AskQuestion gates here (parent **rr-builder** owns confirms). Task agents: N/A — path-loaded `Read` only.
 
 1. **load** — Read refs from **Required Knowledge** in order; load language ref when stack is identified. Done: principles loaded before edits or findings.
-2. **apply** — For implement/refactor: apply loaded principles and language refs; load [testability.md](refs/testability.md) when tests will follow. For review: full LOAD list; exclude dedicated test paths from production findings. Done: principles applied to scoped source, or review scope enumerated with dedicated test paths excluded.
+2. **apply** — For implement/refactor: apply loaded principles and language refs; load [testability.md](refs/testability.md) when tests will follow. For TypeScript `process`/`Buffer` name errors, run the **Node types probe** in [typescript.md](refs/typescript.md) before installing packages or rewriting imports. For review: full LOAD list; exclude dedicated test paths from production findings. Done: principles applied to scoped source, or review scope enumerated with dedicated test paths excluded.
 3. **emit** — When reviewing: map findings via [compliance-rubric.md](refs/compliance-rubric.md); triage via [severity-triage.md](refs/severity-triage.md); emit CP table then mandatory **`## Architecture`**. When brief path is set, **Read** it once — do not re-fetch linked tickets. Done: findings or applied changes match loaded refs.
 
 Fix path: inline apply in the parent session. When **rr-review** `--fix` routes code findings, follow the review plan steps.

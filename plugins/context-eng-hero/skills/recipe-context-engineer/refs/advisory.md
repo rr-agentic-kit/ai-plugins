@@ -44,7 +44,7 @@ Plugins (and standalone skills) need `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-
 | File | Holds |
 |------|-------|
 | `ACRONYMS.md` | Short forms → expansion (domain jargon; skip ubiquitous HTTP/JSON/URL unless redefined) |
-| `GLOSSARY.md` | Overloaded terms with canonical plugin sense |
+| `GLOSSARY.md` | Overloaded plugin-wide senses (not flags/templates/schema; owning skill/ref is SoT) |
 
 ## Hidden-requirements catalog
 
@@ -60,7 +60,7 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **Invoke mode** — Auto / Slash-or-parent / Background chosen before drafting `description` and flags (`design/skill.md`)
 - **Scripts folder** — If `scripts/` exists: agent **runs** helpers via shell; do not paste script bodies into SKILL (`refs/helper-cli.md`)
 - **README** — Sibling spec with Why/What/When; does not restate Procedure (`refs/readme-spec.md`)
-- **ACRONYMS + GLOSSARY** — Both companions at resolved path; table shape; harvest domain jargon (`refs/lexicon-spec.md`)
+- **ACRONYMS + GLOSSARY** — Both companions at resolved path; table shape; harvest overloaded plugin-wide senses, not flags/templates (`refs/lexicon-spec.md`)
 - **Skill UX (input/delivery)** — Create/design: resolve **skill-ux-delivery** before draft (`gate-prompts.md`); wire README **UX → Clarify/Close** + SKILL Orchestration / Execution rules from that choice—do not rewrite Purpose/Procedure from the gate alone
 - **AskQuestion text fallback** — If Procedure/Orchestration/close uses AskQuestion or enumerable gates: state Delivery channels (prefer AskQuestion; same options as prose; no stall). If no gates: one-line N/A (`questioning.md`)
 - **Task inject/load contract** — When the skill Tasks agents: document which refs go in the Task payload vs stable hard-links before draft (`chat-orchestration.md`; exemplar `actions/improve.md`)

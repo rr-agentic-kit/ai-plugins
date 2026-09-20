@@ -8,9 +8,9 @@ Execute needs one entry that owns pipeline cursor (prepare → plan → build �
 
 ## What
 
-Owns flag/NL normalization, **orchestrate vs handoff** mode, drive×scope run loop, stage→load contracts, and on-demand load of `rr-prepare`, `rr-coder`, `rr-tester`, `rr-security-auditor`, or `rr-review`. Prepare/execute cursor under `docs/rr/tasks/`; review artifacts under `.ai/review/<runId>/`.
+Owns flag/NL normalization, **orchestrate vs handoff** mode, drive×scope run loop, stage→load contracts, plan-stage **feature branch ensure** (`feat/{NNNN}-{step}-{short-desc}`), and on-demand load of `rr-prepare`, `rr-coder`, `rr-tester`, `rr-security-auditor`, or `rr-review`. Prepare/execute cursor under `docs/rr/tasks/`; review artifacts under `.ai/review/<runId>/`.
 
-**Out of scope:** inventing a **refactor** stage procedure while TBD; README tone rewrites. Mis-invocation redirects live under **Avoid when** only.
+**Out of scope:** inventing a **refactor** stage procedure while TBD; squash/worktree/prune (those stay **rr-git**); README tone rewrites. Mis-invocation redirects live under **Avoid when** only.
 
 ## Actions
 
@@ -42,7 +42,7 @@ Defaults: orchestrate without drive/scope → `manual` × `full`. Lone `--auto` 
 
 - Cascade planning (exec-summary → PRD) → **rr-planner**
 - PR/MR create, pipeline debug, or forge POST after **delivered** → **rr-ci**
-- Local git only (rebase, worktree, squash) → **rr-git**
+- Local git only (rebase, worktree, squash) → **rr-git** (plan-stage feature-branch ensure is **not** this case)
 - Docs humanization → **rr-humanize**
 
 ## Philosophy
@@ -51,6 +51,7 @@ Defaults: orchestrate without drive/scope → `manual` × `full`. Lone `--auto` 
 - **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; ready list marks cursor stage **`(next)`**; silent chain only with `--auto` (default drive×scope is `manual` × `full`)
 - **One nested skill (or stage knowledge set) per stage turn** — never preload all lane skills
 - **Plan ≠ build** — plan stage loads knowledge only; no application source edits; plan lands in `{NNNN}-{step}.plan.md` (1-based step) so build loads one step’s plan, not a bloated task body
+- **Feature branch at plan start** — on `main`/`master`, create `feat/{NNNN}-{step}-{short-desc}` before writing the plan; otherwise AskQuestion (stay / new from base / rename / abort) — never invent alternate names or defer to post-build
 - **Review under orchestrate is `--fix --all`** — report-only review uses explicit `--review` without `--fix`
 - **Delivered → rr-ci** — builder stops at ship boundary
 
@@ -66,7 +67,7 @@ Normalize via input-resolution into `payload.mode` + `drive`/`scope` (orchestrat
 
 ### Clarify
 
-Ambiguous mode → AskQuestion once (orchestrate drive×scope \| prepare \| coder \| tester \| security \| review). Manual → confirm/edit next stage, or ready-vs-blocked pick under `--full` with cursor stage marked **`(next)`**. Missing kernel/`slice_id` → AskQuestion or stop. Incompatible `--fix` + `--ci` under `--review`, or dual drive/scope flags → stop with one-line error.
+Ambiguous mode → AskQuestion once (orchestrate drive×scope \| prepare \| coder \| tester \| security \| review). Manual → confirm/edit next stage, or ready-vs-blocked pick under `--full` with cursor stage marked **`(next)`**. Missing kernel/`slice_id` → AskQuestion or stop. Plan stage off `main`/`master` → feature-branch probe (stay \| new from base \| rename \| abort). Incompatible `--fix` + `--ci` under `--review`, or dual drive/scope flags → stop with one-line error.
 
 ### Output
 

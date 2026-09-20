@@ -41,7 +41,18 @@ Domain jargon only. Skip ubiquitous tokens (`HTTP`, `JSON`, `URL`, `OK`) unless 
 
 ### Glossary scope
 
-Terms that would mislead an agent or human if read with a common alternate sense: product verbs, cascade nouns, action names used as nouns, domain metaphors.
+Harvest **cross-skill overloaded nouns** only — terms that would mislead if read with a common alternate sense **and** that appear across skills (e.g. `freeze`, `slice`, `challenge` vs `Challenge (review)`, `plan` vs `plan (builder)`).
+
+**In:** product verbs, cascade nouns, action names used as nouns, domain metaphors with a plugin-specific sense that collides with English or another skill.
+
+**Out (owning skill/ref is SoT — do not add these rows):**
+
+- CLI flags / skill parameters (`--manual`, `--auto`, `--next`, `--full`, `--from-code`, `--improve` as flag spelling)
+- Path/name templates (`feat/{NNNN}-{step}-{short-desc}`)
+- Skill-owned schema, booleans, dir tokens, file stems (`builder_stage`, `step_*_done`, `REVIEW_DIR`, `task-summary`, `runId`)
+- Skill-private rubric/stage names that only that pack loads (`task-validate`, `slice validate`, `refactor (builder)`)
+
+Harvest: do **not** add excluded-class rows. Coverage (`skill.glossary.coverage`): **FAIL** only for missing/wrong *in-scope* senses — never FAIL because a flag/template/schema token is undocumented in `GLOSSARY.md`.
 
 ## Audit / fix
 
@@ -49,7 +60,7 @@ Terms that would mislead an agent or human if read with a common alternate sense
 |--------|---------------------|
 | Missing either file | Static **FAIL** (`static.acronyms.present` / `static.glossary.present`) |
 | Wrong shape (no H1 or required table columns) | Static **FAIL** (`static.*.shape`) |
-| Used-but-undefined or wrong sense | Judgment **FAIL** (`skill.acronyms.coverage` / `skill.glossary.coverage`) |
+| Used-but-undefined or wrong sense (in-scope only) | Judgment **FAIL** (`skill.acronyms.coverage` / `skill.glossary.coverage`) |
 | **fix** | Create or update the failing companion file(s); apply `acronyms.*` / `glossary.*` FAILs only |
 
 Static checks presence + minimal shape only—not brittle token regex for coverage.

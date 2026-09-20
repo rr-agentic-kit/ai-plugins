@@ -25,7 +25,7 @@ description: Slice build orchestrator (drive×scope; default --manual --full) or
 |------|-------------|
 | Cascade planning (exec-summary → PRD) | **rr-planner** |
 | PR/MR create, pipeline debug, forge POST after **delivered** | **rr-ci** |
-| Local git only (rebase, worktree, squash) | **rr-git** |
+| Local git only (rebase, worktree, squash) | **rr-git** (not plan-stage feature-branch ensure) |
 | Docs humanization | **rr-humanize** |
 
 See [refs/anti-overlap.md](refs/anti-overlap.md).
@@ -36,14 +36,14 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
 
 **Task agents:** N/A — no Task spawn; nested skills are path-loaded `Read`s only.
 
-**Delivery channels:** Prefer AskQuestion for missing kernel/`slice_id`, ambiguous mode, manual confirm/ready-pick, and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
+**Delivery channels:** Prefer AskQuestion for missing kernel/`slice_id`, ambiguous mode, manual confirm/ready-pick, plan-stage feature-branch probe (not on `main`/`master`), and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
 
 1. **resolve** — Load [refs/input-resolution.md](refs/input-resolution.md). Normalize flags / NL into `payload.mode` (`orchestrate` \| `handoff`), `payload.drive` / `payload.scope` (orchestrate defaults: `manual` × `full`), optional `payload.lane`, and slice/task cursor fields. Explicit lane → omit/ignore drive/scope. Done: payload emitted or one AskQuestion.
 2. **mode** — If explicit lane flag → **handoff**. Else → **orchestrate** (probe cursor per [refs/slice-pipeline.md](refs/slice-pipeline.md)). Explicit flag wins over cursor. Done: exactly one mode.
 3. **load** — Follow [refs/routing.md](refs/routing.md):
    - **Handoff:** `Read` only the matching nested `SKILL.md` once.
    - **Orchestrate:** load stage contract from [refs/slice-pipeline.md](refs/slice-pipeline.md) (full nested skill, plan allowlist, or validate rubric). Do not preload every nested skill.
-4. **execute** — Apply drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` / step done markers after each done-when. **Stop** — handoff does not re-enter orchestrate; plan stage must not edit application source; delivered → point to **rr-ci** (do not open PR). Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
+4. **execute** — Apply drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` / step done markers after each done-when. **Stop** — handoff does not re-enter orchestrate; plan stage must not edit application source (feature-branch create/checkout is allowed — [refs/feature-branch.md](refs/feature-branch.md)); delivered → point to **rr-ci** (do not open PR). Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
 
 ## Nested skills (path-loaded only)
 
@@ -65,6 +65,7 @@ Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
 | [refs/routing.md](refs/routing.md) | After resolve (handoff table + orchestrate pointers) |
 | [refs/slice-pipeline.md](refs/slice-pipeline.md) | Orchestrate mode (stage contracts, cursor, run loop) |
 | [refs/plan-knowledge.md](refs/plan-knowledge.md) | Orchestrate **plan** stage only |
+| [refs/feature-branch.md](refs/feature-branch.md) | Plan-stage feature branch name + ensure (via plan-knowledge) |
 | [refs/plan-schema.md](refs/plan-schema.md) | Orchestrate **plan** done-when / output shape |
 | [refs/task-validate.md](refs/task-validate.md) | Task / step validate stages |
 | [refs/slice-validate.md](refs/slice-validate.md) | Slice validate stage |
