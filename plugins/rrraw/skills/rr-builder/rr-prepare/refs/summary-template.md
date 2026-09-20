@@ -11,7 +11,9 @@ track: "0.1"
 kernel_path: docs/rr/0.1/plan/execute-slice.yaml
 posture: greenfield   # greenfield | brownfield | docs_ahead | conflict
 prepare_status: l1 | l2 | complete
-builder_stage: null | prepare | plan | build | review | refactor | step_validate | task_validate | slice_validate | delivered
+builder_stage: null | prepare | plan | build | review | refactor | step_validate | ship | task_validate | slice_validate | delivered
+active_ship_branch: null | string   # last ship head (feat/…)
+ship_base_branch: null | string     # default branch or prior open PR tip
 pending_tech: []   # empty = no topics yet; else list of maps:
 # pending_tech:
 #   - topic: auth-session-store
@@ -38,6 +40,8 @@ Mirror [tech-decisions.md](tech-decisions.md) inventory until resolved. Shape: Y
 | pr_group | task_ids | rationale |
 |----------|----------|-----------|
 | g1 | [1, 2] | … |
+
+Optional stacking note under the map (prose): e.g. “stacked PRs via `Ship.base: prior_open_pr` on step plans” — concrete branches stay in `{NNNN}-{step}.plan.md`.
 
 ## Registry pointer
 

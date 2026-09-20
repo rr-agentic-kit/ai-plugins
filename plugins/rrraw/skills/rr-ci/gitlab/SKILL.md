@@ -35,11 +35,12 @@ Parent **rr-ci** already selected GitLab. Do not load for GitHub remotes.
 | glab syntax | [refs/cli.md](refs/cli.md) |
 | **Issue create** | Steps **Issue create** below |
 | **MR ship** | `mr-add-preflight` then **Default MR ship** below |
-| Inline MR threads | [refs/inline-comments.md](refs/inline-comments.md) |
+| Inline MR threads | `mr-ci-review-preflight` then optional `mr-inline-anchors`, then [refs/inline-comments.md](refs/inline-comments.md) |
+| Thread disposition / reply | Parent `refs/review-comment-triage.md` (Read from rr-ci root; do not invent path) |
 | Resolve open MR | [refs/mr-resolve.md](refs/mr-resolve.md) |
 | Failed pipeline | `debug-pipeline` `[MR_IID]` — branch on `result.status`, `result.error_lines`, `result.failed_job_id` |
 | CI code-quality | `code-quality-reports` — `result.reports.count`, `result.reports.nodes` |
-| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues` (default: open MR for current branch) |
+| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues --lean` (default: open MR for current branch) |
 | Pipeline security | `pipeline-security-reports` — `result.merge_blocked`, `result.findings.*` |
 | Bulk resolve threads | `mr-skip-threads` |
 | MR add preflight | `mr-add-preflight` |
@@ -73,15 +74,7 @@ Skill `--draft` is the parent human gate — not this row’s forge `--draft` fl
 
 ### Pre-merge
 
-When asked — stop at first failure:
-
-1. `glab mr view` — pipeline, approvals, conflicts
-2. Pipeline success (else `debug-pipeline`)
-3. `pipeline-security-reports` — `merge_blocked`
-4. Unresolved threads
-5. Required approvals
-
-**Pre-merge report:** Pipeline, security, discussions, approvals, merge ready/blocked, one-line verdict. Done: report emitted. Stop: first failing gate above.
+When asked — run `pre-merge-status` once; branch on `result.verdict` / `result.blockers`; report one-line verdict. Do **not** invent five sequential probes. Done: report emitted. Stop: `verdict == blocked` (next action from `blockers`; `debug-pipeline` only when pipeline fails).
 
 ## Invariants
 

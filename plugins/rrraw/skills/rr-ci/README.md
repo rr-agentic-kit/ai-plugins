@@ -10,7 +10,7 @@ One forge-agnostic ship path: detect GitHub vs GitLab, author PR/MR title/descri
 
 Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pipeline/review CLI helpers, **`--fix --sonar`** (scripted Sonar issue list + agent remediations), and routing into nested forge / publish / deployment skills. Ship path may commit/push when creating or updating a PR/MR. Forge **target** may differ from cwd origin when the user names `owner/repo`.
 
-**Out of scope:** employer/internal cluster catalogs, required tracker keys in titles, Renovate onboarding CLI, local-only git (→ rr-git), general implement/review (→ rr-builder; Sonar-only remediations are in-scope under `--fix --sonar`), inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` as JSON-CLI subcommands (those are skill invoke routes only).
+**Out of scope:** see **Avoid when**; also Renovate onboarding CLI, inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` as JSON-CLI subcommands (those are skill invoke routes only).
 
 ## When
 

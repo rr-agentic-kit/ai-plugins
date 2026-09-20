@@ -4,13 +4,13 @@ Slice build **orchestrator** for software engineers: advances an execute-slice u
 
 ## Why
 
-Execute needs one entry that owns pipeline cursor (prepare → plan → build → review → validate → delivered) without preloading every lane rubric, and without silently chaining past an explicit single-lane request or a `--next` intent. Done when the run loop stops (stage done-when, delivered, hard stop, or user decline), or the nested handoff skill finishes.
+Execute needs one entry that owns pipeline cursor (prepare → plan → build → review → validate → optional **ship** → delivered) without preloading every lane rubric, and without silently chaining past an explicit single-lane request or a `--next` intent. Done when the run loop stops (stage done-when, delivered, hard stop, or user decline), or the nested handoff skill finishes.
 
 ## What
 
-Owns flag/NL normalization, **orchestrate vs handoff** mode, drive×scope run loop, stage→load contracts, plan-stage **feature branch ensure** (`feat/{NNNN}-{step}-{short-desc}`), and on-demand load of `rr-prepare`, `rr-coder`, `rr-tester`, `rr-security-auditor`, or `rr-review`. Prepare/execute cursor under `docs/rr/tasks/`; review artifacts under `.ai/review/<runId>/`.
+Owns flag/NL normalization, **orchestrate vs handoff** mode, drive×scope run loop, stage→load contracts, plan-stage **feature branch ensure** (`feat/{NNNN}-{step}-{short-desc}`), plan **Ship** intent (`ship_after` / stacked `base`), and on-demand load of `rr-prepare`, `rr-coder`, `rr-tester`, `rr-security-auditor`, `rr-review`, or **rr-ci** on **ship**. Prepare/execute cursor under `docs/rr/tasks/`; review artifacts under `.ai/review/<runId>/`.
 
-**Out of scope:** inventing a **refactor** stage procedure while TBD; squash/worktree/prune (those stay **rr-git**); README tone rewrites. Mis-invocation redirects live under **Avoid when** only.
+**Out of scope:** inventing a **refactor** stage procedure while TBD; squash/worktree/prune (those stay **rr-git**); inventing forge CLI (those stay **rr-ci**); README tone rewrites. Mis-invocation redirects live under **Avoid when** only.
 
 ## Actions
 
@@ -37,11 +37,12 @@ Defaults: orchestrate without drive/scope → `manual` × `full`. Lone `--auto` 
 - Prepare a pin-complete slice into ordered tasks
 - Implement, test, security-audit, or review a scoped change without full-slice orchestrate
 - Need task/slice Goal·Verify / AC validation before ship
+- Mid-slice or task-scoped PR via plan **Ship** → orchestrate **ship** → **rr-ci**
 
 ### Avoid when
 
 - Cascade planning (exec-summary → PRD) → **rr-planner**
-- PR/MR create, pipeline debug, or forge POST after **delivered** → **rr-ci**
+- Forge POST / pipeline debug without a builder ship or review-ci handoff → **rr-ci** directly
 - Local git only (rebase, worktree, squash) → **rr-git** (plan-stage feature-branch ensure is **not** this case)
 - Docs humanization → **rr-humanize**
 
@@ -52,8 +53,9 @@ Defaults: orchestrate without drive/scope → `manual` × `full`. Lone `--auto` 
 - **One nested skill (or stage knowledge set) per stage turn** — never preload all lane skills
 - **Plan ≠ build** — plan stage loads knowledge only; no application source edits; plan lands in `{NNNN}-{step}.plan.md` (1-based step) so build loads one step’s plan, not a bloated task body
 - **Feature branch at plan start** — on `main`/`master`, create `feat/{NNNN}-{step}-{short-desc}` before writing the plan; otherwise AskQuestion (stay / new from base / rename / abort) — never invent alternate names or defer to post-build
+- **Ship is planned** — each step plan’s **Ship** sets `branch`, `ship_after`, `base`; `prior_open_pr` stacks onto the latest still-open PR in the `pr_group` chain; forge open is **rr-ci** via **ship** stage
 - **Review under orchestrate is `--fix --all`** — report-only review uses explicit `--review` without `--fix`
-- **Delivered → rr-ci** — builder stops at ship boundary
+- **Delivered → residual rr-ci** — mid-slice ships already handed off; delivered only covers unshipped remainder
 
 ## UX
 
@@ -67,15 +69,15 @@ Normalize via input-resolution into `payload.mode` + `drive`/`scope` (orchestrat
 
 ### Clarify
 
-Ambiguous mode → AskQuestion once (orchestrate drive×scope \| prepare \| coder \| tester \| security \| review). Manual → confirm/edit next stage, or ready-vs-blocked pick under `--full` with cursor stage marked **`(next)`**. Missing kernel/`slice_id` → AskQuestion or stop. Plan stage off `main`/`master` → feature-branch probe (stay \| new from base \| rename \| abort). Incompatible `--fix` + `--ci` under `--review`, or dual drive/scope flags → stop with one-line error.
+Ambiguous mode → AskQuestion once (orchestrate drive×scope \| prepare \| coder \| tester \| security \| review). Manual → confirm/edit next stage, or ready-vs-blocked pick under `--full` with cursor stage marked **`(next)`**. Missing kernel/`slice_id` → AskQuestion or stop. Plan stage off `main`/`master` → feature-branch probe (stay \| new from base \| rename \| abort). Ship `prior_open_pr` with >1 candidate tip → AskQuestion. Incompatible `--fix` + `--ci` under `--review`, or dual drive/scope flags → stop with one-line error.
 
 ### Output
 
-Nested skill / stage owns artifacts; prepare writes `docs/rr/tasks/`; review runs write under `.ai/review/<runId>/`; validate stages emit PASS/FAIL verdicts.
+Nested skill / stage owns artifacts; prepare writes `docs/rr/tasks/`; review runs write under `.ai/review/<runId>/`; validate stages emit PASS/FAIL verdicts; **ship** persists `active_ship_branch` / `ship_base_branch` then hands off **rr-ci**.
 
 ### Close
 
-Stop per drive×scope loop (stage done-when, delivered, hard stop, or decline). Handoff does not auto-advance the pipeline. Slice validate PASS → **delivered** → point to **rr-ci**. Load **rr-ci** mid-builder only after review `--ci` or explicit ship request.
+Stop per drive×scope loop (stage done-when, delivered, hard stop, or decline). Handoff does not auto-advance the pipeline. Planned **ship** after validate → **rr-ci**. Slice validate PASS → **delivered** → residual **rr-ci** only. Load **rr-ci** also after review `--ci`.
 
 ## Constraints
 
@@ -90,4 +92,4 @@ Stop per drive×scope loop (stage done-when, delivered, hard stop, or decline). 
 
 Nested lane skills intentionally fail context-engineer `static.name.path-match` — they are path-loaded children of `rr-builder`, not top-level `skills/<name>/` entries.
 
-Layout: `refs/` (router + pipeline + validate + plan allowlist/schema), `rr-prepare/`, `rr-coder/`, `rr-tester/`, `rr-security-auditor/`, `rr-review/`.
+Layout: `refs/` (router + pipeline + validate + plan allowlist/schema + ship), `rr-prepare/`, `rr-coder/`, `rr-tester/`, `rr-security-auditor/`, `rr-review/`.

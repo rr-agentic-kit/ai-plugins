@@ -34,6 +34,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="List SonarQube issues (machine JSON; wrap sonarqube-cli)",
         description=(
             "Result keys: project, total, issues[]; optional pull_request, branch. "
+            "With --lean: by_file map (key/rule/severity/line), issues omitted. "
             "Default scope: open PR/MR for current branch"
         ),
     )
@@ -56,6 +57,11 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         default="OPEN,CONFIRMED",
         help="Comma-separated statuses (default: OPEN,CONFIRMED)",
     )
+    parser.add_argument(
+        "--lean",
+        action="store_true",
+        help="Group by file; omit full issues[]/messages (for --fix --sonar)",
+    )
     parser.set_defaults(handler=_handler)
 
 
@@ -65,7 +71,34 @@ def _handler(args: argparse.Namespace) -> int:
         pull_request=args.pull_request,
         branch=args.branch,
         statuses=args.statuses,
+        lean=args.lean,
     )
+
+
+def lean_reshape(result: dict[str, Any]) -> dict[str, Any]:
+    """Collapse full issues[] into by_file lean rows (no message dump)."""
+    by_file: dict[str, list[dict[str, Any]]] = {}
+    for issue in result.get("issues") or []:
+        if not isinstance(issue, dict):
+            continue
+        path = str(issue.get("file") or "")
+        row = {
+            "key": issue.get("key"),
+            "rule": issue.get("rule"),
+            "severity": issue.get("severity"),
+            "line": issue.get("line"),
+        }
+        by_file.setdefault(path, []).append(row)
+    lean: dict[str, Any] = {
+        "project": result.get("project"),
+        "total": result.get("total"),
+        "by_file": by_file,
+    }
+    if result.get("pull_request") is not None:
+        lean["pull_request"] = result["pull_request"]
+    if result.get("branch") is not None:
+        lean["branch"] = result["branch"]
+    return lean
 
 
 def _resolve_project_key(explicit: str | None) -> str:
@@ -250,6 +283,7 @@ def main(
     pull_request: str | None = None,
     branch: str | None = None,
     statuses: str = "OPEN,CONFIRMED",
+    lean: bool = False,
 ) -> int:
     try:
         key = _resolve_project_key(project)
@@ -259,6 +293,8 @@ def main(
             branch=branch,
             statuses=statuses,
         )
+        if lean:
+            result = lean_reshape(result)
     except SonarError as exc:
         return emit.fail(COMMAND, exc.code, str(exc))
     except (FileNotFoundError, GitError, GhError, GlabError) as exc:

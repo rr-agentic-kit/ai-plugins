@@ -23,10 +23,10 @@
 
 ## Verdict
 
-Emit one line: `slice-validate: PASS | FAIL` plus ≤5 bullets of evidence (cite kernel field / AC id + proof). On **PASS**, set `builder_stage: delivered` and stop — point engineer to **rr-ci** (do not open PR/MR from builder). On **FAIL**, leave `builder_stage: slice_validate`.
+Emit one line: `slice-validate: PASS | FAIL` plus ≤5 bullets of evidence (cite kernel field / AC id + proof). On **PASS**, set `builder_stage: delivered` and stop — point engineer to **rr-ci** for **residual** unshipped work only (do **not** open PR/MR from builder). Mid-slice / task ships already ran via **ship**. On **FAIL**, leave `builder_stage: slice_validate`.
 
 ## Out of scope
 
 - Per-task Goal/Verify detail → [task-validate.md](task-validate.md)
-- Forge ship / pipeline → **rr-ci** after delivered
+- Planned mid-slice / task forge ship → [ship.md](ship.md) + **rr-ci**
 - Re-planning product cascade → **rr-planner**

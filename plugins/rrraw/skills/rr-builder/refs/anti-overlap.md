@@ -12,13 +12,15 @@
 
 ## rr-ci
 
-**Owns:** Forge detect, PR/MR title/description, pipeline debug, publish, deploy, inline POST scripts. Disk sidecars under **`.ai/ci/`**. Ship after **slice delivered**.
+**Owns:** Forge detect, PR/MR title/description, pipeline debug, publish, deploy, inline POST scripts. Disk sidecars under **`.ai/ci/`**.
 
-**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--full`) and explicit lane **handoffs**. Stops at delivered — does **not** open MR/PR from orchestrate.
+**When builder hands off:** (1) orchestrate **ship** after planned validate ([ship.md](ship.md) — mid-slice or task-scoped); (2) **slice delivered** residual; (3) **rr-review** `--ci`.
 
-**rr-builder does not:** open MR/PR except when **rr-review** handoff finished with `--ci` and hands off to **rr-ci**.
+**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--full`) and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **rr-ci** — does **not** invent forge CLI.
 
-**Stop phrase:** "Ship/CI only — use **rr-ci**." After slice validate PASS → delivered boundary → **rr-ci**. Review first if user wants findings before POST.
+**rr-builder does not:** open MR/PR except by handing off to **rr-ci** (ship stage, delivered residual, or review `--ci`).
+
+**Stop phrase:** "Ship/CI forge mechanics — use **rr-ci**." Builder may **enter** ship and load rr-ci when the step plan declares `ship_after`; it must not skip a planned ship or open the PR itself.
 
 ## rr-git
 

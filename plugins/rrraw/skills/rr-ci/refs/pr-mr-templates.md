@@ -51,6 +51,16 @@ Closes #N
 - <Removed capability>
 ```
 
+### Summary readability (required)
+
+`## Summary` is for reviewers scanning the PR. Structure beats density:
+
+- **Short lead** — first sentence names the gap or problem.
+- **One idea per sentence** — prefer periods; avoid semicolon / em-dash glue that packs multiple claims.
+- **Given–new** — known context first, then what this PR changes.
+- **No stacked walls** — do not crush problem + solution + edge cases into one paragraph with "while / then / and".
+- **Short-circuit** — a Summary that is already ≤3 short sentences and meets this bar needs no further rewrite.
+
 Headings below `---` follow [Keep a Changelog](https://keepachangelog.com/): **Added**, **Changed**, **Fixed**, **Removed**, **Deprecated**, **Security**. Omit empty sections.
 
 | Content | Above `---` | Below `---` |
@@ -76,4 +86,4 @@ When the invoke includes `--draft` (or prose asks to draft title/description fir
 4. **I'll edit** → do not rewrite the files; after the user continues, **re-read** both paths and use that content (user edition wins). AskQuestion again.
 5. **Ship** → nested forge upsert uses the current disk title/body. Add forge `gh`/`glab` `--draft` only if the user also asked for forge-draft status (separate from this skill flag).
 
-Without `--draft`, authoring may still write a body file for CLI `--body-file`; no AskQuestion gate.
+Without `--draft`, authoring may still write a body file for CLI `--body-file`. The parent step **title** still runs the **Summary readability gate** before forge create/edit (humanize or AskQuestion when dense).

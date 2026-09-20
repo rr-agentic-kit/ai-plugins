@@ -9,7 +9,9 @@ from errors import GitError
 from forge import detect
 from gh import GhClient, default_gh
 from gitutil import current_branch, merge_base_refs, repo_root
+from mr_inline_anchors import parse_unified_diff_plus_lines
 from paths import ci_file, ci_rel
+from pre_merge_status import assemble_verdict
 
 
 def dispatch(args: Namespace) -> int:
@@ -30,10 +32,14 @@ def dispatch(args: Namespace) -> int:
             return _ensure_instructions(client, args)
         if command == "mr-ci-review-preflight":
             return _ci_preflight(client, args)
+        if command == "mr-inline-anchors":
+            return _inline_anchors(client, args)
         if command == "mr-review-submit":
             return _review_submit(client, args)
         if command == "pending-reviews":
             return _pending(client)
+        if command == "pre-merge-status":
+            return _pre_merge(client, args)
         return emit.fail(command, "unknown_command", command)
     except FileNotFoundError as exc:
         return emit.fail_exception(command, exc)
@@ -296,6 +302,176 @@ def _ci_preflight(client: GhClient, args: Namespace) -> int:
             "diff_refs": {},
         },
     )
+
+
+def _inline_anchors(client: GhClient, args: Namespace) -> int:
+    """Parse PR file patches for + lines when available; else parity-gap note."""
+    pr = getattr(args, "mr_ref", None) or getattr(args, "mr_iid", None)
+    number = _pr_number(client, str(pr) if pr else None)
+    path_filter = frozenset(getattr(args, "paths", None) or [])
+    try:
+        meta = json.loads(
+            client.cli(
+                [
+                    "pr",
+                    "view",
+                    number,
+                    "--json",
+                    "number,baseRefOid,headRefOid",
+                ]
+            )
+        )
+        files_raw = client.api(
+            f"repos/{{owner}}/{{repo}}/pulls/{number}/files?per_page=100"
+        )
+    except Exception:
+        return emit.succeed(
+            "mr-inline-anchors",
+            {
+                "mr_iid": number,
+                "diff_refs": {},
+                "files": {},
+                "note": (
+                    "GitHub parity gap: could not load PR patches for + line anchors; "
+                    "use gh pr diff / review comment line from the UI, or GitLab backend"
+                ),
+            },
+        )
+
+    files_list = files_raw if isinstance(files_raw, list) else []
+    files: dict[str, list[int]] = {}
+    for item in files_list:
+        if not isinstance(item, dict):
+            continue
+        path = str(item.get("filename") or "")
+        if not path:
+            continue
+        if path_filter and path not in path_filter:
+            continue
+        patch = str(item.get("patch") or "")
+        if not patch:
+            files.setdefault(path, [])
+            continue
+        files[path] = parse_unified_diff_plus_lines(patch)
+
+    base_sha = str(meta.get("baseRefOid") or "")
+    head_sha = str(meta.get("headRefOid") or "")
+    diff_refs: dict[str, str] = {}
+    if base_sha:
+        diff_refs["base_sha"] = base_sha
+        diff_refs["start_sha"] = base_sha  # GitHub has no GitLab start_sha; mirror base
+    if head_sha:
+        diff_refs["head_sha"] = head_sha
+
+    result: dict[str, Any] = {
+        "mr_iid": str(meta.get("number") or number),
+        "diff_refs": diff_refs,
+        "files": files,
+    }
+    if not files and not diff_refs:
+        result["note"] = (
+            "GitHub parity gap: empty PR files/patches; "
+            "diff_refs may be incomplete vs GitLab"
+        )
+    return emit.succeed("mr-inline-anchors", result)
+
+
+def _unresolved_thread_count(client: GhClient, pr: str) -> int:
+    remote = detect()
+    data = client.graphql(
+        _THREADS_QUERY,
+        {"owner": remote.owner, "name": remote.repo, "number": int(pr)},
+    )
+    nodes = ((data or {}).get("repository") or {}).get("pullRequest", {}).get(
+        "reviewThreads", {}
+    ).get("nodes") or []
+    return sum(1 for n in nodes if not n.get("isResolved"))
+
+
+def _pre_merge(client: GhClient, args: Namespace) -> int:
+    pr_ref = getattr(args, "mr_ref", None) or getattr(args, "mr_iid", None)
+    number = _pr_number(client, str(pr_ref) if pr_ref else None)
+    payload = json.loads(
+        client.cli(
+            [
+                "pr",
+                "view",
+                number,
+                "--json",
+                "number,mergeable,reviewDecision,statusCheckRollup,reviews",
+            ]
+        )
+    )
+
+    rollup = payload.get("statusCheckRollup") or []
+    check_status = "success"
+    failing: list[str] = []
+    if isinstance(rollup, list) and rollup:
+        for item in rollup:
+            state = str(
+                item.get("conclusion") or item.get("state") or item.get("status") or ""
+            ).upper()
+            if state in {"FAILURE", "FAILED", "ERROR", "CANCELLED", "TIMED_OUT"}:
+                check_status = "failure"
+                name = str(item.get("name") or item.get("context") or "check")
+                failing.append(name)
+            elif (
+                state in {"PENDING", "QUEUED", "IN_PROGRESS", "EXPECTED"}
+                and check_status != "failure"
+            ):
+                check_status = "pending"
+    else:
+        check_status = "no_pipeline"
+
+    mergeable = str(payload.get("mergeable") or "").upper()
+    has_conflicts = mergeable == "CONFLICTING"
+
+    # Security via same logic as _security, compact
+    security_status = "clean"
+    merge_blocked = False
+    try:
+        scanning = client.api("repos/{owner}/{repo}/code-scanning/alerts?state=open")
+        nodes = scanning if isinstance(scanning, list) else []
+        blocking = [
+            n
+            for n in nodes
+            if str(n.get("severity") or "").lower() in {"critical", "high"}
+        ]
+        merge_blocked = bool(blocking)
+        if merge_blocked:
+            security_status = "blocking_findings"
+        elif not nodes:
+            security_status = "no_reports"
+    except Exception:
+        security_status = "unavailable"
+
+    unresolved = _unresolved_thread_count(client, number)
+    decision = str(payload.get("reviewDecision") or "")
+    reviews_raw = payload.get("reviews") or []
+    approved = decision.upper() == "APPROVED"
+    changes_requested = decision.upper() == "CHANGES_REQUESTED"
+    reviews = {
+        "summary": decision
+        or f"reviews={len(reviews_raw) if isinstance(reviews_raw, list) else 0}",
+        "approved": approved if decision else None,
+        "approvals_required": None,
+        "approvals_left": (
+            1 if changes_requested or (decision.upper() == "REVIEW_REQUIRED") else 0
+        ),
+    }
+
+    snapshot: dict[str, Any] = {
+        "checks": {"status": check_status, "failing": failing},
+        "pipeline": {"status": check_status},
+        "has_conflicts": has_conflicts,
+        "security": {"status": security_status, "merge_blocked": merge_blocked},
+        "unresolved_threads": unresolved,
+        "reviews": reviews,
+        "merge_status": mergeable.lower() if mergeable else "",
+    }
+    result = assemble_verdict(snapshot)
+    result["mr_iid"] = str(payload.get("number") or number)
+    return emit.succeed("pre-merge-status", result)
 
 
 def _review_submit(client: GhClient, args: Namespace) -> int:

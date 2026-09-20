@@ -19,21 +19,22 @@ update_merge_request({
 
 ## Create code comment
 
-Get `diff_refs` from `get_merge_request`, compute `+` lines from diffs/`changes`, then `create_merge_request_thread` with the same `position` rules as [inline-comments.md](inline-comments.md).
+Run CLI `mr-inline-anchors` for `diff_refs` + `files[path]` (`+` lines). Do **not** invent unified-diff parse in the agent. Then `create_merge_request_thread` with `new_line` chosen from that set and the same `position` rules as [inline-comments.md](inline-comments.md).
 
 ```typescript
-const mr = get_merge_request({ merge_request_iid: "123" })
+// Prefer: rr-ci mr-inline-anchors → result.diff_refs + result.files[path]
+const anchors = /* parse CLI envelope */
 create_merge_request_thread({
   merge_request_iid: "123",
   body: "Add error handling here",
   position: {
     position_type: "text",
-    base_sha: mr.diff_refs.base_sha,
-    head_sha: mr.diff_refs.head_sha,
-    start_sha: mr.diff_refs.start_sha,
+    base_sha: anchors.diff_refs.base_sha,
+    head_sha: anchors.diff_refs.head_sha,
+    start_sha: anchors.diff_refs.start_sha,
     new_path: "src/auth.ts",
     old_path: "src/auth.ts",
-    new_line: 42,
+    new_line: anchors.files["src/auth.ts"][0], // must be in files[path]
   },
 })
 ```
@@ -85,5 +86,5 @@ Many functions accept **`merge_request_iid` OR `source_branch`**: `get_merge_req
 - **`list_project_members`:** requires explicit `project_id` (unlike most tools that use MCP default project).
 - **`create_branch`:** optional `project_id`; set it for multi-project worktrees.
 - **Assignees/reviewers:** IDs only (`whoami` / `list_project_members`), never usernames.
-- **`position`:** all three SHAs from `mr.diff_refs` (`base_sha`, `head_sha`, `start_sha`).
-- **`new_line`:** must be a `+` line in `/changes` — [inline-comments.md](inline-comments.md).
+- **`position`:** all three SHAs from `mr.diff_refs` / CLI `mr-inline-anchors` (`base_sha`, `head_sha`, `start_sha`).
+- **`new_line`:** must be a `+` line from CLI `mr-inline-anchors` `result.files[path]` — [inline-comments.md](inline-comments.md).

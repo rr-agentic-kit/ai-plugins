@@ -11,10 +11,12 @@ import github_backend
 import mr_add_preflight
 import mr_ci_review_preflight
 import mr_ensure_review_instructions
+import mr_inline_anchors
 import mr_review_submit
 import mr_skip_threads
 import pending_reviews
 import pipeline_security_reports
+import pre_merge_status
 import sonar_list_issues
 from emit import fail
 from forge import detect
@@ -41,8 +43,10 @@ def _build_parser() -> argparse.ArgumentParser:
     mr_add_preflight.add_parser(subparsers)
     mr_ensure_review_instructions.add_parser(subparsers)
     mr_ci_review_preflight.add_parser(subparsers)
+    mr_inline_anchors.add_parser(subparsers)
     mr_review_submit.add_parser(subparsers)
     pending_reviews.add_parser(subparsers)
+    pre_merge_status.add_parser(subparsers)
     sonar_list_issues.add_parser(subparsers)
     return parser
 

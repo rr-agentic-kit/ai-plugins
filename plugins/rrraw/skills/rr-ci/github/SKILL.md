@@ -35,10 +35,11 @@ Parent **rr-ci** already selected GitHub. Do not load for GitLab remotes.
 | gh syntax | [refs/cli.md](refs/cli.md) |
 | **Issue create** | Steps **Issue create** below |
 | **PR ship** | `mr-add-preflight` then **Default PR ship** below |
-| Review comments on diff lines | [refs/inline-comments.md](refs/inline-comments.md) |
+| Review comments on diff lines | `mr-ci-review-preflight` then [refs/inline-comments.md](refs/inline-comments.md) — GitHub `diff_refs` may be empty until parity; still run preflight for allowlist/MR metadata |
+| Thread disposition / reply | Parent `refs/review-comment-triage.md` (Read from rr-ci root; do not invent path) |
 | Failed Actions run | `debug-pipeline` `[PR_NUMBER]` — `result.status`, `result.error_lines`, `result.failed_job_id` (check-run / job id) |
 | Code scanning / quality | `code-quality-reports` |
-| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues` (default: open PR for current branch) |
+| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues --lean` (default: open PR for current branch) |
 | Security / Dependabot / code scanning | `pipeline-security-reports` — treat `merge_blocked` as merge-state dirty when GitHub reports failing required checks |
 | Resolve review threads | `mr-skip-threads` |
 | PR add preflight | `mr-add-preflight` |
@@ -70,15 +71,7 @@ Skill `--draft` is the parent human gate — not this row’s forge `--draft` fl
 
 ### Pre-merge
 
-When asked — stop at first failure:
-
-1. `gh pr view` — checks, reviews, conflicts
-2. Required checks green (else `debug-pipeline`)
-3. `pipeline-security-reports`
-4. Unresolved review threads
-5. Required reviews
-
-**Pre-merge report:** Checks, security, discussions, reviews, mergeable, one-line verdict. Done: report emitted. Stop: first failing gate above.
+When asked — run `pre-merge-status` once; branch on `result.verdict` / `result.blockers`; report one-line verdict. Do **not** invent five sequential probes. Done: report emitted. Stop: `verdict == blocked` (next action from `blockers`; `debug-pipeline` only when checks fail).
 
 ## Invariants
 

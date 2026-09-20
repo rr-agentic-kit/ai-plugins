@@ -20,6 +20,7 @@ description: Forge router for PR/MR ship (upsert via --create|update-[pr|mr]), i
 | Pipeline fix anti-patterns | [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) |
 | Sonar remediations (`--fix --sonar`) | [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) |
 | Review thread disposition | [refs/review-comment-triage.md](refs/review-comment-triage.md) |
+| Shape detail (draft / sonar / issue / ship) | [refs/task-shapes.md](refs/task-shapes.md) when step 0 needs more than classify |
 
 Procedure step **load** follows this table; do not invent nested paths.
 
@@ -35,7 +36,7 @@ Own the **ship path** (commit/push when creating or updating a PR/MR), **forge t
 - Draft and create a GitHub or GitLab **issue** (including on a forge `owner/repo` other than cwd origin)
 - Author PR/MR **title** and **description**
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
-- **`--fix --sonar`** — auto-remediate open SonarQube issues for a PR or branch (scripted list; agent applies edits; no human issue dump)
+- **`--fix --sonar`** — auto-remediate open SonarQube issues for a PR or branch (scripted list; agent applies edits)
 - Publish artifacts to a static or registry destination
 - Deploy via Helm, Kubernetes, Argo CD, or similar
 
@@ -48,31 +49,21 @@ Own the **ship path** (commit/push when creating or updating a PR/MR), **forge t
 
 ## Procedure
 
-TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` when shipping a PR/MR or running 3+ CLI commands. Single CLI call: skip TodoWrite. **Issue-only** tasks: TodoWrite ids `root`, `forge`, `load`, `execute` (skip `title` / pr-mr-templates). **`--fix --sonar`:** TodoWrite ids `root`, `load`, `execute` (skip forge/title unless scope needs forge PR lookup).
+TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` when shipping a PR/MR or running 3+ CLI commands. Single CLI call: skip TodoWrite. Shape-specific TodoWrite ids: see [refs/task-shapes.md](refs/task-shapes.md).
 
-0. **task-shape** — Classify the user ask before PR ship steps:
-   - **Ship routes (first-class):** `--create-pr` \| `--create-mr` \| `--update-pr` \| `--update-mr` \| `--create-pr-mr` \| `--update-pr-mr` → same **PR/MR upsert** ship (PR vs MR from forge after `detect-remote`; `-pr-mr` = forge-agnostic). Do **not** treat create vs update as different shapes.
-   - **`--draft` (optional, with ship routes):** human title/body draft gate — write files under `.ai/ci/`, AskQuestion next steps; **not** forge `gh`/`glab` `--draft` (add that only if prose asks for forge-draft status). See step **title**.
-   - **`--fix --sonar`:** Sonar remediations — skip `title`; Load [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md); run `sonar-list-issues` (default: open PR/MR for current branch) then apply fixes per that ref. Optional `--pr <id>` or `--branch <name>` overrides.
-   - **issue** → skip step 3 (`title` / [refs/pr-mr-templates.md](refs/pr-mr-templates.md)); after forge bind, load forge skill and run its **Issue create** row.
-   - **PR/MR ship** (prose “open/create/update PR/MR” or routes above) → full steps 1–5 including `title`; nested forge skill branches on preflight `exists` vs `ready_create`.
-   - **CI / review / publish / deploy** → steps 1–2, then matching load row (no invent).
-   Done: shape recorded (include whether `--draft` gate or `--fix --sonar` applies). Stop: shape unclear after one AskQuestion (Issue | PR/MR ship | Sonar fix | CI/other).
+0. **task-shape** — Classify: **ship** (named routes or prose PR/MR upsert) | **`--draft`** (with ship) | **`--fix --sonar`** | **issue** | **CI / review / publish / deploy**. Load [refs/task-shapes.md](refs/task-shapes.md) only when the shape needs draft-gate, sonar, issue, or ship-route detail beyond this line. Done: shape recorded. Stop: shape unclear after one AskQuestion (Issue | PR/MR ship | Sonar fix | CI/other).
 
 1. **root** — Resolve `REPO_ROOT` via plugin-relative `skills/rr-git/refs/repo-root.md`. Load `skills/rr-git/refs/safety.md` **only when** this ship may rewrite history, force-push, reset/clean, or discard work — not on clean upsert of an already-pushed branch. Done: cwd/`git -C` is the repo root (local work tree for git ops). Issue create on another forge project does **not** require that path to be a clone of the target.
 
 2. **forge** — Run `rr-ci detect-remote` ([scripts/README.md](scripts/README.md)). Branch on `result.forge`: `github` | `gitlab` | `unknown`. If `unknown`, AskQuestion: GitHub | GitLab (no Other). **Forge target probe:** if the user named `owner/repo` (or equivalent URL) and it differs from `result.owner`/`result.repo`, set **forge target** to that `owner/repo` and pass it to the nested skill (`gh --repo` / `glab --repo`); do not silently use cwd origin. If ambiguous which repo → one AskQuestion (cwd origin | named `owner/repo`). Done: forge + forge target selected. Stop: user declines or forge is neither GitHub nor GitLab — say “GitHub/GitLab only.” **Skip** for `--fix --sonar` (CLI resolves PR via origin; forge bind only if user needs an override AskQuestion).
 
-3. **title** — **PR/MR only.** Load [refs/pr-mr-templates.md](refs/pr-mr-templates.md). Author title + description per that ref.
-   - **With `--draft` (or prose “draft title/description first”):** write `.ai/ci/pr-mr-title.txt` and `.ai/ci/pr-mr-body.md`; report paths; AskQuestion: **Ship** | **Keep draft only** | **I'll edit**. **Keep draft only** → stop (files remain). **I'll edit** → wait for the user; when they continue, **re-read disk files** (user edits win — do not regenerate) and AskQuestion again. **Ship** → proceed to load/execute using current disk title/body. Done: gate resolved or stopped.
-   - **Without `--draft`:** draft in context (still may write body file for CLI `--body-file`); no AskQuestion gate. Done: title + description ready.
-   Skip entirely for **issue** shape and for **`--fix --sonar`**.
+3. **title** — **PR/MR only.** Load [refs/pr-mr-templates.md](refs/pr-mr-templates.md). Author title + description per that ref. For `--draft` gate vs in-context draft, follow [refs/task-shapes.md](refs/task-shapes.md) `--draft` section. Skip for **issue** and **`--fix --sonar`**.
 
-4. **load** — In **one** tool turn after forge bind: Read the nested forge skill **and** that forge’s `refs/cli.md`, and run `mr-add-preflight` when the task is PR/MR ship. Do not invent-search for skill flags as `rr-ci` JSON-CLI subcommands — ship routes are task-shape only (not SCRIPTS-SPEC). For `github` / `gitlab`, run the forge skill’s task row matching PR/MR ship vs issue vs CI vs **Sonar fix**. For **`--fix --sonar`:** in one turn Read [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) (and forge skill only if PR number must be resolved).
+4. **load** — In **one** tool turn after forge bind: Read the nested forge skill **and** that forge’s `refs/cli.md`, and run `mr-add-preflight` when the task is PR/MR ship. Do not invent-search for skill flags as `rr-ci` JSON-CLI subcommands — ship routes are task-shape only (not SCRIPTS-SPEC). For `github` / `gitlab`, run the forge skill’s matching task row. For **`--fix --sonar`:** Read [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) (and forge skill only if PR number must be resolved).
 
 **Fallback (no matching row):** CLI-only via [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md). If policy or forge-specific steps are still required → AskQuestion or stop. Do not invent nested skill behavior.
 
-5. **execute** — Follow the nested skill or Sonar ref; invoke CLI commands from [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md) or the forge skill’s allowlisted `gh`/`glab` rows. Happy-path upsert: keep tool turns tight (batch Reads/Shells; skip unused probes). **`--fix --sonar`:** run `sonar-list-issues` once, then apply fixes per [refs/sonar-fix.md](refs/sonar-fix.md) — summary counts only (no issue table). Stop on first hard failure (`ok: false`, auth missing, preflight escalate, user declines issue create / keeps draft only).
+5. **execute** — Follow the nested skill or Sonar ref; invoke CLI commands from [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md) or the forge skill’s allowlisted `gh`/`glab` rows. Happy-path upsert: keep tool turns tight (batch Reads/Shells; skip unused probes). **`--fix --sonar`:** run `sonar-list-issues --lean` once, then apply fixes per [refs/sonar-fix.md](refs/sonar-fix.md). Stop on first hard failure (`ok: false`, auth missing, preflight escalate, user declines issue create / keeps draft only).
 
 ## Invariants
 
@@ -81,7 +72,7 @@ TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` wh
 - **Ship git:** Commit/push allowed from this skill when upserting a PR/MR. Still confirm before history rewrite or discarding work (`skills/rr-git/refs/safety.md`).
 - **Ship routes:** `--create-*` / `--update-*` are aliases for the same upsert ship — skill invoke/task-shape flags, **not** `rr-ci` JSON-CLI subcommands unless added to [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md). Never open a second PR/MR for the same branch.
 - **`--draft` + ship:** human gate via `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md`; user disk edits win; distinct from forge draft status unless user asks for that on ship.
-- **`--fix --sonar`:** scripted `sonar-list-issues` + agent remediations; never dump a human issue table on this path; Sonar-scoped only — not general implement.
+- **`--fix --sonar`:** list + remediations per [refs/sonar-fix.md](refs/sonar-fix.md); Sonar-scoped only — not general implement.
 - **Disk sidecars:** Any file this skill or its CLI writes (job traces, dumps, PR/MR drafts) lands under **`.ai/ci/`** at the target repo root — never cwd clutter. Review run artifacts stay under `.ai/review/` (**rr-review**).
 - **No Renovate onboarding CLI** in this plugin. Do not add per-repo Renovate CI unless the user asked.
 - Nested `gitlab` / `github` / `publish` / `deployment` skills are **not** plugin-listed; load them by path only.

@@ -6,7 +6,7 @@
 
 ## Persist path (canonical)
 
-Write the five required sections to:
+Write the six required sections to:
 
 `docs/rr/tasks/{slice_id}/{NNNN}-{step}.plan.md`
 
@@ -28,17 +28,28 @@ Optional frontmatter on the plan file: `task_id`, `step`, `step_index`, `slice_i
 | **Risks** | Residual risks / unknowns that could block build |
 | **Verify hooks** | How build will prove the step (commands, assertions, AC ids) |
 | **Non-goals** | Explicit exclusions for this step |
+| **Ship** | Mid-slice / task ship intent — see table below (required; use `ship_after: never` when not shipping) |
+
+### Ship (required)
+
+Record after feature-branch ensure. Do **not** invent a second branch naming scheme — `branch` is the settled HEAD / `feat/{NNNN}-{step}-{short-desc}` from [feature-branch.md](feature-branch.md).
+
+| Field | Values | Meaning |
+|-------|--------|---------|
+| `branch` | Exact branch name string | Feature branch this step builds/ships on |
+| `ship_after` | `step_validate` \| `task_validate` \| `never` | When orchestrate enters **ship** ([ship.md](ship.md)) |
+| `base` | `default` \| `prior_open_pr` | PR/MR base: default branch, or tip of latest **still-open** PR in the same `pr_group` ship chain |
 
 ## Done-when
 
 0. Feature branch settled per [feature-branch.md](feature-branch.md) (**before** writing the sidecar).
 1. Sidecar `{NNNN}-{step}.plan.md` exists at the path above.
-2. All five sections present and non-empty; assessment is enough for **build** to start without inventing scope.
-3. `{NNNN}.md` Steps item has the pointer only (no inlined five-section plan).
+2. All **six** sections present and non-empty (Ship may set `ship_after: never`); assessment is enough for **build** to start without inventing scope.
+3. `{NNNN}.md` Steps item has the pointer only (no inlined plan body).
 4. **No** application source edits this stage (git branch create/checkout for the step is allowed — not application source).
 5. Then set `step_plan_done: true` on `{NNNN}.md` (see [slice-pipeline.md](slice-pipeline.md) cursor persistence).
 
-**Probe:** Do not set `step_plan_done: true` from prose inside `{NNNN}.md` alone — the sidecar must exist with the five sections **and** the feature-branch gate must have passed.
+**Probe:** Do not set `step_plan_done: true` from prose inside `{NNNN}.md` alone — the sidecar must exist with the required sections **and** the feature-branch gate must have passed.
 
 ## Anti-patterns
 
@@ -49,3 +60,5 @@ Optional frontmatter on the plan file: `task_id`, `step`, `step_index`, `slice_i
 - Using 0-based `{step}` in the filename (filename step is always 1-based)
 - Writing the plan (or setting `step_plan_done`) while still on `main`/`master` without creating `feat/{NNNN}-{step}-{short-desc}`
 - Inventing non-conforming branch names (`feat/<prose>`, slice-only prefixes)
+- Omitting **Ship** (or leaving `branch` / `ship_after` / `base` blank)
+- Setting `Ship.branch` to something other than the settled feature-branch name

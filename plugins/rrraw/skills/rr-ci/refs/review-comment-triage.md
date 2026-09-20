@@ -1,173 +1,56 @@
-# PR/MR comment triage and reply templates
+# PR/MR comment triage
 
-Same evidence bar for human and bot/AI comments — never auto-apply bot suggestions without verifying in context.
+Same evidence bar for human and bot/AI comments — never auto-apply unverified bot suggestions.
 
-## PR/MR task scope derivation (once per run, before per-comment loop)
+## Outcome constraints
 
-Before triaging individual comments, derive a one-line **task boundary** for the PR/MR:
+| Condition | Action |
+|-----------|--------|
+| Validity **and** chosen fix both **High** (`IN_SCOPE`) | Implement (`APPLY_AS_PROPOSED` or `BETTER_ALTERNATIVE`), test, push; reply with commit |
+| `FALSE_POSITIVE` at High | Reply with evidence only; **do not** resolve thread |
+| `OUT_OF_SCOPE` at High | Reply with out-of-scope template; no code; no thread resolve; offer issue link when available |
+| Any gate Medium/Low, or `UNCLEAR` after one pass | Batch `ASK_USER` (do not interrupt mid-loop) |
+| Pure taste nit with no standards win | `DECLINE` — do not ask |
 
-1. Read PR/MR title, description (summary above `---`), and any linked ticket via `gh pr view` or `glab mr view`.
-2. Write the task boundary — used for all comments in this run. Example: *"Add retry logic to payment webhook handler."*
+**Strict autonomy:** auto-act only when High on both “claim is real” and “chosen fix is right.” Otherwise investigate once → batch ask.
 
-Gate 1b compares each comment to this boundary (runs only when Gate 1 = `REAL`):
+## Once per run
 
-| Scope verdict | Meaning | Next |
-|---------------|---------|------|
-| `IN_SCOPE` | Fits the PR/MR's stated goal | Gate 2 — Solution |
-| `OUT_OF_SCOPE` | Valid concern but not this PR/MR's job | `DECLINE` with out-of-scope template; offer issue link when glab/jira is available |
-| `FOLLOW_UP` | Valid but belongs in a separate ticket | `DECLINE` or batch `ASK_USER` at Medium/Low |
+Derive a one-line **task boundary** from PR/MR title, summary (above `---`), and linked ticket (`gh pr view` / `glab mr view`). Example: *"Add retry logic to payment webhook handler."* Gate scope against this boundary for every comment.
 
-`OUT_OF_SCOPE` + High confidence → auto-reply with out-of-scope template (no code, no thread resolve).
-
-## Three-gate triage flow
-
-Apply gates in order for **each** comment. Complete the per-comment triage record (below) before any edit.
-
-```mermaid
-flowchart TD
-    gate1[Gate1_Validity]
-    gate1b[Gate1b_Scope]
-    gate2[Gate2_Solution]
-    gate1 -->|FALSE_POSITIVE High| replyFP[Reply evidence only]
-    gate1 -->|UNCLEAR or not High| ask1[Batch ASK_USER]
-    gate1 -->|REAL High| gate1b
-    gate1b -->|OUT_OF_SCOPE High| replyDecline[Auto-decline reply]
-    gate1b -->|not High or borderline| ask2[Batch ASK_USER]
-    gate1b -->|IN_SCOPE High| gate2
-    gate2 -->|APPLY or BETTER_ALT High+High| implement[Implement + test + push]
-    gate2 -->|Medium or Low| ask3[Batch ASK_USER]
-```
+## Gates (per comment)
 
 | Gate | Question | Outputs |
 |------|----------|---------|
-| **Gate 1 — Validity** | Is the reviewer's claim true in this codebase? | `REAL` / `FALSE_POSITIVE` / `UNCLEAR` |
-| **Gate 1b — Task scope** | Even if true, does it belong in *this* PR/MR's stated goal? | `IN_SCOPE` / `OUT_OF_SCOPE` / `FOLLOW_UP` |
-| **Gate 2 — Solution** | If in scope, is the proposed fix (or best fix) correct? | `APPLY_AS_PROPOSED` / `BETTER_ALTERNATIVE` / `DECLINE` / `ASK_USER` |
+| **1 Validity** | Is the claim true here? | `REAL` / `FALSE_POSITIVE` / `UNCLEAR` |
+| **1b Scope** (only if `REAL`) | Belongs in *this* PR/MR? | `IN_SCOPE` / `OUT_OF_SCOPE` / `FOLLOW_UP` |
+| **2 Solution** (only if `IN_SCOPE`) | Is the fix (or best fix) correct? | `APPLY_AS_PROPOSED` / `BETTER_ALTERNATIVE` / `DECLINE` / `ASK_USER` |
 
-Gate 1b runs only when Gate 1 = `REAL`. Gate 2 runs only when scope = `IN_SCOPE` (or `FOLLOW_UP` if user later opts in).
+Evidence: read anchored code + mitigations; check callers in **PR/MR-changed files**; treat proposed fixes as hypotheses.
 
-## Evidence steps (in order)
+| Confidence | Validity | Solution |
+|------------|----------|----------|
+| **High** | Confirmed in context; mitigations checked | One clear fix matching project patterns |
+| **Medium / Low** | Incomplete or speculative | Multiple plausible fixes or unclear direction |
 
-1. Read anchored code and surrounding context; check mitigations, reachability, and whether the claim is already handled.
-2. Wider scope: callers/callees relevant to the claim; same pattern in **PR/MR-changed files**. Expand beyond the PR/MR only when correctness of the fix requires it.
-3. If the comment proposes a fix, treat it as a hypothesis — compare to alternatives and project patterns.
+## Batch ask triggers
 
-## Gate 1 — Validity verdict
+- Gate 1 `UNCLEAR` after one investigation
+- Scope `OUT_OF_SCOPE` / `FOLLOW_UP` at Medium/Low
+- Two+ plausible fixes; pattern conflict; material scope expansion
 
-| Verdict | Meaning | Next |
-|---------|---------|------|
-| `REAL` | Evidence confirms a real issue or valid improvement | Gate 1b — Task scope |
-| `FALSE_POSITIVE` | Wrong assumption, already mitigated, or not a bug | Reply with evidence; **do not resolve** thread |
-| `UNCLEAR` | Cannot confirm with High confidence after evidence steps | `ASK_USER` (batch) |
+Pipeline SAST / dependency / secrets findings → escalate to org scanner / security skill; do not locally “fix” SAST without that path. Prose security claims in threads → triage first; escalate scanner only if `REAL`.
 
-## Gate 2 — Solution disposition
+## Optional reply skeletons
 
-Runs only when scope = `IN_SCOPE` (or `FOLLOW_UP` if user opted in).
+**Implemented:** `Addressed in [commit]. [what changed]`
 
-| Disposition | When |
-|-------------|------|
-| `APPLY_AS_PROPOSED` | Proposed fix is correct and matches project patterns |
-| `BETTER_ALTERNATIVE` | Real issue, but a different fix is clearly better |
-| `DECLINE` | Real-ish request but pure taste nitpick that does not match standards, or would add complexity without value |
-| `ASK_USER` | See ask triggers below |
+**Better alt:** `Applied [alt] instead of suggested because [reason]. See [commit].`
 
-## Comment-specific confidence criteria
+**False positive:** `After checking [context], not an issue because [evidence]. Leaving thread open.`
 
-Define High/Medium/Low per gate — not the merge-conflict pattern bar.
+**Out of scope:** `Outside this PR/MR scope. Tracking in #[n] if created.`
 
-| Level | Validity ("is real") | Solution ("fix is right") |
-|-------|----------------------|---------------------------|
-| **High** | Claim confirmed in anchored code + surrounding context; mitigations checked | Single fix matches project patterns; alternatives clearly inferior OR proposed fix verified correct |
-| **Medium** | Plausible but incomplete context; pattern exists elsewhere in PR/MR | Two+ reasonable fixes; proposed fix conflicts with a project pattern |
-| **Low** | Speculative; needs domain/product input | Fix direction unclear or would materially expand PR/MR |
+**Decline:** `Not changing because [reason].`
 
-**Strict autonomy:** Auto-act **only** when confidence is **High on both** "claim is valid" **and** "chosen fix is right." Medium/Low on any gate → investigate once → `ASK_USER` batch.
-
-High-confidence `FALSE_POSITIVE` and `OUT_OF_SCOPE` may auto-reply (no code, no thread resolve).
-
-| Confidence | "Is real" + "This fix is right" | Action |
-|------------|----------------------------------|--------|
-| **High** | Both High | Implement (`APPLY_AS_PROPOSED` or `BETTER_ALTERNATIVE`) or decline/reply per disposition |
-| **Medium / Low** | Either not High | Investigate once more; if still not High → `ASK_USER` |
-
-## Per-comment triage record (required before any edit)
-
-Emit for each comment before editing, committing, or resolving:
-
-```text
-Comment: [ref]
-Gate1: REAL|FALSE_POSITIVE|UNCLEAR (High|Med|Low) — [one-line evidence]
-Scope: IN_SCOPE|OUT_OF_SCOPE|FOLLOW_UP|n/a (High|Med|Low) — [tie to PR/MR task boundary]
-Gate2: APPLY|BETTER_ALT|DECLINE|ASK_USER|n/a (High|Med|Low) — [why]
-Action: implement | reply-only | batch-ask
-```
-
-## Ask-user triggers (batch; do not interrupt per item mid-loop)
-
-- Gate 1 `UNCLEAR` after one investigation pass
-- Gate 1b `OUT_OF_SCOPE` or `FOLLOW_UP` at Medium/Low (user decides decline vs follow-up issue vs expand scope)
-- Gate 2 two or more plausible fixes at Medium/Low
-- Proposed fix contradicts project patterns with no clear winner
-- Fix would materially expand PR/MR scope (new deps, API/contract change, cross-module redesign)
-
-## Category routing (after triage)
-
-| Category | Priority | Handler |
-|----------|----------|---------|
-| Pipeline SAST / dependency / secrets jobs | Critical | Escalate to org security scanner / dedicated security skill (do not locally “fix” SAST without that path) |
-| Prose security claim in a review thread | Critical | Triage first; escalate scanner only if verdict `REAL` |
-| Code change / bug (`REAL`, High) | High | Comment handler |
-| Performance (`REAL`, High) | Medium | Comment handler |
-| Style/nitpick | Medium | Apply only if matches team standards or clear readability win with negligible risk; else `DECLINE` — **do not** ask for pure taste |
-| Question/clarification | Low | Respond, no code change |
-| Suggestion | Low | Disposition after triage |
-
-## Reply templates
-
-**Implemented:**
-
-```txt
-Addressed in [commit-hash]. [Brief explanation of what changed]
-```
-
-**Better alternative:**
-
-```txt
-Agreed there is an issue. Applied [alternative] instead of the suggested change because [reason]. See [commit-hash].
-```
-
-**False positive:**
-
-```txt
-Thanks for the review. After checking [file/context], this does not appear to be an issue because [evidence]. Leaving the thread open for your acknowledgment.
-```
-
-**Decline:**
-
-```txt
-Thanks for the suggestion. Not changing this because [reason]. [Alternative or follow-up if applicable]
-```
-
-**Question:**
-
-```txt
-[Answer the question clearly]
-Let me know if you need me to adjust the implementation.
-```
-
-**Out of scope:**
-
-```txt
-Good point. This is outside the scope of this PR/MR.
-Created issue #[number] to track separately.
-```
-
-**Batched ask-user (to the user, not necessarily as PR/MR notes):**
-
-```txt
-Need your call on [N] review item(s):
-1. [thread/ref] — [one-line issue]
-   Options: A) … B) … C) decline
-   Recommendation: [A/B/C] because [reason]
-…
-```
+**Batch ask (to user):** list each thread with options A/B/C + recommendation.

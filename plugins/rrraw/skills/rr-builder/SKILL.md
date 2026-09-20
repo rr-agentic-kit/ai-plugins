@@ -9,7 +9,7 @@ description: Slice build orchestrator (drive×scope; default --manual --full) or
 
 ## Purpose
 
-**Orchestrate** building a pin-complete execute-slice for software engineers: prepare → per-task plan/build/review/validate → slice validate → **delivered** boundary. Drive (`--auto` \| `--manual`) × scope (`--next` \| `--full`) control confirm gates and how far one run advances. With an explicit lane flag, **hand off** to exactly one nested skill and stop (drive/scope ignored). Artifacts: `docs/rr/tasks/` (prepare/execute cursor), `.ai/review/<runId>/` (review).
+**Orchestrate** building a pin-complete execute-slice for software engineers: prepare → per-task plan/build/review/validate → optional planned **ship** (rr-ci handoff) → slice validate → **delivered** residual. Drive (`--auto` \| `--manual`) × scope (`--next` \| `--full`) control confirm gates and how far one run advances. With an explicit lane flag, **hand off** to exactly one nested skill and stop (drive/scope ignored). Artifacts: `docs/rr/tasks/` (prepare/execute cursor), `.ai/review/<runId>/` (review).
 
 ## When to use
 
@@ -24,7 +24,7 @@ description: Slice build orchestrator (drive×scope; default --manual --full) or
 | Need | Use instead |
 |------|-------------|
 | Cascade planning (exec-summary → PRD) | **rr-planner** |
-| PR/MR create, pipeline debug, forge POST after **delivered** | **rr-ci** |
+| PR/MR create, pipeline debug, forge POST (incl. mid-slice **ship** handoff target) | **rr-ci** |
 | Local git only (rebase, worktree, squash) | **rr-git** (not plan-stage feature-branch ensure) |
 | Docs humanization | **rr-humanize** |
 
@@ -43,7 +43,7 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
 3. **load** — Follow [refs/routing.md](refs/routing.md):
    - **Handoff:** `Read` only the matching nested `SKILL.md` once.
    - **Orchestrate:** load stage contract from [refs/slice-pipeline.md](refs/slice-pipeline.md) (full nested skill, plan allowlist, or validate rubric). Do not preload every nested skill.
-4. **execute** — Apply drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` / step done markers after each done-when. **Stop** — handoff does not re-enter orchestrate; plan stage must not edit application source (feature-branch create/checkout is allowed — [refs/feature-branch.md](refs/feature-branch.md)); delivered → point to **rr-ci** (do not open PR). Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
+4. **execute** — Apply drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` / step done markers after each done-when. **Stop** — handoff does not re-enter orchestrate; plan stage must not edit application source (feature-branch create/checkout is allowed — [refs/feature-branch.md](refs/feature-branch.md)); planned **ship** → [refs/ship.md](refs/ship.md) then **rr-ci** (do not invent forge CLI); **delivered** → residual rr-ci only. Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
 
 ## Nested skills (path-loaded only)
 
@@ -66,7 +66,8 @@ Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
 | [refs/slice-pipeline.md](refs/slice-pipeline.md) | Orchestrate mode (stage contracts, cursor, run loop) |
 | [refs/plan-knowledge.md](refs/plan-knowledge.md) | Orchestrate **plan** stage only |
 | [refs/feature-branch.md](refs/feature-branch.md) | Plan-stage feature branch name + ensure (via plan-knowledge) |
-| [refs/plan-schema.md](refs/plan-schema.md) | Orchestrate **plan** done-when / output shape |
+| [refs/plan-schema.md](refs/plan-schema.md) | Orchestrate **plan** done-when / output shape (incl. **Ship**) |
+| [refs/ship.md](refs/ship.md) | Orchestrate **ship** stage (branch/base resolve → rr-ci) |
 | [refs/task-validate.md](refs/task-validate.md) | Task / step validate stages |
 | [refs/slice-validate.md](refs/slice-validate.md) | Slice validate stage |
 | [refs/anti-overlap.md](refs/anti-overlap.md) | Boundary disputes |

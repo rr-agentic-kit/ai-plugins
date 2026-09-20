@@ -1,0 +1,37 @@
+# Task shapes (progressive load)
+
+Load from root Procedure step **task-shape** when the invoke needs shape-specific detail. Root keeps thin dispatch only.
+
+## Ship routes
+
+`--create-pr` | `--create-mr` | `--update-pr` | `--update-mr` | `--create-pr-mr` | `--update-pr-mr` → same **PR/MR upsert** (PR vs MR from forge after `detect-remote`; `-pr-mr` = forge-agnostic). Create vs update are **not** different shapes. Nested forge skill branches on preflight `exists` vs `ready_create`.
+
+Prose “open/create/update PR/MR” without a named route → same ship shape.
+
+## `--draft` (optional, with ship routes)
+
+Human title/body gate — **not** forge `gh`/`glab` `--draft` (add forge-draft status only if prose asks).
+
+1. Write `.ai/ci/pr-mr-title.txt` and `.ai/ci/pr-mr-body.md`; report paths.
+2. AskQuestion: **Ship** | **Keep draft only** | **I'll edit**.
+3. **Keep draft only** → stop (files remain). **I'll edit** → wait; on continue **re-read disk files** (user edits win — do not regenerate) and AskQuestion again. **Ship** → proceed using current disk title/body.
+
+Without `--draft`: draft title/body in context (may still write body file for CLI `--body-file`); no AskQuestion gate.
+
+## `--fix --sonar`
+
+Sonar remediations. Skip root `title` / forge bind unless PR lookup needs an override AskQuestion.
+
+1. Load [sonar-fix.md](sonar-fix.md) + [pipeline-fix-rules.md](pipeline-fix-rules.md).
+2. Run `sonar-list-issues --lean` (default: open PR/MR for current branch). Optional `--pr <id>` or `--branch <name>` overrides.
+3. Apply fixes per sonar-fix.md.
+
+TodoWrite ids: `root`, `load`, `execute` (skip forge/title unless scope needs forge PR lookup).
+
+## issue
+
+Skip root step `title` / [pr-mr-templates.md](pr-mr-templates.md). After forge bind, load forge skill and run its **Issue create** row. TodoWrite ids: `root`, `forge`, `load`, `execute`.
+
+## CI / review / publish / deploy
+
+Steps `root` → `forge`, then matching Shared-refs load row (no invent). No `title` unless the ask also ships a PR/MR.

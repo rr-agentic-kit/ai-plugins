@@ -30,8 +30,9 @@ Local worktree / destructive git during review `--fix`: **Read** `skills/rr-git/
 | **review** | Full `rr-review/SKILL.md` with forced `--fix --all` |
 | **refactor** | TBD stub — see slice-pipeline |
 | **step_validate** / **task_validate** | [task-validate.md](task-validate.md) |
+| **ship** | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` |
 | **slice_validate** | [slice-validate.md](slice-validate.md) |
-| **delivered** | Stop — point to **rr-ci** |
+| **delivered** | Stop — point to **rr-ci** for residual unshipped work |
 
 Run loop (auto/manual × next/full, readiness, cursor): [slice-pipeline.md](slice-pipeline.md).
 
@@ -53,8 +54,9 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Re-entering **orchestrate** after an explicit handoff in the same run.
 - Writing application source during **plan** stage.
 - Dumping rr-coder Required Knowledge / language matrices on **plan** (use [plan-knowledge.md](plan-knowledge.md) only).
-- Inventing plan/build/review completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
+- Inventing plan/build/review/ship completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
 - Auto-chaining prepare → build without cursor/done-when.
-- Running **rr-ci** / opening PR from **slice delivered** (builder stops; engineer invokes **rr-ci**).
+- Opening PR/MR inside builder without **rr-ci** (including mid-slice **ship** — hand off, do not invent forge CLI).
+- Skipping planned **ship** after validate when `ship_after` is not `never`.
 - Using **rr-builder** for exec-summary / PRD authoring → **rr-planner**.
 - Inventing a **refactor** stage procedure while TBD.

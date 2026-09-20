@@ -53,4 +53,4 @@ AskQuestion options (Delivery channels: text fallback OK):
 
 - Worktree-per-step (optional via **rr-git**, not required here).
 - Squash, merge, force-push, prune — **rr-git** / **rr-ci**.
-- Forge PR branch naming — **rr-ci**.
+- Opening PR/MR — **rr-ci** via orchestrate **ship** ([ship.md](ship.md)); plan **Ship.branch** only **records** this TARGET for that handoff.
