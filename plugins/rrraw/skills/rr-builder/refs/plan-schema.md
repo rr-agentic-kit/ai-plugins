@@ -59,6 +59,8 @@ Record after feature-branch ensure. Do **not** invent a second branch naming sch
 | `ship_after` | `step_validate` \| `task_validate` \| `never` | **Shippable** (`step_validate` / `task_validate`): forge open via **ship** before that validate can PASS. **`never`:** non-shippable — skip ship stage and Forge/PR gate; still run Goal/Verify |
 | `base` | `default` \| `prior_open_pr` | PR/MR base: default branch, or tip of latest **still-open** PR in the same `pr_group` ship chain (ignored when `never`) |
 
+**Auto tip-chain default:** When `drive: auto` and [feature-branch.md](feature-branch.md) just created `TARGET` from a prior same-task `feat/{NNNN}-*` tip (not from `main`/`master`), set `base: prior_open_pr` unless the engineer already recorded `default` or `ship_after: never`. First step branched from `main`/`master` keeps `base: default`.
+
 **Ship-intent review (plan stage):** `never` is valid when this step will not open a PR. If Goal/Approach/pr_group clearly imply a forge open this step, AskQuestion once: keep `never` \| set `step_validate` or `task_validate` \| abort — do not silently coerce.
 
 ## Done-when
