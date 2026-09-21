@@ -41,7 +41,7 @@ Run from **`REPO_ROOT`** (use **Shell** / **Glob** as needed).
    - **If `<base>` is `main` or `master` (ASCII case-insensitive):** **hard stop** — emit **Stopped:** **`policy`** per **`terminal-report.md`** / **`exit-conditions.md`**: operator must **`git checkout <integration-branch>`** first, then re-run. The worker **refuses** **`master`**/**`main`** as **`<base>`** (see **`agents/test-endless/fix.md`** **Base policy gate**).
    - **If not on trunk:** **`<base>`** = that branch. Optional disposable branch for **your** working checkout only: create it **from `<base>`** if you need isolation, but **`<base>`** passed to workers **remains** the integration branch — **never** `main`/`master`.
 2. **Project detection:** Per **`skills/rr-builder/rr-test-endless/refs/project-detection.md`**. If **no test framework** → hard stop.
-3. **Chunk list:** Build **`chunk_id`** list per **`skills/rr-builder/rr-review/refs/chunking.md`** for this scope. Same repo snapshot → same chunks (deterministic).
+3. **Chunk list:** Build **`chunk_id`** list per **`skills/rr-builder/rr-review/refs/chunking.md`** for this scope. Same repo snapshot → same chunks (deterministic). **Skip when `Start: execute`** and checkpoint provides **`assessment_paths_by_chunk`** (§4 queues from **`Glob`**; no assess runs) — do not **Read** `chunking.md` for that run.
 4. **Size:** Classify per **size-thresholds.md** for logging; chunking bounds each assess **`Task`** scope.
 
 ---
@@ -84,7 +84,7 @@ Prefix each path with **`PLUGIN_ROOT/`** when **Read**ing. If any **core** file 
 
 1. `skills/rr-builder/rr-test-endless/refs/orchestration-core.md` (this file)
 2. `skills/rr-builder/rr-test-endless/refs/orchestration.md`
-3. `skills/rr-builder/rr-review/refs/chunking.md`
+3. `skills/rr-builder/rr-review/refs/chunking.md` (skip Read when `Start: execute` — Pre-flight §3)
 4. `skills/rr-builder/rr-test-endless/refs/project-detection.md`
 5. `skills/rr-builder/rr-test-endless/refs/artifacts.md`
 6. `skills/rr-builder/rr-test-endless/refs/exit-conditions.md`

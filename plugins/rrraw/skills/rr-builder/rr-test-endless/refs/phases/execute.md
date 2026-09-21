@@ -36,8 +36,8 @@ Schema and field meanings: **`artifacts.md`** § Checkpoint JSON — **do not** 
 
 **Resume playbook:**
 
-1. **`Read`** checkpoint; confirm **`iteration_n`** + **`scope`** match current run.
-2. Rebuild §4 queue (helper); drop **`completed_plan_paths`**.
+1. **`Read`** checkpoint; confirm **`iteration_n`** + **`scope`** match current run. **Path-consistency probe:** if checkpoint paths (**`assessment_paths_by_chunk`** values, **`completed_plan_paths`**) are not under the current **`REVIEW_DIR`** (e.g. run dir was moved/renamed), warn once and treat the checkpoint as resume-only telemetry — plan files remain SoT.
+2. Rebuild §4 queue (helper); drop **`completed_plan_paths`**; also drop packs whose plan YAML shows **`execution_status: merged`** or all steps **`[verified]`** (pre-dispatch resume sweep — checkpoint may be stale; helper **`--skip-merged`** when supported).
 3. Dispatch **`test-endless-fix`** for remaining layers.
 4. On each success, append **`plan_path`**, **`Write`** checkpoint, apply §5.
 5. Queue empty → **§7 verify** → **§8–§9** or advance **`n`**.
@@ -46,6 +46,6 @@ Schema and field meanings: **`artifacts.md`** § Checkpoint JSON — **do not** 
 
 Continue all layers until queue empty → **§7**. **`Deferred:`** only on actual host turn end / **`Task`** refusal — not wall-clock or pack count heuristics.
 
-**Dispatch:** **`test-endless-fix`** per layer/batch; one **`Task`** = one work-pack.
+**Dispatch:** **`test-endless-fix`** per layer/batch; one **`Task`** = one work-pack. Dispatch the whole parallel layer in one turn up to **`--max-parallel`** (unlimited default) — do not split a layer into ad-hoc waves.
 
 On **`{ "success": false }`** → **Report** unless retry policy applies.

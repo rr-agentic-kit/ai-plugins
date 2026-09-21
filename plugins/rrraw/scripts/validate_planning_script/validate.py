@@ -21,7 +21,14 @@ from .constants import DOC_METHOD, LEDGER_NAME
 from .ledger import check_rationale, load_ledger
 from .models import Issue
 from .parse import parse_planning_dir
-from .workspace import check_baselines, check_execute_slice, check_plan_entry
+from .workspace import (
+    PLAN_DIR,
+    check_baselines,
+    check_execute_slice,
+    check_plan_entry,
+    discovery_dir_for,
+    phase_name,
+)
 
 
 def _check_json_priority_methods(json_rows: list[dict[str, Any]]) -> list[Issue]:
@@ -61,30 +68,42 @@ def validate_dir(
     md_items, issues = parse_planning_dir(planning_dir, doc_format=doc_format)
     if any(issue.code in {"UNSUPPORTED_FORMAT", "STALE_FORMAT"} for issue in issues):
         return issues
+    # Plan-level cascade walks cross-doc parents into the sibling discovery
+    # dir (PRD → ES/BRD). Merge discovery items so parent resolution sees the
+    # frozen parents; discovery parse issues are Discover-owned (validated at
+    # Discover) and must not leak into plan validation. Rationale resolution
+    # stays scoped to items authored in this phase dir (each phase owns its
+    # ledger); merged discovery items resolve against the discovery ledger.
+    plan_md_items = list(md_items)
+    if phase_name(planning_dir) == PLAN_DIR:
+        discovery = discovery_dir_for(planning_dir)
+        if discovery is not None:
+            parent_items, _ = parse_planning_dir(discovery, doc_format=doc_format)
+            md_items.extend(parent_items)
     ledger, ledger_issues = load_ledger(planning_dir / LEDGER_NAME)
     issues.extend(ledger_issues)
     json_rows, json_issues = load_items_json(planning_dir / "items.json")
     issues.extend(json_issues)
-    issues.extend(check_unique_and_ids(md_items))
-    issues.extend(check_kind_and_children(md_items))
+    issues.extend(check_unique_and_ids(plan_md_items))
+    issues.extend(check_kind_and_children(plan_md_items))
     issues.extend(check_parents(md_items))
     reserved = (
         ledger.get("reserved_ids")
         if isinstance(ledger, dict) and isinstance(ledger.get("reserved_ids"), dict)
         else None
     )
-    issues.extend(check_numbering(md_items, reserved))
-    issues.extend(check_required_fields(md_items))
-    issues.extend(check_status(md_items))
-    issues.extend(check_rationale(md_items, ledger))
+    issues.extend(check_numbering(plan_md_items, reserved))
+    issues.extend(check_required_fields(plan_md_items))
+    issues.extend(check_status(plan_md_items))
+    issues.extend(check_rationale(plan_md_items, ledger))
     registry = _load_registry(planning_dir / "session-state.json")
-    issues.extend(check_revive(md_items, registry))
-    issues.extend(check_baselines(planning_dir, md_items))
+    issues.extend(check_revive(plan_md_items, registry))
+    issues.extend(check_baselines(planning_dir, plan_md_items))
     issues.extend(check_execute_slice(planning_dir))
     if require_plan_entry:
         issues.extend(check_plan_entry(planning_dir))
     if json_rows:
-        issues.extend(check_drift(md_items, json_rows))
+        issues.extend(check_drift(plan_md_items, json_rows))
         issues.extend(_check_json_priority_methods(json_rows))
     return issues
 

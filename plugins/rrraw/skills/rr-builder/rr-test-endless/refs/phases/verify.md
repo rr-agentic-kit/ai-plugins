@@ -4,7 +4,7 @@
 
 ## §7 Verify
 
-From **`REPO_ROOT`**: **`Task`** **`test-endless-toolchain`** — phases **`build`**, **`test`** only. **FAIL** → record; **Report** or re-assess per **exit-conditions.md**.
+From **`REPO_ROOT`**: **`Task`** **`test-endless-toolchain`** — phases **`build`**, **`test`** only. **FAIL** → record; classify each failing suite **pre-existing** (outside all touched plan file scope, or failing identically at gateway baseline) vs **regression** before **Report** or re-assess per **exit-conditions.md**; pre-existing failures go to **Remaining gaps**, not iteration failure.
 
 On **PASS**: optionally update checkpoint **`last_verify_head_sha`** + **`updated_at`** per **`artifacts.md`**.
 
