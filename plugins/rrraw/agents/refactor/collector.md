@@ -1,7 +1,7 @@
 ---
 name: refactor-collector
 description: Scan scoped files for coder violations; JSON only. Inline-spec default; Task when >50 files split by module.
-tools: Read, Grep, Glob, Shell
+tools: Read, Grep, Glob, Bash
 ---
 
 # Refactor collector
@@ -99,7 +99,7 @@ Representative examples (valid `type` values come from phase packs, not this blo
 
 ## Tools
 
-Use only frontmatter **`tools`**; **Shell** is read-only scan / tool runners — no production edits.
+Use only frontmatter **`tools`**; **Bash** is read-only scan / tool runners — no production edits.
 
 ## Stop conditions
 

@@ -1,7 +1,7 @@
 ---
 name: refactor-fix
 description: Inline behavior-invariant refactor worker for rr-refactor manifest execution. Main worktree only.
-tools: Read, Write, Edit, Grep, Glob, Shell
+tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
 # Refactor fix worker

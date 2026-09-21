@@ -1,6 +1,7 @@
 ---
 name: rr-builder
 description: Slice build orchestrator (drive×scope; default --auto --step), ad-hoc --feature mint+task run, or lane handoff via --prepare/--coder/--tester/--security/--review/--refactor/--add-endless-test. Not rr-planner/rr-ci.
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task, AskUserQuestion, TodoWrite
 ---
 
 # rr-builder
@@ -43,7 +44,7 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
 | Handoffs / `--auto --step` / `--manual` / `--feature` | Nested skills are path-loaded `Read`s only (parent-inline). |
 | Nested exceptions | `--add-endless-test` → **rr-test-endless** owns `Task` dispatch to `agents/test-endless/*` per `rr-test-endless/refs/orchestration.md`; `--refactor` → **rr-refactor** may `Task` `refactor-collector` when >50 files per `rr-refactor/refs/agent-index.md` (fix stays inline). Inside a step executor, those same leaf Tasks stay allowed — the executor **is** the parent session for nested lanes. |
 
-**Delivery channels:** Prefer AskQuestion for missing kernel/`slice_id`/feature intent, ambiguous mode, manual confirm/ready-pick, feature-mode origin probe, plan-stage feature-branch probe (not on `main`/`master`), and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
+**Delivery channels:** Prefer **AskUserQuestion** (Claude) / AskQuestion (Cursor) for missing kernel/`slice_id`/feature intent, ambiguous mode, manual confirm/ready-pick, feature-mode origin probe, plan-stage feature-branch probe (not on `main`/`master`), and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
 
 1. **resolve** — Load [refs/input-resolution.md](refs/input-resolution.md). Normalize flags / NL into `payload.mode` (`orchestrate` \| `feature` \| `handoff`), `payload.drive` / `payload.scope` (orchestrate defaults: `auto` × `step`; feature: `auto` × forced `task`), optional `payload.lane` / `payload.feature`, and slice/task cursor fields. Explicit lane → omit/ignore drive/scope. Done: payload emitted or one AskQuestion.
 2. **mode** — If `--feature` → **feature**. Else if explicit lane flag → **handoff**. Else → **orchestrate** (probe cursor per [refs/slice-pipeline.md](refs/slice-pipeline.md)). Explicit flag wins over cursor. Done: exactly one mode.

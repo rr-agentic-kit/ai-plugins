@@ -3,6 +3,7 @@ name: rr-tester
 description: Flag-driven test excellence via agents/test/*. Via --tester, review test lane, or orchestrate plan/build (drive/scope per parent).
 disable-model-invocation: true
 user-invocable: false
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task, AskUserQuestion, TodoWrite
 ---
 
 # rr-tester (runtime)
