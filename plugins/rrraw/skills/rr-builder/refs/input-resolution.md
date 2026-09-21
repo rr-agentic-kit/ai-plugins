@@ -76,7 +76,7 @@ Reject retired `--full` with one-line: `use --slice` (no alias).
 
 | | `--next` | `--step` | `--task` | `--slice` |
 |---|----------|----------|----------|-----------|
-| **`--auto`** | Run cursor-next stage; stop when its done-when met | Chain until step boundary: non-final → step-validate PASS; **final** step (or cursor on `task_validate`) → task-validate PASS ≡ `--task` for that run (prepare-only: stop after prepare) | Chain until task-validate PASS | Chain until **delivered** or hard stop |
+| **`--auto`** | Run cursor-next stage; stop when its done-when met | Chain until step boundary: non-final → step-validate PASS; **final** step (or cursor on `task_validate`) → task-validate PASS ≡ `--task` for that run (prepare-only: stop after prepare) | **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)) until task-validate PASS | **Isolated step run** then parent validate until **delivered** or hard stop |
 | **`--manual`** | Present next stage; wait for confirm/edit; execute that one | Same step boundary (incl. last-step ≡ task); AskQuestion before each stage | Same task boundary; AskQuestion before each stage | Ready vs **blocked**; mark cursor **`(next)`**; AskQuestion among ready; re-list until boundary / decline / hard stop |
 
 **Breaking:** no compat aliases for retired top-level review-only entry flags (`--code` / `--test` / `--all` / `--fix` / `--ci` as sole top-level router). Those nested flags apply **under `--review`** only (or via auto review stage). Multiple explicit lane flags → stop: `one lane flag only`.

@@ -232,6 +232,60 @@ From the cursor algorithm over **remaining** stages until **delivered**:
 
 Linear pipeline usually yields **one** ready stage (that item is also **`(next)`**). Still list the remaining blocked path. AskQuestion **only** among the ready set — never offer blocked stages as executable choices. When presenting the ready list (AskQuestion options or prose), mark that cursor stage as e.g. `build (next)` so the engineer sees which choice `--next` would have run. Under `manual` × `step` / `task`, present only stages within the current scope boundary the same way.
 
+## Isolated step run (`auto` × `task` \| `slice`)
+
+**When:** `payload.mode: orchestrate` ∧ `drive: auto` ∧ `scope: task|slice` (includes lone `--task` / `--slice`). Cursor is inside a remaining **task-step** (plan→…→step-validate), not prepare / task-validate / slice-validate / delivered.
+
+**Out of this cell:** `--feature` (parent-inline), `--manual`, `--auto --next`, `--auto --step`, explicit lane handoffs.
+
+**Isolation:** context only — **same working tree**; never parallel steps; never `git worktree`.
+
+### Ownership
+
+| Owner | Owns |
+|-------|------|
+| **Parent** | resolve / mode / load; **prepare**; spawn one `generalPurpose` Task per remaining task-step; **dirty-tree gate** after each return; **ship** / **rr-ci**; **task-validate**; **slice-validate** + delivered (`scope: slice` only) |
+| **Executor** | That task-step’s inner pipeline `plan → build → refactor → review → step-validate` (resume from cursor `builder_stage` / `step_*_done`). Spec: [executors/step.md](executors/step.md). Prompt: [templates/step-task.template.md](templates/step-task.template.md). |
+
+Parent does **not** implement the step inline under this cell ([routing.md](routing.md) anti-pattern).
+
+### Loop
+
+```
+parent: prepare if needed
+  → while remaining task-steps in scope:
+       spawn generalPurpose Task (step executor) for current step_index
+       ← Task returns status ok | needs_ship | failed
+       dirty-tree gate (git status --porcelain)
+         dirty or failed → hard-stop (list paths; do not spawn next; do not silent-commit)
+         clean + needs_ship → parent ship → re-run step-validate inline (assessment only)
+             → parent commits cursor/validate → dirty-tree gate → continue
+         clean + ok → if forge miss already handled / no ship needed → next step or exit loop
+  → parent task-validate (+ forge landing)
+  → scope slice only: parent slice-validate → delivered
+```
+
+### Dirty-tree gate
+
+After each Task return (and after parent post-ship commit), parent runs `git status --porcelain`.
+
+| Porcelain | Action |
+|-----------|--------|
+| **Non-empty** | Hard-stop: list dirty paths; do **not** spawn the next step; do **not** silent-commit. Under this cell, **carry-to-next does not waive** a dirty tree ([task-validate.md](task-validate.md) isolation exception). |
+| **Empty** | Continue (next spawn, or parent ship / task-validate). |
+
+**Success path:** executor **commits** step work (app source + this step’s durable sidecars + cursor flags) **before** return so porcelain is empty.
+
+**Failure path:** executor must **not** commit; dirty tree is expected; parent stops.
+
+### `needs_ship`
+
+Executor may return `needs_ship` after writing/committing a forge-miss step-validate report (forge POST stays in parent). Parent runs [ship.md](ship.md) → **rr-ci**, re-runs step-validate **inline** (assessment only), commits cursor/validate, dirty-gates, then spawns the next step Task (or proceeds to task-validate).
+
+### Nested-skill leaf Tasks
+
+CE parent-only executors normally forbid nested Task. Contract here: the step executor **is** the parent session for nested lane skills — leaf Tasks those skills already document (`refactor-collector`, tester agents, etc.) stay allowed. Executor MUST NOT re-invoke **rr-builder**, MUST NOT spawn sibling step Tasks, MUST NOT run `--add-endless-test`.
+
 ## Orchestrate run loop (drive × scope)
 
 Resolve `payload.drive` / `payload.scope` defaults in [input-resolution.md](input-resolution.md). Then:
@@ -242,8 +296,8 @@ resolve flags + cursor
   → decide drive × scope:
        auto × next  → execute next stage → stop at done-when
        auto × step  → execute → re-probe → repeat until step boundary (or hard stop)
-       auto × task  → chain until task-validate PASS (or hard stop)
-       auto × slice → chain until delivered (or hard stop)
+       auto × task  → Isolated step run (above) until task-validate PASS (or hard stop)
+       auto × slice → Isolated step run (above) then task-/slice-validate until delivered (or hard stop)
        manual × next → show next stage (AskQuestion confirm/edit) → execute that one → stop
        manual × step|task|slice → AskQuestion before each stage; under slice keep ready-vs-blocked with (next); stop at scope boundary
 ```
@@ -251,14 +305,14 @@ resolve flags + cursor
 | Cell | Behavior |
 |------|----------|
 | **auto × next** | Run cursor-next stage (may load multiple nested skills/refs **in order** within that stage’s done-when). Persist cursor. **Stop** — do not chain. |
-| **auto × step** | Same execute as next, then **loop** until the **step** scope boundary (non-final → step-validate PASS + forge landing; final step or cursor on `task_validate` → task-validate PASS + forge landing of last-step + task reports). If cursor is **prepare**, complete prepare then **stop** (do not enter first step). |
-| **auto × task** | Chain stages until active task reaches task-validate PASS (all its steps + task-validate), or hard stop. |
-| **auto × slice** | Chain stages until **delivered** or hard stop (validate FAIL, missing kernel, refactor stop, endless review max-epochs, user cancel). Silent chaining requires `drive: auto`. |
+| **auto × step** | Same execute as next, then **loop** until the **step** scope boundary (non-final → step-validate PASS + forge landing; final step or cursor on `task_validate` → task-validate PASS + forge landing of last-step + task reports). If cursor is **prepare**, complete prepare then **stop** (do not enter first step). Parent-inline (not Isolated step run). |
+| **auto × task** | **Isolated step run** (above): one sequential step Task per remaining task-step → dirty-tree gate → parent task-validate (+ ship as needed) until task-validate PASS, or hard stop. |
+| **auto × slice** | **Isolated step run** across remaining tasks’ steps, then parent task-validate / slice-validate → **delivered**, or hard stop (validate FAIL, missing kernel, dirty-tree gate, refactor stop, endless review max-epochs, user cancel). Silent chaining requires `drive: auto`. |
 | **manual × next** | Present only the next logical stage; wait for confirm/change; execute that one; then wait again or stop if user declines. **Never** execute without confirm. |
-| **manual × step** / **task** / **slice** | Same boundaries as auto counterparts; AskQuestion before each stage execute. Under `slice`, list remaining stages as **ready** vs **blocked** (+ prereq); mark the cursor stage **`(next)`**; AskQuestion among **ready** only; execute chosen; re-list until decline / delivered / hard stop / boundary. **Never** offer blocked as runnable. |
+| **manual × step** / **task** / **slice** | Same boundaries as auto counterparts; AskQuestion before each stage execute. Under `slice`, list remaining stages as **ready** vs **blocked** (+ prereq); mark the cursor stage **`(next)`**; AskQuestion among **ready** only; execute chosen; re-list until decline / delivered / hard stop / boundary. **Never** offer blocked as runnable. Parent-inline (not Isolated step run). |
 
-**Hard stop** ends any loop: stage failure, validate FAIL, missing inputs, conflicting flags, endless review epoch cap without clear exit, user decline. Persist `builder_stage` / `step_index` / `step_*_done` after each successful done-when before the next probe.
+**Hard stop** ends any loop: stage failure, validate FAIL, dirty-tree gate (isolation cell), missing inputs, conflicting flags, endless review epoch cap without clear exit, user decline. Persist `builder_stage` / `step_index` / `step_*_done` after each successful done-when before the next probe.
 
 **Handoff:** skip this loop — [routing.md](routing.md) handoff table; stop at nested done-when. Drive/scope do not mutate handoff lanes.
 
-**Feature:** after [feature.md](feature.md) mint + cursor, run this loop with `scope: task` and paths under `artifact_root`; hard-stop at task-validate (step 10) — never slice-validate / delivered.
+**Feature:** after [feature.md](feature.md) mint + cursor, run this loop with `scope: task` and paths under `artifact_root` **parent-inline** (not Isolated step run); hard-stop at task-validate (step 10) — never slice-validate / delivered.

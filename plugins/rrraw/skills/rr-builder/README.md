@@ -55,8 +55,10 @@ Defaults: orchestrate without drive/scope → `auto` × `step`. `--feature` → 
 ## Philosophy
 
 - **Orchestrate by default; feature / handoff on explicit flag** — `--feature` is a third mode (mint + `scope=task`); explicit lane never silently re-enters orchestrate; drive/scope do not mutate handoff lanes
-- **Default auto × step** — no drive/scope flags chain the current task-step to step-validate PASS + forge landing; on the **final** task-step, `--step` ≡ `--task` through task-validate PASS **and** forge-land last-step + task validate sidecars onto the open tip (or carry-to-next); do not park on `task_validate` and exit; prepare-only cursor stops after prepare
-- **Validate reports land on forge** — shippable step/task-validate PASS is incomplete until rr-ci pushes sidecars (+ Verify/cursor) onto the tip, or carry-to-next is applied; task-validate with only step-scoped ships still lands on the last open step Ship PR / `active_ship_branch`
+- **Isolated step run (`auto` × `task`\|`slice`)** — one sequential `generalPurpose` Task per remaining task-step (same working tree; no worktree; never parallel); parent owns prepare / dirty-tree gate / ship / task-validate / slice-validate; executor owns plan→build→refactor→review→step-validate; dirty porcelain after a Task → hard-stop (no silent-commit; carry-to-next does not waive this cell)
+- **`--feature` stays parent-inline** — not in the isolation cell this pass; still stops at task-validate
+- **Default auto × step** — no drive/scope flags chain the current task-step to step-validate PASS + forge landing (parent-inline); on the **final** task-step, `--step` ≡ `--task` through task-validate PASS **and** forge-land last-step + task validate sidecars onto the open tip (or carry-to-next); do not park on `task_validate` and exit; prepare-only cursor stops after prepare
+- **Validate reports land on forge** — shippable step/task-validate PASS is incomplete until rr-ci pushes sidecars (+ Verify/cursor) onto the tip, or carry-to-next is applied (isolation cell: parent commits post-ship validate/cursor before the next spawn); task-validate with only step-scoped ships still lands on the last open step Ship PR / `active_ship_branch`
 - **`--feature` stops at task-validate** — never slice-validate / delivered; rr vs non-rr roots (`docs/rr/tasks/` vs `.ai/tasks/`); never invent `docs/rr/` in non-rr repos
 - **`--next` unchanged** — lone `--next` is still `manual` × `next`; `--auto --next` runs one stage without confirm
 - **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; under `--slice` the ready list marks cursor stage **`(next)`**; silent chain only with `--auto`
@@ -92,12 +94,13 @@ Nested skill / stage owns artifacts; `--feature` writes under `artifact_root` (`
 
 ### Close
 
-Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard stop, or decline). `--feature` stops at task-validate. Handoff does not auto-advance the pipeline. Shippable validate forge-miss → **ship** → **rr-ci** → re-validate. Slice validate PASS → **delivered** → residual **rr-ci** only. Load **rr-ci** also after review `--ci`.
+Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard stop, dirty-tree gate under Isolated step run, or decline). `--feature` stops at task-validate. Handoff does not auto-advance the pipeline. Shippable validate forge-miss → **ship** → **rr-ci** → re-validate. Under Isolated step run, executor `needs_ship` → parent ship + inline re-validate + commit before the next step Task. Slice validate PASS → **delivered** → residual **rr-ci** only. Load **rr-ci** also after review `--ci`.
 
 ## Constraints
 
 - Explicit lane flag wins over cursor; drive/scope ignored on handoff
-- `--feature` incompatible with lane flags and with `--slice` / `--next` / `--step`; never invents `docs/rr/` in non-rr repos; never advances past task-validate
+- `--feature` incompatible with lane flags and with `--slice` / `--next` / `--step`; never invents `docs/rr/` in non-rr repos; never advances past task-validate; stays parent-inline (not Isolated step run)
+- Isolated step run (`auto` × `task`\|`slice`): sequential step Tasks only; dirty-tree gate after each return; no parallel steps; no `git worktree`
 - Nested skills are not listed in `plugin.json` — parent **Read**s them
 - `--fix` and `--ci` are mutually exclusive under `--review`
 - Manual `--slice` never offers **blocked** stages as runnable
@@ -111,6 +114,6 @@ Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard sto
 
 Nested lane skills intentionally fail context-engineer `static.name.path-match` — they are path-loaded children of `rr-builder`, not top-level `skills/<name>/` entries.
 
-Layout: `refs/` (router + feature + pipeline + validate + plan allowlist/schema + ship), `rr-prepare/`, `rr-coder/`, `rr-tester/`, `rr-security-auditor/`, `rr-review/`, `rr-refactor/`.
+Layout: `refs/` (router + feature + pipeline + validate + plan allowlist/schema + ship + executors/templates), `rr-prepare/`, `rr-coder/`, `rr-tester/`, `rr-security-auditor/`, `rr-review/`, `rr-refactor/`.
 
-After `--feature` redesign writes: shared write gates (static → reflect → pre-ship → write); recommend post-redesign re-audit on the same path (do not treat prior audit FAILs as mandatory absorb list).
+After Isolated step run redesign writes: shared write gates (static → reflect → pre-ship → write); recommend post-redesign re-audit on `skills/rr-builder/SKILL.md` (do not treat prior audit FAILs as mandatory absorb list).

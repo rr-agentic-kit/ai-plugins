@@ -114,6 +114,14 @@ Validate writes the report **after** the forge-miss → **ship** → re-validate
 
 Chat: announce the persisted path (`…validate.md` or `…task-validate.md`) **and** whether landing was **pushed** or **carry-to-next**.
 
+### Isolation-cell exception (`auto` × `task` \| `slice`)
+
+Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)):
+
+- **Dirty porcelain is a hard-stop** — parent must not advance / spawn the next step Task while `git status --porcelain` is non-empty. Carry-to-next does **not** waive this gate in this cell (other drive×scope cells keep carry-to-next).
+- **Parent owns** task-validate (and post-`needs_ship` step-validate re-run). After parent ship + inline re-validate, parent **commits** cursor/validate sidecars so the dirty-tree gate can PASS before the next spawn.
+- Executor-owned step-validate may return `needs_ship` with a committed forge-miss report; forge POST stays in parent via [ship.md](ship.md).
+
 ## Out of scope
 
 - Slice-level AC / execute-slice outcome → [slice-validate.md](slice-validate.md)

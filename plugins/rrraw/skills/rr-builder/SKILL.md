@@ -35,7 +35,13 @@ See [refs/anti-overlap.md](refs/anti-overlap.md).
 
 TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the run spans 3+ steps; omit for a single unambiguous handoff.
 
-**Task agents:** N/A for most handoffs — nested skills are path-loaded `Read`s only. **Exceptions:** `--add-endless-test` → **rr-test-endless** owns `Task` dispatch to `agents/test-endless/*` per `rr-test-endless/refs/orchestration.md`; `--refactor` → **rr-refactor** may `Task` `refactor-collector` when >50 files per `rr-refactor/refs/agent-index.md` (fix stays inline).
+**Task agents:**
+
+| Cell | Behavior |
+|------|----------|
+| **Isolated step run** (`drive: auto` ∧ `scope: task\|slice`, orchestrate only) | Parent spawns one sequential `generalPurpose` Task per remaining task-step. Inject: [refs/executors/step.md](refs/executors/step.md) + [refs/templates/step-task.template.md](refs/templates/step-task.template.md) + Caller Load (required / stable hard-links / variant) from the executor. Stage contracts live in [refs/slice-pipeline.md](refs/slice-pipeline.md). Parent does **not** implement the step. |
+| Handoffs / `--auto --step` / `--manual` / `--feature` | Nested skills are path-loaded `Read`s only (parent-inline). |
+| Nested exceptions | `--add-endless-test` → **rr-test-endless** owns `Task` dispatch to `agents/test-endless/*` per `rr-test-endless/refs/orchestration.md`; `--refactor` → **rr-refactor** may `Task` `refactor-collector` when >50 files per `rr-refactor/refs/agent-index.md` (fix stays inline). Inside a step executor, those same leaf Tasks stay allowed — the executor **is** the parent session for nested lanes. |
 
 **Delivery channels:** Prefer AskQuestion for missing kernel/`slice_id`/feature intent, ambiguous mode, manual confirm/ready-pick, feature-mode origin probe, plan-stage feature-branch probe (not on `main`/`master`), and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
 
@@ -44,8 +50,8 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
 3. **load** — Follow [refs/routing.md](refs/routing.md):
    - **Feature:** `Read` [refs/feature.md](refs/feature.md), then stage contracts from [refs/slice-pipeline.md](refs/slice-pipeline.md) with `scope=task`.
    - **Handoff:** `Read` only the matching nested `SKILL.md` once.
-   - **Orchestrate:** load stage contract from [refs/slice-pipeline.md](refs/slice-pipeline.md) (full nested skill, plan allowlist, or validate rubric). Do not preload every nested skill.
-4. **execute** — Feature: detect/mint/branch per [refs/feature.md](refs/feature.md), then drive×scope loop with hard stop at task-validate. Orchestrate: apply drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` / step done markers after each done-when. **Stop** — handoff does not re-enter orchestrate; feature does not enter slice-validate/delivered; plan stage must not edit application source (feature-branch create/checkout is allowed — [refs/feature-branch.md](refs/feature-branch.md)); planned **ship** → [refs/ship.md](refs/ship.md) then **rr-ci** (do not invent forge CLI); **delivered** → residual rr-ci only. Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
+   - **Orchestrate:** load stage contract from [refs/slice-pipeline.md](refs/slice-pipeline.md) (full nested skill, plan allowlist, or validate rubric). Do not preload every nested skill. When Isolated step run applies and cursor is inside a task-step, load the step executor + template (do not preload every stage skill into the parent).
+4. **execute** — Feature: detect/mint/branch per [refs/feature.md](refs/feature.md), then drive×scope loop with hard stop at task-validate (**parent-inline** — not Isolated step run). Orchestrate: apply drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Under Isolated step run: parent **prepare** if needed → spawn step Task → **dirty-tree gate** → parent **ship** on `needs_ship` → parent **task-validate** / **slice-validate**. Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` / step done markers after each done-when. **Stop** — handoff does not re-enter orchestrate; feature does not enter slice-validate/delivered; plan stage must not edit application source (feature-branch create/checkout is allowed — [refs/feature-branch.md](refs/feature-branch.md)); planned **ship** → [refs/ship.md](refs/ship.md) then **rr-ci** (do not invent forge CLI); **delivered** → residual rr-ci only. Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
 
 ## Nested skills (path-loaded only)
 
@@ -68,7 +74,9 @@ Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
 | [refs/input-resolution.md](refs/input-resolution.md) | Every invocation |
 | [refs/routing.md](refs/routing.md) | After resolve (feature + handoff table + orchestrate pointers) |
 | [refs/feature.md](refs/feature.md) | `--feature` / ad-hoc feature mode |
-| [refs/slice-pipeline.md](refs/slice-pipeline.md) | Orchestrate + feature run loop (stage contracts, cursor; feature stops at task-validate) |
+| [refs/slice-pipeline.md](refs/slice-pipeline.md) | Orchestrate + feature run loop (stage contracts, cursor, **Isolated step run**; feature stops at task-validate) |
+| [refs/executors/step.md](refs/executors/step.md) | Isolated step run Task executor (Caller Load) |
+| [refs/templates/step-task.template.md](refs/templates/step-task.template.md) | Spawn prompt for step executor |
 | [refs/plan-knowledge.md](refs/plan-knowledge.md) | Orchestrate **plan** stage only |
 | [refs/feature-branch.md](refs/feature-branch.md) | Plan-stage feature branch name + ensure (via plan-knowledge) |
 | [refs/plan-schema.md](refs/plan-schema.md) | Orchestrate **plan** done-when / output shape (incl. **Ship**) |

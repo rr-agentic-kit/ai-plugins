@@ -68,10 +68,15 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Auto-chaining prepare → build without cursor/done-when.
 - Opening PR/MR inside builder without **rr-ci** (including mid-slice **ship** — hand off, do not invent forge CLI).
 - Emitting shippable **step-validate** / **task-validate** PASS without an open PR for `Ship.branch`.
-- Advancing past shippable validate while the validate sidecar (+ Verify checkbox flips) are uncommitted and absent from the open PR tip **without** carry-to-next ([task-validate.md](task-validate.md) Forge landing).
+- Advancing past shippable validate while the validate sidecar (+ Verify checkbox flips) are uncommitted and absent from the open PR tip **without** carry-to-next ([task-validate.md](task-validate.md) Forge landing) — **except** under Isolated step run, where dirty porcelain is always a hard-stop (carry-to-next does not waive).
+- Parent-inline implement of a task-step under **Isolated step run** (`auto` × `task|slice`) — spawn [executors/step.md](executors/step.md) instead ([slice-pipeline.md](slice-pipeline.md)).
 - Requiring Forge/PR when `ship_after: never` was confirmed (non-shippable).
 - Skipping planned **ship** when shippable validate fails the Forge/PR gate (`ship_after` is not `never`).
 - Shipping only *after* validate PASS when the forge gate is what blocks PASS (wrong order).
 - Serial-loading co-named plan allowlist / build nested `SKILL.md` Reads that [plan-knowledge.md](plan-knowledge.md) / [slice-pipeline.md](slice-pipeline.md) mark for one parallel turn.
 - Using **rr-builder** for exec-summary / PRD authoring → **rr-planner**.
 - **`Task`** for refactor fix worker (fix is inline only per `rr-refactor/refs/inline-fix.md`).
+
+### Nested Task (isolation cell)
+
+Under Isolated step run, the **step executor** is the parent session for nested lane skills. Leaf Tasks those skills already document (`refactor-collector`, tester agents, rr-test-endless leaves, etc.) stay allowed. Forbidden from the step executor: re-invoke **rr-builder**; spawn sibling step Tasks; run `--add-endless-test`.
