@@ -1,21 +1,23 @@
 # rr-builder input resolution
 
-**Audience:** Every `rr-builder` invocation. Normalize before orchestrate or handoff.
+**Audience:** Every `rr-builder` invocation. Normalize before orchestrate, feature, or handoff.
 
-## Dual mode
+## Modes
 
 | Mode | Trigger | Behavior |
 |------|---------|----------|
-| **Orchestrate** | `--auto` / `--manual` / `--next` / `--step` / `--task` / `--slice`, or **no** explicit lane flag | Resolve slice/task cursor → run drive×scope loop ([slice-pipeline.md](slice-pipeline.md)) |
+| **Feature** | `--feature` (or NL ad-hoc feature intent) | Mint one task → run effective `drive` × `scope=task` until task-validate ([feature.md](feature.md)); hard stop — no slice-validate/delivered |
+| **Orchestrate** | `--auto` / `--manual` / `--next` / `--step` / `--task` / `--slice`, or **no** explicit lane/`--feature` flag | Resolve slice/task cursor → run drive×scope loop ([slice-pipeline.md](slice-pipeline.md)) |
 | **Handoff** | `--prepare` \| `--coder` \| `--tester` \| `--security` \| `--review` \| `--refactor` \| `--add-endless-test` | Classify → load **one** nested skill → stop at its done-when (no pipeline advance beyond that skill) |
 
-**Explicit lane flag wins** over drive/scope flags and over `builder_stage` / cursor. When handoff wins, ignore `drive` / `scope` (omit from payload or one-line note: drive/scope ignored for handoff).
+**Explicit lane flag wins** over drive/scope flags and over `builder_stage` / cursor. When handoff wins, ignore `drive` / `scope` (omit from payload or one-line note: drive/scope ignored for handoff). **`--feature` wins** over bare orchestrate defaults; incompatible with lane flags and with `--slice` / `--next` / `--step`.
 
 ## Top-level flags
 
 | Signal | Mode | `payload.mode` | `payload.lane` / stage |
 |--------|------|----------------|------------------------|
-| Drive/scope flags and/or no lane flag | orchestrate | `orchestrate` | resolve `builder_stage` via cursor |
+| `--feature` | feature | `feature` | mint + task run; see Feature mode below |
+| Drive/scope flags and/or no lane/`--feature` flag | orchestrate | `orchestrate` | resolve `builder_stage` via cursor |
 | `--prepare` | handoff | `handoff` | `prepare` |
 | `--coder` | handoff | `handoff` | `coder` |
 | `--tester` | handoff | `handoff` | `tester` |
@@ -23,6 +25,29 @@
 | `--review` | handoff | `handoff` | `review` (+ nested review flags) |
 | `--refactor` | handoff | `handoff` | `refactor` |
 | `--add-endless-test` | handoff | `handoff` | `add_endless_test` |
+
+### Feature mode (`--feature`)
+
+Third top-level mode (not a lane handoff). Procedure SoT: [feature.md](feature.md).
+
+| Rule | Detail |
+|------|--------|
+| Drive | Default `auto`; allow `--manual` only among drive/scope flags |
+| Scope | Forced `task` — reject `--slice` / `--next` / `--step` with one-line stop |
+| Lanes | Incompatible with any lane flag → stop: `feature incompatible with lane flags` |
+| Intent | Missing title/desc → one AskQuestion or stop |
+| Payload | `payload.feature` (see Output payload) |
+
+```yaml
+feature:
+  title: string              # or desc from NL
+  project_kind: rr | non_rr  # docs/rr/ present → rr
+  artifact_root: string      # docs/rr/tasks/{slice_id}/ | .ai/tasks/{feature_id}/
+  slice_id: null | string    # rr + open slice only
+  feature_id: string         # non_rr dir stem; rr may mirror short-desc
+  branch: string             # feat/{NNNN}-{short-desc} when created/settled
+  base: string               # origin/main | origin/master | current branch name
+```
 
 ### Drive × scope (orchestrate only)
 
@@ -61,7 +86,7 @@ Reject retired `--full` with one-line: `use --slice` (no alias).
 Parse into `payload.review` when `lane: review` **or** when orchestrate stage is **review** (builder forces `--fix --all --endless`):
 
 ```yaml
-lanes: [code, test, security]   # default --all; narrow with --code / --test / --security
+lanes: [code, test, security]   # default --all (also when --fix / report-only with no lane flags)
 outcome: report | fix | ci        # --fix | --ci; auto review stage forces fix
 endless: false | true             # --endless; auto review stage forces true
 max_epochs: 5                     # --max-epochs; default 5 when endless
@@ -97,21 +122,22 @@ When `lane: refactor`, normalize per `rr-refactor/refs/input-resolution.md` into
 | `docs/plans/*.md` with implement intent | `payload.plan_path` (orchestrate still prefers task tree under `docs/rr/tasks/`) |
 | Cascade dir with `status.yaml` only, no prepare/implement | `OUT_OF_SCOPE` → **rr-planner** |
 
-## Natural language (no lane flag → orchestrate)
+## Natural language (no lane flag → orchestrate or feature)
 
 | Pattern | Effect |
 |---------|--------|
+| "implement this feature", "ad-hoc feature", "build X as a feature task" | `mode: feature`; force `scope: task`; default `drive: auto` unless `--manual` / “confirm each stage” |
 | "continue build", "build the slice", "pick a stage" | `mode: orchestrate`; default `drive: auto`, `scope: step` unless user says otherwise |
 | "next stage only", "just the next step" | `mode: orchestrate`, `drive: manual`, `scope: next` |
 | "auto next", "auto one stage" | `mode: orchestrate`, `drive: auto`, `scope: next` |
 | "one step", "continue step", "finish this step" | `mode: orchestrate`, `drive: auto`, `scope: step` |
 | "finish this task", "complete the task" | `mode: orchestrate`, `drive: auto`, `scope: task` |
 | "full auto", "finish the slice", "chain until delivered", "run through without asking" | `mode: orchestrate`, `drive: auto`, `scope: slice` |
-| "manual", "step by step", "confirm each stage" | `mode: orchestrate`, `drive: manual` (scope stays default `step` unless “next only” / “finish task” / “finish slice”) |
+| "manual", "step by step", "confirm each stage" | `mode: orchestrate` or `feature` if already feature-intent; `drive: manual` (orchestrate scope stays default `step` unless “next only” / “finish task” / “finish slice”) |
 | "prepare slice", "decompose execute-slice", "tech plan for slice" | Prefer handoff `prepare` if clearly prepare-only; else orchestrate (cursor may land on prepare) |
-| "implement", "write tests only", "OWASP audit", "review my PR", "endless test", "perfect tests loop" **with** clear single-lane intent | AskQuestion once if ambiguous between handoff vs orchestrate; else map to matching handoff lane |
+| "implement", "write tests only", "OWASP audit", "review my PR", "endless test", "perfect tests loop" **with** clear single-lane intent | AskQuestion once if ambiguous between handoff vs orchestrate vs feature; else map to matching handoff lane |
 | "refactor my MR", "behavior-invariant refactor", "phased refactor on this branch" | handoff `refactor` when clearly refactor-only (not full-slice orchestrate) |
-| Ambiguous | AskQuestion once: orchestrate (auto/manual × next/step/task/slice) \| prepare \| coder \| tester \| security \| review \| refactor |
+| Ambiguous | AskQuestion once: feature \| orchestrate (auto/manual × next/step/task/slice) \| prepare \| coder \| tester \| security \| review \| refactor |
 
 ## Prepare path
 
@@ -126,10 +152,11 @@ prepare:
 ## Output payload (skill session)
 
 ```yaml
-mode: orchestrate | handoff
-drive: auto | manual          # orchestrate only; default auto; omit or ignore on handoff
-scope: next | step | task | slice   # orchestrate only; default step; omit or ignore on handoff
+mode: orchestrate | feature | handoff
+drive: auto | manual          # orchestrate + feature; default auto; omit or ignore on handoff
+scope: next | step | task | slice   # orchestrate: default step; feature: forced task; omit or ignore on handoff
 lane: null | prepare | coder | tester | security | review | refactor | add_endless_test
+feature: null | { title, project_kind, artifact_root, slice_id, feature_id, branch, base }
 builder_stage: null | prepare | plan | build | refactor | review | step_validate | task_validate | slice_validate | delivered
 step_index: null | integer
 plan_path: null | string
@@ -145,12 +172,16 @@ code_scope: null | { scope, paths, plan_excerpt }
 ## Stop conditions
 
 - Two+ explicit lane flags
+- `--feature` + any lane flag
+- `--feature` + `--slice` / `--next` / `--step`
 - `--auto` and `--manual` together, or any two of `--next` / `--step` / `--task` / `--slice`
 - Retired `--full` present → `use --slice`
 - `--fix` and `--ci` together (under `--review`)
 - `--endless` and `--ci` together (under `--review`)
+- `--feature` with missing intent/desc and user declines AskQuestion
 - No lane/mode and user declines AskQuestion
 - Manual gate declined / user declines continue
 - Request is clearly **rr-planner** or **rr-ci**-only → redirect per [anti-overlap.md](anti-overlap.md)
 - Orchestrate with no pin-complete kernel / no `slice_id` → stop or AskQuestion
 - Hard stop from stage failure / validate FAIL / endless review max-epochs without clear exit (do not chain further under `step` / `task` / `slice`)
+- Feature mode after task-validate done-when — do not chain to slice-validate / delivered

@@ -60,7 +60,7 @@ Flat locked filenames under `REVIEW_DIR` scratch (see `refs/artifacts.md`); endl
 
 ## Constraints
 
-- Default lanes: `[code, test, security]`; narrow with flags
+- Default lanes: `[code, test, security]` — including `--fix` / report-only with no lane flags; narrow with `--code`/`--test`/`--security`
 - `--fix` and `--ci` are mutually exclusive
 - `--endless` requires `--fix`; incompatible with `--ci`
 - Orchestrate review always forces `--fix --all --endless`

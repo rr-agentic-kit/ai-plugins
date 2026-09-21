@@ -44,7 +44,7 @@ TodoWrite `merge: false` with ids matching steps below when the run spans 3+ ste
 
 ### 1. parse
 
-Confirm param block from [refs/params.md](refs/params.md). Default lanes: `[code, test, security]`. **Abort:** `--fix` + `--ci`; `--endless` + `--ci`; `--endless` without `--fix` (unless forced); unknown flag.
+Confirm param block from [refs/params.md](refs/params.md). Default lanes: `[code, test, security]` (also when `--fix` or report-only omits lane flags). **Abort:** `--fix` + `--ci`; `--endless` + `--ci`; `--endless` without `--fix` (unless forced); unknown flag.
 
 ### 2. id
 

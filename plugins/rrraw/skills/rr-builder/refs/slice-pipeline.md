@@ -1,6 +1,25 @@
 # Slice pipeline (builder orchestration)
 
-**Audience:** `rr-builder` in **orchestrate** mode (drive/scope flags or no lane flag). SoT for lifecycle, task-step stage contracts, cursor, and drive×scope run loop. Handoff mode does **not** advance this pipeline beyond the explicit nested skill. Handoff load table: [routing.md](routing.md).
+**Audience:** `rr-builder` in **orchestrate** or **feature** mode (drive/scope flags, `--feature`, or no lane flag). SoT for lifecycle, task-step stage contracts, cursor, and drive×scope run loop. Handoff mode does **not** advance this pipeline beyond the explicit nested skill. Handoff load table: [routing.md](routing.md). Feature mint + hard stop: [feature.md](feature.md).
+
+## Artifact root (durable paths)
+
+Default (orchestrate on an rr-project slice):
+
+`docs/rr/tasks/{slice_id}/`
+
+When `payload.feature.artifact_root` is set (feature mode / non_rr), resolve **all** durable task/step sidecars under that root instead:
+
+| Kind | Under `artifact_root` |
+|------|------------------------|
+| Task | `{NNNN}.md` |
+| Plan / refactor / review / step-validate | `{NNNN}-{step}.{plan,refactor,review,validate}.md` |
+| Task-validate | `{NNNN}.task-validate.md` |
+| Summary / registry (rr) | `task-summary.md`, `docs/rr/tasks/registry.yaml` (rr only) |
+
+Scratch stays `.ai/review/<runId>/`, `.ai/refactor/<runId>/` — never relocated under `artifact_root`. Slice-validate / delivered paths apply only to orchestrate `scope: slice` — **feature mode never reaches them**.
+
+Below, paths written as `docs/rr/tasks/{slice_id}/…` mean **`{artifact_root}/…`** when `artifact_root` is set.
 
 ## Slice lifecycle
 
@@ -180,8 +199,8 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
    - **PASS** and `ship_after: never` → `step_ship_done` satisfied; go to 9.
    - **PASS** and shippable → open PR already proven; `step_ship_done` should be `true`; go to 9. Do **not** enter ship after PASS for `ship_after: step_validate`.
 9. **Advance** — If more steps remain: next `step_index`, set `step_plan_done` / `step_build_done` / `step_refactor_done` / `step_review_done` / `step_ship_done` to `false`. If no more steps → **task-validate**.
-10. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Other FAIL → hard stop. **PASS** → next task or step 11.
-11. **All tasks validated** → **slice validate**.
+10. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Other FAIL → hard stop. **PASS** → next task or step 11. **Feature mode:** **PASS** or hard FAIL → **stop** (do not go to step 11).
+11. **All tasks validated** → **slice validate** (orchestrate `scope: slice` only — skip under feature).
 12. **Slice validate PASS** → stop: **slice delivered** → point engineer to **rr-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
 
 Explicit lane flag wins over this cursor even if `builder_stage` says otherwise ([input-resolution.md](input-resolution.md)).
@@ -194,8 +213,8 @@ Explicit lane flag wins over this cursor even if `builder_stage` says otherwise 
 |---------|-----------|
 | `next` | Cursor-next stage done-when met (no chaining) |
 | `step` | Current task-step reaches step-validate PASS (incl. ship→re-validate if shippable). If cursor is still **prepare**, complete prepare then stop (do not enter first step). |
-| `task` | Active task reaches task-validate PASS (all its steps + task-validate). |
-| `slice` | Slice validate PASS → delivered (or hard stop). Replaces retired `--full`. |
+| `task` | Active task reaches task-validate PASS (all its steps + task-validate). **Feature mode** always uses this boundary and **must not** advance to slice-validate / delivered. |
+| `slice` | Slice validate PASS → delivered (or hard stop). Replaces retired `--full`. Not used under `--feature`. |
 
 ## Readiness set (`drive: manual`, `scope: slice`)
 
@@ -237,3 +256,5 @@ resolve flags + cursor
 **Hard stop** ends any loop: stage failure, validate FAIL, missing inputs, conflicting flags, endless review epoch cap without clear exit, user decline. Persist `builder_stage` / `step_index` / `step_*_done` after each successful done-when before the next probe.
 
 **Handoff:** skip this loop — [routing.md](routing.md) handoff table; stop at nested done-when. Drive/scope do not mutate handoff lanes.
+
+**Feature:** after [feature.md](feature.md) mint + cursor, run this loop with `scope: task` and paths under `artifact_root`; hard-stop at task-validate (step 10) — never slice-validate / delivered.

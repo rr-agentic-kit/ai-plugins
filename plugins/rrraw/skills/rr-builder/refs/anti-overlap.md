@@ -8,16 +8,18 @@
 
 **rr-builder does not:** compose planning docs, run `agents/planning/*`, or validate cascade format.
 
-**Stop phrase:** "This is planning-only — use **rr-planner**."
+**`--feature` ≠ product Plan:** ad-hoc `--feature` mints one execute task and runs to task-validate ([feature.md](feature.md)) — it does **not** author cascade/PRD or replace **rr-planner**. Upstream cascade/docs edits required by the feature are **task obligations**, not a Plan phase.
 
+**`--feature` ≠ full-slice `--slice`:** stops at task-validate; never slice-validate / delivered on this path.
+
+**Stop phrase:** "This is planning-only — use **rr-planner**."
 ## rr-ci
 
 **Owns:** Forge detect, PR/MR title/description, pipeline debug, publish, deploy, inline POST scripts. Disk sidecars under **`.ai/ci/`**.
 
 **When builder hands off:** (1) orchestrate **ship** after planned validate ([ship.md](ship.md) — mid-slice or task-scoped); (2) **slice delivered** residual; (3) **rr-review** `--ci`.
 
-**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--step`/`--task`/`--slice`) and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **rr-ci** — does **not** invent forge CLI.
-
+**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--step`/`--task`/`--slice`), ad-hoc **`--feature`** (mint + `scope=task`), and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **rr-ci** — does **not** invent forge CLI.
 **rr-builder does not:** open MR/PR except by handing off to **rr-ci** (ship stage, delivered residual, or review `--ci`).
 
 **Stop phrase:** "Ship/CI forge mechanics — use **rr-ci**." Builder may **enter** ship and load rr-ci when shippable validate hits the Forge/PR gate (or plan declares `ship_after`); it must not skip a planned ship, require PASS-before-ship for that gate, or open the PR itself.
@@ -26,8 +28,7 @@
 
 **Owns:** Local git safety, worktrees, squash, conflict resolution, merged branch cleanup.
 
-**rr-builder owns (narrow):** At orchestrate **plan** start, **ensure** the task-step feature branch per [feature-branch.md](feature-branch.md) (`feat/{NNNN}-{step}-{short-desc}`). That is create/checkout (+ optional rename after AskQuestion) only.
-
+**rr-builder owns (narrow):** (1) **`--feature`** task-branch ensure per [feature.md](feature.md) (`feat/{NNNN}-{short-desc}` + origin AskQuestion). (2) At orchestrate **plan** start, **ensure** the task-step feature branch per [feature-branch.md](feature-branch.md) (`feat/{NNNN}-{step}-{short-desc}`). Both are create/checkout (+ optional rename/origin after AskQuestion) only — not squash/worktree/prune.
 **rr-builder may Read** `skills/rr-git/refs/safety.md` when the feature-branch probe chooses rename/`-D`, or worktree refs during review `--fix`. It does **not** replace **rr-git** for squash, worktrees, prune, or standalone git tasks.
 
 **Stop phrase (standalone git):** "Local git only — use **rr-git**." (Does not apply to the plan-stage feature-branch ensure.)

@@ -4,10 +4,12 @@
 
 ## Persist paths (canonical)
 
+Resolve under **`artifact_root`** when `payload.feature.artifact_root` is set; otherwise `docs/rr/tasks/{slice_id}/` ([slice-pipeline.md](slice-pipeline.md) Artifact root).
+
 | Scope | Path |
 |-------|------|
-| **step-validate** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.validate.md` |
-| **task-validate** | `docs/rr/tasks/{slice_id}/{NNNN}.task-validate.md` |
+| **step-validate** | `{artifact_root}/{NNNN}-{step}.validate.md` (default root: `docs/rr/tasks/{slice_id}/`) |
+| **task-validate** | `{artifact_root}/{NNNN}.task-validate.md` |
 
 `{step}` is **1-based** (same as plan sidecar). Write the report **before** advancing cursor on PASS.
 
@@ -15,7 +17,7 @@
 
 | Input | Source |
 |-------|--------|
-| Task artifact | `docs/rr/tasks/{slice_id}/{NNNN}.md` |
+| Task artifact | `{artifact_root}/{NNNN}.md` |
 | Goal / Obligations / Verify | Task body (task-validate) or current step plan Goal / **Verify hooks** checkboxes (step-validate) |
 | Ship block | Current `{NNNN}-{step}.plan.md` **Ship** (step-validate); any step with pending `ship_after: task_validate` (task-validate) |
 | Evidence | Diffs, test results, step notes from build/refactor/review; forge probe when shippable |

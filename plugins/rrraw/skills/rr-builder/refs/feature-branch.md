@@ -20,6 +20,7 @@ feat/{NNNN}-{step}-{short-desc}
 
 At **plan** stage start — before writing `{NNNN}-{step}.plan.md`. Re-check is a no-op when HEAD already matches the convention for this task-step.
 
+**Feature-mode Stay:** when HEAD is already `feat/{NNNN}-*` from [feature.md](feature.md) task-branch ensure, prefer **Stay** (do not force rename to the step-suffixed `TARGET` unless the engineer asks).
 ## Ensure procedure
 
 1. Resolve repo root; `git branch --show-current` → `HEAD_BRANCH`.

@@ -2,6 +2,14 @@
 
 **Audience:** `rr-builder` after [input-resolution.md](input-resolution.md).
 
+## Feature mode
+
+When `payload.mode: feature`:
+
+1. **Read** [feature.md](feature.md) (detect → branch ensure → mint → cursor).
+2. Enter the task run-loop from [slice-pipeline.md](slice-pipeline.md) with forced `scope=task` and durable paths under `payload.feature.artifact_root`.
+3. **Hard stop** at task-validate done-when — do **not** treat as a nested-skill handoff; do **not** advance to slice-validate / delivered.
+
 ## Handoff load table
 
 Exact one nested `SKILL.md` **Read**. Stop at that skill’s done-when. Do **not** re-enter orchestration or advance `builder_stage` past the handoff lane.

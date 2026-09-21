@@ -27,7 +27,7 @@ Top-level `--code` / `--test` / `--all` / `--fix` / `--ci` **without** `--review
 | `--security` | `lanes: [security]` |
 | `--all` | `lanes: [code, test, security]` |
 
-**Default (no lane flags):** `--all`. **`--all` wins** over individual lane flags.
+**Default (no lane flags):** `--all` — including when only `--fix` or report-only (no `--code`/`--test`/`--security`/`--all`) is set; lanes inherit `[code, test, security]`. **`--all` wins** over individual lane flags.
 
 ## Outcome
 

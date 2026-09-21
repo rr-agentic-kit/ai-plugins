@@ -8,7 +8,9 @@
 
 Write the six required sections to:
 
-`docs/rr/tasks/{slice_id}/{NNNN}-{step}.plan.md`
+`{artifact_root}/{NNNN}-{step}.plan.md`
+
+Default `artifact_root` = `docs/rr/tasks/{slice_id}/`. When `payload.feature.artifact_root` is set (feature / non_rr), use that root instead — see [slice-pipeline.md](slice-pipeline.md) Artifact root.
 
 | Token | Meaning |
 |-------|---------|
