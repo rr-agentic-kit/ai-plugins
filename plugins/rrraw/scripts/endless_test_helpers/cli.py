@@ -133,7 +133,7 @@ def cmd_dispatch_queue(args: argparse.Namespace) -> int:
         batch: list[dict] = []
         used_files: set[str] = set()
         for n in sorted(ready, key=lambda x: x["pack_sequence"]):
-            if n["files"] & used_files:
+            if set(n["files"]) & used_files:
                 continue
             batch.append(n)
             used_files |= set(n["files"])

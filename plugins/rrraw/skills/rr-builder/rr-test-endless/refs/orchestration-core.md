@@ -80,6 +80,8 @@ Prefix each path with **`PLUGIN_ROOT/`** when **Read**ing. If any **core** file 
 
 ### Core bundle (always — before loop)
 
+**Read all 7 in one parallel turn** (co-named peers — do not Read one-per-turn):
+
 1. `skills/rr-builder/rr-test-endless/refs/orchestration-core.md` (this file)
 2. `skills/rr-builder/rr-test-endless/refs/orchestration.md`
 3. `skills/rr-builder/rr-review/refs/chunking.md`
@@ -89,6 +91,8 @@ Prefix each path with **`PLUGIN_ROOT/`** when **Read**ing. If any **core** file 
 7. `skills/rr-builder/rr-test-endless/refs/terminal-report.md`
 
 ### Phase bundles (load per **`Start:`** and active loop §)
+
+**Read each bundle's paths in one parallel turn** when that bundle's § becomes active — do not Read one-per-turn.
 
 | Bundle | Paths | Load when |
 |--------|-------|-----------|
