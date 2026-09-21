@@ -4,19 +4,21 @@ Load from root Procedure step **task-shape** when the invoke needs shape-specifi
 
 ## Ship routes
 
-`--create-pr` | `--create-mr` | `--update-pr` | `--update-mr` | `--create-pr-mr` | `--update-pr-mr` → same **PR/MR upsert** (PR vs MR from forge after `detect-remote`; `-pr-mr` = forge-agnostic). Create vs update are **not** different shapes. Nested forge skill branches on preflight `exists` vs `ready_create`.
+`--create-pr` | `--create-mr` | `--update-pr` | `--update-mr` | `--add-pr` | `--add-mr` | `--create-pr-mr` | `--update-pr-mr` | `--add-pr-mr` → same **PR/MR upsert** (PR vs MR from forge after `detect-remote`; `-pr-mr` = forge-agnostic). Create / update / add are **not** different shapes. Nested forge skill branches on preflight `exists` vs `ready_create`.
 
-Prose “open/create/update PR/MR” without a named route → same ship shape.
+Prose “open/create/update/add PR/MR” without a named route → same ship shape.
+
+Pass explicit merge base via `mr-add-preflight --base` when handoff/user names one (`ship_base_branch` or prose). Otherwise preflight detects the closest `origin/*` ancestor (follow-up stacks keep non-trunk bases) and emits `result.base_branch` for forge `--base` / `--target-branch`.
 
 ## `--draft` (optional, with ship routes)
 
-Human title/body gate — **not** forge `gh`/`glab` `--draft` (add forge-draft status only if prose asks).
+Human title/body gate — **not** a toggle for forge `gh`/`glab` `--draft`. Forge create **always** passes `--draft`; skill `--draft` only gates disk title/body AskQuestion.
 
 1. Write `.ai/ci/pr-mr-title.txt` and `.ai/ci/pr-mr-body.md`; report paths.
 2. AskQuestion: **Ship** | **Keep draft only** | **I'll edit**.
 3. **Keep draft only** → stop (files remain). **I'll edit** → wait; on continue **re-read disk files** (user edits win — do not regenerate) and AskQuestion again. **Ship** → proceed using current disk title/body.
 
-Without `--draft`: draft title/body in context (may still write body file for CLI `--body-file`); no AskQuestion gate.
+Without skill `--draft`: draft title/body in context (may still write body file for CLI `--body-file`); no AskQuestion gate. Forge create still uses `--draft`.
 
 ## `--fix --sonar`
 

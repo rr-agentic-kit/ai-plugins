@@ -2,13 +2,15 @@
 
 **Audience:** `rr-builder` orchestrate **plan** stage only. Fixed Read set — do **not** dump rr-coder/rr-tester full Required Knowledge or language matrices.
 
-## Always Read (in order)
+## Always Read
 
-1. [feature-branch.md](feature-branch.md) — ensure `feat/{NNNN}-{step}-{short-desc}` **before** writing the plan
-2. [../rr-coder/refs/code.principles.md](../rr-coder/refs/code.principles.md)
-3. [../rr-tester/refs/shared-heuristics.md](../rr-tester/refs/shared-heuristics.md)
-4. [../rr-tester/refs/contracts.md](../rr-tester/refs/contracts.md)
-5. [plan-schema.md](plan-schema.md) — output shape before writing the step plan
+1. [feature-branch.md](feature-branch.md) — ensure `feat/{NNNN}-{step}-{short-desc}` **before** writing the plan (**first**, alone if branch may change).
+2. Then **one parallel** tool turn for the rest of the allowlist (do not serial-chain these):
+   - [../rr-coder/refs/code.principles.md](../rr-coder/refs/code.principles.md)
+   - [../rr-tester/refs/shared-heuristics.md](../rr-tester/refs/shared-heuristics.md)
+   - [../rr-tester/refs/contracts.md](../rr-tester/refs/contracts.md)
+   - [plan-schema.md](plan-schema.md) — output shape before writing the step plan
+   - Plus any **Conditional** rows whose predicate holds (same turn)
 
 ## Conditional (one hop, only when predicate holds)
 

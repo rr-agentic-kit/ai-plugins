@@ -10,14 +10,14 @@ One forge-agnostic ship path: detect GitHub vs GitLab, author PR/MR title/descri
 
 Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pipeline/review CLI helpers, **`--fix --sonar`** (scripted Sonar issue list + agent remediations), **`--pull-dependabot`** (batch-merge `origin/dependabot/**` with verify), and routing into nested forge / publish / deployment skills. Ship path may commit/push when creating or updating a PR/MR. Forge **target** may differ from cwd origin when the user names `owner/repo`.
 
-**Out of scope:** see **Avoid when**; also Renovate onboarding CLI, inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` as JSON-CLI subcommands (those are skill invoke routes only), inventing `dependabot.yml` directory rewrites.
+**Out of scope:** see **Avoid when**; also Renovate onboarding CLI, inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` / `--add-*` as JSON-CLI subcommands (those are skill invoke routes only), inventing `dependabot.yml` directory rewrites.
 
 ## When
 
 ### Use when
 
 - Opening or updating a PR/MR (including commit/push for that flow)
-- Named routes: `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` (or `--create-pr-mr` / `--update-pr-mr`) — all mean upsert; combine with `--draft` to gate title/body on disk
+- Named routes: `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` / `--add-pr` / `--add-mr` (or `-pr-mr` aliases) — all mean upsert; combine with skill `--draft` to gate title/body on disk. Ship opens **forge draft** PRs/MRs into the resolved origin/base (not always trunk).
 - Drafting or creating a GitHub/GitLab issue (same or other `owner/repo`)
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
 - `--fix --sonar` to remediate open SonarQube issues on a PR/branch (no human issue dump)
@@ -41,7 +41,7 @@ Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pip
 
 ### Invoke
 
-Slash `/rr-ci` with `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` (or `-pr-mr` aliases) — same upsert ship; optional `--draft` writes `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` and AskQuestions next steps. `--fix --sonar` remediates Sonar issues (default: open PR/MR for current branch; optional `--pr`/`--branch`). `--pull-dependabot` batch-merges Dependabot remotes (`--verify-cmd` required unless `--dry-run`). Nested forge skills are path-loaded only.
+Slash `/rr-ci` with `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` / `--add-pr` / `--add-mr` (or `-pr-mr` aliases) — same upsert ship; optional skill `--draft` writes `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` and AskQuestions next steps. Forge create is always draft into `result.base_branch` from preflight. `--fix --sonar` remediates Sonar issues (default: open PR/MR for current branch; optional `--pr`/`--branch`). `--pull-dependabot` batch-merges Dependabot remotes (`--verify-cmd` required unless `--dry-run`). Nested forge skills are path-loaded only.
 
 ### Intake
 

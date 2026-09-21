@@ -8,7 +8,7 @@ import emit
 from errors import GitError
 from forge import detect
 from gh import GhClient, default_gh
-from gitutil import current_branch, merge_base_refs, repo_root
+from gitutil import current_branch, merge_base_refs, repo_root, resolve_pr_base
 from mr_inline_anchors import parse_unified_diff_plus_lines
 from paths import ci_file, ci_rel
 from pre_merge_status import assemble_verdict
@@ -237,6 +237,7 @@ def _skip_threads(client: GhClient, args: Namespace) -> int:
 def _add_preflight(client: GhClient, args: Namespace) -> int:
     repo_root()
     branch = getattr(args, "branch_name", None) or current_branch()
+    base_branch = resolve_pr_base(getattr(args, "base", None))
     try:
         url = client.cli(
             ["pr", "view", "--json", "url", "--jq", ".url", "--head", branch]
@@ -244,7 +245,12 @@ def _add_preflight(client: GhClient, args: Namespace) -> int:
         if url:
             return emit.succeed(
                 "mr-add-preflight",
-                {"status": "exists", "mr_url": url, "message": "PR already exists"},
+                {
+                    "status": "exists",
+                    "mr_url": url,
+                    "base_branch": base_branch,
+                    "message": "PR already exists",
+                },
             )
     except Exception:
         pass
@@ -254,6 +260,7 @@ def _add_preflight(client: GhClient, args: Namespace) -> int:
             "status": "ready_create",
             "message": "no open PR for branch",
             "upstream": branch,
+            "base_branch": base_branch,
         },
     )
 

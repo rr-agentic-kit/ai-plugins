@@ -29,7 +29,7 @@ At **plan** stage start — before writing `{NNNN}-{step}.plan.md`. Re-check is 
 
 | Predicate | Action |
 |-----------|--------|
-| `HEAD_BRANCH` is `main` or `master` | `git checkout -b TARGET` (dirty tree OK — carry uncommitted work onto the new branch). Done when HEAD is `TARGET`. |
+| `HEAD_BRANCH` is `main` or `master` | `git checkout -b TARGET` (dirty tree OK — **must** carry uncommitted work onto the new branch, including orphaned `docs/rr/tasks/**` / `artifact_root` validate reports, Verify checkbox flips, and cursor frontmatter from a prior step’s carry-to-next — [task-validate.md](task-validate.md) Forge landing). Done when HEAD is `TARGET`. |
 | `HEAD_BRANCH` equals `TARGET` | No-op. Done. |
 | `HEAD_BRANCH` matches `feat/{NNNN}-{step}-*` but ≠ `TARGET` | AskQuestion: rename to `TARGET` \| keep current \| abort plan. |
 | Any other branch | AskQuestion (see **Probe**). **Stop-rule:** do not invent a silent checkout/create. |
@@ -41,7 +41,7 @@ At **plan** stage start — before writing `{NNNN}-{step}.plan.md`. Re-check is 
 AskQuestion options (Delivery channels: text fallback OK):
 
 1. **Stay** — continue plan on current branch (record branch name in plan Risks).
-2. **New from base** — create `TARGET` from `main`/`master` (confirm base; warn if uncommitted work needs stash/carry).
+2. **New from base** — create `TARGET` from `main`/`master` (confirm base; **must** stash/carry uncommitted task sidecars — same carry-to-next rule as the main/master row).
 3. **Rename to convention** — rename current branch to `TARGET` (confirm; safety.md if destructive).
 4. **Abort plan** — stop; do not write plan sidecar or set `step_plan_done`.
 

@@ -8,7 +8,8 @@ from gitutil import (
     git_output,
     has_uncommitted_changes,
     opened_mrs_for_branch,
-    resolve_integration_base,
+    origin_ref_for_base,
+    resolve_pr_base,
     run_git,
     staged_hint,
     upstream_abbrev_ref,
@@ -93,13 +94,17 @@ def handle_default_branch_snapshot(
     return _snapshot_commit_push(_repo, branch_name, commit_policy)
 
 
-def _upstream_escalation(branch: str, upstream: str) -> int:
+def _upstream_escalation(branch: str, upstream: str, *, base_branch: str) -> int:
     message = f"upstream {upstream} != origin/{branch}; use --same-name-push or abort"
     return emit.succeed(
         COMMAND,
         emit_result(
             "escalate_upstream",
-            extra={"upstream": upstream, "message": message},
+            extra={
+                "upstream": upstream,
+                "base_branch": base_branch,
+                "message": message,
+            },
         ),
     )
 
@@ -108,6 +113,7 @@ def _check_upstream_mismatch(
     branch: str,
     *,
     same_name_push: bool,
+    base_branch: str,
 ) -> int | None:
     upstream = upstream_abbrev_ref()
     if upstream is None:
@@ -117,7 +123,7 @@ def _check_upstream_mismatch(
     if upstream_short == branch or same_name_push:
         return None
 
-    return _upstream_escalation(branch, upstream)
+    return _upstream_escalation(branch, upstream, base_branch=base_branch)
 
 
 def _needs_push(branch: str, *, same_name_push: bool) -> bool:
@@ -166,6 +172,7 @@ def _has_commits_to_merge(base: str) -> bool:
 def _merged_escalation(
     base: str,
     *,
+    base_branch: str,
     continue_anyway: bool,
 ) -> int | None:
     if continue_anyway:
@@ -178,24 +185,37 @@ def _merged_escalation(
     message = f"commits look already in {base}; abort (default) or --continue-anyway"
     return emit.succeed(
         COMMAND,
-        emit_result("escalate_merged", extra={"message": message}),
+        emit_result(
+            "escalate_merged",
+            extra={"base_branch": base_branch, "message": message},
+        ),
     )
 
 
-def _mr_lookup_result(branch: str, client: GlabClient) -> int:
+def _mr_lookup_result(branch: str, client: GlabClient, *, base_branch: str) -> int:
     mr_url = _lookup_open_mr_url(client, branch)
     if mr_url:
         return emit.succeed(
             COMMAND,
             emit_result(
                 "exists",
-                extra={"mr_url": mr_url, "message": "MR already exists"},
+                extra={
+                    "mr_url": mr_url,
+                    "base_branch": base_branch,
+                    "message": "MR already exists",
+                },
             ),
         )
 
     return emit.succeed(
         COMMAND,
-        emit_result("ready_create", extra={"message": "ready to create draft MR"}),
+        emit_result(
+            "ready_create",
+            extra={
+                "base_branch": base_branch,
+                "message": "ready to create draft MR",
+            },
+        ),
     )
 
 
@@ -204,6 +224,7 @@ def _push_and_lookup_mr(
     base: str,
     client: GlabClient,
     *,
+    base_branch: str,
     same_name_push: bool,
 ) -> int:
     if _needs_push(branch, same_name_push=same_name_push):
@@ -216,24 +237,35 @@ def _push_and_lookup_mr(
             COMMAND,
             "no_commits",
             "No commits to merge",
-            result=emit_result("no_commits", extra={"message": "No commits to merge"}),
+            result=emit_result(
+                "no_commits",
+                extra={
+                    "base_branch": base_branch,
+                    "message": "No commits to merge",
+                },
+            ),
         )
 
-    return _mr_lookup_result(branch, client)
+    return _mr_lookup_result(branch, client, base_branch=base_branch)
 
 
 def _run_preflight_gates(
     branch: str,
     base: str,
     *,
+    base_branch: str,
     continue_anyway: bool,
     same_name_push: bool,
 ) -> int | None:
-    early = _merged_escalation(base, continue_anyway=continue_anyway)
+    early = _merged_escalation(
+        base, base_branch=base_branch, continue_anyway=continue_anyway
+    )
     if early is not None:
         return early
 
-    return _check_upstream_mismatch(branch, same_name_push=same_name_push)
+    return _check_upstream_mismatch(
+        branch, same_name_push=same_name_push, base_branch=base_branch
+    )
 
 
 def _run_after_snapshot(
@@ -242,12 +274,15 @@ def _run_after_snapshot(
     *,
     continue_anyway: bool,
     same_name_push: bool,
+    base: str | None,
 ) -> int:
-    base = resolve_integration_base()
+    base_branch = resolve_pr_base(base)
+    origin_base = origin_ref_for_base(base_branch)
 
     early = _run_preflight_gates(
         branch,
-        base,
+        origin_base,
+        base_branch=base_branch,
         continue_anyway=continue_anyway,
         same_name_push=same_name_push,
     )
@@ -256,8 +291,9 @@ def _run_after_snapshot(
 
     return _push_and_lookup_mr(
         branch,
-        base,
+        origin_base,
         client,
+        base_branch=base_branch,
         same_name_push=same_name_push,
     )
 
@@ -271,6 +307,7 @@ def run_preflight(
     branch_name: str | None,
     commit_policy: str,
     client: GlabClient,
+    base: str | None = None,
 ) -> int:
     branch, early = handle_default_branch_snapshot(
         _repo,
@@ -286,4 +323,5 @@ def run_preflight(
         client,
         continue_anyway=continue_anyway,
         same_name_push=same_name_push,
+        base=base,
     )

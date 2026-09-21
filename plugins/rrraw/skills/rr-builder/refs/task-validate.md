@@ -90,7 +90,20 @@ On **FAIL**:
 
 On **PASS** with `ship_after: never`: treat `step_ship_done` as satisfied for advance (nothing to ship).
 
-Chat: announce the persisted path (`…validate.md` or `…task-validate.md`).
+### Forge landing (shippable PASS)
+
+Validate writes the report **after** the forge-miss → **ship** → re-validate loop. Disk persist alone is not enough — sidecars + Verify checkbox flips must **land on forge** or be **carried to the next ship**.
+
+| Situation | Required action before advancing `step_index` / next task |
+|-----------|-----------------------------------------------------------|
+| Open PR/MR whose head is `Ship.branch` | Hand off **rr-ci** update/push so `{NNNN}-{step}.validate.md` (or task-validate report), flipped Verify checkboxes, and cursor frontmatter are on that tip |
+| No open PR (e.g. already merged) and those paths are dirty/uncommitted | **Carry-to-next:** leave them dirty (or note them); next [feature-branch.md](feature-branch.md) ensure **must** carry them onto the new `feat/…` branch; next **ship** **must** include them in the rr-ci commit set. Do **not** invent a dedicated PR solely for validate docs |
+
+**Stop-rule:** Do **not** treat shippable step/task-validate as closed (do **not** advance cursor) while the validate sidecar (+ matching Verify checkbox flips) are uncommitted **and** absent from the open PR tip **and** carry-to-next was not applied.
+
+**Anti-trigger:** Do **not** claim PASS-complete from chat alone when forge tip lacks the validate sidecar.
+
+Chat: announce the persisted path (`…validate.md` or `…task-validate.md`) **and** whether landing was **pushed** or **carry-to-next**.
 
 ## Out of scope
 
@@ -98,3 +111,4 @@ Chat: announce the persisted path (`…validate.md` or `…task-validate.md`).
 - Re-running full rr-review (already done at review stage)
 - Inventing new acceptance criteria not in the task / step plan
 - Opening PR/MR inside builder — **rr-ci** via **ship** only
+- Rewriting Forge/PR PASS to mean “merged historically” instead of open tip or carry-to-next

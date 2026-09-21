@@ -64,13 +64,13 @@ Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: fal
 
 ### Default MR ship
 
-For `--create-mr` / `--update-mr` / `--create-pr-mr` / `--update-pr-mr` / prose “create|open|update MR” — **one upsert path**. Title/body: parent step **title** (after `--draft` gate if any, prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). After `mr-add-preflight`, branch on `result.status`:
+For `--create-mr` / `--update-mr` / `--add-mr` / `--create-pr-mr` / `--update-pr-mr` / `--add-pr-mr` / prose “create|open|update|add MR” — **one upsert path**. Title/body: parent step **title** (after skill `--draft` gate if any, prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). Pass handoff/user base as `mr-add-preflight --base <name>` when known. After `mr-add-preflight`, use `result.base_branch` on forge create/update. Branch on `result.status`:
 
-- **`exists`** — push commits if needed; `glab mr update` with title/description from disk when they should change. Done: existing MR URL (`result.mr_url`). Never open a second MR for the branch.
-- **`ready_create`** — `glab mr create --fill --yes --squash-before-merge --remove-source-branch` plus title/description (**no** forge `--draft` unless user asked for forge-draft status). Done: MR created. Stop: create fails.
+- **`exists`** — push commits if needed; `glab mr update` with title/description from disk when they should change; `glab mr update --target-branch <base_branch>` when the MR target differs from `result.base_branch`. Do **not** convert ready↔draft. Done: existing MR URL (`result.mr_url`). Never open a second MR for the branch.
+- **`ready_create`** — `glab mr create --draft --target-branch <base_branch> --fill --yes --squash-before-merge --remove-source-branch` plus title/description. Always pass forge `--draft` and `--target-branch` from preflight. Done: draft MR created. Stop: create fails.
 - Other preflight statuses (`error`, `no_commits`, `escalate_*`, `needs_branch_from_default`) → stop or escalate per envelope; do not invent a create.
 
-Skill `--draft` is the parent human gate — not this row’s forge `--draft` flag.
+Skill `--draft` is the parent human title/body gate — distinct from forge `--draft` (always on create).
 
 ### Pre-merge
 

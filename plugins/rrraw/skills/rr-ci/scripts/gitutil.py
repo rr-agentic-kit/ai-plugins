@@ -131,6 +131,79 @@ def resolve_integration_base() -> str:
     raise GitError("neither origin/master nor origin/main exists after fetch")
 
 
+def short_remote_branch(ref: str) -> str:
+    name = ref.strip()
+    if name.startswith("origin/"):
+        return name.removeprefix("origin/")
+    return name
+
+
+def origin_ref_for_base(base_branch: str) -> str:
+    return f"origin/{short_remote_branch(base_branch)}"
+
+
+def _origin_branch_shorts(*, exclude_short: str | None) -> list[str]:
+    result = run_git(
+        ["for-each-ref", "--format=%(refname:short)", "refs/remotes/origin/"],
+        check=False,
+    )
+    if result.returncode != 0:
+        return []
+    tips: list[str] = []
+    for line in result.stdout.splitlines():
+        ref = line.strip()
+        if not ref or ref == "origin/HEAD":
+            continue
+        short = short_remote_branch(ref)
+        if short == "HEAD" or (exclude_short and short == exclude_short):
+            continue
+        tips.append(short)
+    return tips
+
+
+def _closest_origin_ancestor(*, exclude_short: str | None) -> str | None:
+    best: str | None = None
+    best_count: int | None = None
+    for short in _origin_branch_shorts(exclude_short=exclude_short):
+        ref = f"origin/{short}"
+        if (
+            run_git(
+                ["merge-base", "--is-ancestor", ref, "HEAD"], check=False
+            ).returncode
+            != 0
+        ):
+            continue
+        count = int(git_output(["rev-list", "--count", f"{ref}..HEAD"]))
+        if best_count is None or count < best_count:
+            best = short
+            best_count = count
+    return best
+
+
+def resolve_pr_base(explicit: str | None = None) -> str:
+    """Resolve PR/MR merge-target short branch name (no ``origin/`` prefix).
+
+    Order: explicit invoke/handoff → closest ``origin/*`` ancestor of HEAD →
+    trunk via :func:`resolve_integration_base`. Never silently retarget a
+    non-trunk origin ancestor to main/master.
+    """
+    if explicit and explicit.strip():
+        return short_remote_branch(explicit)
+
+    run_git(["fetch", "origin"], check=False)
+    current: str | None
+    try:
+        current = current_branch()
+    except GitError:
+        current = None
+
+    closest = _closest_origin_ancestor(exclude_short=current)
+    if closest is not None:
+        return closest
+
+    return short_remote_branch(resolve_integration_base())
+
+
 def fetch_remote_branches(remote: str, *branches: str) -> None:
     if not branches:
         return

@@ -109,8 +109,8 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | **Inputs** | Plan Verify checkboxes (step) or task Verify/Goal/Obligations (task); Ship block; evidence from prior stages |
 | **Durable output** | `{NNNN}-{step}.validate.md` or `{NNNN}.task-validate.md` — Validation plan + per-item PASS/FAIL |
 | **Marking** | Item PASS → flip matching `- [x]` on plan/task Verify; FAIL leaves `- [ ]` (report SoT for FAIL) |
-| **Done-when** | Report written; overall PASS only if all required items PASS |
-| **Hard-stops** | Non-forge FAIL; forge-miss → **ship** then re-enter (not a permanent stop under auto) |
+| **Done-when** | Report written; overall PASS only if all required items PASS; **shippable:** forge landing satisfied ([task-validate.md](task-validate.md) — push to open PR tip **or** carry-to-next) before cursor advance |
+| **Hard-stops** | Non-forge FAIL; forge-miss → **ship** then re-enter (not a permanent stop under auto); advancing with orphaned validate sidecar (no open-PR push and no carry-to-next) |
 | **Nested** | None (assessment); forge probe via **rr-ci** preflight when shippable |
 
 #### ship
@@ -139,8 +139,8 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 
 | Stage / mode | Behavior |
 |--------------|----------|
-| **plan** (orchestrate) | **Read** only [plan-knowledge.md](plan-knowledge.md). Run [feature-branch.md](feature-branch.md) ensure **first**. Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run rr-coder/rr-tester implement procedures. |
-| **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `rr-coder/SKILL.md` and `rr-tester/SKILL.md` and follow them for the step (code + tests). |
+| **plan** (orchestrate) | **Read** [plan-knowledge.md](plan-knowledge.md). Run [feature-branch.md](feature-branch.md) ensure **first**. Then load remaining allowlist refs in **one parallel** tool turn ([plan-knowledge.md](plan-knowledge.md)). Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run rr-coder/rr-tester implement procedures. |
+| **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `rr-coder/SKILL.md` **and** `rr-tester/SKILL.md` in **one parallel** turn. Prefer step Verify hooks over full tester flag-routing when orchestrate already scoped the step. |
 | **refactor** (orchestrate) | **Read** `rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Durable: lean `{NNNN}-{step}.refactor.md`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
 | **review** (orchestrate) | **Read** `rr-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). Durable terminal: `{NNNN}-{step}.review.md` (scratch under `.ai/review/`). |
 | **ship** (orchestrate) | **Read** [ship.md](ship.md), then `skills/rr-ci/SKILL.md`. Do **not** invent forge CLI in builder. |
@@ -197,8 +197,8 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
    - **Forge / PR FAIL** and `ship_after: step_validate` and `step_ship_done` ≠ `true` → **ship** ([ship.md](ship.md)); after ship done-when → return here (re-validate). Under `drive: auto`, chain ship → re-validate without asking.
    - Other **FAIL** → leave `builder_stage: step_validate`; hard-stop chaining under `scope: step|task|slice`.
    - **PASS** and `ship_after: never` → `step_ship_done` satisfied; go to 9.
-   - **PASS** and shippable → open PR already proven; `step_ship_done` should be `true`; go to 9. Do **not** enter ship after PASS for `ship_after: step_validate`.
-9. **Advance** — If more steps remain: next `step_index`, set `step_plan_done` / `step_build_done` / `step_refactor_done` / `step_review_done` / `step_ship_done` to `false`. If no more steps → **task-validate**.
+   - **PASS** and shippable → open PR already proven; `step_ship_done` should be `true`; satisfy **forge landing** ([task-validate.md](task-validate.md): rr-ci push validate+cursor docs onto open tip, **or** carry-to-next if merged/no open PR); **then** go to 9. Do **not** enter ship-after-PASS for the forge-miss gate (`ship_after: step_validate` create path stays before PASS).
+9. **Advance** — Only after forge landing (shippable) or never-ship path. If more steps remain: next `step_index`, set `step_plan_done` / `step_build_done` / `step_refactor_done` / `step_review_done` / `step_ship_done` to `false`. If no more steps → **task-validate**.
 10. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Other FAIL → hard stop. **PASS** → next task or step 11. **Feature mode:** **PASS** or hard FAIL → **stop** (do not go to step 11).
 11. **All tasks validated** → **slice validate** (orchestrate `scope: slice` only — skip under feature).
 12. **Slice validate PASS** → stop: **slice delivered** → point engineer to **rr-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.

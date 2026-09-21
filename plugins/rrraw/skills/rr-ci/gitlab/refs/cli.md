@@ -6,6 +6,14 @@ Do not copy `glab --help` into context. Run `glab <command> --help` for flags.
 
 Parent skill `refs/pr-mr-templates.md`. Default create flags: nested SKILL **Default MR ship**.
 
+```bash
+glab mr create --draft --target-branch BASE --fill --yes --squash-before-merge --remove-source-branch -t "..." -d "..."
+glab mr update -t "..." -d "..."
+glab mr update --target-branch BASE
+```
+
+Default ship create always includes `--draft` and `--target-branch` from `mr-add-preflight` `result.base_branch`.
+
 ## Issues
 
 ```bash

@@ -1,6 +1,6 @@
 ---
 name: rr-ci
-description: Forge router for PR/MR ship (upsert via --create|update-[pr|mr]), issues, CI debug, publish, deploy; --fix --sonar remediates Sonar issues; --pull-dependabot merges origin/dependabot/** with verify.
+description: Forge router for PR/MR ship (upsert via --create|update|add-[pr|mr]), issues, CI debug, publish, deploy; --fix --sonar remediates Sonar issues; --pull-dependabot merges origin/dependabot/** with verify.
 ---
 
 # rr-ci
@@ -33,7 +33,8 @@ Own the **ship path** (commit/push when creating or updating a PR/MR), **forge t
 
 - Open or update a pull/merge request (including commit/push as part of that flow)
 - Named ship routes: `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` (and `--create-pr-mr` / `--update-pr-mr`) — **all upsert** (create if none for the branch; update if one exists)
-- Optional `--draft` with any ship route — write title+body under `.ai/ci/`, AskQuestion for next steps (not forge draft status by itself)
+- Optional `--add-pr` / `--add-mr` / `--add-pr-mr` — same upsert aliases as create/update
+- Optional `--draft` with any ship route — write title+body under `.ai/ci/`, AskQuestion for next steps (human disk gate; **not** a toggle for forge draft — forge create always uses `--draft`)
 - Draft and create a GitHub or GitLab **issue** (including on a forge `owner/repo` other than cwd origin)
 - Author PR/MR **title** and **description**
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
@@ -72,8 +73,9 @@ TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` wh
 - **Titles/descriptions (PR/MR):** only [refs/pr-mr-templates.md](refs/pr-mr-templates.md) — do not restate that policy here.
 - **Issues:** draft → human approve → create; never skip draft when the user asked to draft first (default: always draft once before create).
 - **Ship git:** Commit/push allowed from this skill when upserting a PR/MR. Still confirm before history rewrite or discarding work (`skills/rr-git/refs/safety.md`).
-- **Ship routes:** `--create-*` / `--update-*` are aliases for the same upsert ship — skill invoke/task-shape flags, **not** `rr-ci` JSON-CLI subcommands unless added to [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md). Never open a second PR/MR for the same branch.
-- **`--draft` + ship:** human gate via `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md`; user disk edits win; distinct from forge draft status unless user asks for that on ship.
+- **Ship routes:** `--create-*` / `--update-*` / `--add-*` are aliases for the same upsert ship — skill invoke/task-shape flags, **not** `rr-ci` JSON-CLI subcommands unless added to [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md). Never open a second PR/MR for the same branch.
+- **Forge draft on create:** nested forge create always passes forge `--draft` plus `--base` / `--target-branch` from `mr-add-preflight` `result.base_branch`. On `exists`, update title/body/base only — do **not** convert ready↔draft.
+- **`--draft` + ship:** human gate via `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md`; user disk edits win; distinct from forge `--draft` (always on create).
 - **`--fix --sonar`:** list + remediations per [refs/sonar-fix.md](refs/sonar-fix.md); Sonar-scoped only — not general implement.
 - **`--pull-dependabot`:** CLI loop + escalate per [refs/pull-dependabot.md](refs/pull-dependabot.md); GitHub-only; no invent merge chains; no invent `dependabot.yml` directory rewrites.
 - **Disk sidecars:** Any file this skill or its CLI writes (job traces, dumps, PR/MR drafts) lands under **`.ai/ci/`** at the target repo root — never cwd clutter. Review run artifacts stay under `.ai/review/` (**rr-review**).

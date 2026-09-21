@@ -84,6 +84,6 @@ When the invoke includes `--draft` (or prose asks to draft title/description fir
 2. Report both paths. AskQuestion (or prose): **Ship** | **Keep draft only** | **I'll edit**.
 3. **Keep draft only** → stop; leave files.
 4. **I'll edit** → do not rewrite the files; after the user continues, **re-read** both paths and use that content (user edition wins). AskQuestion again.
-5. **Ship** → nested forge upsert uses the current disk title/body. Add forge `gh`/`glab` `--draft` only if the user also asked for forge-draft status (separate from this skill flag).
+5. **Ship** → nested forge upsert uses the current disk title/body. Forge create always includes `gh`/`glab` `--draft` (and `--base` / `--target-branch` from preflight); skill `--draft` is only this disk gate.
 
 Without `--draft`, authoring may still write a body file for CLI `--body-file`. The parent step **title** still runs the **Summary readability gate** before forge create/edit (humanize or AskQuestion when dense).

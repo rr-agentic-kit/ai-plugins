@@ -13,11 +13,17 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     parser = subparsers.add_parser(
         support.COMMAND,
         help="Deterministic MR-add preflight: fetch, push, existing-MR query",
-        description="Result keys: status, mr_url, message, upstream, staged_hint",
+        description=(
+            "Result keys: status, mr_url, message, upstream, staged_hint, base_branch"
+        ),
     )
     parser.add_argument("--continue-anyway", action="store_true")
     parser.add_argument("--same-name-push", action="store_true")
     parser.add_argument("--branch-name")
+    parser.add_argument(
+        "--base",
+        help="Explicit PR/MR merge-target branch (short name or origin/…)",
+    )
     parser.add_argument("--commit-all", action="store_true")
     parser.add_argument("--commit-staged", action="store_true")
     parser.set_defaults(handler=_handler)
@@ -34,6 +40,7 @@ def _handler(args: argparse.Namespace) -> int:
         same_name_push=args.same_name_push,
         branch_name=args.branch_name,
         commit_policy=commit_policy,
+        base=args.base,
         glab=None,
     )
 
@@ -70,6 +77,7 @@ def _run_preflight_with_client(
     same_name_push: bool,
     branch_name: str | None,
     commit_policy: str,
+    base: str | None,
     glab: GlabClient | None,
 ) -> int:
     client = glab or default_glab()
@@ -81,6 +89,7 @@ def _run_preflight_with_client(
         branch_name=branch_name,
         commit_policy=commit_policy,
         client=client,
+        base=base,
     )
 
 
@@ -90,6 +99,7 @@ def _run_mr_add_preflight(
     same_name_push: bool,
     branch_name: str | None,
     commit_policy: str,
+    base: str | None,
     glab: GlabClient | None,
 ) -> int:
     repo, early = _repo_root_or_fail()
@@ -107,6 +117,7 @@ def _run_mr_add_preflight(
         same_name_push=same_name_push,
         branch_name=branch_name,
         commit_policy=commit_policy,
+        base=base,
         glab=glab,
     )
 
@@ -117,6 +128,7 @@ def main(
     same_name_push: bool = False,
     branch_name: str | None = None,
     commit_policy: str = "",
+    base: str | None = None,
     glab: GlabClient | None = None,
 ) -> int:
     return emit.run_guarded(
@@ -126,6 +138,7 @@ def main(
             same_name_push=same_name_push,
             branch_name=branch_name,
             commit_policy=commit_policy,
+            base=base,
             glab=glab,
         ),
     )

@@ -26,9 +26,13 @@
    - `default` → repo default branch (`main`/`master`).
    - `prior_open_pr` → tip of the **latest open** PR/MR whose head branch is in the same `pr_group` ship chain (prior step/task that already shipped and is still unmerged). If none open → fall back to `default`. **Probe:** list candidate open PRs; AskQuestion if >1 ambiguous tip (Delivery channels: text fallback OK).
 3. **Persist** on `task-summary.md` frontmatter: `active_ship_branch`, `ship_base_branch` (resolved values).
-4. **Handoff** — `Read` `skills/rr-ci/SKILL.md`; pass branch = `active_ship_branch`, base = `ship_base_branch`. Stop at rr-ci PR/MR done-when. **Do not** invent gh/glab flags here.
+4. **Handoff** — `Read` `skills/rr-ci/SKILL.md`; pass branch = `active_ship_branch`, base = `ship_base_branch`. Include dirty task sidecars under `artifact_root` / `docs/rr/tasks/` that belong to this step **or** prior orphaned validate/cursor docs marked carry-to-next ([task-validate.md](task-validate.md) Forge landing). Stop at rr-ci PR/MR done-when. **Do not** invent gh/glab flags here.
 5. Set `step_ship_done: true` on `{NNNN}.md` (for `ship_after: step_validate`) or clear pending task-level ship marker after task ship.
 6. **Return** — re-enter the matching validate stage (`step_validate` or `task_validate`); do not advance past validate on ship alone.
+
+### Post-PASS landing (shippable)
+
+When re-validate reaches overall **PASS** and an open PR still exists for `Ship.branch`, hand off **rr-ci** again to push the validate report + Verify checkbox flips + cursor frontmatter **before** advancing `step_index` ([task-validate.md](task-validate.md) Forge landing). If the PR is already gone/merged, apply **carry-to-next** instead — do not invent a validate-only PR.
 
 ## Done-when
 
