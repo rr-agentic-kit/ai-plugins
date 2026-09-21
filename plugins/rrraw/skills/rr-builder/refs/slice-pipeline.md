@@ -198,8 +198,8 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
    - Other **FAIL** → leave `builder_stage: step_validate`; hard-stop chaining under `scope: step|task|slice`.
    - **PASS** and `ship_after: never` → `step_ship_done` satisfied; go to 9.
    - **PASS** and shippable → open PR already proven; `step_ship_done` should be `true`; satisfy **forge landing** ([task-validate.md](task-validate.md): rr-ci push validate+cursor docs onto open tip, **or** carry-to-next if merged/no open PR); **then** go to 9. Do **not** enter ship-after-PASS for the forge-miss gate (`ship_after: step_validate` create path stays before PASS).
-9. **Advance** — Only after forge landing (shippable) or never-ship path. If more steps remain: next `step_index`, set `step_plan_done` / `step_build_done` / `step_refactor_done` / `step_review_done` / `step_ship_done` to `false`. If no more steps → **task-validate**.
-10. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Other FAIL → hard stop. **PASS** → next task or step 11. **Feature mode:** **PASS** or hard FAIL → **stop** (do not go to step 11).
+9. **Advance** — Only after forge landing (shippable) or never-ship path. If more steps remain: next `step_index`, set `step_plan_done` / `step_build_done` / `step_refactor_done` / `step_review_done` / `step_ship_done` to `false`. If no more steps → **task-validate** (under `scope: step`, this is still in-boundary — do **not** stop; continue into step 10).
+10. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Other FAIL → hard stop. On **PASS**: satisfy **forge landing** for the task-validate report ([task-validate.md](task-validate.md) tip resolution — including when no step used `ship_after: task_validate`, land onto **last open step Ship PR** / `active_ship_branch`). **Final task-step close:** tip (or carry-to-next) must include **both** last-step `{NNNN}-{step}.validate.md` and `{NNNN}.task-validate.md` before stopping `scope: step` / `task`. Then → next task or step 11. **Feature mode:** **PASS** (+ forge landing) or hard FAIL → **stop** (do not go to step 11). Under `scope: step`, task-validate PASS + forge landing is the stop boundary when this was the final task-step (or when the run entered with cursor already on `task_validate`).
 11. **All tasks validated** → **slice validate** (orchestrate `scope: slice` only — skip under feature).
 12. **Slice validate PASS** → stop: **slice delivered** → point engineer to **rr-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
 
@@ -214,9 +214,11 @@ Explicit lane flag wins over this cursor even if `builder_stage` says otherwise 
 | `scope` | Stop when |
 |---------|-----------|
 | `next` | Cursor-next stage done-when met (no chaining) |
-| `step` | Current task-step reaches step-validate PASS (incl. ship→re-validate if shippable). If cursor is still **prepare**, complete prepare then stop (do not enter first step). |
-| `task` | Active task reaches task-validate PASS (all its steps + task-validate). **Feature mode** always uses this boundary and **must not** advance to slice-validate / delivered. |
+| `step` | **Non-final** task-step: step-validate PASS + forge landing (incl. ship→re-validate if shippable). **Final** task-step (no more steps after advance), **or** cursor already on `task_validate`: continue through **task-validate PASS** + forge landing of **both** last-step and task validate sidecars onto tip — same stop as `scope: task` for that run. If cursor is still **prepare**, complete prepare then stop (do not enter first step). **Anti-trigger:** do **not** park `builder_stage: task_validate` and exit `--step` after the last step’s step-validate PASS; do **not** stop `--step`/`--task` with validate docs only on disk. |
+| `task` | Active task reaches task-validate PASS + forge landing (all its steps + task-validate). **Feature mode** always uses this boundary and **must not** advance to slice-validate / delivered. |
 | `slice` | Slice validate PASS → delivered (or hard stop). Replaces retired `--full`. Not used under `--feature`. |
+
+**Last-step equivalence:** On the final task-step, `scope: step` ≡ `scope: task` through task-validate PASS **and** forge landing of last-step + task validate reports onto the open tip (or carry-to-next) — then stop (do not enter next task / slice-validate). Mid-task steps keep the narrower step-validate + forge-landing boundary.
 
 ## Readiness set (`drive: manual`, `scope: slice`)
 
@@ -249,7 +251,7 @@ resolve flags + cursor
 | Cell | Behavior |
 |------|----------|
 | **auto × next** | Run cursor-next stage (may load multiple nested skills/refs **in order** within that stage’s done-when). Persist cursor. **Stop** — do not chain. |
-| **auto × step** | Same execute as next, then **loop** until current task-step reaches step-validate PASS (incl. ship→re-validate). If cursor is **prepare**, complete prepare then **stop** (do not enter first step). |
+| **auto × step** | Same execute as next, then **loop** until the **step** scope boundary (non-final → step-validate PASS + forge landing; final step or cursor on `task_validate` → task-validate PASS + forge landing of last-step + task reports). If cursor is **prepare**, complete prepare then **stop** (do not enter first step). |
 | **auto × task** | Chain stages until active task reaches task-validate PASS (all its steps + task-validate), or hard stop. |
 | **auto × slice** | Chain stages until **delivered** or hard stop (validate FAIL, missing kernel, refactor stop, endless review max-epochs, user cancel). Silent chaining requires `drive: auto`. |
 | **manual × next** | Present only the next logical stage; wait for confirm/change; execute that one; then wait again or stop if user declines. **Never** execute without confirm. |

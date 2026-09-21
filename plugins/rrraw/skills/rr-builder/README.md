@@ -20,8 +20,8 @@ Owns flag/NL normalization, **orchestrate vs feature vs handoff** mode, drive×s
 | `auto` | Orchestrate with `drive=auto` (default `scope=step`) | `--auto` / “full auto” / “chain without asking” |
 | `manual` | Orchestrate with confirm before each execute | `--manual` / “confirm each stage” |
 | `next` | Only cursor-next stage | `--next` / “next stage only” |
-| `step` | Current task-step through step-validate PASS (default scope) | `--step` / “one step” / “continue step” |
-| `task` | Active task through task-validate PASS | `--task` / “finish this task” |
+| `step` | Current task-step through step-validate PASS + forge landing; **final** step ≡ `--task` (task-validate PASS + land both validate reports on tip) | `--step` / “one step” / “continue step” |
+| `task` | Active task through task-validate PASS + forge landing | `--task` / “finish this task” |
 | `slice` | Remaining stages until **delivered** | `--slice` / “finish the slice” (replaces retired `--full`) |
 | `prepare` | Tech plan + task WBS via rr-prepare | `--prepare` / prepare-slice NL |
 | `coder` | Production implement/refactor via rr-coder | `--coder` / implement-only NL |
@@ -55,7 +55,8 @@ Defaults: orchestrate without drive/scope → `auto` × `step`. `--feature` → 
 ## Philosophy
 
 - **Orchestrate by default; feature / handoff on explicit flag** — `--feature` is a third mode (mint + `scope=task`); explicit lane never silently re-enters orchestrate; drive/scope do not mutate handoff lanes
-- **Default auto × step** — no drive/scope flags chain the current task-step to step-validate PASS; prepare-only cursor stops after prepare
+- **Default auto × step** — no drive/scope flags chain the current task-step to step-validate PASS + forge landing; on the **final** task-step, `--step` ≡ `--task` through task-validate PASS **and** forge-land last-step + task validate sidecars onto the open tip (or carry-to-next); do not park on `task_validate` and exit; prepare-only cursor stops after prepare
+- **Validate reports land on forge** — shippable step/task-validate PASS is incomplete until rr-ci pushes sidecars (+ Verify/cursor) onto the tip, or carry-to-next is applied; task-validate with only step-scoped ships still lands on the last open step Ship PR / `active_ship_branch`
 - **`--feature` stops at task-validate** — never slice-validate / delivered; rr vs non-rr roots (`docs/rr/tasks/` vs `.ai/tasks/`); never invent `docs/rr/` in non-rr repos
 - **`--next` unchanged** — lone `--next` is still `manual` × `next`; `--auto --next` runs one stage without confirm
 - **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; under `--slice` the ready list marks cursor stage **`(next)`**; silent chain only with `--auto`

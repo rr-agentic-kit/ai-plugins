@@ -15,7 +15,7 @@ description: Slice build orchestrator (drive×scope; default --auto --step), ad-
 
 - Continue or resume a frozen slice (orchestrate: no lane flag; defaults `drive=auto`, `scope=step`)
 - Ad-hoc feature without a prior prepare/slice chain (`--feature`)
-- Run without confirms (`--auto`), only the cursor stage (`--next`), one task-step (`--step`), one task (`--task`), or until delivered (`--slice`)
+- Run without confirms (`--auto`), only the cursor stage (`--next`), one task-step (`--step`; final step ≡ `--task`), one task (`--task`), or until delivered (`--slice`)
 - Explicit single-lane work: `--prepare` / `--coder` / `--tester` / `--security` / `--review` / `--refactor` / `--add-endless-test`
 - Task-step plan (knowledge only) or build (code + tests) under orchestrate
 - Multi-lane endless review with fix under orchestrate review (`--fix --all --endless` forced) or explicit `--review`

@@ -32,7 +32,7 @@
 
 ### Post-PASS landing (shippable)
 
-When re-validate reaches overall **PASS** and an open PR still exists for `Ship.branch`, hand off **rr-ci** again to push the validate report + Verify checkbox flips + cursor frontmatter **before** advancing `step_index` ([task-validate.md](task-validate.md) Forge landing). If the PR is already gone/merged, apply **carry-to-next** instead — do not invent a validate-only PR.
+When re-validate reaches overall **PASS** and an open PR still exists for the tip from [task-validate.md](task-validate.md) tip resolution (`Ship.branch` or `active_ship_branch` / last open step Ship PR), hand off **rr-ci** again to push the validate report(s) + Verify checkbox flips + cursor frontmatter **before** advancing `step_index` or stopping `scope: step`/`task`. **Task-validate / final-step close:** include **both** `{NNNN}-{step}.validate.md` (last step) and `{NNNN}.task-validate.md` in that push when both are dirty. If the PR is already gone/merged, apply **carry-to-next** instead — do not invent a validate-only PR.
 
 ## Done-when
 

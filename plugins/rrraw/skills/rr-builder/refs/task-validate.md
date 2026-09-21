@@ -94,14 +94,23 @@ On **PASS** with `ship_after: never`: treat `step_ship_done` as satisfied for ad
 
 Validate writes the report **after** the forge-miss → **ship** → re-validate loop. Disk persist alone is not enough — sidecars + Verify checkbox flips must **land on forge** or be **carried to the next ship**.
 
-| Situation | Required action before advancing `step_index` / next task |
+**Tip resolution (which PR head):**
+
+| Validate scope | Prefer tip |
+|----------------|------------|
+| **step-validate** | Current step plan `Ship.branch` when shippable; else `active_ship_branch` from `task-summary.md` |
+| **task-validate** | Any pending `ship_after: task_validate` plan’s `Ship.branch`; **else** (all steps used `step_validate` / `never`) → **last open step Ship PR** = `active_ship_branch` or the latest still-open PR whose head matches a step `Ship.branch` in this task |
+
+| Situation | Required action before advancing `step_index` / next task / declaring `scope: step\|task` complete |
 |-----------|-----------------------------------------------------------|
-| Open PR/MR whose head is `Ship.branch` | Hand off **rr-ci** update/push so `{NNNN}-{step}.validate.md` (or task-validate report), flipped Verify checkboxes, and cursor frontmatter are on that tip |
+| Open PR/MR whose head matches tip resolution above | Hand off **rr-ci** update/push so the validate sidecar(s) written this stage, flipped Verify checkboxes, and cursor frontmatter are on that tip. **Final task-step / task-validate:** tip **must** receive **both** `{NNNN}-{step}.validate.md` (last step) **and** `{NNNN}.task-validate.md` (+ cursor) before scope stop — push in one rr-ci handoff when both are dirty. |
 | No open PR (e.g. already merged) and those paths are dirty/uncommitted | **Carry-to-next:** leave them dirty (or note them); next [feature-branch.md](feature-branch.md) ensure **must** carry them onto the new `feat/…` branch; next **ship** **must** include them in the rr-ci commit set. Do **not** invent a dedicated PR solely for validate docs |
 
-**Stop-rule:** Do **not** treat shippable step/task-validate as closed (do **not** advance cursor) while the validate sidecar (+ matching Verify checkbox flips) are uncommitted **and** absent from the open PR tip **and** carry-to-next was not applied.
+**Probe (done-when):** tip contains the required sidecar(s) for this stage **or** carry-to-next was applied and announced. For last-step / task close under `scope: step` or `task`: tip (or carry set) includes `{NNNN}.task-validate.md` **and** the final `{NNNN}-{step}.validate.md`.
 
-**Anti-trigger:** Do **not** claim PASS-complete from chat alone when forge tip lacks the validate sidecar.
+**Stop-rule:** Do **not** treat shippable step/task-validate as closed (do **not** advance cursor / stop `--step`/`--task`) while the validate sidecar(s) (+ matching Verify checkbox flips) are uncommitted **and** absent from the open PR tip **and** carry-to-next was not applied.
+
+**Anti-trigger:** Do **not** claim PASS-complete from chat alone when forge tip lacks the validate sidecar. Do **not** skip task-validate forge landing because no step had `ship_after: task_validate` — use tip resolution above.
 
 Chat: announce the persisted path (`…validate.md` or `…task-validate.md`) **and** whether landing was **pushed** or **carry-to-next**.
 
