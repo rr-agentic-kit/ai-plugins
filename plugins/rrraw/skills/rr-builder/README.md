@@ -65,7 +65,9 @@ Defaults: orchestrate without drive/scope → `auto` × `step`. `--feature` → 
 - **Feature branch at plan start** — on `main`/`master`, create `feat/{NNNN}-{step}-{short-desc}` before writing the plan; otherwise AskQuestion (stay / new from base / rename / abort) — never invent alternate names or defer to post-build; `--feature` settles `feat/{NNNN}-{short-desc}` first (origin AskQuestion)
 - **Ship is planned** — each step plan’s **Ship** sets `branch`, `ship_after`, `base`; `never` = non-shippable (no Forge/PR gate); shippable validate requires an open PR; forge open is **rr-ci** via **ship** before that validate can PASS; `prior_open_pr` stacks onto the latest still-open PR in the `pr_group` chain
 - **Refactor lean note** — orchestrate writes `{NNNN}-{step}.refactor.md`; `.ai/refactor/` is scratch only (no required `report.md`)
-- **Review under orchestrate is `--fix --all --endless`** — terminal `{NNNN}-{step}.review.md`; scratch under `.ai/review/`; report-only review uses explicit `--review` without `--fix`
+- **Review under orchestrate is `--fix --all --endless`** — terminal `{NNNN}-{step}.review.md`; scratch under `.ai/review/`; report-only review uses explicit `--review` without `--fix`; handoff `--fix` also forces endless until clear + residual probe
+- Orchestrate **review** endless max-epochs without clear → hard stop (`step_review_done` unset)
+- Orchestrate **review** success without task `{NNNN}-{step}.review.md` → hard stop (`step_review_done` unset)
 - **Validate reports mark checkboxes** — step/task/slice validate persist reports with plan + PASS/FAIL; item PASS flips `- [x]` on plan/task Verify
 - **Delivered → residual rr-ci** — mid-slice ships already handed off; delivered only covers unshipped remainder (not used on `--feature`)
 
@@ -101,6 +103,7 @@ Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard sto
 - `--refactor` is mutually exclusive with other lane flags (`one lane flag only`)
 - Orchestrate **refactor** stage skips when MR ∩ **build-touched** scope is empty (sets `step_refactor_done: true`)
 - Orchestrate **review** endless max-epochs without clear → hard stop (`step_review_done` unset)
+- Orchestrate **review** success without task `{NNNN}-{step}.review.md` → hard stop (`step_review_done` unset)
 - Planning-only docs without implementation or prepare intent → redirect to **rr-planner**
 
 ## Notes

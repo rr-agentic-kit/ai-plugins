@@ -97,8 +97,8 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | **Inputs** | Step MR/workspace scope; brief sources; `max_epochs` default 5 |
 | **Scratch** | `.ai/review/<runId>/` (brief/assess/challenge/`report.md`) |
 | **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md`; optional `→ review:` pointer |
-| **Done-when** | Endless success (clear or warnings-security-only) **and** task review sidecar present; `step_review_done: true` |
-| **Hard-stops** | Epoch cap without clear; unchallenged report; empty allowlist |
+| **Done-when** | Endless success (clear or warnings-security-only, residual probe clean) **and** task review sidecar `{NNNN}-{step}.review.md` on disk; **then** set `step_review_done: true` |
+| **Hard-stops** | Epoch cap without clear; unchallenged report; empty allowlist; endless “success” chat without writing the task sidecar; setting `step_review_done` / advancing without sidecar present |
 | **Nested** | **rr-review** → rr-coder / rr-tester / rr-security-auditor lanes |
 
 #### step-validate / task-validate
@@ -206,6 +206,8 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
 Explicit lane flag wins over this cursor even if `builder_stage` says otherwise ([input-resolution.md](input-resolution.md)).
 
 **Endless review hard-stop:** if review exits at `--max-epochs` without clear/warnings-security-only → leave `step_review_done` unset; hard-stop the orchestrate chain (do not advance to step-validate).
+
+**Review sidecar hard-stop:** never set `step_review_done: true` and never advance past review unless `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md` exists after endless success. Missing sidecar = incomplete review (treat as hard-stop, not a soft skip).
 
 ## Scope stop boundaries
 

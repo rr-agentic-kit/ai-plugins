@@ -2,6 +2,9 @@
 # Mirrors .github/workflows/python-quality.yml plus GitHub config checks.
 # Tool versions via `uv run` / uv.lock (same as CI).
 
+# doublestar: ** matches any depth including zero (scripts/*.py, not only nested).
+glob_matcher: doublestar
+
 output:
   - meta
   - summary
@@ -16,16 +19,28 @@ pre-commit:
   parallel: false
   follow: true
   jobs:
+    # Always tick rc before quality. A one-path `files:` + {files} keeps lefthook
+    # from skipping on an empty index without expanding the whole tree onto the
+    # argv ( `{all_files}` hits ARG_MAX / multi-chunk re-runs and breaks).
+    # Do NOT use stage_fixed: it only re-adds already-staged paths — bump writes
+    # version files that usually were not staged. Explicit git add is required.
+    # Stage even when Claude local sync fails after the write.
     - name: bump-plugins-rc
       skip:
         - merge-commit
+      files: "printf '%s\\n' pyproject.toml"
       run: |
+        : {files}
+        set +e
         uv run python scripts/bump_plugins_version.py rc
+        status=$?
+        set -e
         git add -- \
           pyproject.toml \
           uv.lock \
           plugins/*/.cursor-plugin/plugin.json \
           plugins/*/.claude-plugin/plugin.json
+        exit "$status"
 
     - name: quality
       group:
@@ -74,11 +89,11 @@ pre-commit:
           - name: validate-plugin-versions
             run: uv run python scripts/validate_plugin_versions.py
 
+          # py-only: markdown/skill edits under plugins/ must not trip the Python
+          # suite (red suite → --no-verify → skipped bump).
           - name: ruff
             glob:
-              - "plugins/**"
-              - "scripts/**"
-              - "tests/**"
+              - "**/*.py"
               - "pyproject.toml"
             run: >
               uv run ruff check
@@ -91,9 +106,7 @@ pre-commit:
 
           - name: black
             glob:
-              - "plugins/**"
-              - "scripts/**"
-              - "tests/**"
+              - "**/*.py"
               - "pyproject.toml"
             run: >
               uv run black --check
@@ -106,12 +119,12 @@ pre-commit:
 
           - name: mypy
             glob:
-              - "plugins/*/scripts/**"
+              - "plugins/*/scripts/**/*.py"
               - "pyproject.toml"
             run: uv run mypy
 
           - name: bandit
-            glob: "plugins/*/scripts/**"
+            glob: "plugins/*/scripts/**/*.py"
             run: >
               uv run bandit -r
               plugins/context-eng-hero/scripts
@@ -128,9 +141,7 @@ pre-commit:
 
           - name: pytest
             glob:
-              - "plugins/**"
-              - "scripts/**"
-              - "tests/**"
+              - "**/*.py"
               - "pyproject.toml"
             run: >
               uv run pytest tests/ -v

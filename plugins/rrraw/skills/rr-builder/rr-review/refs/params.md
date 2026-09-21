@@ -34,7 +34,7 @@ Top-level `--code` / `--test` / `--all` / `--fix` / `--ci` **without** `--review
 | Flag | Param |
 |------|-------|
 | (none) | `outcome: report` |
-| `--fix` | `outcome: fix` |
+| `--fix` | `outcome: fix` + `endless: true` (forced — loop until clear) |
 | `--ci` | `outcome: ci` |
 | Auto review stage | `outcome: fix` + `lanes: [code, test, security]` + `endless: true` (forced) |
 
@@ -44,10 +44,11 @@ Security + `--fix`: assess only (no security apply).
 
 ## Endless
 
-| Flag | Param |
-|------|-------|
-| (none) | `endless: false` |
+| Flag / condition | Param |
+|------------------|-------|
+| (none) and `outcome: report` | `endless: false` |
 | `--endless` | `endless: true` |
+| `outcome: fix` (handoff `--fix` **or** auto review) | `endless: true` (**forced** — omit `--endless` still loops) |
 | Auto review stage | `endless: true` (forced) |
 | `--max-epochs <n>` | `max_epochs: <n>` (default **5** when endless) |
 
@@ -56,9 +57,9 @@ Security + `--fix`: assess only (no security apply).
 | Pair | Action |
 |------|--------|
 | `--endless` + `--ci` | stop: `incompatible flags: --endless and --ci` |
-| `--endless` without `--fix` (handoff) | stop or force `outcome: fix` |
+| `--endless` without `--fix` (handoff) | stop or force `outcome: fix` (which also forces `endless: true`) |
 
-Endless exit rules: [endless.md](endless.md).
+Report-only (`outcome: report`) stays single-shot. Fix mode always endless until clear / warnings / epoch cap — [endless.md](endless.md).
 
 ## Scope
 

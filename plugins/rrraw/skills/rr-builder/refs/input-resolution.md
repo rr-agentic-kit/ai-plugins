@@ -88,13 +88,13 @@ Parse into `payload.review` when `lane: review` **or** when orchestrate stage is
 ```yaml
 lanes: [code, test, security]   # default --all (also when --fix / report-only with no lane flags)
 outcome: report | fix | ci        # --fix | --ci; auto review stage forces fix
-endless: false | true             # --endless; auto review stage forces true
+endless: false | true             # forced true when outcome: fix (--fix or auto); --endless alone still forces fix
 max_epochs: 5                     # --max-epochs; default 5 when endless
 scope: MR | all                   # --scope MR|PR|all|full
 paths: []                         # optional positional narrowers
 ```
 
-Rules mirror `rr-review/refs/params.md`. Incompatible `--fix` + `--ci` → stop with one-line error. `--endless` + `--ci` → stop. `--endless` without `--fix` under handoff → stop or force `outcome: fix`.
+Rules mirror `rr-review/refs/params.md`. Incompatible `--fix` + `--ci` → stop with one-line error. `--endless` + `--ci` → stop. `--endless` without `--fix` under handoff → stop or force `outcome: fix`. **Handoff `--fix` forces `endless: true`** (same as auto) — do not run single-shot fix-then-exit.
 
 **Auto review stage:** ignore report-only omission — set `outcome: fix`, `lanes: [code, test, security]`, `endless: true`, `max_epochs: 5` (or parsed `--max-epochs`).
 

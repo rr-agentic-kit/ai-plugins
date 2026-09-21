@@ -1,6 +1,6 @@
 ---
 name: rr-review
-description: "Multi-lane review under .ai/review/<runId>/. Via --review (+ nested flags) or orchestrate review (forces --fix --all --endless)."
+description: "Multi-lane review under .ai/review/<runId>/. --review nested flags, or orchestrate/handoff --fix (forces endless until clear)."
 disable-model-invocation: true
 user-invocable: false
 ---
@@ -11,12 +11,12 @@ user-invocable: false
 
 ## Purpose
 
-Orchestrate multi-lane code / test / security review in the **parent session**. Scratch (brief/assess/challenge) lives under **`.ai/review/<runId>/`**. **Orchestrate** with task/step cursor: terminal report → `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md`. **Handoff `--review`** without cursor: terminal stays `REVIEW_DIR/report.md`. Lane rubrics live in **rr-coder**, **rr-tester**, **rr-security-auditor**. Optional **`--endless`** loops assess→Challenge→fix→re-assess until clear or epoch cap.
+Orchestrate multi-lane code / test / security review in the **parent session**. Scratch (brief/assess/challenge) lives under **`.ai/review/<runId>/`**. **Orchestrate** with task/step cursor: terminal report → `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md`. **Handoff `--review`** without cursor: terminal stays `REVIEW_DIR/report.md`. Lane rubrics live in **rr-coder**, **rr-tester**, **rr-security-auditor**. **`--fix` always implies endless** (assess→Challenge→residual probe→fix→re-assess until clear or epoch cap); bare `--endless` still requires / forces fix. Report-only omits `--fix`.
 
 ## When to use
 
 - Multi-lane review via **rr-builder** `--review` with nested `--code`, `--test`, `--security`, or `--all`
-- Optional nested `--fix` (inline apply), `--endless` (fix loop until clear), or `--ci` (handoff to **rr-ci** after Challenge)
+- Nested `--fix` (inline apply **and** endless until clear), optional explicit `--endless`, or `--ci` (handoff to **rr-ci** after Challenge)
 - Builder orchestrate **review** stage — parent **forces** `--fix --all --endless` (engineers wanting report-only use explicit `--review` without `--fix`)
 - Review intent from **rr-builder** when `payload.lane` is `review`
 
@@ -44,7 +44,7 @@ TodoWrite `merge: false` with ids matching steps below when the run spans 3+ ste
 
 ### 1. parse
 
-Confirm param block from [refs/params.md](refs/params.md). Default lanes: `[code, test, security]` (also when `--fix` or report-only omits lane flags). **Abort:** `--fix` + `--ci`; `--endless` + `--ci`; `--endless` without `--fix` (unless forced); unknown flag.
+Confirm param block from [refs/params.md](refs/params.md). Default lanes: `[code, test, security]` (also when `--fix` or report-only omits lane flags). **`outcome: fix` → force `endless: true`** (handoff `--fix` without `--endless` still loops). **Abort:** `--fix` + `--ci`; `--endless` + `--ci`; `--endless` without `--fix` (unless forced to fix); unknown flag.
 
 ### 2. id
 
@@ -88,14 +88,15 @@ Per chunk, ordered lane list:
 
 When **`endless: false`**: run steps 6–9 once (below).
 
-When **`endless: true`**: for `epoch = 1..max_epochs`:
+When **`endless: true`** (always for `--fix`): for `epoch = 1..max_epochs`:
 
 1. **assess** (step 6) with epoch-stamped stems (`code-assess-e{n}.md` — [refs/artifacts.md](refs/artifacts.md)).
 2. **Challenge** (step 7).
-3. Evaluate [refs/endless.md](refs/endless.md) exit rules **before** burning a fix epoch when already clear.
-4. If not clear and epoch allows: **fix** (step 8) per [refs/fix-routing.md](refs/fix-routing.md), then continue.
-5. **merge** (step 9) — overwrite `report.md` each epoch.
-6. On clear / warnings-security-only → exit success. On cap without clear → stop per [refs/endless.md](refs/endless.md) (orchestrate leaves `step_review_done` unset).
+3. If zero code+test `keep`: run **residual probe** per [refs/endless.md](refs/endless.md); new keeps → not clear.
+4. Evaluate [refs/endless.md](refs/endless.md) exit rules **before** burning a fix epoch when already clear.
+5. If not clear and epoch allows: **fix** (step 8) per [refs/fix-routing.md](refs/fix-routing.md), then continue.
+6. **merge** (step 9) — overwrite `report.md` each epoch; orchestrate also writes task `{NNNN}-{step}.review.md`.
+7. On clear / warnings-security-only (probe clean) → exit success. On cap without clear → stop per [refs/endless.md](refs/endless.md) (orchestrate leaves `step_review_done` unset). Orchestrate must not set `step_review_done` without the task sidecar on disk.
 
 #### 6. assess
 

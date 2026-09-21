@@ -17,7 +17,7 @@ Parses lanes, mints `runId`, builds brief, chunks large scope, assesses via nest
 ### Use when
 
 - **rr-builder** `--review` with nested `--code` / `--test` / `--security` / `--all`
-- Optional nested `--fix` (inline apply), `--endless` (assess→Challenge→fix until clear; requires `--fix`), or `--ci` (forge POST after Challenge)
+- Optional nested `--fix` (inline apply **and** endless until clear — `--endless` optional), or `--ci` (forge POST after Challenge)
 - Builder orchestrate **review** stage (forced `--fix --all --endless`; drive/scope per parent)
 - "Review my changes" / PR review intent with multi-lane findings
 
@@ -31,8 +31,8 @@ Parses lanes, mints `runId`, builds brief, chunks large scope, assesses via nest
 
 - **Challenge before consumers** — unchallenged challengeable rows stop the report
 - **Keep-only** — consumers use Challenge `keep` rows; dropped observations stay dropped
-- **Endless until clear** — `--endless` re-assesses after fix until code+test zero-keep (or security-only `warnings`) or `--max-epochs` (default 5)
-- **Scratch vs durable** — `.ai/review/` is in-run; orchestrate task terminal is the durable report
+- **Endless until clear** — `--fix` forces endless; residual probe before clear; re-assess until code+test zero-keep (or security-only `warnings`) or `--max-epochs` (default 5)
+- **Scratch vs durable** — `.ai/review/` is in-run; orchestrate task terminal is the durable report; no `step_review_done` without sidecar
 - **Forge handoff** — `--ci` loads **rr-ci** after Challenge; review does not embed glab/gh scripts
 - **Parent session** — assess/Challenge runs inline
 
@@ -44,7 +44,7 @@ Via **rr-builder** `--review` (+ nested flags) or orchestrate **review** stage; 
 
 ### Intake
 
-Parse `refs/params.md` → lanes + outcome (`report` | `fix` | `ci`) + optional `endless` / `max_epochs` + scope/paths.
+Parse `refs/params.md` → lanes + outcome (`report` | `fix` | `ci`) + `endless` / `max_epochs` + scope/paths. **`outcome: fix` forces `endless: true`.**
 
 ### Clarify
 
@@ -56,19 +56,19 @@ Flat locked filenames under `REVIEW_DIR` scratch (see `refs/artifacts.md`); endl
 
 ### Close
 
-`--fix` → fix-routing inline; `--endless` → loop per `refs/endless.md`; `--ci` → **rr-ci** after Challenge; refuse POST on unchallenged blocker-tier rows.
+`--fix` → endless loop per `refs/endless.md` (fix-routing inline each epoch); `--ci` → **rr-ci** after Challenge; refuse POST on unchallenged blocker-tier rows.
 
 ## Constraints
 
 - Default lanes: `[code, test, security]` — including `--fix` / report-only with no lane flags; narrow with `--code`/`--test`/`--security`
 - `--fix` and `--ci` are mutually exclusive
-- `--endless` requires `--fix`; incompatible with `--ci`
+- `--fix` forces `endless: true`; `--endless` without `--fix` forces or stops for fix; incompatible with `--ci`
 - Orchestrate review always forces `--fix --all --endless`
 - Scratch `REVIEW_DIR` = `.ai/review/<runId>/` (`runId` = `yyyymmdd-NN` local)
-- Orchestrate done-when requires task review sidecar when cursor present
+- Orchestrate done-when requires task review sidecar when cursor present — hard-stop if missing
 - Security lane is report-only on `--fix`
 - `disable-model-invocation: true` / `user-invocable: false`
 
 ## Notes
 
-Flag surface under **rr-builder** `--review`: `[--code] [--test] [--security] [--all] [--fix | --ci] [--endless] [--max-epochs <n>] [--scope MR|PR|all|full] [paths…]`. Auto review stage forces `--fix --all --endless`.
+Flag surface under **rr-builder** `--review`: `[--code] [--test] [--security] [--all] [--fix | --ci] [--endless] [--max-epochs <n>] [--scope MR|PR|all|full] [paths…]`. Auto review **and** handoff `--fix` force endless until clear. Report-only: `--review` without `--fix`.
