@@ -20,7 +20,7 @@ Owns flag/NL normalization, **orchestrate vs feature vs handoff** mode, drive×s
 | `auto` | Orchestrate with `drive=auto` (default `scope=step`) | `--auto` / “full auto” / “chain without asking” |
 | `manual` | Orchestrate with confirm before each execute | `--manual` / “confirm each stage” |
 | `next` | Only cursor-next stage | `--next` / “next stage only” |
-| `step` | Current task-step through step-validate PASS + forge landing; **final** step ≡ `--task` (task-validate PASS + land both validate reports on tip) | `--step` / “one step” / “continue step” |
+| `step` | Current task-step through step-validate PASS + forge landing; final step ≡ `--task` (both validate reports land on tip) — boundary SoT: `refs/slice-pipeline.md` Scope stop boundaries | `--step` / “one step” / “continue step” |
 | `task` | Active task through task-validate PASS + forge landing | `--task` / “finish this task” |
 | `slice` | Remaining stages until **delivered** | `--slice` / “finish the slice” (replaces retired `--full`) |
 | `prepare` | Tech plan + task WBS via rr-prepare | `--prepare` / prepare-slice NL |
@@ -57,8 +57,8 @@ Defaults: orchestrate without drive/scope → `auto` × `step`. `--feature` → 
 - **Orchestrate by default; feature / handoff on explicit flag** — `--feature` is a third mode (mint + `scope=task`); explicit lane never silently re-enters orchestrate; drive/scope do not mutate handoff lanes
 - **Isolated step run (`auto` × `task`\|`slice`)** — one sequential `generalPurpose` Task per remaining task-step (same working tree; no worktree; never parallel); parent owns prepare / dirty-tree gate / ship / task-validate / slice-validate; executor owns plan→build→refactor→review→step-validate; dirty porcelain after a Task → hard-stop (no silent-commit; carry-to-next does not waive this cell)
 - **`--feature` stays parent-inline** — not in the isolation cell this pass; still stops at task-validate
-- **Default auto × step** — no drive/scope flags chain the current task-step to step-validate PASS + forge landing (parent-inline); on the **final** task-step, `--step` ≡ `--task` through task-validate PASS **and** forge-land last-step + task validate sidecars onto the open tip (or carry-to-next); do not park on `task_validate` and exit; prepare-only cursor stops after prepare
-- **Validate reports land on forge** — shippable step/task-validate PASS is incomplete until rr-ci pushes sidecars (+ Verify/cursor) onto the tip, or carry-to-next is applied (isolation cell: parent commits post-ship validate/cursor before the next spawn); task-validate with only step-scoped ships still lands on the last open step Ship PR / `active_ship_branch`
+- **Default auto × step** — no drive/scope flags chain the current task-step to step-validate PASS + forge landing (parent-inline); stop boundaries incl. the final-step `--step` ≡ `--task` equivalence are SoT-owned by `refs/slice-pipeline.md` **Scope stop boundaries** — do not park on `task_validate` and exit; prepare-only cursor stops after prepare
+- **Validate reports land on forge** — shippable step/task-validate PASS is incomplete until the sidecars (+ Verify/cursor) are on the tip or carried to the next ship; mechanics SoT: `refs/task-validate.md` **Forge landing**
 - **`--feature` stops at task-validate** — never slice-validate / delivered; rr vs non-rr roots (`docs/rr/tasks/` vs `.ai/tasks/`); never invent `docs/rr/` in non-rr repos
 - **`--next` unchanged** — lone `--next` is still `manual` × `next`; `--auto --next` runs one stage without confirm
 - **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; under `--slice` the ready list marks cursor stage **`(next)`**; silent chain only with `--auto`

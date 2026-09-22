@@ -12,7 +12,7 @@ When `payload.mode: feature`:
 
 ## Handoff load table
 
-Exact one nested `SKILL.md` **Read**. Stop at that skill’s done-when. Do **not** re-enter orchestration or advance `builder_stage` past the handoff lane.
+**SoT for lane → nested-SKILL.md mapping.** SKILL.md carries a one-line pointer to this table only — update this table first when lanes change. Exact one nested `SKILL.md` **Read**. Stop at that skill’s done-when. Do **not** re-enter orchestration or advance `builder_stage` past the handoff lane.
 
 | `payload.lane` | Load | Notes |
 |----------------|------|-------|
@@ -66,9 +66,9 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Dumping rr-coder Required Knowledge / language matrices on **plan** (use [plan-knowledge.md](plan-knowledge.md) only).
 - Inventing plan/build/refactor/review/ship completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
 - Auto-chaining prepare → build without cursor/done-when.
-- Opening PR/MR inside builder without **rr-ci** (including mid-slice **ship** — hand off, do not invent forge CLI).
+- Opening PR/MR inside builder without **rr-ci** — boundary SoT: [anti-overlap.md](anti-overlap.md) rr-ci section.
 - Emitting shippable **step-validate** / **task-validate** PASS without an open PR for `Ship.branch`.
-- Advancing past shippable validate while the validate sidecar (+ Verify checkbox flips) are uncommitted and absent from the open PR tip **without** carry-to-next ([task-validate.md](task-validate.md) Forge landing) — **except** under Isolated step run, where dirty porcelain is always a hard-stop (carry-to-next does not waive).
+- Advancing past shippable validate with sidecars absent from tip and no carry-to-next — rules SoT: [task-validate.md](task-validate.md) Forge landing (isolation cell: dirty porcelain is always a hard-stop).
 - Parent-inline implement of a task-step under **Isolated step run** (`auto` × `task|slice`) — spawn [executors/step.md](executors/step.md) instead ([slice-pipeline.md](slice-pipeline.md)).
 - Requiring Forge/PR when `ship_after: never` was confirmed (non-shippable).
 - Skipping planned **ship** when shippable validate fails the Forge/PR gate (`ship_after` is not `never`).

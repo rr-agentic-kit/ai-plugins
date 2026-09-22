@@ -6,9 +6,20 @@
 
 ## Run id
 
-**Format:** `yyyymmdd-NN` — local calendar date + zero-padded daily counter starting at `01`.
+**Format:** `yyyymmdd-NN` — local calendar date + zero-padded daily counter starting at `01`. No hour/minute.
 
-**Mint:** List existing `.ai/review/yyyymmdd-*` dirs for today; next = max `NN` + 1 (or `01` if none). No hour/minute.
+**Mint helper (stdout → value only)** — same recipe style as `rr-refactor/refs/artifacts.md`; do not list directories into context for the LLM to max-scan:
+
+```bash
+TODAY="$(date +%Y%m%d)"
+LAST="$(ls -d .ai/review/${TODAY}-* 2>/dev/null | sed 's/.*-//' | sort -n | tail -1)"
+NN="$(printf '%02d' $(( ${LAST:-0} + 1 )))"
+RUN_ID="${TODAY}-${NN}"
+mkdir -p ".ai/review/${RUN_ID}"
+printf '%s\n' "${RUN_ID}"   # runId stem only
+```
+
+Set **`RUN_ID`** to the printed stem; **`REVIEW_DIR`** = `.ai/review/${RUN_ID}/`.
 
 ## Scratch vs terminal
 

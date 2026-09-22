@@ -32,11 +32,11 @@
 
 ### Post-PASS landing (shippable)
 
-When re-validate reaches overall **PASS** and an open PR still exists for the tip from [task-validate.md](task-validate.md) tip resolution (`Ship.branch` or `active_ship_branch` / last open step Ship PR), hand off **rr-ci** again to push the validate report(s) + Verify checkbox flips + cursor frontmatter **before** advancing `step_index` or stopping `scope: step`/`task`. **Task-validate / final-step close:** include **both** `{NNNN}-{step}.validate.md` (last step) and `{NNNN}.task-validate.md` in that push when both are dirty. If the PR is already gone/merged, apply **carry-to-next** instead — do not invent a validate-only PR.
+When re-validate reaches overall **PASS** and an open PR still exists for the tip, hand off **rr-ci** again to push the validate report(s) + Verify checkbox flips + cursor frontmatter **before** advancing or stopping. Full tip resolution, final-step "both sidecars" rule, and carry-to-next SoT: [task-validate.md](task-validate.md) **Forge landing** — do not restate it here.
 
 ### Isolation-cell exception (`auto` × `task` \| `slice`)
 
-Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)): **ship stays in parent**. When a step executor returns `needs_ship`, parent runs this stage → **rr-ci**, re-runs step-validate **inline** (assessment only), **commits** cursor/validate sidecars, then runs the dirty-tree gate before spawning the next step Task. Do **not** advance with dirty porcelain (carry-to-next does not waive the gate in this cell — [task-validate.md](task-validate.md)).
+Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)): **ship stays in parent**. When a step executor returns `needs_ship`, parent runs this stage → **rr-ci**, re-runs step-validate **inline** (assessment only), **commits** cursor/validate sidecars, then runs the dirty-tree gate before spawning the next step Task. Dirty-porcelain rules SoT: [task-validate.md](task-validate.md) Isolation-cell exception (carry-to-next does not waive the gate in this cell).
 
 ## Done-when
 

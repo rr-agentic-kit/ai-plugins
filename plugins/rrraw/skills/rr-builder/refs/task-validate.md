@@ -92,6 +92,8 @@ On **PASS** with `ship_after: never`: treat `step_ship_done` as satisfied for ad
 
 ### Forge landing (shippable PASS)
 
+**SoT for forge-landing rules** (tip resolution, "both sidecars" final-task-step close, carry-to-next) — slice-pipeline.md, ship.md, routing.md, SKILL.md, and README point here; update this section first.
+
 Validate writes the report **after** the forge-miss → **ship** → re-validate loop. Disk persist alone is not enough — sidecars + Verify checkbox flips must **land on forge** or be **carried to the next ship**.
 
 **Tip resolution (which PR head):**
@@ -115,6 +117,8 @@ Validate writes the report **after** the forge-miss → **ship** → re-validate
 Chat: announce the persisted path (`…validate.md` or `…task-validate.md`) **and** whether landing was **pushed** or **carry-to-next**.
 
 ### Isolation-cell exception (`auto` × `task` \| `slice`)
+
+**SoT for the dirty-porcelain / carry-to-next isolation exception** — slice-pipeline.md Dirty-tree gate, ship.md, and routing.md point here.
 
 Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)):
 

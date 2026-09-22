@@ -1,6 +1,6 @@
 ---
 name: rr-builder
-description: Slice build orchestrator (drive×scope; default --auto --step), ad-hoc --feature mint+task run, or lane handoff via --prepare/--coder/--tester/--security/--review/--refactor/--add-endless-test. Not rr-planner/rr-ci.
+description: Slice build orchestrator (drive×scope; default --auto --step), ad-hoc --feature run, or explicit lane handoff. Not rr-planner/rr-ci.
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task, AskUserQuestion, TodoWrite
 ---
 
@@ -52,19 +52,15 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
    - **Feature:** `Read` [refs/feature.md](refs/feature.md), then stage contracts from [refs/slice-pipeline.md](refs/slice-pipeline.md) with `scope=task`.
    - **Handoff:** `Read` only the matching nested `SKILL.md` once.
    - **Orchestrate:** load stage contract from [refs/slice-pipeline.md](refs/slice-pipeline.md) (full nested skill, plan allowlist, or validate rubric). Do not preload every nested skill. When Isolated step run applies and cursor is inside a task-step, load the step executor + template (do not preload every stage skill into the parent).
-4. **execute** — Feature: detect/mint/branch per [refs/feature.md](refs/feature.md), then drive×scope loop with hard stop at task-validate (**parent-inline** — not Isolated step run). Orchestrate: apply drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Under Isolated step run: parent **prepare** if needed → spawn step Task → **dirty-tree gate** → parent **ship** on `needs_ship` → parent **task-validate** / **slice-validate**. Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` / step done markers after each done-when. **Stop** — handoff does not re-enter orchestrate; feature does not enter slice-validate/delivered; plan stage must not edit application source (feature-branch create/checkout is allowed — [refs/feature-branch.md](refs/feature-branch.md)); planned **ship** → [refs/ship.md](refs/ship.md) then **rr-ci** (do not invent forge CLI); **delivered** → residual rr-ci only. Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
+4. **execute** — Per mode:
+   - **Feature:** detect/mint/branch per [refs/feature.md](refs/feature.md), then the drive×scope loop with hard stop at task-validate (**parent-inline** — not Isolated step run).
+   - **Orchestrate:** apply the drive×scope run loop from [refs/slice-pipeline.md](refs/slice-pipeline.md). Under Isolated step run: parent **prepare** if needed → spawn step Task → **dirty-tree gate** → parent **ship** on `needs_ship` → parent **task-validate** / **slice-validate**. Manual gates use AskQuestion (+ Delivery channels fallback). Persist `builder_stage` / `step_index` / step done markers after each done-when.
+   - **Handoff:** run only the nested skill loaded in step 3; no drive/scope chaining.
+   - **Stop:** handoff does not re-enter orchestrate; feature does not enter slice-validate/delivered; plan stage must not edit application source (feature-branch create/checkout is allowed — [refs/feature-branch.md](refs/feature-branch.md)). Ship / validate / forge-landing / last-step stop rules are SoT-owned by [refs/slice-pipeline.md](refs/slice-pipeline.md) (Scope stop boundaries), [refs/ship.md](refs/ship.md), and [refs/task-validate.md](refs/task-validate.md) (Forge landing) — do not re-derive them here; route planned **ship** → [refs/ship.md](refs/ship.md) then **rr-ci**, and **delivered** → residual **rr-ci** only. Review `--ci` handoff may `Read` `skills/rr-ci/SKILL.md` after findings.
 
 ## Nested skills (path-loaded only)
 
-| Lane / stage use | Path | Listed in plugin.json |
-|------------------|------|------------------------|
-| Prepare | [rr-prepare/SKILL.md](rr-prepare/SKILL.md) | no |
-| Coder | [rr-coder/SKILL.md](rr-coder/SKILL.md) | no |
-| Tester | [rr-tester/SKILL.md](rr-tester/SKILL.md) | no |
-| Security | [rr-security-auditor/SKILL.md](rr-security-auditor/SKILL.md) | no |
-| Review hub | [rr-review/SKILL.md](rr-review/SKILL.md) | no |
-| Refactor | [rr-refactor/SKILL.md](rr-refactor/SKILL.md) | no |
-| Endless add-test | [rr-test-endless/SKILL.md](rr-test-endless/SKILL.md) | no |
+Lane → path mapping SoT: [refs/routing.md](refs/routing.md) **Handoff load table** (carries each lane's stop notes). Seven nested skills — rr-prepare, rr-coder, rr-tester, rr-security-auditor, rr-review, rr-refactor, rr-test-endless — live in this folder, are path-loaded `Read`s only, and are not listed in `plugin.json` (README Constraints).
 
 Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
 
@@ -85,3 +81,5 @@ Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
 | [refs/task-validate.md](refs/task-validate.md) | Task / step validate stages |
 | [refs/slice-validate.md](refs/slice-validate.md) | Slice validate stage |
 | [refs/anti-overlap.md](refs/anti-overlap.md) | Boundary disputes |
+
+Missing or unreadable required ref (any Read above, or a nested skill's own required refs) → **stop** with a one-line reason; do not invent procedure or contract content from memory. If a companion ref under this pack owns the same contract, Read it and note the substitution in one line; otherwise stop.

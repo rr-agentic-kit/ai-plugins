@@ -48,7 +48,7 @@ Confirm param block from [refs/params.md](refs/params.md). Default lanes: `[code
 
 ### 2. id
 
-Mint **`runId`**: `yyyymmdd-NN` local (list today's `.ai/review/yyyymmdd-*`; next = max `NN` + 1, or `01`). **`REVIEW_DIR`** = `.ai/review/<runId>/`. `mkdir -p` **`REVIEW_DIR`** (flat — no lane subdirs). Paths: [refs/artifacts.md](refs/artifacts.md).
+Mint **`runId`** via the stdout→value helper in [refs/artifacts.md](refs/artifacts.md) Run id (`yyyymmdd-NN`). **`REVIEW_DIR`** = `.ai/review/<runId>/`. `mkdir -p` **`REVIEW_DIR`** (flat — no lane subdirs). Paths: [refs/artifacts.md](refs/artifacts.md).
 
 ### 3. scope
 

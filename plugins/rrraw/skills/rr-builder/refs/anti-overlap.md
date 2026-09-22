@@ -24,6 +24,8 @@
 
 **Stop phrase:** "Ship/CI forge mechanics — use **rr-ci**." Builder may **enter** ship and load rr-ci when shippable validate hits the Forge/PR gate (or plan declares `ship_after`); it must not skip a planned ship, require PASS-before-ship for that gate, or open the PR itself.
 
+**Forge-open invariant SoT:** the two rr-ci bullets above ("When builder hands off" + "does not open MR/PR except by handing off"). Other refs (ship.md, task-validate.md, slice-pipeline.md, routing.md, SKILL.md) carry pointers only.
+
 ## rr-git
 
 **Owns:** Local git safety, worktrees, squash, conflict resolution, merged branch cleanup.

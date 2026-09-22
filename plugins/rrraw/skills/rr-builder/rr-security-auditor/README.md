@@ -27,6 +27,14 @@ Audits scoped code for OWASP Top 10, secrets exposure, and language-specific vul
 - Test verdicts and coverage → **rr-tester**
 - Expecting auto-fix of security findings → not supported
 
+## Philosophy
+
+- **Confidence-gated findings only** — `refs/confidence.md` rules are authoritative; findings below the gate are dropped, not qualified
+- **Low-confidence noise is worse than silence** — a quiet report outranks a speculative one
+- **Do-not-flag rules win** — patterns excluded by `refs/confidence.md` never appear as findings
+- **Report-only** — findings are handed back for the fix lane; the auditor never edits source
+- **Language depth on demand** — `*.secure.md` refs load once the stack is identified, not upfront
+
 ## Constraints
 
 - Confidence and Do-not-flag rules in `refs/confidence.md` are authoritative

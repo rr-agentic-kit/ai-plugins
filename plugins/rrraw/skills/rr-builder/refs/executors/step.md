@@ -35,7 +35,8 @@ Caller Load (parent Task prompt / payload):
 | Kind | Fields / paths |
 |------|----------------|
 | **Required** | `PLUGIN_ROOT`, `REPO_ROOT`, `slice_id`, `artifact_root`, `{NNNN}`, `step_index`, resume `builder_stage` + `step_*_done`, `scope` (`task` \| `slice`) |
-| **Stable hard-links** | `refs/slice-pipeline.md` stage contracts; `refs/plan-knowledge.md`; `refs/plan-schema.md`; `refs/feature-branch.md`; `refs/task-validate.md` (step-validate only); nested `rr-coder` / `rr-tester` / `rr-refactor` / `rr-review` `SKILL.md` |
+| **Stable hard-links** | `refs/slice-pipeline.md` stage contracts; `refs/plan-knowledge.md`; `refs/plan-schema.md`; `refs/feature-branch.md`; `refs/task-validate.md` (step-validate only) |
+| **Lane hard-links (resume-conditional)** | Load only pending stages per `step_*_done`: plan/build → `rr-coder/SKILL.md` + `rr-tester/SKILL.md`; refactor → `rr-refactor/SKILL.md`; review → `rr-review/SKILL.md`; resuming at step-validate → none |
 | **Variant inject** | Current `{NNNN}.md` + `{NNNN}-{step}.plan.md` if present |
 | **Forbidden** | Re-invoke rr-builder; slice-validate; task-validate; ship/rr-ci; `--add-endless-test`; parallel sibling steps |
 

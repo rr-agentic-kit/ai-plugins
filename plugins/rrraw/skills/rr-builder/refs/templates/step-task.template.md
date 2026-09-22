@@ -33,10 +33,12 @@ On success (ok|needs_ship): commit before return so porcelain is empty. On faile
 4. skills/rr-builder/refs/plan-schema.md
 5. skills/rr-builder/refs/feature-branch.md
 6. skills/rr-builder/refs/task-validate.md (step-validate only)
-7. skills/rr-builder/rr-coder/SKILL.md
-8. skills/rr-builder/rr-tester/SKILL.md
-9. skills/rr-builder/rr-refactor/SKILL.md
-10. skills/rr-builder/rr-review/SKILL.md
+
+## Lane refs (resume-conditional — Read only when the stage is still pending per step_*_done)
+- Plan or build pending (`step_plan_done` / `step_build_done` ≠ true) → skills/rr-builder/rr-coder/SKILL.md **and** skills/rr-builder/rr-tester/SKILL.md
+- Refactor pending (`step_refactor_done` ≠ true) → skills/rr-builder/rr-refactor/SKILL.md
+- Review pending (`step_review_done` ≠ true) → skills/rr-builder/rr-review/SKILL.md
+- Resuming at step-validate (all four `step_*_done` true) → **none** of the lane SKILL.md files
 
 ## Variant inject (Read when present)
 - {artifact_root}/{NNNN}.md

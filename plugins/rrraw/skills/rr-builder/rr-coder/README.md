@@ -26,6 +26,14 @@ Applies principles to **application source** only (implement, refactor, or code-
 - OWASP / exploitability → **rr-security-auditor**
 - MR inline POST alone → **rr-ci** after **rr-review** `--ci`
 
+## Philosophy
+
+- **CPNNN findings over ad-hoc prose** — every finding maps to a stable **CPNNN** id so fixes and reviews stay traceable
+- **Rubric + severity triage, then Challenge** — findings pass `refs/compliance-rubric.md` mapping and `refs/severity-triage.md` triage before they are reported
+- **Application source only** — production code rules; test strategy stays **rr-tester**
+- **Architecture is mandatory** — a code report without `## Architecture` is incomplete
+- **Inline fix path** — fixes apply in the parent session; no Task fan-out for code fixes
+
 ## Constraints
 
 - Dedicated test paths excluded from production findings
