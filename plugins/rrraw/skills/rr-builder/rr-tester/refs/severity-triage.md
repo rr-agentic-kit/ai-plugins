@@ -17,6 +17,16 @@ Non-ADEQUATE: **MISSING**, **NON-COMPLIANT**, **OVER-TESTED**, **UNCLEAR**.
 
 **Blockers** for fix/plan/POST = rows that survive emit gate + Challenge (**kept** only).
 
+### Hard MISSING — soft-fixture ADEQUATE close (anti-trigger)
+
+**MUST NOT** demote **MISSING** → Soft / Suggestion, and **MUST NOT** treat coverage as ADEQUATE / scope `pass`, when:
+
+- Brief acceptance or regression signals for extract, install, refuse, replace, or env-detection are evidenced **only** by soft fixtures that fail **Production fidelity and predicate isolation** probes in [shared-heuristics.md](shared-heuristics.md)
+- Composite classifier tests would still pass if an acceptance-critical prefix/reason were removed
+- Writability/replace or shared-helper predicates named by production/brief are untested
+
+On uncertainty for these rows: **`keep` with `uncertain-hard`** — same as other Hard MISSING.
+
 ## Challenge
 
 **When:** Any challengeable row before plan, **`--ci`** POST, or treating assess as final.

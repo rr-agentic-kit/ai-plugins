@@ -138,6 +138,41 @@ Severity: `medium` default; `high` on payment/auth/data mutation paths.
 
 Do not require bundled PIT/Stryker — heuristic only unless project already runs mutation tooling.
 
+## Production fidelity and predicate isolation
+
+When brief / acceptance / regression signals cover **extract**, **install**, **package**, **replace**, **refuse**, or **env-detection** gates, soft unit coverage is **not** adequate until the probes below pass. Emit existing kinds (`missing_coverage`, `weak_assertion`, `mutation_gap`) — do not invent a parallel enum.
+
+### Fixture ↔ production builder fidelity
+
+Flag `missing_coverage` (**high** when extract/install is an acceptance signal) when **any** apply:
+
+- Test builds the artifact with an in-module helper that does **not** match the **in-scope CI/release artifact builder** (e.g. packs bare entry names while the builder uses `tar … .` / CurDir / `./`-prefixed entries)
+- Assess did not Read the in-scope CI artifact builder when extract/install appeared in the brief or production surface
+- Round-trip extract tests only exercise the soft fixture, never an archive shaped like the production builder
+
+**Batch / read-budget:** In **one parallel turn**, Read the CI/release artifact builder in scope + the extract/install tests under review + this section. Do not stage those Reads across turns.
+
+Generic probe only — cite "CI artifact builder in scope"; do not hard-code one project's workflow filename.
+
+### Predicate isolation (composite classifiers)
+
+Flag `weak_assertion` or `mutation_gap` when:
+
+- Refusal / package-managed / path-prefix gates are tested only through a **composite** classifier (one call that OR/AND-covers many prefixes or reasons)
+- The test would still pass if one acceptance-critical prefix or reason branch were deleted
+- Asserts only "rejects" / "errors" without the specific refusal reason, code, or prefix the brief names
+
+Prefer a focused unit on the isolated predicate (or exact reason assert), not only the composite entry point.
+
+### Strategy and shared-helper fidelity
+
+Flag `missing_coverage` when:
+
+- Production replace/install depends on **parent-dir writability**, rename-only replace, or running-executable write refusal, but tests only write a fresh fake file under a writable temp path
+- Production env/container detection uses a **shared helper**, but tests only cover a local subset of that helper's predicates (e.g. one marker file) and never the helper itself or its other triggers (alternate runtimes, env overrides)
+
+**Stop-rule:** Do not emit scope `pass` (or review-lane ADEQUATE) for extract / refuse / install / replace acceptance signals when any fidelity or isolation probe above fails — emit the signal kinds above instead.
+
 ## Flakiness severity categories
 
 | Severity | Indicators |

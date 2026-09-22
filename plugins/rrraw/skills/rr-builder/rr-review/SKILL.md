@@ -102,6 +102,13 @@ When **`endless: true`** (always for `--fix`): for `epoch = 1..max_epochs`:
 
 For each chunk × lane, **`Read`** nested skill and produce assess artifact under `REVIEW_DIR` (see [refs/artifacts.md](refs/artifacts.md)). Forward **`BRIEF_PATH`**; when `outcome: ci`, use **`READ_REF`** via `git show` for context reads.
 
+**Test lane (stop-rule + batch):** Before writing `test-assess*.md`:
+
+1. **`Read`** `agents/test/assess.md` — **required**. Skimming `shared-heuristics` / report-template alone is insufficient.
+2. In the **same parallel turn**, Read co-named peers the assess agent indexes: `skills/rr-builder/rr-tester/refs/shared-heuristics.md` (including **Production fidelity and predicate isolation**) and `skills/rr-builder/rr-tester/refs/severity-triage.md`. When brief acceptance signals include extract/install/package, also Read the in-scope CI artifact builder + extract/install tests under review in that same turn.
+3. Prefer **`Task`** to the assess agent per `skills/rr-builder/rr-tester/refs/agent-index.md` when the parent would otherwise invent ADEQUATE / `pass` without those Loads.
+4. **Stop:** do not emit ADEQUATE / `pass` for extract / refuse / install / replace gates covered only by soft fixtures (Hard MISSING anti-trigger in rr-tester severity-triage).
+
 #### 7. Challenge
 
 Parent session. **`Read`** [refs/severity-triage.md](refs/severity-triage.md) + lane binding refs + [refs/maintenance-hunk-exclusion.md](refs/maintenance-hunk-exclusion.md). Persist **`{assess-stem}-challenge.md`** per lane (see [refs/artifacts.md](refs/artifacts.md)). Consumers use **`keep` only**. Unchallenged challengeable rows → **Stopped:** `unchallenged report`.
