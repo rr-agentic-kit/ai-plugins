@@ -46,6 +46,8 @@ python3 scripts/render_ce_report.py apply-plan --in …/apply-plan.json --out �
 
 (Paths may be absolute under the user project; adjust `--in`/`--out` accordingly.)
 
+**Sandbox fallback (when scratch sits outside the plugin root):** `render_ce_report.py` only accepts paths under the plugin root. Sanctioned fallback: copy the lean `*.json` into a temp dir under the plugin root (e.g. `<plugin-root>/.ai/learning/ce-improve/<run-id>/`), render there with relative paths, copy the rendered `*.md` back to the user-project scratch, then **remove** the plugin-root temp dir. Do not relocate improve scratch itself.
+
 **Validate→fix:** on exit **2**, read stderr `path: message` lines, fix the lean `*.json`, re-run render — do **not** agent-`Write` full report markdown. Pattern: `templates/reports/README.md`.
 
 ## Ref index (Read at step)
@@ -120,7 +122,7 @@ python3 scripts/render_ce_report.py apply-plan --in …/apply-plan.json --out �
 - **Outcome:** Absorb `redesign` opportunities applied to the **draft** set (or skipped).
 - **Done when:** If redesign list empty → mark completed. Else run `actions/redesign.md` **Nested under improve** short path against the redesign list. **Nested intake:** treat full `redesign-1-clarify` / `redesign-intake.md` done-when as satisfied from the merge plan—delta brief = Ranked Absorb `redesign` opportunity detail; skip **all** redesign-intake AskQuestions (outcome/audience/capabilities/failure modes/breaking-change); record breaking-change assumption once in the apply plan. **TodoWrite:** only `improve-1…6` — do not spawn `redesign-*` todos. Merge with any fix draft into one candidate artifact set; keep `touch-list.txt` complete.
 - **Same stop-rule** as improve-4: no target-path promotion yet.
-- **Gates:** Run `shared-write-gates.md` once on the combined **draft**. One **approve-revise-abort** for the whole plan — AskQuestion **must** include Reports + apply-plan + draft links. On **Approve** → promote draft → target paths; leave **unstaged** (default dirty `git status`); **never** `git add` / `git commit`. On **Abort** → discard draft / restore only if a restore intermediary was used; **target paths unchanged**; still close with Next Up.
+- **Gates:** Run `shared-write-gates.md` once on the combined **draft**. One **approve-revise-abort** for the whole plan — AskQuestion **must** include Reports + apply-plan + draft links. On **Approve** → promote draft → target paths **driven by `touch-list.txt`**: copy each listed repo-relative path from the draft tree to its target relative (no ad-hoc extra copies); then reconcile — `git status --porcelain` entries under the target tree must equal the touch-list count; mismatch → stop and reconcile (remove strays or complete missing promotes) before continuing. Leave **unstaged** (default dirty `git status`); **never** `git add` / `git commit`. On **Abort** → discard draft / restore only if a restore intermediary was used; **target paths unchanged**; still close with Next Up.
 
 ### Step 6: `improve-6-close`
 

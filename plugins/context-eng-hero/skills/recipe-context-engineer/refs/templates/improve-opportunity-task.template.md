@@ -32,6 +32,7 @@ Write ONLY to Caller Load lean_out (scratch JSON path) when provided.
 4. Build lean JSON (kind: opportunity) per opportunity.schema.json — preserve Ranked Absorb + Impact. Write that JSON to lean_out. Do NOT emit full markdown. Do NOT Read *.md.j2.
 5. Absorb values: fix | redesign | defer — absorb = how to improve; Summary = detected waste
 6. Pattern SCRIPTABLE when invent/dump waste is primary (see improvement-patterns.md)
+7. Multi-field blocks that the schema types as `string` (e.g. `challenge`) MUST be emitted as one **flattened single-line string** — `"Section: text | Section: text"`; no nested objects, arrays, or raw newlines
 
 ## Output (chat — keep tiny)
 - status: ok|partial|failed

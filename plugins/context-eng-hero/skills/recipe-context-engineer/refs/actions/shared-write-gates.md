@@ -27,7 +27,7 @@ Record **draft hash** (path + content fingerprint) when static PASSes. Pre-ship 
 - **Outcome:** Static checks pass on **draft** content (scratch mirror)—not a premature “already shipped” target.
 - **Liveness:** Emit `◆ Running static audit (~5–10s)…` per `ui-brand.md` before the shell call.
 - **Done when:** From plugin root, after PyYAML bootstrap if needed (plugin root `CLAUDE.md` **Python runtime**), `python3 scripts/audit_static.py . <relative-path>` run against the draft under audit; all static rows PASS or fixes applied until PASS. Store output + draft hash. If script missing or errors after bootstrap: **STATIC SKIPPED** with reason—**do not promote** until static PASS or user accepts draft-only.
-- **Improve:** Prefer auditing files under `.ai/learning/ce-improve/<run-id>/draft/` (or an isolated overlay plugin_root) when present; map results to intended target relatives in the AskQuestion packet. **Do not** treat a filesystem snapshot of live targets as the goal of this gate—snapshot is optional only if needed later to restore or to finalize the improve **touch list**.
+- **Improve:** Prefer auditing files under `.ai/learning/ce-improve/<run-id>/draft/` (or an isolated overlay plugin_root) when present; map results to intended target relatives in the AskQuestion packet. The overlay must be a **complete plugin root**: include plugin-root companions the static checks expect — `ACRONYMS.md` + `GLOSSARY.md` (lexicon) and any sibling skill packs referenced by internal links (e.g. `skills/rr-ci/`). **Do not** treat a filesystem snapshot of live targets as the goal of this gate—snapshot is optional only if needed later to restore or to finalize the improve **touch list**.
 
 ## Pre-write reflection gate
 

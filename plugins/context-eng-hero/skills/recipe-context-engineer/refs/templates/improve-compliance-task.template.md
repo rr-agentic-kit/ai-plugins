@@ -41,3 +41,5 @@ Write ONLY to Caller Load lean_out (scratch JSON path) when provided.
 ```
 
 **Placeholders:** `{type_rubric}` = `skill` | `command` | …; for Skill+Ref also inject `rubrics/skill-ref.rubric.md` as item 4; `{static_relative_path}` = file path static accepts (pack entrypoint `…/SKILL.md` when path is a folder); `{lean_out}` = absolute path to `.ai/learning/ce-improve/<run-id>/compliance.json`.
+
+**Static target outside the plugin root (friction recipe):** the script resolves paths under `plugin_root`, so `<plugin_root>/<relative_path>` must exist. When the target lives outside the context-eng-hero tree (e.g. a monorepo), run in **monorepo-root mode** — from the monorepo root: `python3 plugins/context-eng-hero/scripts/audit_static.py <repo-root-or-plugin-root-dir-containing-target> <repo-relative-path>` (e.g. `…/audit_static.py /path/to/repo plugins/rrraw/skills/rr-builder/SKILL.md`). Parent-relative `../…` paths are rejected by `static.paths.within-plugin`; absolute paths are rejected by leading-slash strip. Never pass a path the given `plugin_root` cannot contain.
