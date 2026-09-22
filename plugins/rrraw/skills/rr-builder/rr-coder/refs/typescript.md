@@ -54,6 +54,8 @@ Framework-generated tsconfigs (e.g. SvelteKit `.svelte-kit/tsconfig.json`) often
 | `replaceAll` for string replacement | `replace` (replaces first match only; easy to miss) |
 | Optional chaining (`?.`) for nullable access | `obj && obj.trim()` or `obj && obj.prop` (S6582) |
 | `RegExp.exec(str)` for single-match extraction | `str.match(regex)` when regex has no `g` flag (S6594) |
+| `expect(xs).toHaveLength(n)` (Jest/Vitest) | `expect(xs.length).toBe(n)` (S5906) |
+| Most-specific matcher (`toBeNull`, `toBeUndefined`, `toEqual`, …) | Generic `toBeTruthy` / `toBeFalsy` when a specific matcher exists (S5906) |
 
 ## Type Safety Patterns
 

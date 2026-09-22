@@ -38,7 +38,7 @@ Honor collector **`disposition`** on every item. Complete one full pass over all
 
 ## Language / framework (`language_ref`, Phase 8)
 
-- Apply Prefer/Avoid and MUST from loaded stack refs (cite **`CPNNN`** or ref **§heading**).
+- Apply Prefer/Avoid and MUST from loaded stack refs (cite **`CPNNN`** or ref **§heading**), including assertion Prefer/Avoid (e.g. TypeScript S5906 most-specific matchers) when execute rewrites Prefer/Avoid violations or edits `expect(...)` / assertions.
 - **`fix`** — behavior-invariant cleanup only (e.g. JSpecify instead of Jakarta-as-nullness; drop duplicate internal null/blank guards when boundary BV already covers).
 - **`clarify`** / **`escalate_human`** — introducing `@Valid` / new BV where requests were previously accepted; flipping service `@Validated`; any change that would alter HTTP/status or thrown validation errors — **do not** apply.
 - If a listed **`fix`** would still change observable I/O — treat as semantic conflict: **stop** and escalate.
@@ -52,4 +52,4 @@ Honor collector **`disposition`** on every item. Complete one full pass over all
 
 ## Other violations
 
-Fix per phase/order in the manifest (magic numbers, nesting, DRY, naming). Sonar rows on **test-only** paths: skip (Sonar remediation → **rr-ci**).
+Fix per phase/order in the manifest (magic numbers, nesting, DRY, naming). Sonar **remediation** rows on **test-only** paths: skip (Sonar-only loop → **rr-ci**). That skip does **not** waive Phase 8 Prefer/Avoid assertion hygiene when execute already touches assertions.
