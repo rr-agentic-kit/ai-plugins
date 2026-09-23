@@ -149,6 +149,7 @@ Does it use injected fakes/stubs (FakeHelm, mock repository, stub HTTP) with no 
 | `POST api/orders` (external) | Contract + Integration | Contract: schema; Integration: full behavior |
 | Login form submission | Integration | Form + validation + API + navigation |
 | Critical auth/checkout flow | E2E | Cross-system, revenue/compliance critical |
+| CLI self-upgrade / self-replace | CLI process E2E | Spawn shipped entry; unit helpers insufficient |
 
 ---
 
@@ -231,6 +232,22 @@ E2E tests catch failures that only manifest when the full stack runs together. *
 
 ### Target: 5-15 E2E scenarios maximum. Runnable in < 10 minutes. Flaky test = P1 bug.
 
+### CLI process E2E (shipped entry)
+
+Distinct from web full-stack E2E. Use when failure modes only appear when the **operator-facing binary/process** runs the subcommand (self-replace, upgrade, install refresh, hook wire-up). Pair with [shared-heuristics.md](shared-heuristics.md) **CLI process-under-test fidelity**.
+
+**Write when ALL apply:**
+1. Production path is a CLI entry the operator invokes
+2. Failure mode requires process boundaries (running-exe replace, argv/env wiring, sibling asset refresh) that unit helpers cannot reproduce
+3. Hermetic local fixtures can stand in for remote services (release mirror, fake registry) — live CDN/engine not required
+
+**Assert:** exit status, on-disk binary/asset swap, refusal message — not every intermediate helper call.
+
+**Do not:**
+- Treat in-process library calls as CLI E2E
+- Require live GitHub Releases, a real container engine, or a multi-OS matrix solely for process-E2E confidence
+- Close ADEQUATE on checksum/extract/atomic unit coverage alone when the brief names self-replace / upgrade
+
 ---
 
 ## Quick Reference
@@ -243,3 +260,4 @@ E2E tests catch failures that only manifest when the full stack runs together. *
 - [ ] Multiple teams depend on this API? → Contract test is mandatory
 - [ ] Would this catch a real production bug? → Keep
 - [ ] Test breaks on refactor without behavior change? → Coupled to implementation
+- [ ] CLI self-replace / upgrade / install-refresh? → CLI process E2E (spawn shipped entry; hermetic fixture OK)

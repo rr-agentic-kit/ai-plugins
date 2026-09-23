@@ -116,6 +116,8 @@ Validate writes the report **after** the forge-miss → **ship** → re-validate
 
 Chat: announce the persisted path (`…validate.md` or `…task-validate.md`) **and** whether landing was **pushed** or **carry-to-next**.
 
+**Next stage:** When landing was **pushed** to an open tip → **pr-validate** ([pr-validate.md](pr-validate.md)). When `never` or carry-to-next → skip pr-validate and advance per [slice-pipeline.md](slice-pipeline.md).
+
 ### Isolation-cell exception (`auto` × `task` \| `slice`)
 
 **SoT for the dirty-porcelain / carry-to-next isolation exception** — slice-pipeline.md Dirty-tree gate, ship.md, and routing.md point here.
@@ -123,7 +125,7 @@ Chat: announce the persisted path (`…validate.md` or `…task-validate.md`) **
 Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)):
 
 - **Dirty porcelain is a hard-stop** — parent must not advance / spawn the next step Task while `git status --porcelain` is non-empty. Carry-to-next does **not** waive this gate in this cell (other drive×scope cells keep carry-to-next).
-- **Parent owns** task-validate (and post-`needs_ship` step-validate re-run). After parent ship + inline re-validate, parent **commits** cursor/validate sidecars so the dirty-tree gate can PASS before the next spawn.
+- **Parent owns** task-validate (and post-`needs_ship` step-validate re-run) **and pr-validate** when an open tip was landed. After parent ship + inline re-validate, parent **commits** cursor/validate sidecars so the dirty-tree gate can PASS before the next spawn.
 - Executor-owned step-validate may return `needs_ship` with a committed forge-miss report; forge POST stays in parent via [ship.md](ship.md).
 
 ## Out of scope
@@ -133,3 +135,4 @@ Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)):
 - Inventing new acceptance criteria not in the task / step plan
 - Opening PR/MR inside builder — **rr-ci** via **ship** only
 - Rewriting Forge/PR PASS to mean “merged historically” instead of open tip or carry-to-next
+- PR/MR pipeline wait/fix after tip push → [pr-validate.md](pr-validate.md)

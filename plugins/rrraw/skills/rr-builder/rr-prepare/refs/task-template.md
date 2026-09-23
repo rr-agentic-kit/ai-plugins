@@ -15,18 +15,19 @@ files_likely: []
 pr_group: null
 adr_refs: []
 status: detailed
-builder_stage: prepare | plan | build | refactor | review | step_validate | ship | task_validate | slice_validate | delivered   # full enum (10 values)
+builder_stage: prepare | plan | build | refactor | review | step_validate | ship | pr_validate | task_validate | slice_validate | delivered   # full enum (11 values)
 step_index: null | integer   # 0-based into Steps; omit when not in a task-step stage
 step_plan_done: false | true   # current step_index only; reset on step advance
 step_build_done: false | true
 step_refactor_done: false | true
 step_review_done: false | true
 step_ship_done: false | true
+step_pr_validate_done: false | true   # step-scoped; true when skipped (never/carry-to-next); reset on step advance
 step_build_base_sha: null | sha   # set at build start; SoT: refs/slice-pipeline.md Cursor persistence
 ---
 ```
 
-Cursor algorithm + `builder_stage` enum SoT: [../../refs/slice-pipeline.md](../../refs/slice-pipeline.md) **Cursor persistence** — this frontmatter block mirrors that list verbatim; do not add or drop stage values here. `ship` / `task_validate` / `slice_validate` / `delivered` are parent-written. Do not infer the `step_*_done` flags from body prose.
+Cursor algorithm + `builder_stage` enum SoT: [../../refs/slice-pipeline.md](../../refs/slice-pipeline.md) **Cursor persistence** — this frontmatter block mirrors that list verbatim; do not add or drop stage values here. `ship` / `pr_validate` / `task_validate` / `slice_validate` / `delivered` are parent-written. Do not infer the `step_*_done` flags from body prose.
 
 ## Body sections (required)
 

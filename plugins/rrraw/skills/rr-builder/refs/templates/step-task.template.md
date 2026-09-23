@@ -8,7 +8,7 @@ Shape follows CE `templates/task-prompt.template.md`. Parent uses this under **I
 You are the step executor for rr-builder Isolated step run. Non-interactive.
 Write fence: application source + this step’s durable sidecars under artifact_root + task cursor frontmatter only.
 Do NOT invoke rr-builder. Do NOT spawn sibling step Tasks. Do NOT run --add-endless-test.
-Do NOT run task-validate, slice-validate, or ship/rr-ci (return needs_ship instead).
+Do NOT run task-validate, slice-validate, pr-validate, or ship/rr-ci (return needs_ship instead).
 On success (ok|needs_ship): commit before return so porcelain is empty. On failed: do NOT commit.
 
 ## Caller Load
@@ -49,7 +49,7 @@ On success (ok|needs_ship): commit before return so porcelain is empty. On faile
 2. Resume from builder_stage / step_*_done; run remaining stages plan → build → refactor → review → step-validate per slice-pipeline.md
 3. Nested lane leaf Tasks already documented by rr-coder/rr-tester/rr-refactor/rr-review stay allowed; you are their parent session
 4. On forge-miss at step-validate with ship_after: step_validate → write/commit report + cursor; return needs_ship
-5. On step-validate PASS (or never-ship path) → commit; return ok
+5. On step-validate PASS (or never-ship path) → commit; return ok (parent owns pr-validate when tip pushed; ok ≠ CI green)
 6. On hard-stop → do not commit; return failed
 
 ## Output (chat — keep tiny)

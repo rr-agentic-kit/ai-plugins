@@ -22,6 +22,7 @@ Non-ADEQUATE: **MISSING**, **NON-COMPLIANT**, **OVER-TESTED**, **UNCLEAR**.
 **MUST NOT** demote **MISSING** → Soft / Suggestion, and **MUST NOT** treat coverage as ADEQUATE / scope `pass`, when:
 
 - Brief acceptance or regression signals for extract, install, refuse, replace, or env-detection are evidenced **only** by soft fixtures that fail **Production fidelity and predicate isolation** probes in [shared-heuristics.md](shared-heuristics.md)
+- Brief acceptance for **CLI self-replace / upgrade / install-refresh** is evidenced **only** by in-module unit helpers (no hermetic spawn of the shipped entry as process under test) — see **CLI process-under-test fidelity** in [shared-heuristics.md](shared-heuristics.md)
 - Composite classifier tests would still pass if an acceptance-critical prefix/reason were removed
 - Writability/replace or shared-helper predicates named by production/brief are untested
 

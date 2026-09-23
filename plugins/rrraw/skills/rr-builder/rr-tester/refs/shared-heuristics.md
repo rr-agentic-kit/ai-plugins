@@ -171,7 +171,17 @@ Flag `missing_coverage` when:
 - Production replace/install depends on **parent-dir writability**, rename-only replace, or running-executable write refusal, but tests only write a fresh fake file under a writable temp path
 - Production env/container detection uses a **shared helper**, but tests only cover a local subset of that helper's predicates (e.g. one marker file) and never the helper itself or its other triggers (alternate runtimes, env overrides)
 
-**Stop-rule:** Do not emit scope `pass` (or review-lane ADEQUATE) for extract / refuse / install / replace acceptance signals when any fidelity or isolation probe above fails — emit the signal kinds above instead.
+### CLI process-under-test fidelity
+
+When brief / acceptance / regression signals name a **CLI command** that **self-replaces**, upgrades, or install-refreshes the running entry (or otherwise only fails when the **shipped process** executes the subcommand), flag `missing_coverage` (**high**) when **any** apply:
+
+- Coverage is only in-module unit helpers (checksum, extract, atomic rename, path classifiers) with **no** hermetic spawn of the **shipped entry** (built test binary / installed CLI) as the process under test
+- The act calls library functions **in-process** instead of executing the command an operator runs
+- A local fixture service (fake Releases base, fake registry) is required for the act, but the harness blocks concurrency so the fixture cannot serve while the process runs
+
+Unit helpers remain necessary; they are **not** sufficient for these signals. Prefer hermetic fixtures over live CDN/engine; do not require a multi-OS matrix solely for process-E2E confidence. See [test-types.md](test-types.md) **CLI process E2E**.
+
+**Stop-rule:** Do not emit scope `pass` (or review-lane ADEQUATE) for extract / refuse / install / replace acceptance signals when any fidelity or isolation probe above fails — emit the signal kinds above instead. The same stop applies when CLI self-replace / upgrade / install-refresh signals fail the **CLI process-under-test** probe.
 
 ## Flakiness severity categories
 

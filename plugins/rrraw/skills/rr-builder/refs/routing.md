@@ -41,6 +41,7 @@ Local worktree / destructive git during review `--fix`: **Read** `skills/rr-git/
 | **review** | Full `rr-review/SKILL.md` with forced `--fix --all --endless` |
 | **step_validate** / **task_validate** | [task-validate.md](task-validate.md) |
 | **ship** | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` |
+| **pr_validate** | [pr-validate.md](pr-validate.md) then `skills/rr-ci/SKILL.md` |
 | **slice_validate** | [slice-validate.md](slice-validate.md) |
 | **delivered** | Stop — point to **rr-ci** for residual unshipped work |
 
@@ -64,11 +65,12 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Re-entering **orchestrate** after an explicit handoff in the same run.
 - Writing application source during **plan** stage.
 - Dumping rr-coder Required Knowledge / language matrices on **plan** (use [plan-knowledge.md](plan-knowledge.md) only).
-- Inventing plan/build/refactor/review/ship completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
+- Inventing plan/build/refactor/review/ship/pr-validate completion from prose — use `step_*_done` fields ([slice-pipeline.md](slice-pipeline.md)).
 - Auto-chaining prepare → build without cursor/done-when.
 - Opening PR/MR inside builder without **rr-ci** — boundary SoT: [anti-overlap.md](anti-overlap.md) rr-ci section.
 - Emitting shippable **step-validate** / **task-validate** PASS without an open PR for `Ship.branch`.
 - Advancing past shippable validate with sidecars absent from tip and no carry-to-next — rules SoT: [task-validate.md](task-validate.md) Forge landing (isolation cell: dirty porcelain is always a hard-stop).
+- Advancing past a landed open tip with failing/pending CI — rules SoT: [pr-validate.md](pr-validate.md).
 - Parent-inline implement of a task-step under **Isolated step run** (`auto` × `task|slice`) — spawn [executors/step.md](executors/step.md) instead ([slice-pipeline.md](slice-pipeline.md)).
 - Requiring Forge/PR when `ship_after: never` was confirmed (non-shippable).
 - Skipping planned **ship** when shippable validate fails the Forge/PR gate (`ship_after` is not `never`).

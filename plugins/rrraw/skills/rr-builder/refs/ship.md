@@ -32,7 +32,7 @@
 
 ### Post-PASS landing (shippable)
 
-When re-validate reaches overall **PASS** and an open PR still exists for the tip, hand off **rr-ci** again to push the validate report(s) + Verify checkbox flips + cursor frontmatter **before** advancing or stopping. Full tip resolution, final-step "both sidecars" rule, and carry-to-next SoT: [task-validate.md](task-validate.md) **Forge landing** — do not restate it here.
+When re-validate reaches overall **PASS** and an open PR still exists for the tip, hand off **rr-ci** again to push the validate report(s) + Verify checkbox flips + cursor frontmatter **before** advancing or stopping. Full tip resolution, final-step "both sidecars" rule, and carry-to-next SoT: [task-validate.md](task-validate.md) **Forge landing** — do not restate it here. After push → **pr-validate** ([pr-validate.md](pr-validate.md)); skip when carry-to-next / `never`.
 
 ### Isolation-cell exception (`auto` × `task` \| `slice`)
 

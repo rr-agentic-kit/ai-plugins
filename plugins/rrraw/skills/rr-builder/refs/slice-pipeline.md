@@ -13,8 +13,8 @@ When `payload.feature.artifact_root` is set (feature mode / non_rr), resolve **a
 | Kind | Under `artifact_root` |
 |------|------------------------|
 | Task | `{NNNN}.md` |
-| Plan / refactor / review / step-validate | `{NNNN}-{step}.{plan,refactor,review,validate}.md` |
-| Task-validate | `{NNNN}.task-validate.md` |
+| Plan / refactor / review / step-validate / pr-validate | `{NNNN}-{step}.{plan,refactor,review,validate,pr-validate}.md` |
+| Task-validate / task pr-validate | `{NNNN}.task-validate.md`, `{NNNN}.pr-validate.md` |
 | Summary / registry (rr) | `task-summary.md`, `docs/rr/tasks/registry.yaml` (rr only) |
 
 Scratch stays `.ai/review/<runId>/`, `.ai/refactor/<runId>/` — never relocated under `artifact_root`. Slice-validate / delivered paths apply only to orchestrate `scope: slice` — **feature mode never reaches them**.
@@ -31,9 +31,11 @@ slice ready
           → [ per task-step:
                 plan → build → refactor → review → step-validate
                   ⇄ [ ship? ]      # shippable: forge-miss → ship → re-validate (before PASS)
+                → forge landing → pr-validate   # when tip pushed; skip never/carry-to-next
               ]
           → task-validate
           ⇄ [ ship? ]              # ship_after = task_validate: same forge loop
+          → forge landing → pr-validate   # when tip pushed; skip never/carry-to-next
         ]
   → slice validate
   → slice delivered              # residual ship boundary → rr-ci when nothing shipped mid-slice
@@ -51,6 +53,7 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | **review** | Full multi-lane review with fix, endless until clear | **rr-review** with **`--fix --all --endless`** (forced) | Via review fix path | Endless exit success **and** task sidecar `{NNNN}-{step}.review.md` present; set `step_review_done: true` |
 | **step-validate** / **task-validate** | Rubric + persist report; mark Verify checkboxes on item PASS | [task-validate.md](task-validate.md) | No (assessment) | Report at `{NNNN}-{step}.validate.md` / `{NNNN}.task-validate.md` with plan + per-item PASS/FAIL; forge-miss FAIL → **ship** then re-validate |
 | **ship** | Resolve branch/base; hand off **rr-ci**; return to validate | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` | Via rr-ci only | [ship.md](ship.md) done-when; set `step_ship_done: true` when step-scoped; re-enter validate |
+| **pr-validate** | After forge landing **pushed**: poll CI → PASS or fix → re-push → re-poll | [pr-validate.md](pr-validate.md) then `skills/rr-ci/SKILL.md` | Via rr-ci / ad-hoc fix only | Report PASS + `step_pr_validate_done: true` (step); skip when never/carry-to-next |
 | **slice validate** | Rubric: did **slice** hit slice goal / AC; persist report | [slice-validate.md](slice-validate.md) | No (assessment) | `docs/rr/tasks/{slice_id}/slice-validate.md` with plan + per-item PASS/FAIL |
 
 ### Stage procedures (orchestrate)
@@ -124,6 +127,17 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | **Hard-stops** | rr-ci failure / missing branch |
 | **Nested** | **rr-ci** |
 
+#### pr-validate
+
+| | |
+|--|--|
+| **Loads** | [pr-validate.md](pr-validate.md) then `skills/rr-ci/SKILL.md` |
+| **Inputs** | Open tip after forge landing push; prior validate sidecars on tip |
+| **Durable output** | `{NNNN}-{step}.pr-validate.md` or `{NNNN}.pr-validate.md` |
+| **Done-when** | [pr-validate.md](pr-validate.md); `step_pr_validate_done: true` when step-scoped; **skip** when `ship_after: never` or carry-to-next |
+| **Hard-stops** | Epoch cap (5); wait timeout; non-Sonar unrecoverable; engineer decline |
+| **Nested** | **rr-ci** (`pre-merge-status`, `debug-pipeline`, `--fix --sonar`) |
+
 #### slice validate
 
 | | |
@@ -144,6 +158,7 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | **refactor** (orchestrate) | **Read** `rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Durable: lean `{NNNN}-{step}.refactor.md`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
 | **review** (orchestrate) | **Read** `rr-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). Durable terminal: `{NNNN}-{step}.review.md` (scratch under `.ai/review/`). |
 | **ship** (orchestrate) | **Read** [ship.md](ship.md), then `skills/rr-ci/SKILL.md`. Do **not** invent forge CLI in builder. |
+| **pr-validate** (orchestrate) | **Read** [pr-validate.md](pr-validate.md), then `skills/rr-ci/SKILL.md`. Wait/fix probes stay rr-ci; do **not** invent forge wait CLI in builder. |
 | Explicit lane flag | Full-skill **handoff** — see [routing.md](routing.md). No pipeline advance past that skill’s done-when. |
 
 ## Cursor persistence (minimal v1)
@@ -152,19 +167,20 @@ Prefer extending existing prepare artifacts — no third parallel state file.
 
 | Field | Where | Values / notes |
 |-------|--------|----------------|
-| `builder_stage` | `{NNNN}.md` frontmatter (active task) and/or `task-summary.md` | `prepare` \| `plan` \| `build` \| `refactor` \| `review` \| `step_validate` \| `ship` \| `task_validate` \| `slice_validate` \| `delivered` |
+| `builder_stage` | `{NNNN}.md` frontmatter (active task) and/or `task-summary.md` | `prepare` \| `plan` \| `build` \| `refactor` \| `review` \| `step_validate` \| `ship` \| `pr_validate` \| `task_validate` \| `slice_validate` \| `delivered` |
 | `step_index` | `{NNNN}.md` frontmatter | 0-based index into that task’s **Steps** (omit when stage is prepare / task_validate / slice_validate / delivered) |
 | `step_plan_done` | `{NNNN}.md` frontmatter | `true` \| `false` — applies to current `step_index`; reset to `false` when advancing `step_index` |
 | `step_build_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done` |
 | `step_refactor_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done`; reset when advancing `step_index` |
 | `step_review_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done`; may be reset to `false` after mid-flight refactor migration (see below) |
 | `step_ship_done` | `{NNNN}.md` frontmatter | `true` \| `false` — step-scoped ship; treat as `true` when plan `ship_after: never` (non-shippable — nothing to ship; does **not** waive Goal/Verify). Reset when advancing `step_index` |
+| `step_pr_validate_done` | `{NNNN}.md` frontmatter | `true` \| `false` — step-scoped pr-validate PASS; treat as `true` when skipped (`never` / carry-to-next). Reset when advancing `step_index`. Missing on mid-flight cursors after an open tip land → treat as **not done** |
 | `step_build_base_sha` | `{NNNN}.md` frontmatter | Commit SHA captured at **build** start (`git rev-parse HEAD` before the first build commit). SoT for refactor's build-touched scope (see Orchestrate refactor scope rule). Reset to empty when advancing `step_index` |
 | `active_ship_branch` | `task-summary.md` | Last resolved ship head branch (from plan Ship / feature-branch) |
 | `ship_base_branch` | `task-summary.md` | Last resolved PR/MR base (`default` branch name or prior open tip) |
 | `prepare_status` | `task-summary.md` | Existing: `l1` \| `l2` \| `complete` — still authoritative for prep completeness |
 
-Update fields when a stage’s done-when passes — **before** looping or stopping. Do not invent a second cursor store. Do **not** infer plan/build/refactor/review/ship completion from prose alone — use the booleans (+ Ship section for whether ship applies).
+Update fields when a stage’s done-when passes — **before** looping or stopping. Do not invent a second cursor store. Do **not** infer plan/build/refactor/review/ship/pr-validate completion from prose alone — use the booleans (+ Ship section for whether ship / pr-validate apply).
 
 ### Orchestrate refactor scope rule
 
@@ -212,26 +228,40 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
    |-----------|--------|
    | **Forge / PR FAIL** ∧ `ship_after: step_validate` ∧ `step_ship_done` ≠ `true` | **Ship** ([ship.md](ship.md)); after ship done-when → return here (re-validate). Under `drive: auto`, chain ship → re-validate without asking. |
    | Other **FAIL** | Leave `builder_stage: step_validate`; hard-stop chaining under `scope: step\|task\|slice`. |
-   | **PASS** ∧ `ship_after: never` | `step_ship_done` satisfied → go to 9. |
+   | **PASS** ∧ `ship_after: never` | `step_ship_done` / `step_pr_validate_done` satisfied (skip) → go to 10. |
    | **PASS** ∧ shippable | Open PR already proven; `step_ship_done` should be `true`. Satisfy **forge landing** ([task-validate.md](task-validate.md) Forge landing — rr-ci push validate+cursor docs onto open tip, **or** carry-to-next) → go to 9. Do **not** enter ship-after-PASS for the forge-miss gate (`ship_after: step_validate` create path stays before PASS). |
 
-9. **Advance** — Only after forge landing (shippable) or never-ship path:
+9. **While on pr-validate (step)** — After forge landing. Branch table:
 
    | Condition | Action |
    |-----------|--------|
-   | More steps remain | Next `step_index`; set `step_plan_done` / `step_build_done` / `step_refactor_done` / `step_review_done` / `step_ship_done` to `false` (also reset `step_build_base_sha`). |
-   | No more steps | **Task-validate** (under `scope: step`, still in-boundary — do **not** stop; continue into step 10). |
+   | Carry-to-next / no open tip | Skip; set `step_pr_validate_done: true` → go to 10. |
+   | Open tip just landed | `builder_stage: pr_validate`; run [pr-validate.md](pr-validate.md) (wait → PASS or fix→re-push→re-poll). |
+   | **PASS** | Write `{NNNN}-{step}.pr-validate.md`; `step_pr_validate_done: true` → go to 10. |
+   | Hard-stop (epoch cap / timeout / unrecoverable / decline) | Leave `pr_validate`; do not advance. |
 
-10. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Branch table:
+10. **Advance** — Only after pr-validate PASS/skip (shippable push path) or never-ship path:
+
+   | Condition | Action |
+   |-----------|--------|
+   | More steps remain | Next `step_index`; set `step_plan_done` / `step_build_done` / `step_refactor_done` / `step_review_done` / `step_ship_done` / `step_pr_validate_done` to `false` (also reset `step_build_base_sha`). |
+   | No more steps | **Task-validate** (under `scope: step`, still in-boundary — do **not** stop; continue into step 11). |
+
+11. **While on task-validate** — Same forge loop for any step plan with `ship_after: task_validate` and ship not done (AskQuestion once if several Ship blocks). Branch table:
 
    | Condition | Action |
    |-----------|--------|
    | Other **FAIL** | Hard stop. |
    | **PASS** | Satisfy **forge landing** for the task-validate report ([task-validate.md](task-validate.md) Forge landing — including when no step used `ship_after: task_validate`, land onto **last open step Ship PR** / `active_ship_branch`). |
-   | **Final task-step close** | Tip (or carry-to-next) must include **both** last-step `{NNNN}-{step}.validate.md` and `{NNNN}.task-validate.md` before stopping `scope: step` / `task` (SoT: Scope stop boundaries below). → next task or step 11. |
-   | **Feature mode: PASS** (+ forge landing) or hard FAIL | **Stop** (do not go to step 11). Under `scope: step`, task-validate PASS + forge landing is the stop boundary when this was the final task-step (or when the run entered with cursor already on `task_validate`). |
-11. **All tasks validated** → **slice validate** (orchestrate `scope: slice` only — skip under feature).
-12. **Slice validate PASS** → stop: **slice delivered** → point engineer to **rr-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
+   | **PASS** ∧ forge landing pushed | → step 12 (pr-validate task). |
+   | **PASS** ∧ never / carry-to-next | Skip pr-validate → final-task-step close / next. |
+   | **Final task-step close** | Tip (or carry-to-next) must include **both** last-step `{NNNN}-{step}.validate.md` and `{NNNN}.task-validate.md` before stopping `scope: step` / `task` (SoT: Scope stop boundaries below); when tip was pushed, also require task pr-validate PASS. → next task or step 13. |
+   | **Feature mode: PASS** (+ forge landing + pr-validate when tip pushed) or hard FAIL | **Stop** (do not go to step 13). Under `scope: step`, task-validate PASS + forge landing (+ pr-validate when pushed) is the stop boundary when this was the final task-step (or when the run entered with cursor already on `task_validate`). |
+
+12. **While on pr-validate (task)** — Same as step 9 for task scope ([pr-validate.md](pr-validate.md) → `{NNNN}.pr-validate.md`). Skip when never/carry-to-next. PASS → final-task-step close / next task or step 13.
+
+13. **All tasks validated** → **slice validate** (orchestrate `scope: slice` only — skip under feature).
+14. **Slice validate PASS** → stop: **slice delivered** → point engineer to **rr-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
 
 Explicit lane flag wins over this cursor even if `builder_stage` says otherwise ([input-resolution.md](input-resolution.md)).
 
@@ -246,11 +276,11 @@ Explicit lane flag wins over this cursor even if `builder_stage` says otherwise 
 | `scope` | Stop when |
 |---------|-----------|
 | `next` | Cursor-next stage done-when met (no chaining) |
-| `step` | **Non-final** task-step: step-validate PASS + forge landing (incl. ship→re-validate if shippable). **Final** task-step (no more steps after advance), **or** cursor already on `task_validate`: continue through **task-validate PASS** + forge landing of **both** last-step and task validate sidecars onto tip — same stop as `scope: task` for that run. If cursor is still **prepare**, complete prepare then stop (do not enter first step). **Anti-trigger:** do **not** park `builder_stage: task_validate` and exit `--step` after the last step’s step-validate PASS; do **not** stop `--step`/`--task` with validate docs only on disk. |
-| `task` | Active task reaches task-validate PASS + forge landing (all its steps + task-validate). **Feature mode** always uses this boundary and **must not** advance to slice-validate / delivered. |
+| `step` | **Non-final** task-step: step-validate PASS + forge landing + **pr-validate PASS** when an open tip was landed this run (skip pr-validate on never/carry-to-next). **Final** task-step (no more steps after advance), **or** cursor already on `task_validate`: continue through **task-validate PASS** + forge landing of **both** last-step and task validate sidecars onto tip (+ **pr-validate PASS** when tip pushed) — same stop as `scope: task` for that run. If cursor is still **prepare**, complete prepare then stop (do not enter first step). **Anti-trigger:** do **not** park `builder_stage: task_validate` and exit `--step` after the last step’s step-validate PASS; do **not** stop `--step`/`--task` with validate docs only on disk; do **not** advance past a landed open tip with failing/pending CI. |
+| `task` | Active task reaches task-validate PASS + forge landing (+ pr-validate when tip pushed) (all its steps + task-validate). **Feature mode** always uses this boundary and **must not** advance to slice-validate / delivered. |
 | `slice` | Slice validate PASS → delivered (or hard stop). Replaces retired `--full`. Not used under `--feature`. |
 
-**Last-step equivalence:** On the final task-step, `scope: step` ≡ `scope: task` through task-validate PASS **and** forge landing of last-step + task validate reports onto the open tip (or carry-to-next) — then stop (do not enter next task / slice-validate). Mid-task steps keep the narrower step-validate + forge-landing boundary.
+**Last-step equivalence:** On the final task-step, `scope: step` ≡ `scope: task` through task-validate PASS **and** forge landing of last-step + task validate reports onto the open tip (or carry-to-next) **and** pr-validate PASS when tip was pushed — then stop (do not enter next task / slice-validate). Mid-task steps keep the narrower step-validate + forge-landing + pr-validate boundary.
 
 ## Readiness set (`drive: manual`, `scope: slice`)
 
@@ -276,8 +306,8 @@ Linear pipeline usually yields **one** ready stage (that item is also **`(next)`
 
 | Owner | Owns |
 |-------|------|
-| **Parent** | resolve / mode / load; **prepare**; spawn one `generalPurpose` Task per remaining task-step; **dirty-tree gate** after each return; **ship** / **rr-ci**; **task-validate**; **slice-validate** + delivered (`scope: slice` only) |
-| **Executor** | That task-step’s inner pipeline `plan → build → refactor → review → step-validate` (resume from cursor `builder_stage` / `step_*_done`). Spec: [executors/step.md](executors/step.md). Prompt: [templates/step-task.template.md](templates/step-task.template.md). |
+| **Parent** | resolve / mode / load; **prepare**; spawn one `generalPurpose` Task per remaining task-step; **dirty-tree gate** after each return; **ship** / **rr-ci**; **pr-validate** (when open tip landed); **task-validate**; **slice-validate** + delivered (`scope: slice` only) |
+| **Executor** | That task-step’s inner pipeline `plan → build → refactor → review → step-validate` (resume from cursor `builder_stage` / `step_*_done`). Spec: [executors/step.md](executors/step.md). Prompt: [templates/step-task.template.md](templates/step-task.template.md). Executor `ok` does **not** imply CI green. |
 
 Parent does **not** implement the step inline under this cell ([routing.md](routing.md) anti-pattern).
 
@@ -291,9 +321,13 @@ parent: prepare if needed
        dirty-tree gate (git status --porcelain)
          dirty or failed → hard-stop (list paths; do not spawn next; do not silent-commit)
          clean + needs_ship → parent ship → re-run step-validate inline (assessment only)
-             → parent commits cursor/validate → dirty-tree gate → continue
-         clean + ok → if forge miss already handled / no ship needed → next step or exit loop
+             → parent commits cursor/validate → dirty-tree gate
+             → if open tip → parent pr-validate → continue
+         clean + ok → if forge miss already handled / no ship needed
+             → if open tip landed → parent pr-validate
+             → next step or exit loop
   → parent task-validate (+ forge landing)
+  → if open tip → parent pr-validate
   → scope slice only: parent slice-validate → delivered
 ```
 
@@ -312,7 +346,7 @@ After each Task return (and after parent post-ship commit), parent runs `git sta
 
 ### `needs_ship`
 
-Executor may return `needs_ship` after writing/committing a forge-miss step-validate report (forge POST stays in parent). Parent runs [ship.md](ship.md) → **rr-ci**, re-runs step-validate **inline** (assessment only), commits cursor/validate, dirty-gates, then spawns the next step Task (or proceeds to task-validate).
+Executor may return `needs_ship` after writing/committing a forge-miss step-validate report (forge POST stays in parent). Parent runs [ship.md](ship.md) → **rr-ci**, re-runs step-validate **inline** (assessment only), commits cursor/validate, dirty-gates, runs [pr-validate.md](pr-validate.md) when an open tip was landed, then spawns the next step Task (or proceeds to task-validate).
 
 ### Nested-skill leaf Tasks
 
@@ -337,13 +371,13 @@ resolve flags + cursor
 | Cell | Behavior |
 |------|----------|
 | **auto × next** | Run cursor-next stage (may load multiple nested skills/refs **in order** within that stage’s done-when). Persist cursor. **Stop** — do not chain. |
-| **auto × step** | Same execute as next, then **loop** until the **step** scope boundary (non-final → step-validate PASS + forge landing; final step or cursor on `task_validate` → task-validate PASS + forge landing of last-step + task reports). If cursor is **prepare**, complete prepare then **stop** (do not enter first step). Parent-inline (not Isolated step run). |
-| **auto × task** | **Isolated step run** (above): one sequential step Task per remaining task-step → dirty-tree gate → parent task-validate (+ ship as needed) until task-validate PASS, or hard stop. |
+| **auto × step** | Same execute as next, then **loop** until the **step** scope boundary (non-final → step-validate PASS + forge landing + pr-validate when tip pushed; final step or cursor on `task_validate` → task-validate PASS + forge landing of last-step + task reports + pr-validate when tip pushed). If cursor is **prepare**, complete prepare then **stop** (do not enter first step). Parent-inline (not Isolated step run). |
+| **auto × task** | **Isolated step run** (above): one sequential step Task per remaining task-step → dirty-tree gate → parent pr-validate when tip open → parent task-validate (+ ship / pr-validate as needed) until task-validate PASS (+ pr-validate when tip pushed), or hard stop. |
 | **auto × slice** | **Isolated step run** across remaining tasks’ steps, then parent task-validate / slice-validate → **delivered**, or hard stop (validate FAIL, missing kernel, dirty-tree gate, refactor stop, endless review max-epochs, user cancel). Silent chaining requires `drive: auto`. |
 | **manual × next** | Present only the next logical stage; wait for confirm/change; execute that one; then wait again or stop if user declines. **Never** execute without confirm. |
 | **manual × step** / **task** / **slice** | Same boundaries as auto counterparts; AskQuestion before each stage execute. Under `slice`, list remaining stages as **ready** vs **blocked** (+ prereq); mark the cursor stage **`(next)`**; AskQuestion among **ready** only; execute chosen; re-list until decline / delivered / hard stop / boundary. **Never** offer blocked as runnable. Parent-inline (not Isolated step run). |
 
-**Hard stop** ends any loop: stage failure, validate FAIL, dirty-tree gate (isolation cell), missing inputs, conflicting flags, endless review epoch cap without clear exit, user decline. Persist `builder_stage` / `step_index` / `step_*_done` after each successful done-when before the next probe.
+**Hard stop** ends any loop: stage failure, validate FAIL, pr-validate hard-stop, dirty-tree gate (isolation cell), missing inputs, conflicting flags, endless review epoch cap without clear exit, user decline. Persist `builder_stage` / `step_index` / `step_*_done` after each successful done-when before the next probe.
 
 **Handoff:** skip this loop — [routing.md](routing.md) handoff table; stop at nested done-when. Drive/scope do not mutate handoff lanes.
 

@@ -6,7 +6,7 @@ Owned by skill rr-builder; loaded only via Isolated step run Task Caller Load �
 
 Function-style Task executor for **one task-step** under `drive: auto` ∧ `scope: task|slice`. Runs that step’s inner pipeline `plan → build → refactor → review → step-validate`, resuming from cursor `builder_stage` / `step_*_done`. Same working tree as parent — context isolation only.
 
-Does **not** own prepare, ship/rr-ci, task-validate, slice-validate, or delivered. Does **not** re-invoke **rr-builder**.
+Does **not** own prepare, ship/rr-ci, pr-validate, task-validate, slice-validate, or delivered. Does **not** re-invoke **rr-builder**. Executor `ok` does **not** imply CI green — parent runs pr-validate when an open tip was landed.
 
 ## Tools and boundaries
 
@@ -22,8 +22,8 @@ Does **not** own prepare, ship/rr-ci, task-validate, slice-validate, or delivere
 
 | Status | When |
 |--------|------|
-| `ok` | Step-validate done-when met for this step (PASS + forge landing satisfied when shippable, or `ship_after: never`); cursor flags persisted; work committed; porcelain clean |
-| `needs_ship` | Step-validate Forge/PR FAIL with `ship_after: step_validate` and ship not done; forge-miss report (+ cursor) written and **committed**; parent must run `refs/ship.md` then re-validate |
+| `ok` | Step-validate done-when met for this step (PASS + forge landing satisfied when shippable, or `ship_after: never`); cursor flags persisted; work committed; porcelain clean. Does **not** imply PR/MR CI green — parent owns [pr-validate.md](../pr-validate.md) |
+| `needs_ship` | Step-validate Forge/PR FAIL with `ship_after: step_validate` and ship not done; forge-miss report (+ cursor) written and **committed**; parent must run `refs/ship.md` then re-validate (then pr-validate when tip pushed) |
 | `failed` | Hard-stop inside the step (missing inputs, non-forge validate FAIL, review epoch cap, refactor unrecoverable, conflicting state); **no** commit; dirty tree expected |
 
 Always state `status`, `step_index`, `builder_stage` as one-line bullets; list clarifications (or “none”).
@@ -38,7 +38,7 @@ Caller Load (parent Task prompt / payload):
 | **Stable hard-links** | `refs/slice-pipeline.md` stage contracts; `refs/plan-knowledge.md`; `refs/plan-schema.md`; `refs/feature-branch.md`; `refs/task-validate.md` (step-validate only) |
 | **Lane hard-links (resume-conditional)** | Load only pending stages per `step_*_done`: plan/build → `rr-coder/SKILL.md` + `rr-tester/SKILL.md`; refactor → `rr-refactor/SKILL.md`; review → `rr-review/SKILL.md`; resuming at step-validate → none |
 | **Variant inject** | Current `{NNNN}.md` + `{NNNN}-{step}.plan.md` if present |
-| **Forbidden** | Re-invoke rr-builder; slice-validate; task-validate; ship/rr-ci; `--add-endless-test`; parallel sibling steps |
+| **Forbidden** | Re-invoke rr-builder; slice-validate; task-validate; pr-validate; ship/rr-ci; `--add-endless-test`; parallel sibling steps |
 
 Missing required fields → `failed` + clarification bullets.
 
@@ -55,4 +55,4 @@ Parent does **not** need the full review report pasted. Output shape SoT for the
 
 ## Orchestration
 
-Sequential stages inside one Task. Parent owns the outer step loop + dirty-tree gate + ship. No write gates here — parent owns gates for skill authoring; executor owns product commits for this step only.
+Sequential stages inside one Task. Parent owns the outer step loop + dirty-tree gate + ship + pr-validate. No write gates here — parent owns gates for skill authoring; executor owns product commits for this step only.

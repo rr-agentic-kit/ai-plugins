@@ -17,12 +17,12 @@
 
 **Owns:** Forge detect, PR/MR title/description, pipeline debug, publish, deploy, inline POST scripts. Disk sidecars under **`.ai/ci/`**.
 
-**When builder hands off:** (1) orchestrate **ship** after planned validate ([ship.md](ship.md) — mid-slice or task-scoped); (2) **slice delivered** residual; (3) **rr-review** `--ci`.
+**When builder hands off:** (1) orchestrate **ship** after planned validate ([ship.md](ship.md) — mid-slice or task-scoped); (2) **pr-validate** wait/fix probes (`pre-merge-status`, `debug-pipeline`, `--fix --sonar`) after forge landing push ([pr-validate.md](pr-validate.md)); (3) **slice delivered** residual; (4) **rr-review** `--ci`.
 
-**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--step`/`--task`/`--slice`), ad-hoc **`--feature`** (mint + `scope=task`), and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **rr-ci** — does **not** invent forge CLI.
-**rr-builder does not:** open MR/PR except by handing off to **rr-ci** (ship stage, delivered residual, or review `--ci`).
+**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--step`/`--task`/`--slice`), ad-hoc **`--feature`** (mint + `scope=task`), and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **rr-ci** — does **not** invent forge CLI. **pr-validate:** builder waits/orchestrates; rr-ci owns wait probes + Sonar fix.
+**rr-builder does not:** open MR/PR except by handing off to **rr-ci** (ship stage, delivered residual, or review `--ci`); invent forge wait CLI or list Sonar issues itself.
 
-**Stop phrase:** "Ship/CI forge mechanics — use **rr-ci**." Builder may **enter** ship and load rr-ci when shippable validate hits the Forge/PR gate (or plan declares `ship_after`); it must not skip a planned ship, require PASS-before-ship for that gate, or open the PR itself.
+**Stop phrase:** "Ship/CI forge mechanics — use **rr-ci**." Builder may **enter** ship and load rr-ci when shippable validate hits the Forge/PR gate (or plan declares `ship_after`); it must not skip a planned ship, require PASS-before-ship for that gate, or open the PR itself. After tip push, builder enters **pr-validate** and load rr-ci for status/fix — it must not invent wait flags or treat Sonar as ad-hoc outside `--fix --sonar`.
 
 **Forge-open invariant SoT:** the two rr-ci bullets above ("When builder hands off" + "does not open MR/PR except by handing off"). Other refs (ship.md, task-validate.md, slice-pipeline.md, routing.md, SKILL.md) carry pointers only.
 
