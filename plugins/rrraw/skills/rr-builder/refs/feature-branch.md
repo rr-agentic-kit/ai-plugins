@@ -24,6 +24,7 @@ At **plan** stage start — before writing `{NNNN}-{step}.plan.md`. Re-check is 
 
 ## Ensure procedure
 
+0. **Precondition:** Confirm every nested skill directory this stage's Loads row names ([routing.md](routing.md) **Orchestrate stage → load** / [slice-pipeline.md](slice-pipeline.md) Stage contracts) exists on disk. Missing → stop with a one-line reason (`SKILL.md` Missing ref rule) **before** any checkout/branch mutation below — do not `EnterWorktree` / create / rename a branch for a stage whose nested skill can't run.
 1. Resolve repo root; `git branch --show-current` → `HEAD_BRANCH`. Read `payload.drive` from the run (orchestrate / feature).
 2. Build `TARGET=feat/{NNNN}-{step}-{short-desc}` from the step Goal (kebab).
 3. Branch on `HEAD_BRANCH` — **first match wins**:
@@ -31,6 +32,7 @@ At **plan** stage start — before writing `{NNNN}-{step}.plan.md`. Re-check is 
 | Predicate | Action |
 |-----------|--------|
 | `HEAD_BRANCH` is `main` or `master` | `git checkout -b TARGET` (dirty tree OK — **must** carry uncommitted work onto the new branch, including orphaned `docs/rr/tasks/**` / `artifact_root` validate reports, Verify checkbox flips, and cursor frontmatter from a prior step’s carry-to-next — [task-validate.md](task-validate.md) Forge landing). Done when HEAD is `TARGET`. |
+| `HEAD_BRANCH` is a harness-created isolation/scaffold branch (e.g. session `EnterWorktree` default naming) — no commits beyond its base, does **not** match `feat/{NNNN}-*` | Treat as the `main`/`master` row: `git checkout -b TARGET` (or rename in place). Disposable session-only branch, no shared history to preserve. Done when HEAD is `TARGET`. |
 | `HEAD_BRANCH` equals `TARGET` | No-op. Done. |
 | `HEAD_BRANCH` matches `feat/{NNNN}-{step}-*` but ≠ `TARGET` | AskQuestion: rename to `TARGET` \| keep current \| abort plan. (Same-step rename — still Ask even under `drive: auto`.) |
 | **`drive: auto`** and `HEAD_BRANCH` matches `feat/{NNNN}-*` (same `{NNNN}`) and does **not** match `feat/{NNNN}-{step}-*` (prior / other-step tip) and ≠ `TARGET` | **Auto tip-chain:** `git checkout -b TARGET` from current HEAD (dirty tree OK — same carry-to-next rule as main/master). **Do not** AskQuestion. Done when HEAD is `TARGET`. Record chain in plan Risks if useful. |

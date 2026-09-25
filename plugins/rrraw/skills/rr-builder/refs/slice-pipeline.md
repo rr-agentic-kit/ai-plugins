@@ -168,7 +168,7 @@ Prefer extending existing prepare artifacts — no third parallel state file.
 | Field | Where | Values / notes |
 |-------|--------|----------------|
 | `builder_stage` | `{NNNN}.md` frontmatter (active task) and/or `task-summary.md` | `prepare` \| `plan` \| `build` \| `refactor` \| `review` \| `step_validate` \| `ship` \| `pr_validate` \| `task_validate` \| `slice_validate` \| `delivered` |
-| `step_index` | `{NNNN}.md` frontmatter | 0-based index into that task’s **Steps** (omit when stage is prepare / task_validate / slice_validate / delivered) |
+| `step_index` | `{NNNN}.md` frontmatter | 0-based index into that task’s **Steps** (omit when stage is prepare / task_validate / slice_validate / delivered). **Cross-check:** when in doubt, verify against the highest-existing `{NNNN}-{step}.plan.md` on disk (`{step}` = `step_index + 1` per [plan-schema.md](plan-schema.md)) before trusting frontmatter alone — mismatch → stop and reconcile rather than guessing |
 | `step_plan_done` | `{NNNN}.md` frontmatter | `true` \| `false` — applies to current `step_index`; reset to `false` when advancing `step_index` |
 | `step_build_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done` |
 | `step_refactor_done` | `{NNNN}.md` frontmatter | `true` \| `false` — same scope as `step_plan_done`; reset when advancing `step_index` |
