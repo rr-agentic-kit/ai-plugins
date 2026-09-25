@@ -1,7 +1,7 @@
 {
   "name": "rrraw",
   "displayName": "RRRaw",
-  "version": "0.0.5-rc-14",
+  "version": "0.0.5-rc-24",
   "description": "Discover (ES\u2192BRD + business-case) + Plan (PRD+) + build/test/review + local git + forge-agnostic CI",
   "license": "Unlicense",
   "keywords": [

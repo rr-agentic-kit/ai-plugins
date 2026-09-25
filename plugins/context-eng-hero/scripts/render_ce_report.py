@@ -102,8 +102,9 @@ def _assert_markdown_tables_ok(body: str) -> None:
             or (stripped.startswith("|") and "---|" in stripped[:48])
         ):
             raise ValueError(
-                "smashed markdown table row (header/separator glued to data with '||'); "
-                "fix Jinja whitespace (avoid trim_blocks eating newlines between rows)"
+                "smashed markdown table row (header/separator glued to data "
+                "with '||'); fix Jinja whitespace (avoid trim_blocks eating "
+                "newlines between rows)"
             )
         # Multiple data rows glued on one line
         if "||" in line and stripped.startswith("|") and not stripped.startswith("|--"):

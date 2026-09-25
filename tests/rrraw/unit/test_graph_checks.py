@@ -17,17 +17,12 @@ def test_broken_parent():
 
 
 def test_level_skip():
+    # BRD's parent must be MRD; parenting straight to ES skips a cascade level.
+    # (PRD is exempt: C2-7 lets it parent >=1 ES or >=1 BRD id directly.)
     issues = vp.check_parents(
         [
             item("ES-3", parent=None, moscow="Must"),
-            item(
-                "PRD-1",
-                parent="ES-3",
-                reach="40% of MAU",
-                impact="2",
-                confidence="medium",
-                effort="5",
-            ),
+            item("BRD-1", parent="ES-3"),
         ]
     )
     assert "LEVEL_SKIP" in error_codes(issues)

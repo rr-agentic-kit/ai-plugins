@@ -121,8 +121,14 @@ def test_main_auto_resolves_open_pr(
     }
 
     def _fake_run(cmd: list[str], **_kwargs: Any) -> Any:
-        assert "--pull-request" in cmd
-        assert "42" in cmd
+        # total stays 0, so `_run_sonar` falls back from `sonar list issues`
+        # (--pull-request flag) to `sonar api get` (pullRequest= query param).
+        if cmd[1:3] == ["list", "issues"]:
+            assert "--pull-request" in cmd
+            assert "42" in cmd
+        else:
+            assert cmd[1:3] == ["api", "get"]
+            assert "pullRequest=42" in cmd[3]
 
         class _Completed:
             returncode = 0

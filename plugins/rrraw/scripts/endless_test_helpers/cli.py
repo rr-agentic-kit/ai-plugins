@@ -35,7 +35,11 @@ def _load_frontmatter(path: Path) -> dict:
         val = val.strip().strip("'\"")
         if val.startswith("[") and val.endswith("]"):
             inner = val[1:-1].strip()
-            data[key] = [x.strip().strip("'\"") for x in inner.split(",") if x.strip()] if inner else []
+            data[key] = (
+                [x.strip().strip("'\"") for x in inner.split(",") if x.strip()]
+                if inner
+                else []
+            )
         elif val.isdigit():
             data[key] = int(val)
         else:
@@ -47,7 +51,9 @@ def _plan_paths(plans_dir: Path, chunk: str | None) -> list[Path]:
     paths = sorted(plans_dir.glob("trp-*.md"))
     if chunk is None:
         return paths
-    return [p for p in paths if chunk in p.name or chunk in p.read_text(encoding="utf-8")]
+    return [
+        p for p in paths if chunk in p.name or chunk in p.read_text(encoding="utf-8")
+    ]
 
 
 def _file_set(path: Path, fm: dict) -> set[str]:
@@ -80,7 +86,10 @@ def cmd_packing_probes(args: argparse.Namespace) -> int:
         one_step = sum(1 for _, _, _, s in packs if s == 1)
         if one_step >= max(1, len(packs) // 2):
             print("probe: micro_packs")
-            print("PACKING_RETRY: bin-pack toward HARD_MAX; mixed fill small steps into remaining headroom")
+            print(
+                "PACKING_RETRY: bin-pack toward HARD_MAX; mixed fill small "
+                "steps into remaining headroom"
+            )
             return 1
 
     # parallel_collision
@@ -138,7 +147,9 @@ def cmd_dispatch_queue(args: argparse.Namespace) -> int:
             batch.append(n)
             used_files |= set(n["files"])
         if not batch:
-            print("packing_gate: intersecting file sets in ready layer", file=sys.stderr)
+            print(
+                "packing_gate: intersecting file sets in ready layer", file=sys.stderr
+            )
             return 1
         max_p = args.max_parallel
         if max_p and max_p > 0:
@@ -156,7 +167,8 @@ def _parse_counts(text: str) -> tuple[int, int, int, int, int] | None:
     m = COUNTS_RE.search(text)
     if not m:
         return None
-    return tuple(int(x) for x in m.groups())
+    a, b, c, d, e = (int(x) for x in m.groups())
+    return a, b, c, d, e
 
 
 def cmd_aggregate_counts(args: argparse.Namespace) -> int:
@@ -203,7 +215,10 @@ def cmd_manifest_table(args: argparse.Namespace) -> int:
     plans_dir = Path(args.plans_dir)
     paths = _plan_paths(plans_dir, None)
     print(f"## Endless add-test — iteration {args.iteration} / Work-pack dispatch\n")
-    print("| pack_sequence | plan_path | branch_name | sequential_after | parallel_group | Grouping (heuristic) |")
+    print(
+        "| pack_sequence | plan_path | branch_name | sequential_after | "
+        "parallel_group | Grouping (heuristic) |"
+    )
     print("| --- | --- | --- | --- | --- | --- |")
     for p in paths:
         fm = _load_frontmatter(p)
@@ -217,7 +232,9 @@ def cmd_manifest_table(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="rr-test-endless orchestration helpers")
+    parser = argparse.ArgumentParser(
+        description="rr-test-endless orchestration helpers"
+    )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_probe = sub.add_parser("packing-probes")
