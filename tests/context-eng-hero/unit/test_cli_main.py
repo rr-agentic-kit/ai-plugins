@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 from audit_static.cli import _resolve_relative_path, main
+
 from conftest import _ensure_lexicon_companions
 
 _VALID_SKILL = """\

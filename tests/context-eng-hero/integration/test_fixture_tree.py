@@ -7,6 +7,7 @@ import sys
 
 import audit_static as m
 import pytest
+
 from conftest import FIXTURE_CASES, all_pass
 
 

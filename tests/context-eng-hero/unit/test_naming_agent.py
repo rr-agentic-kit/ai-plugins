@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import audit_static as m
+
 from conftest import result_by_id
 
 

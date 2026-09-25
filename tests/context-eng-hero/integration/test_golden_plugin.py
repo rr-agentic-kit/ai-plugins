@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import audit_static as m
+
 from conftest import all_pass
 
 
