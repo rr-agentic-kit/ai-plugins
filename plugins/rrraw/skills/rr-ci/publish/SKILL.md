@@ -1,6 +1,7 @@
 ---
 name: publish
 disable-model-invocation: true
+user-invocable: false
 description: Publish artifacts to Pages, registries, releases, and object storage. Loaded by rr-ci after forge skill — not a top-level plugin skill.
 ---
 

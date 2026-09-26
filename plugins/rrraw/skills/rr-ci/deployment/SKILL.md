@@ -1,6 +1,7 @@
 ---
 name: deployment
 disable-model-invocation: true
+user-invocable: false
 description: Deploy via Helm, Kubernetes, and GitOps (Argo CD). Loaded by rr-ci — not a top-level plugin skill. No employer cluster catalogs.
 ---
 
