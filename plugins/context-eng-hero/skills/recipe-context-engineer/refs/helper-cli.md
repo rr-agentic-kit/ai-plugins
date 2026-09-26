@@ -2,7 +2,7 @@
 
 When a skill folder includes `scripts/`, the agent **runs** them via shell—it does **not** load script source into context as documentation.
 
-Load with **create**, **fix**, **design**, and **audit** when `scripts/` exists under the target skill.
+Load with **create**, **fix**, **design**, and **audit** when the target skill has `scripts/` **or** the case is a deterministic fetch/filter/id-keyed write that should become a script (see **When to add `scripts/`**).
 
 ## Core rule
 
@@ -16,12 +16,15 @@ Anthropic agent-skills guidance: scripts are **executed**, not loaded as docs.
 
 ## When to add `scripts/`
 
-- Repeatable multi-step workflow where the agent would otherwise invent the same shell chain every time
+- A user case that is the **same fetch, filter, or id-keyed write every time** — the agent would re-type the chain or dump raw API payloads into context
+- Stdout must be **only the fields the next step needs** (ids, filtered rows, stable envelopes) — not URLs, full GraphQL objects, or lists the agent re-filters in chat
+- Shell (`#!/bin/sh` + `gh`/`jq`/thin glue) is enough; no general SDK layer required
+- Repeatable multi-step workflow where the agent would otherwise invent the same shell chain every turn
 - Deterministic structure checks (see plugin `scripts/audit_static.py` as reference)
 - Fat CLI that polls internally so the agent waits one invocation
 - **Report scaffolding + severity math** from lean JSON (see **Lean emit + schema + render** below; CE exemplar `scripts/render_ce_report.py`)
 
-**Not for:** one-off `git`/`glab` calls documented once; general SDK layers; inline bash chains that belong in a single documented command.
+**Not for:** general SDK layers; one-off prose-only guidance with no repeated invent/dump waste. A **single** documented `git`/`gh` one-liner is fine when it is not reinvented every run — when the miss is unfiltered payloads or missing id-keyed writes, add the script instead of more markdown.
 
 ### Improve helpers (plugin root)
 

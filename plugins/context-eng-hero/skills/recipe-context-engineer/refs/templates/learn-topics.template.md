@@ -24,7 +24,7 @@ Inventory from the missed run / problem statement (not extra skill Reads). Feed 
 
 | Id | Class | Evidence | Missing locus | Proposed absorb | Confidence |
 |----|-------|----------|---------------|-----------------|------------|
-| T1 | skill_gap | <patch\|friction>: <excerpt/pointer> | <SKILL/ref/step> | step \| stop-rule \| ref \| anti-trigger \| probe \| readme-when \| batch \| read-budget | high \| med \| low |
+| T1 | skill_gap | <patch\|friction>: <excerpt/pointer> | <SKILL/ref/step> | step \| stop-rule \| ref \| anti-trigger \| probe \| readme-when \| batch \| read-budget \| script | high \| med \| low |
 
 (Only rows with Class = skill_gap are **selected** by default. Max 7 rows.)
 

@@ -77,7 +77,7 @@ Load these only when the active action Ref index names them (create/design/extra
 | `refs/frontmatter-schemas.md` | Frontmatter field SoT (draft/gates) |
 | `refs/readme-spec.md` | Skill folder README (bidirectional spec) |
 | `refs/lexicon-spec.md` | Plugin/skill ACRONYMS + GLOSSARY companions |
-| `refs/helper-cli.md` | Target has `scripts/` |
+| `refs/helper-cli.md` | Target has `scripts/` or deterministic fetch/filter/id-keyed write case |
 | `refs/template-required-map.md` | Drafting; reflection evidence |
 
 ## Exit conditions

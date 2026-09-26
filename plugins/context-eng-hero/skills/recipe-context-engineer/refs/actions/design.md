@@ -24,7 +24,7 @@ Conditional procedure when skill **Classify** + **Clarify** ends with writing a 
 | `lexicon-spec.md` | `design-3-draft` (ACRONYMS + GLOSSARY) |
 | `templates/acronyms.template.md` | `design-3-draft` (ACRONYMS.md) |
 | `templates/glossary.template.md` | `design-3-draft` (GLOSSARY.md) |
-| `helper-cli.md` | `design-3-draft` (when `scripts/`) |
+| `helper-cli.md` | `design-3-draft` (when `scripts/` exists **or** deterministic fetch/filter/id-keyed write) |
 | `template-required-map.md` | `design-3-draft` |
 | `templates/<type>.template.md` (per `classify.md`) | `design-3-draft` |
 | `shared-write-gates.md` | `design-4-gates` |
