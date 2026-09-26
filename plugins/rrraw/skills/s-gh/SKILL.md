@@ -40,6 +40,7 @@ Parent **s-ci** already selected GitHub. Do not load for GitLab remotes.
 | **Reply to thread** | `scripts/open-review-threads.sh --reply <thread_id> --body "…"` (or `--body-file`); use `id` from list output — not a discussion URL |
 | **Fix current-PR threads** | Read parent `refs/review-comment-triage.md`; triage each thread; edit this branch when implement; reply with `--reply` + thread `id`; do **not** resolve on false positives (`mr-skip-threads` is skip-only, not reply) |
 | Thread disposition (triage rules) | Parent `refs/review-comment-triage.md` (Read from s-ci root; do not invent path) |
+| **Wait for Actions run** | `scripts/wait-run.py RUN_ID` `[--repo owner/repo]` — one JSON `status`/`conclusion` on completion; do **not** invent inline `gh run view` poll chains |
 | Failed Actions run | `debug-pipeline` `[PR_NUMBER]` — `result.status`, `result.error_lines`, `result.failed_job_id` (check-run / job id) |
 | Code scanning / quality | `code-quality-reports` |
 | **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues --lean` (default: open PR for current branch) |
@@ -81,5 +82,6 @@ When asked — run `pre-merge-status` once; branch on `result.verdict` / `result
 - After workflow fixes: commit/push allowed (parent s-ci); re-run with `gh run rerun RUN_ID --failed`.
 - Do not invent `s-ci` subcommands — parent `SCRIPTS-SPEC.md`.
 - Do not invent `gh` flags — only [refs/cli.md](refs/cli.md) + task rows above.
+- Do not re-create inline `gh run view` / `python -c` poll loops — use `scripts/wait-run.py`.
 - Inline comment line/diff rules: [refs/inline-comments.md](refs/inline-comments.md).
 - Create/update ship routes are aliases; never invent a second PR for the same branch.
