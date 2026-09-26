@@ -80,3 +80,26 @@ def test_workflow_ref_for_prefers_ref_override(fake_git):
         default_branch_name="master",
     )
     assert ref == "custom"
+
+
+def test_sanitize_git_argv_allows_known_call_shapes():
+    assert rb._sanitize_git_argv(["rev-parse", "--abbrev-ref", "HEAD"]) == [
+        "rev-parse",
+        "--abbrev-ref",
+        "HEAD",
+    ]
+    assert rb._sanitize_git_argv(
+        ["ls-remote", "--exit-code", "--heads", "origin", "--", "feat/x"]
+    ) == ["ls-remote", "--exit-code", "--heads", "origin", "--", "feat/x"]
+    assert rb._sanitize_git_argv(
+        ["cat-file", "-e", "origin/master:.github/workflows/release-control.yml"]
+    ) == ["cat-file", "-e", "origin/master:.github/workflows/release-control.yml"]
+
+
+def test_sanitize_git_argv_rejects_option_injection():
+    with pytest.raises(rb.GitError, match="disallowed git flag"):
+        rb._sanitize_git_argv(["fetch", "--upload-pack=evil", "origin"])
+    with pytest.raises(rb.GitError, match="disallowed git subcommand"):
+        rb._sanitize_git_argv(["config", "--get", "user.name"])
+    with pytest.raises(rb.GitError, match="unsafe git argument"):
+        rb._sanitize_git_argv(["fetch", "origin", "feat/x;rm"])

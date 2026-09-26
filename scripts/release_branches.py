@@ -175,8 +175,9 @@ class GhRunner:
         return result.stdout.rstrip("\n")
 
 
-_ALLOWED_GIT_SUBCOMMANDS = frozenset(
-    {
+_ALLOWED_GIT_SUBCOMMANDS_MAP = {
+    name: name
+    for name in (
         "branch",
         "cat-file",
         "checkout",
@@ -185,28 +186,66 @@ _ALLOWED_GIT_SUBCOMMANDS = frozenset(
         "push",
         "rev-parse",
         "show-ref",
-    }
+    )
+}
+_ALLOWED_GIT_SUBCOMMANDS = frozenset(_ALLOWED_GIT_SUBCOMMANDS_MAP)
+
+# Only flags used by in-repo GitRunner call sites (CWE-88 / S8705).
+_ALLOWED_GIT_FLAGS_MAP = {
+    name: name
+    for name in (
+        "--",
+        "-b",
+        "-e",
+        "-f",
+        "-u",
+        "--abbrev-ref",
+        "--exit-code",
+        "--heads",
+        "--no-track",
+        "--quiet",
+        "--verify",
+    )
+}
+_ALLOWED_GIT_FLAGS = frozenset(_ALLOWED_GIT_FLAGS_MAP)
+
+# Branch names, remotes, refs, rev:path, and globs like release/*.
+_SAFE_GIT_VALUE = re.compile(
+    r"^(?:HEAD(?::[^\x00\n\r\s]+)?|[A-Za-z0-9][A-Za-z0-9._/@%+*:~^-]*)$"
 )
 
 
-def _validate_git_arg(arg: str) -> str:
-    if not arg or "\x00" in arg or "\n" in arg or "\r" in arg:
-        raise GitError(f"unsafe git argument: {arg!r}")
-    return arg
+def _sanitize_git_argv(args: Sequence[str]) -> list[str]:
+    """Build argv from allowlists so LLM-supplied tokens cannot inject options."""
+    if not args:
+        raise GitError("empty git argv")
+    subcommand = args[0]
+    if subcommand not in _ALLOWED_GIT_SUBCOMMANDS:
+        raise GitError(f"disallowed git subcommand: {subcommand!r}")
+    # Map through allowlists so tokens are allowlist-derived, not caller-tainted.
+    safe: list[str] = [_ALLOWED_GIT_SUBCOMMANDS_MAP[subcommand]]
+    for arg in args[1:]:
+        if not arg or "\x00" in arg or "\n" in arg or "\r" in arg or " " in arg:
+            raise GitError(f"unsafe git argument: {arg!r}")
+        if arg.startswith("-"):
+            if arg not in _ALLOWED_GIT_FLAGS_MAP:
+                raise GitError(f"disallowed git flag: {arg!r}")
+            safe.append(_ALLOWED_GIT_FLAGS_MAP[arg])
+            continue
+        match = _SAFE_GIT_VALUE.fullmatch(arg)
+        if match is None:
+            raise GitError(f"unsafe git argument: {arg!r}")
+        safe.append(match.group(0))
+    return safe
 
 
 class GitRunner:
     def run(self, args: Sequence[str], *, cwd: Path) -> str:
-        if not args:
-            raise GitError("empty git argv")
-        subcommand = args[0]
-        if subcommand not in _ALLOWED_GIT_SUBCOMMANDS:
-            raise GitError(f"disallowed git subcommand: {subcommand!r}")
-        safe_args = [_validate_git_arg(arg) for arg in args]
+        safe_args = _sanitize_git_argv(args)
         git_bin = shutil.which("git")
         if git_bin is None:
             raise GitError("git not found on PATH")
-        cmd = [git_bin, "-C", str(cwd), *safe_args]
+        cmd = [git_bin, "-C", str(cwd.resolve()), *safe_args]
         result = subprocess.run(
             cmd, capture_output=True, text=True, check=False, shell=False
         )
