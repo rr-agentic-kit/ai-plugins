@@ -8,7 +8,7 @@ Keep GitHub-only `gh`/MCP and Actions patterns out of the forge-agnostic root wh
 
 ## What
 
-Routes PR upsert (create if missing, update if exists), Actions debug, inline review comments, security/quality reports, and pre-merge checks through **gh** or GitHub MCP.
+Routes PR upsert (create if missing, update if exists), Actions debug, inline review comments, **open review-thread list/reply** (`scripts/open-review-threads.sh`), current-PR thread fixes (triage + edit + reply by thread `id`), security/quality reports, and pre-merge checks through **gh** or GitHub MCP.
 
 **Out of scope:** GitLab/`glab`, local-only git, publish/deploy mechanics (siblings), inventing `s-ci` subcommands.
 
@@ -36,5 +36,7 @@ Routes PR upsert (create if missing, update if exists), Actions debug, inline re
 github/
 ├── SKILL.md
 ├── README.md
+├── scripts/
+│   └── open-review-threads.sh
 └── refs/   # cli, inline-comments, mcp, workflow-rules
 ```

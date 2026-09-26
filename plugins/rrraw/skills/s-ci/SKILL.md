@@ -47,7 +47,7 @@ Own the **ship path** (commit/push when creating or updating a PR/MR), **forge t
 ## When not to use
 
 - Local git only (rebase, worktree, conflicts, branch cleanup) with **no** PR/MR → **s-git**
-- General implement, refactor, test writing, or multi-lane code review → **rr-builder** (exception: **Sonar-only** remediations under `--fix --sonar`)
+- General implement, refactor, test writing, or multi-lane code review → **rr-builder** (exceptions: **Sonar-only** remediations under `--fix --sonar`; **unresolved review threads on the current PR** — triage per [refs/review-comment-triage.md](refs/review-comment-triage.md), edit this branch when implement, then forge reply via nested **s-gh** `open-review-threads.sh --reply` with the thread `id`)
 - Employer/internal catalogs (pinned component versions, cluster inventories, required tracker keys in titles) — not this plugin
 - Inventing forge CLI flags or `s-ci` subcommands not listed in nested skills / [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md)
 

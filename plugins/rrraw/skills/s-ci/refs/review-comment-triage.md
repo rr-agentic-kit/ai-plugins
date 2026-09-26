@@ -43,6 +43,8 @@ Pipeline SAST / dependency / secrets findings → escalate to org scanner / secu
 
 ## Optional reply skeletons
 
+**Reply transport (GitHub):** use the thread GraphQL `id` from `skills/s-gh/scripts/open-review-threads.sh` list output with `--reply` — not a PR discussion URL or REST comment id.
+
 **Implemented:** `Addressed in [commit]. [what changed]`
 
 **Better alt:** `Applied [alt] instead of suggested because [reason]. See [commit].`

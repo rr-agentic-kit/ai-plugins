@@ -36,7 +36,10 @@ Parent **s-ci** already selected GitHub. Do not load for GitLab remotes.
 | **Issue create** | Steps **Issue create** below |
 | **PR ship** | `mr-add-preflight` then **Default PR ship** below |
 | Review comments on diff lines | `mr-ci-review-preflight` then [refs/inline-comments.md](refs/inline-comments.md) — GitHub `diff_refs` may be empty until parity; still run preflight for allowlist/MR metadata |
-| Thread disposition / reply | Parent `refs/review-comment-triage.md` (Read from s-ci root; do not invent path) |
+| **Open review threads** | `scripts/open-review-threads.sh` — filtered stdout (`id`, `path`, `line`, `outdated`, `comments`; no `url`) |
+| **Reply to thread** | `scripts/open-review-threads.sh --reply <thread_id> --body "…"` (or `--body-file`); use `id` from list output — not a discussion URL |
+| **Fix current-PR threads** | Read parent `refs/review-comment-triage.md`; triage each thread; edit this branch when implement; reply with `--reply` + thread `id`; do **not** resolve on false positives (`mr-skip-threads` is skip-only, not reply) |
+| Thread disposition (triage rules) | Parent `refs/review-comment-triage.md` (Read from s-ci root; do not invent path) |
 | Failed Actions run | `debug-pipeline` `[PR_NUMBER]` — `result.status`, `result.error_lines`, `result.failed_job_id` (check-run / job id) |
 | Code scanning / quality | `code-quality-reports` |
 | **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues --lean` (default: open PR for current branch) |

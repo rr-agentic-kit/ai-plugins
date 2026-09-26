@@ -23,6 +23,8 @@ Orchestrate multi-lane code / test / security review in the **parent session**. 
 
 Standalone PR open or pipeline-only debug → **s-ci** without review.
 
+Existing **unresolved PR/MR review threads** on the current branch (triage, implement, forge reply) → **s-ci** + nested forge skill — not **s-review**. **`--fix` here** is for lane assess findings under `.ai/review/`, not thread transport.
+
 ## Load
 
 | Ref | When |
