@@ -30,7 +30,7 @@ def test_creates_pr(fake_gh, fake_git, monkeypatch, capsys):
         lambda *_a, **_k: ["release/0.1.0"],
     )
 
-    assert cpr.main(["--title", "Add thing", "--description", "Body"]) == 0
+    cpr.main(["--title", "Add thing", "--description", "Body"])
     out = capsys.readouterr().out
     assert "status=created" in out
     assert fake_gh.calls[-1][0][:2] == ("pr", "create")
@@ -54,7 +54,7 @@ def test_updates_existing_pr(fake_gh, fake_git, monkeypatch, capsys):
         lambda *_a, **_k: ["release/0.1.0"],
     )
 
-    assert cpr.main(["--title", "Updated", "--description", "New body"]) == 0
+    cpr.main(["--title", "Updated", "--description", "New body"])
     out = capsys.readouterr().out
     assert "status=updated" in out
     assert fake_gh.calls[-1][0][:3] == ("pr", "edit", "42")

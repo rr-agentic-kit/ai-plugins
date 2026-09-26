@@ -15,11 +15,16 @@ from packaging.version import Version
 
 from ci_release_control import parse_hotfix_branch, parse_release_branch
 
-RELEASE_HEAD_PATTERN = re.compile(r"^release/[0-9]+\.[0-9]+\.0$")
-SEED_VERSION_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.0$")
+RELEASE_PREFIX = "release/"
+HOTFIX_PREFIX = "hotfix/"
+
+RELEASE_HEAD_PATTERN = re.compile(rf"^{re.escape(RELEASE_PREFIX)}\d+\.\d+\.0$")
+SEED_VERSION_PATTERN = re.compile(r"^\d+\.\d+\.0$")
+RELEASE_VERSION_PATTERN = re.compile(r"^\d+\.\d+\.0$")
+HOTFIX_VERSION_PATTERN = re.compile(r"^\d+\.\d+\.[1-9]\d*$")
 
 RESERVED_BRANCH_NAMES = frozenset({"master", "main"})
-RESERVED_BRANCH_PREFIXES = ("release/", "hotfix/")
+RESERVED_BRANCH_PREFIXES = (RELEASE_PREFIX, HOTFIX_PREFIX)
 RESERVED_PR_HEADS = frozenset({"HEAD", "master", "main"})
 
 WORKFLOW = "release-control.yml"
@@ -46,18 +51,18 @@ def emit(*lines: str) -> None:
 def validate_release_branch_name(
     branch: str, *, prog: str = "release_branches"
 ) -> None:
-    if not branch.startswith("release/"):
+    if not branch.startswith(RELEASE_PREFIX):
         die(f"expected release/X.Y.0, got: {branch}", prog=prog)
-    ver = branch.removeprefix("release/")
-    if not re.fullmatch(r"[0-9]+\.[0-9]+\.0", ver):
+    ver = branch.removeprefix(RELEASE_PREFIX)
+    if not RELEASE_VERSION_PATTERN.fullmatch(ver):
         die(f"release branch must be N.N.0, got: {branch}", prog=prog)
 
 
 def validate_hotfix_branch_name(branch: str, *, prog: str = "release_branches") -> None:
-    if not branch.startswith("hotfix/"):
+    if not branch.startswith(HOTFIX_PREFIX):
         die(f"expected hotfix/X.Y.Z, got: {branch}", prog=prog)
-    ver = branch.removeprefix("hotfix/")
-    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[1-9][0-9]*", ver):
+    ver = branch.removeprefix(HOTFIX_PREFIX)
+    if not HOTFIX_VERSION_PATTERN.fullmatch(ver):
         die(f"hotfix patch must be > 0, got: {branch}", prog=prog)
 
 
@@ -87,7 +92,9 @@ def parse_hotfix_version(branch: str) -> str:
 
 def sorted_release_branches(branches: Sequence[str]) -> list[str]:
     release_only = [name for name in branches if RELEASE_HEAD_PATTERN.match(name)]
-    return sorted(release_only, key=lambda name: Version(name.removeprefix("release/")))
+    return sorted(
+        release_only, key=lambda name: Version(name.removeprefix(RELEASE_PREFIX))
+    )
 
 
 def lowest_open_release(
@@ -168,10 +175,41 @@ class GhRunner:
         return result.stdout.rstrip("\n")
 
 
+_ALLOWED_GIT_SUBCOMMANDS = frozenset(
+    {
+        "branch",
+        "cat-file",
+        "checkout",
+        "fetch",
+        "ls-remote",
+        "push",
+        "rev-parse",
+        "show-ref",
+    }
+)
+
+
+def _validate_git_arg(arg: str) -> str:
+    if not arg or "\x00" in arg or "\n" in arg or "\r" in arg:
+        raise GitError(f"unsafe git argument: {arg!r}")
+    return arg
+
+
 class GitRunner:
     def run(self, args: Sequence[str], *, cwd: Path) -> str:
-        cmd = ["git", "-C", str(cwd), *args]
-        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if not args:
+            raise GitError("empty git argv")
+        subcommand = args[0]
+        if subcommand not in _ALLOWED_GIT_SUBCOMMANDS:
+            raise GitError(f"disallowed git subcommand: {subcommand!r}")
+        safe_args = [_validate_git_arg(arg) for arg in args]
+        git_bin = shutil.which("git")
+        if git_bin is None:
+            raise GitError("git not found on PATH")
+        cmd = [git_bin, "-C", str(cwd), *safe_args]
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, check=False, shell=False
+        )
         if result.returncode != 0:
             detail = result.stderr.strip() or result.stdout.strip()
             raise GitError(detail or f"git exited {result.returncode}")

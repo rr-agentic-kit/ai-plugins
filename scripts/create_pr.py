@@ -64,12 +64,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> int:
-    ns = parse_args(argv)
-    if ns.help:
-        print(usage())
-        return 0
-
+def _body_args(ns: argparse.Namespace) -> list[str]:
     title = ns.title
     description = ns.description or ns.body
     body_file = ns.body_file
@@ -80,37 +75,47 @@ def main(argv: list[str] | None = None) -> int:
         body_path = Path(body_file)
         if not body_path.is_file():
             die(f"body file not found: {body_file}", prog=PROG)
-    elif not description:
+        return ["--body-file", body_file]
+    if not description:
         die("--description or --body-file is required", prog=PROG)
+    return ["--body", description]
 
-    repo_root = REPO_ROOT
-    gh = GhRunner(ns.repo)
-    git = GitRunner()
-    require_gh(gh, prog=PROG)
 
+def _resolve_head(ns: argparse.Namespace, git: GitRunner, repo_root: Path) -> str:
     head = ns.head
     if not head:
         head = git.run(["rev-parse", "--abbrev-ref", "HEAD"], cwd=repo_root)
     if is_reserved_pr_head(head):
         die(f"refusing PR head: {head}", prog=PROG)
+    return head
 
-    branches = list_release_branches(gh, git, repo_root)
-    base = pick_release_branch(branches, ns.base, prog=PROG)
 
+def _ensure_remote_head(git: GitRunner, repo_root: Path, head: str) -> None:
     try:
-        git.run(["ls-remote", "--exit-code", "--heads", "origin", head], cwd=repo_root)
+        git.run(
+            ["ls-remote", "--exit-code", "--heads", "origin", "--", head],
+            cwd=repo_root,
+        )
     except GitError:
-        git.run(["push", "-u", "origin", f"HEAD:refs/heads/{head}"], cwd=repo_root)
+        git.run(
+            ["push", "-u", "origin", "--", f"HEAD:refs/heads/{head}"],
+            cwd=repo_root,
+        )
 
+
+def _upsert_pr(
+    gh: GhRunner,
+    *,
+    title: str,
+    body_args: list[str],
+    base: str,
+    head: str,
+    draft: bool,
+) -> str:
     existing_json = gh.run(["pr", "list", "--head", head, "--json", "url,number"])
     existing = json.loads(existing_json) if existing_json.strip() else []
     existing_url = existing[0]["url"] if existing else ""
     existing_num = str(existing[0]["number"]) if existing else ""
-
-    if body_file:
-        body_args = ["--body-file", body_file]
-    else:
-        body_args = ["--body", description or ""]
 
     if existing_num:
         gh.run(
@@ -118,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         emit("status=updated", f"url={existing_url}", f"base={base}", f"head={head}")
         print(existing_url)
-        return 0
+        return existing_url
 
     create_args = [
         "pr",
@@ -131,13 +136,39 @@ def main(argv: list[str] | None = None) -> int:
         head,
         *body_args,
     ]
-    if ns.draft:
+    if draft:
         create_args.append("--draft")
     url = gh.run(create_args)
     emit("status=created", f"url={url}", f"base={base}", f"head={head}")
     print(url)
-    return 0
+    return url
+
+
+def main(argv: list[str] | None = None) -> None:
+    ns = parse_args(argv)
+    if ns.help:
+        print(usage())
+        return
+
+    body_args = _body_args(ns)
+    repo_root = REPO_ROOT
+    gh = GhRunner(ns.repo)
+    git = GitRunner()
+    require_gh(gh, prog=PROG)
+
+    head = _resolve_head(ns, git, repo_root)
+    branches = list_release_branches(gh, git, repo_root)
+    base = pick_release_branch(branches, ns.base, prog=PROG)
+    _ensure_remote_head(git, repo_root, head)
+    _upsert_pr(
+        gh,
+        title=ns.title,
+        body_args=body_args,
+        base=base,
+        head=head,
+        draft=ns.draft,
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
