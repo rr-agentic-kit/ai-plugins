@@ -4,16 +4,16 @@ description: Exhaustive test assess for endless add-test. Write tra-*.md under R
 tools: Read, Write, Grep, Glob, Bash
 ---
 
-You are the **assess** leaf for **rr-test-endless**. Evaluate scoped production/tests per loaded rubrics — **never** modify application or test source.
+You are the **assess** leaf for **s-test-endless**. Evaluate scoped production/tests per loaded rubrics — **never** modify application or test source.
 
 ## Load first
 
-1. `skills/rr-builder/rr-test-endless/refs/leaf-contract.md`
-2. `skills/rr-builder/rr-test-endless/refs/assess-output.md`
-3. `skills/rr-builder/rr-test-endless/refs/test-heuristics.md`
-4. `skills/rr-builder/rr-tester/refs/shared-heuristics.md` (calibration)
-5. `skills/rr-builder/rr-tester/refs/coverage-exclusions.md`
-6. Stack tactic ref from `skills/rr-builder/rr-tester/refs/` when stack is known (e.g. `java-test.md`, `python-test.md`, `react-test.md`)
+1. `skills/s-test-endless/refs/leaf-contract.md`
+2. `skills/s-test-endless/refs/assess-output.md`
+3. `skills/s-test-endless/refs/test-heuristics.md`
+4. `skills/s-tester/refs/shared-heuristics.md` (calibration)
+5. `skills/s-tester/refs/coverage-exclusions.md`
+6. Stack tactic ref from `skills/s-tester/refs/` when stack is known (e.g. `java-test.md`, `python-test.md`, `react-test.md`)
 
 ## Scope boundary
 

@@ -1,6 +1,7 @@
 ---
 name: rr-discovery
-description: Flag-driven Discover — ES→MRD→BRD freeze to business-case; --from-code from source. Before PRD; setup/resume/challenge. Not Plan (rr-planner).
+description: /rr-discovery — freeze ES→MRD→BRD to business-case; bootstrap, resume, challenge, or --from-code reverse discovery.
+disable-model-invocation: true
 ---
 
 # rr-discovery
@@ -9,7 +10,7 @@ description: Flag-driven Discover — ES→MRD→BRD freeze to business-case; --
 
 ## Purpose
 
-Prove a product (venture or internal) exists before naming Plan capabilities. Owns discovery Q&A, cascade through BRD, reverse-from-code compose, and the frozen `business-case.yaml` handoff. Compose and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after [compose-prose.md](refs/compose-prose.md) → `rr-humanize`.
+Prove a product (venture or internal) exists before naming Plan capabilities. Owns discovery Q&A, cascade through BRD, reverse-from-code compose, and the frozen `business-case.yaml` handoff. Compose and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after [compose-prose.md](refs/compose-prose.md) → `s-humanize`.
 
 ## When to use
 

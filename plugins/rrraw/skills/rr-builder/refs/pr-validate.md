@@ -1,6 +1,6 @@
 # PR validation (post forge-landing)
 
-**Audience:** `rr-builder` orchestrate after shippable **step-validate** / **task-validate** forge landing **pushed** an open tip. Wait for PR/MR pipeline clean; broken CI is remediable in-loop. Forge probes and Sonar remediations stay **rr-ci** — builder orchestrates only.
+**Audience:** `rr-builder` orchestrate after shippable **step-validate** / **task-validate** forge landing **pushed** an open tip. Wait for PR/MR pipeline clean; broken CI is remediable in-loop. Forge probes and Sonar remediations stay **s-ci** — builder orchestrates only.
 
 ## When
 
@@ -15,19 +15,19 @@
 
 ## Loads
 
-`skills/rr-ci/SKILL.md` — use forge nested recipes for:
+`skills/s-ci/SKILL.md` — use forge nested recipes for:
 
-| Need | rr-ci path |
+| Need | s-ci path |
 |------|------------|
 | Wait / status | `pre-merge-status` (or forge nested equivalent) |
 | Non-Sonar job failures | `debug-pipeline` then ad-hoc code/test fix |
-| Sonar / quality findings | `/rr-ci --fix --sonar` |
+| Sonar / quality findings | `/s-ci --fix --sonar` |
 
-Do **not** invent `gh`/`glab` flags in builder. Follow `skills/rr-ci/refs/pipeline-fix-rules.md` (no disable/bypass without AskQuestion).
+Do **not** invent `gh`/`glab` flags in builder. Follow `skills/s-ci/refs/pipeline-fix-rules.md` (no disable/bypass without AskQuestion).
 
 ## Wait
 
-1. Poll via rr-ci `pre-merge-status` until pipeline/checks leave the pending set.
+1. Poll via s-ci `pre-merge-status` until pipeline/checks leave the pending set.
 2. Backoff ~30–60s between polls.
 3. Wall timeout default ~30 min → hard-stop with one-line reason.
 4. Pending CI is **wait**, not FAIL.
@@ -37,8 +37,8 @@ Do **not** invent `gh`/`glab` flags in builder. Follow `skills/rr-ci/refs/pipeli
 | Outcome | Action |
 |---------|--------|
 | **PASS** | `verdict == ready` **or** pipeline/checks success with no blocking security/quality blockers per pre-merge envelope |
-| **FAIL → Sonar / quality** | Hand off **`/rr-ci --fix --sonar`**; after remediations → rr-ci update/push tip → re-enter wait |
-| **FAIL → other jobs** | `debug-pipeline` → ad-hoc code/test fix in working tree → rr-ci update/push tip → re-enter wait |
+| **FAIL → Sonar / quality** | Hand off **`/s-ci --fix --sonar`**; after remediations → s-ci update/push tip → re-enter wait |
+| **FAIL → other jobs** | `debug-pipeline` → ad-hoc code/test fix in working tree → s-ci update/push tip → re-enter wait |
 | **Unrecoverable** (non-Sonar) | Hard-stop with one-line reason |
 
 **Epoch cap:** `epoch_cap: 5` (same as review). Each push→re-poll cycle counts one epoch. Hitting the cap without PASS → hard-stop.
@@ -100,7 +100,7 @@ Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)): **parent o
 
 ## Out of scope
 
-- Opening PR/MR — **ship** → **rr-ci**
+- Opening PR/MR — **ship** → **s-ci**
 - Goal/Verify assessment — [task-validate.md](task-validate.md)
-- Builder-owned Sonar listing — stays **rr-ci**
+- Builder-owned Sonar listing — stays **s-ci**
 - Review `--ci` path — unchanged

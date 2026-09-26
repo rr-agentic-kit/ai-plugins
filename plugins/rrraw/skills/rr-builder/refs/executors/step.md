@@ -6,7 +6,7 @@ Owned by skill rr-builder; loaded only via Isolated step run Task Caller Load �
 
 Function-style Task executor for **one task-step** under `drive: auto` ∧ `scope: task|slice`. Runs that step’s inner pipeline `plan → build → refactor → review → step-validate`, resuming from cursor `builder_stage` / `step_*_done`. Same working tree as parent — context isolation only.
 
-Does **not** own prepare, ship/rr-ci, pr-validate, task-validate, slice-validate, or delivered. Does **not** re-invoke **rr-builder**. Executor `ok` does **not** imply CI green — parent runs pr-validate when an open tip was landed.
+Does **not** own prepare, ship/s-ci, pr-validate, task-validate, slice-validate, or delivered. Does **not** re-invoke **rr-builder**. Executor `ok` does **not** imply CI green — parent runs pr-validate when an open tip was landed.
 
 ## Tools and boundaries
 
@@ -16,7 +16,7 @@ Does **not** own prepare, ship/rr-ci, pr-validate, task-validate, slice-validate
 - MUST NOT commit on failure — leave the tree dirty; return `failed`.
 - MUST NOT invoke **rr-builder**, spawn sibling step Tasks, run `--add-endless-test`, open forge POST, or run task-validate / slice-validate.
 - MUST NOT prompt the user — clarifications as short markdown bullets.
-- Nested lane skills (`rr-coder` / `rr-tester` / `rr-refactor` / `rr-review`): this executor **is** their parent session; leaf Tasks those skills already document stay allowed. MUST NOT invent extra Task fan-out beyond those skills’ own contracts.
+- Nested lane skills (`s-coder` / `s-tester` / `s-refactor` / `s-review`): this executor **is** their parent session; leaf Tasks those skills already document stay allowed. MUST NOT invent extra Task fan-out beyond those skills’ own contracts.
 
 ## Stop conditions
 
@@ -36,9 +36,9 @@ Caller Load (parent Task prompt / payload):
 |------|----------------|
 | **Required** | `PLUGIN_ROOT`, `REPO_ROOT`, `slice_id`, `artifact_root`, `{NNNN}`, `step_index`, resume `builder_stage` + `step_*_done`, `scope` (`task` \| `slice`) |
 | **Stable hard-links** | `refs/slice-pipeline.md` stage contracts; `refs/plan-knowledge.md`; `refs/plan-schema.md`; `refs/feature-branch.md`; `refs/task-validate.md` (step-validate only) |
-| **Lane hard-links (resume-conditional)** | Load only pending stages per `step_*_done` (paths under `PLUGIN_ROOT`): plan/build → `skills/rr-builder/rr-coder/SKILL.md` + `skills/rr-builder/rr-tester/SKILL.md`; refactor → `skills/rr-builder/rr-refactor/SKILL.md`; review → `skills/rr-builder/rr-review/SKILL.md`; resuming at step-validate → none |
+| **Lane hard-links (resume-conditional)** | Load only pending stages per `step_*_done` (paths under `PLUGIN_ROOT`): plan/build → `skills/s-coder/SKILL.md` + `skills/s-tester/SKILL.md`; refactor → `skills/s-refactor/SKILL.md`; review → `skills/s-review/SKILL.md`; resuming at step-validate → none |
 | **Variant inject** | Current `{NNNN}.md` + `{NNNN}-{step}.plan.md` if present |
-| **Forbidden** | Re-invoke rr-builder; slice-validate; task-validate; pr-validate; ship/rr-ci; `--add-endless-test`; parallel sibling steps |
+| **Forbidden** | Re-invoke rr-builder; slice-validate; task-validate; pr-validate; ship/s-ci; `--add-endless-test`; parallel sibling steps |
 
 Missing required fields → `failed` + clarification bullets.
 

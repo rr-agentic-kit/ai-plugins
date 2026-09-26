@@ -4,8 +4,8 @@
 
 ## Load (only if not already in session)
 
-- `skills/rr-builder/rr-coder/refs/code.principles.md` (Prefer/Avoid: magic, early returns, functions <20 lines, DRY at 3+)
-- For phase **3**: `skills/rr-builder/rr-coder/refs/compliance-rubric.md` when citing size/fan-out CPs
+- `skills/s-coder/refs/code.principles.md` (Prefer/Avoid: magic, early returns, functions <20 lines, DRY at 3+)
+- For phase **3**: `skills/s-coder/refs/compliance-rubric.md` when citing size/fan-out CPs
 
 ## Phase checklists
 

@@ -42,7 +42,7 @@ Do **not** invent criteria absent from plan/task. Each plan/task checkbox become
 | **Obligations** | Cited constitution / tech ADR / delta obligations still hold for changed surfaces | Obligation violated or silently ignored |
 | **Non-goals** | Non-goals were not implemented as scope creep | Non-goal work shipped as if in-scope |
 | **Open risks** | Residual risks either closed or explicitly carried with owner | Blocking `pending_tech` / open risk ignored as if done |
-| **Forge / PR** (shippable only) | `ship_after` ≠ `never` **and** an open PR/MR exists whose head is `Ship.branch` (probe via **rr-ci** preflight / forge CLI — do not invent flags in builder) | Shippable and no matching open PR/MR |
+| **Forge / PR** (shippable only) | `ship_after` ≠ `never` **and** an open PR/MR exists whose head is `Ship.branch` (probe via **s-ci** preflight / forge CLI — do not invent flags in builder) | Shippable and no matching open PR/MR |
 | **Ship intent** (`never` review) | `ship_after: never` fits a non-shippable step (no forge open intended this step) | `never` contradicts shippable intent (e.g. step clearly meant to open a PR) — AskQuestion once: keep `never` \| set `step_validate`/`task_validate` \| abort; do **not** invent a PR requirement for a confirmed `never` |
 
 **Shippable** means plan `ship_after` is `step_validate` or `task_validate`. When `never`, skip the **Forge / PR** row entirely — Goal/Verify/Obligations/Non-goals/Open risks + **Ship intent** review only.
@@ -105,8 +105,8 @@ Validate writes the report **after** the forge-miss → **ship** → re-validate
 
 | Situation | Required action before advancing `step_index` / next task / declaring `scope: step\|task` complete |
 |-----------|-----------------------------------------------------------|
-| Open PR/MR whose head matches tip resolution above | Hand off **rr-ci** update/push so the validate sidecar(s) written this stage, flipped Verify checkboxes, and cursor frontmatter are on that tip. **Final task-step / task-validate:** tip **must** receive **both** `{NNNN}-{step}.validate.md` (last step) **and** `{NNNN}.task-validate.md` (+ cursor) before scope stop — push in one rr-ci handoff when both are dirty. |
-| No open PR (e.g. already merged) and those paths are dirty/uncommitted | **Carry-to-next:** leave them dirty (or note them); next [feature-branch.md](feature-branch.md) ensure **must** carry them onto the new `feat/…` branch; next **ship** **must** include them in the rr-ci commit set. Do **not** invent a dedicated PR solely for validate docs |
+| Open PR/MR whose head matches tip resolution above | Hand off **s-ci** update/push so the validate sidecar(s) written this stage, flipped Verify checkboxes, and cursor frontmatter are on that tip. **Final task-step / task-validate:** tip **must** receive **both** `{NNNN}-{step}.validate.md` (last step) **and** `{NNNN}.task-validate.md` (+ cursor) before scope stop — push in one s-ci handoff when both are dirty. |
+| No open PR (e.g. already merged) and those paths are dirty/uncommitted | **Carry-to-next:** leave them dirty (or note them); next [feature-branch.md](feature-branch.md) ensure **must** carry them onto the new `feat/…` branch; next **ship** **must** include them in the s-ci commit set. Do **not** invent a dedicated PR solely for validate docs |
 
 **Probe (done-when):** tip contains the required sidecar(s) for this stage **or** carry-to-next was applied and announced. For last-step / task close under `scope: step` or `task`: tip (or carry set) includes `{NNNN}.task-validate.md` **and** the final `{NNNN}-{step}.validate.md`.
 
@@ -131,8 +131,8 @@ Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)):
 ## Out of scope
 
 - Slice-level AC / execute-slice outcome → [slice-validate.md](slice-validate.md)
-- Re-running full rr-review (already done at review stage)
+- Re-running full s-review (already done at review stage)
 - Inventing new acceptance criteria not in the task / step plan
-- Opening PR/MR inside builder — **rr-ci** via **ship** only
+- Opening PR/MR inside builder — **s-ci** via **ship** only
 - Rewriting Forge/PR PASS to mean “merged historically” instead of open tip or carry-to-next
 - PR/MR pipeline wait/fix after tip push → [pr-validate.md](pr-validate.md)

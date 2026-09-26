@@ -1,6 +1,6 @@
 # endless_test_helpers
 
-Deterministic orchestration helpers for **`rr-test-endless`**. Run from **`PLUGIN_ROOT`** (rrraw plugin root).
+Deterministic orchestration helpers for **`s-test-endless`**. Run from **`PLUGIN_ROOT`** (rrraw plugin root).
 
 ## Invoke
 

@@ -66,7 +66,7 @@ Gate: missing feature intent/desc → one AskQuestion or stop.
 
 ### rr
 
-1. Allocate id via [rr-prepare/refs/task-template.md](../rr-prepare/refs/task-template.md) (`docs/rr/tasks/registry.yaml` / max-id under `docs/rr/tasks/`).
+1. Allocate id via [s-prepare/refs/task-template.md](../s-prepare/refs/task-template.md) (`docs/rr/tasks/registry.yaml` / max-id under `docs/rr/tasks/`).
 2. Write `{NNNN}.md` under the open slice’s `artifact_root` with **Goal** from user intent; **Steps** grain via prepare grain rules (thin L2 — enough to run plan→…→task-validate).
 3. Body shape + frontmatter cursor fields per task-template. Upstream doc/ADR/cascade edits the feature requires are **task obligations**, not a separate mode.
 

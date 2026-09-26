@@ -31,7 +31,7 @@ Anchor all downstream docs to a clear vision, problem statement, and rationale. 
 | **Kill criteria** *(optional but Gate 7 asks)* | What evidence by when flips verdict to kill | Prose or ranked leaves |
 | **Horizons** *(optional)* | Thematic future buckets (≤5); not an exhaustive feature list | Ranked leaves (no MoSCoW); may point at `later.md` |
 
-Prefix `ES`. Mint `ES-n` only for ranked sections. Human brief, posture, vision, problem, what-must-be-true, viability verdict, cost position, and defensibility stay prose. Ranked leaves carry `Rationale`. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `rr-humanize`. Posture classification: `skills/rr-discovery/refs/project-posture.md`. Premise test and verdict: `skills/rr-discovery/refs/expert-panel.md`. Strategy lenses: `skills/rr-discovery/refs/strategy-lenses.md`.
+Prefix `ES`. Mint `ES-n` only for ranked sections. Human brief, posture, vision, problem, what-must-be-true, viability verdict, cost position, and defensibility stay prose. Ranked leaves carry `Rationale`. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `s-humanize`. Posture classification: `skills/rr-discovery/refs/project-posture.md`. Premise test and verdict: `skills/rr-discovery/refs/expert-panel.md`. Strategy lenses: `skills/rr-discovery/refs/strategy-lenses.md`.
 
 ### Section scope (agent-facing)
 
@@ -83,7 +83,7 @@ When GDPR, i18n, distribution, security, or enrichment-law topics surface during
 11. Write or refresh **Human brief** from locked facts last — claim-check; no invented claims (`refs/planning/doc-standards/dual-audience.md`).
 12. Feature-level detail volunteered during this level → `skills/rr-discovery/refs/note-sessions.md`, not an ES fact.
 13. Mode existence (e.g. anonymous browse) can be its own Functional-deliverable Must when success-critical — separate from the privacy/consent constraint (T7-1).
-14. Persist cascade `.md` only after skill `compose-prose` → `rr-humanize` (compose agent does not humanize).
+14. Persist cascade `.md` only after skill `compose-prose` → `s-humanize` (compose agent does not humanize).
 
 ## Traceability
 

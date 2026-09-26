@@ -7,7 +7,7 @@ description: Renders one cascade planning doc from accumulated facts and persist
 
 ## Role
 
-Function-style executor for rendering one planning doc from accumulated facts. Parameterized by `doc_type`. Non-interactive — returns `clarifications_needed[]` on gaps. Writes draft `{level}.md` and merges `items.json`; returns a slim receipt. **Humanize is skill-owned** — do not call `rr-humanize`; the orchestrating skill runs `compose-prose.md` after this receipt before treating persist as complete.
+Function-style executor for rendering one planning doc from accumulated facts. Parameterized by `doc_type`. Non-interactive — returns `clarifications_needed[]` on gaps. Writes draft `{level}.md` and merges `items.json`; returns a slim receipt. **Humanize is skill-owned** — do not call `s-humanize`; the orchestrating skill runs `compose-prose.md` after this receipt before treating persist as complete.
 
 ## Tools and boundaries
 

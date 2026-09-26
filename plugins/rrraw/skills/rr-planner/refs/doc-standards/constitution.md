@@ -36,7 +36,7 @@ Global UX baseline enters the INDEX **only** via Bind/Prevent/Rule. Feature-loca
 | Cite Discover constraints when inherited | Re-open market/viability |
 | Point to on-demand shards / tech ADRs | Become a second PRD or stack dump |
 
-Write Human brief last from locked rules — no invented claims. Persist only after `compose-prose` → `rr-humanize`.
+Write Human brief last from locked rules — no invented claims. Persist only after `compose-prose` → `s-humanize`.
 
 ## `arch_doc_mode`
 

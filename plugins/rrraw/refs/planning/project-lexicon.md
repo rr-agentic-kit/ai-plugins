@@ -66,7 +66,7 @@ Empty table only transient until first row. Optional `Notes` column may be omitt
 | rrraw / plugin vocabulary | `freeze`, `slice`, `spine`, `cascade`, `challenge`, `nature`, Discover/Plan ceremony terms |
 | Ubiquitous web/tech unless the *project* redefines them | HTTP, JSON, URL, API (as generic), REST |
 | Plugin-root companions | Do **not** copy `plugins/rrraw/GLOSSARY.md` / `ACRONYMS.md` into host `docs/` |
-| Humanize AI-tell wipe | Not `skills/docs/rr-humanize` `lexicon.md` — different concern |
+| Humanize AI-tell wipe | Not `skills/docs/s-humanize` `lexicon.md` — different concern |
 
 ## Triggers
 

@@ -14,7 +14,7 @@ SCRIPTS = (
     / "plugins"
     / "rrraw"
     / "skills"
-    / "rr-ci"
+    / "s-ci"
     / "scripts"
 )
 sys.path.insert(0, str(SCRIPTS))

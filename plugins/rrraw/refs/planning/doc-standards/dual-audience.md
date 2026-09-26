@@ -4,7 +4,7 @@
 
 **Load when:** Authoring or composing any cascade `.md` (`executive-summary` … `prd`), standing spine / constitution / feature delta, or running `compose-prose` before persist.
 
-**Does not:** Change item schema, validator codes, or ledger facts. Does not replace `compose-prose.md` / `rr-humanize` — it obligates them.
+**Does not:** Change item schema, validator codes, or ledger facts. Does not replace `compose-prose.md` / `s-humanize` — it obligates them.
 
 ## Audiences
 
@@ -39,7 +39,7 @@ Unnumbered prose. Roughly ½–1 page max. No new IDs. Must be understandable wi
 
 ## Always humanize
 
-Every cascade / session `.md` prose persist runs `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize` (generate on first write; rewrite on re-compose). Machine YAML/JSON still skip. Default cascade prose register: `active` + `plain`.
+Every cascade / session `.md` prose persist runs `skills/rr-discovery/refs/compose-prose.md` → `s-humanize` (generate on first write; rewrite on re-compose). Machine YAML/JSON still skip. Default cascade prose register: `active` + `plain`.
 
 ## Leaf bodies
 

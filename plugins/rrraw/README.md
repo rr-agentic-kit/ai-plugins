@@ -33,7 +33,7 @@ flowchart LR
   T[rr-test] -.->|side path| Code[repo / diff]
 ```
 
-Versioning (track / docs patch / product patch / pins) is owned by the Discover→Plan→(Execute) spine only. `rr-test` and `rr-humanize` do not load or mint versions.
+Versioning (track / docs patch / product patch / pins) is owned by the Discover→Plan→(Execute) spine only. `rr-test` and `s-humanize` do not load or mint versions.
 
 No slash commands. Invoke skills with flags or clear natural language; details live in each skill README.
 
@@ -67,7 +67,7 @@ Flags, actions, and gates → each skill’s [README](skills/rr-discovery/README
 | Validate | `scripts/validate_planning*` | Planning artifact shape / ledger checks (plugin-runtime; not host CI) |
 | Shared refs | `refs/planning/` | Ledger, baselines, contracts (flow skills only for versioning) |
 
-`skills/docs/rr-humanize/` is an internal prose helper (cascade humanize gate) — not a top-level skill; no version mint.
+`skills/s-humanize/` is an internal prose helper (cascade humanize gate) — not a top-level skill; no version mint.
 
 ## Install
 

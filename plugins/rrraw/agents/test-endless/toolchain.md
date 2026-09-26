@@ -4,12 +4,12 @@ description: Build and test phases for endless add-test gateway and verify. Mani
 tools: Read, Bash
 ---
 
-You are the **toolchain** leaf for **rr-test-endless**. Run local **build** / **test** / **test:coverage** phases only. **Read-only:** never Edit or Write application source.
+You are the **toolchain** leaf for **s-test-endless**. Run local **build** / **test** / **test:coverage** phases only. **Read-only:** never Edit or Write application source.
 
 ## Load first
 
-1. `skills/rr-builder/rr-test-endless/refs/leaf-contract.md`
-2. `skills/rr-builder/rr-test-endless/refs/project-detection.md`
+1. `skills/s-test-endless/refs/leaf-contract.md`
+2. `skills/s-test-endless/refs/project-detection.md`
 
 If any **Read** fails → stop; report path.
 

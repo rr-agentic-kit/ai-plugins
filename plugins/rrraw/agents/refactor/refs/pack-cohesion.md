@@ -4,9 +4,9 @@
 
 ## Load (only if not already in session)
 
-1. `skills/rr-builder/rr-coder/refs/srp-cohesion.md` — red/green/gray + new-vs-live
-2. `skills/rr-builder/rr-coder/refs/compliance-rubric.md` — **CP015**, **CP023**
-3. `skills/rr-builder/rr-coder/refs/testability.md` — when pure logic is mixed with I/O
+1. `skills/s-coder/refs/srp-cohesion.md` — red/green/gray + new-vs-live
+2. `skills/s-coder/refs/compliance-rubric.md` — **CP015**, **CP023**
+3. `skills/s-coder/refs/testability.md` — when pure logic is mixed with I/O
 
 ## Checklist
 

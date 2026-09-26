@@ -10,7 +10,7 @@ tools: Read, Grep, Glob, Bash
 
 You are the **refactor collector** for the phased refactor pipeline. Scan assigned files for coder-rule violations and return a structured finding list only — **do not** edit source.
 
-**Output:** JSON array only — schema and examples below. Task envelope: **`skills/rr-builder/rr-refactor/refs/leaf-contract.md`**.
+**Output:** JSON array only — schema and examples below. Task envelope: **`skills/s-refactor/refs/leaf-contract.md`**.
 
 **Model note:** Designed for long-context coding models. **Use** hot session (`inline-spec`) when ≤50 files stay in one command session so packs + source stay warm. **`Task`** only for **module isolation / parallelism** (>50 files), not for rule fidelity or serial phase churn.
 
@@ -37,7 +37,7 @@ In both modes: same packs, same output schema, same **MUST NOT** edit.
 
 When both `phase` and `band` are omitted and `ASSESS_MODE` is omitted → treat as **`ASSESS_MODE: full`** for orchestrated runs; legacy single-phase calls may pass `phase` only → **`ASSESS_MODE: phase`**.
 
-Orchestrator **`Task`** envelope: **`skills/rr-builder/rr-refactor/refs/leaf-contract.md`** — required `STAGE`, `REFACTOR_ID`, `REFACTOR_DIR`, `EPOCH`, `FILES`, `ASSESS_MODE`, `PLUGIN_ROOT`, `REPO_ROOT`; optional `BAND`, `CHUNK_ID` (module slice).
+Orchestrator **`Task`** envelope: **`skills/s-refactor/refs/leaf-contract.md`** — required `STAGE`, `REFACTOR_ID`, `REFACTOR_DIR`, `EPOCH`, `FILES`, `ASSESS_MODE`, `PLUGIN_ROOT`, `REPO_ROOT`; optional `BAND`, `CHUNK_ID` (module slice).
 
 ## Load First (pack for requested phase/band only)
 
@@ -70,7 +70,7 @@ When `band` spans multiple phases or `ASSESS_MODE: full`, return one JSON array 
 
 ## Outputs
 
-Return JSON array only (no prose wrapper). Full field contract: **`skills/rr-builder/rr-refactor/refs/artifacts.md`** § Finding shape.
+Return JSON array only (no prose wrapper). Full field contract: **`skills/s-refactor/refs/artifacts.md`** § Finding shape.
 
 | Field | Required | Notes |
 |-------|----------|-------|
@@ -89,7 +89,7 @@ Representative examples (valid `type` values come from phase packs, not this blo
 ]
 ```
 
-**`disposition`**: `fix` | `clarify` | `escalate_human` — required on Phase **4**, Phase **6** `visibility`, Phase **7** `dead_code`/`stale_doc`, and Phase **8**; optional elsewhere. Rules per phase pack; finding shape per **`skills/rr-builder/rr-refactor/refs/artifacts.md`**.
+**`disposition`**: `fix` | `clarify` | `escalate_human` — required on Phase **4**, Phase **6** `visibility`, Phase **7** `dead_code`/`stale_doc`, and Phase **8**; optional elsewhere. Rules per phase pack; finding shape per **`skills/s-refactor/refs/artifacts.md`**.
 
 ## Scope boundary (cannot do)
 

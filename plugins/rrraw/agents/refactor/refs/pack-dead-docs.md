@@ -4,7 +4,7 @@
 
 ## Load (only if not already in session)
 
-- `skills/rr-builder/rr-coder/refs/compliance-rubric.md` when citing **CP009** / **CP018** / **CP010**
+- `skills/s-coder/refs/compliance-rubric.md` when citing **CP009** / **CP018** / **CP010**
 - Tool seeds for unused/naming already from `pack-tool-map.md` / `tools.md`
 
 ## Procedure

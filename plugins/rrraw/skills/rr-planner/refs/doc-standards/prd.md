@@ -43,7 +43,7 @@ Before minting structure, recommend `prd_shape` + `scope_mode` (+ optional `arch
 | **Acceptance (WWAS)** | Why / What / observable Acceptance — product pass/fail | Prose or leaves tied to selected requirements; smell-gate before slice freeze |
 | **Out of scope** | Product-level exclusions (inherits exec non-goals) | Ranked leaves; no RICE |
 
-Prefix `PRD`. Product scoping + observable AC. **P-tags only on requirement leaves.** No MoSCoW. No sprint / capacity / velocity ceremony. No release-phasing doc in this pass. Personas stay a section; stories name a persona in the body — they do not parent to a persona id. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `rr-humanize`.
+Prefix `PRD`. Product scoping + observable AC. **P-tags only on requirement leaves.** No MoSCoW. No sprint / capacity / velocity ceremony. No release-phasing doc in this pass. Personas stay a section; stories name a persona in the body — they do not parent to a persona id. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `s-humanize`.
 
 Selection: `_status_: deferred | selected | in_progress | delivered` on leaves. Selecting “build now” **never** deletes/shrinks the full set and never invents a second scope doc. Language: **slice / phase**.
 
@@ -85,7 +85,7 @@ Follow `skills/rr-planner/refs/plan-interview.md`: objective → capability → 
 6. Capture full requirement set with P1–P3; select via status.
 7. WWAS + `skills/rr-planner/refs/req-smell.md` before slice freeze.
 8. Write or refresh **Human brief** from locked facts last — claim-check; no invented claims (`refs/planning/doc-standards/dual-audience.md`).
-9. Persist cascade `.md` only after skill `compose-prose` → `rr-humanize`.
+9. Persist cascade `.md` only after skill `compose-prose` → `s-humanize`.
 10. Slice freeze → `skills/rr-planner/refs/execute-handoff.md`.
 
 ## Traceability (C2-7)

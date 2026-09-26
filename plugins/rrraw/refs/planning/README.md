@@ -28,7 +28,7 @@ Plugin Spec (process-ownership UX): [`INTENT.md`](../../INTENT.md).
 | **rr-planner** (flow) | Yes | Slice freeze, pins across dirs, open-next |
 | **Future Execute** (flow) | Yes | Product ship / track lock; same model — do not invent a third |
 | Compose / challenge planning agents | Pins/rev **read-only**; skill mints | Agents do not write `status.yaml` |
-| **rr-humanize** | **No** | Prose pass only |
+| **s-humanize** | **No** | Prose pass only |
 | **Git helpers** (if any) | **No** | VCS ≠ planning SemVer |
 | **rr-test** | **No** | Orthogonal quality path |
 

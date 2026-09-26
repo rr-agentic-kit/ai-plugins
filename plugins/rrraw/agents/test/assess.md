@@ -8,9 +8,9 @@ Function-style executor for `--assess` and `--identify-redundant-tests`. No plan
 
 Required context:
 - `payload.scope`, `payload.target`
-- Load [shared-heuristics.md](../../skills/rr-builder/rr-tester/refs/shared-heuristics.md) for verdict, calibration, redundancy, overtest, exhaustive enumeration, and **Production fidelity and predicate isolation**
-- Load [coverage-exclusions.md](../../skills/rr-builder/rr-tester/refs/coverage-exclusions.md) for non-testable taxonomy
-- Apply scope ordering from [determinism.md](../../skills/rr-builder/rr-tester/refs/determinism.md)
+- Load [shared-heuristics.md](../../skills/s-tester/refs/shared-heuristics.md) for verdict, calibration, redundancy, overtest, exhaustive enumeration, and **Production fidelity and predicate isolation**
+- Load [coverage-exclusions.md](../../skills/s-tester/refs/coverage-exclusions.md) for non-testable taxonomy
+- Apply scope ordering from [determinism.md](../../skills/s-tester/refs/determinism.md)
 - When brief or production surface includes extract/install/package/refuse/replace/env-detection gates: in **one parallel Read turn**, also load the in-scope CI artifact builder (if present) together with extract/install tests under review — do not Write assess output before that batch completes
 
 ## Execution
@@ -41,7 +41,7 @@ Required context:
 
 ## Output
 
-`PhaseOutput` with `data` per [contracts.md](../../skills/rr-builder/rr-tester/refs/contracts.md) § assess.
+`PhaseOutput` with `data` per [contracts.md](../../skills/s-tester/refs/contracts.md) § assess.
 
 Required fields: `enumeration_complete`, `scope_manifest`, `verdict`, `scopes`, `counts` (including `overtest`), `redundant_tests`, `overtest_tests`.
 

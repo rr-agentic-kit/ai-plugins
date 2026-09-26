@@ -38,7 +38,7 @@ At **plan** stage start — before writing `{NNNN}-{step}.plan.md`. Re-check is 
 | **`drive: auto`** and `HEAD_BRANCH` matches `feat/{NNNN}-*` (same `{NNNN}`) and does **not** match `feat/{NNNN}-{step}-*` (prior / other-step tip) and ≠ `TARGET` | **Auto tip-chain:** `git checkout -b TARGET` from current HEAD (dirty tree OK — same carry-to-next rule as main/master). **Do not** AskQuestion. Done when HEAD is `TARGET`. Record chain in plan Risks if useful. |
 | Any other branch | AskQuestion (see **Probe**). **Stop-rule:** do not invent a silent checkout/create under `drive: manual` or off-task branches. |
 
-4. Optional: **Read** `skills/rr-git/refs/safety.md` only if a rename/`-D` path is chosen — do not run squash/worktree/cleanup here.
+4. Optional: **Read** `skills/s-git/refs/safety.md` only if a rename/`-D` path is chosen — do not run squash/worktree/cleanup here.
 
 **Anti-trigger / stop-rule:** Under `drive: auto`, never AskQuestion the Probe when HEAD is already `feat/{NNNN}-*` for this task and `TARGET` is the next (or different) step suffix — tip-chain is mandatory. Do **not** stall auto×step / auto×task / auto×slice on “stay \| new from base \| rename”.
 
@@ -58,6 +58,6 @@ AskQuestion options (Delivery channels: text fallback OK) — **skip entirely** 
 
 ## Non-goals
 
-- Worktree-per-step (optional via **rr-git**, not required here).
-- Squash, merge, force-push, prune — **rr-git** / **rr-ci**.
-- Opening PR/MR — **rr-ci** via orchestrate **ship** ([ship.md](ship.md)); plan **Ship.branch** only **records** this TARGET for that handoff.
+- Worktree-per-step (optional via **s-git**, not required here).
+- Squash, merge, force-push, prune — **s-git** / **s-ci**.
+- Opening PR/MR — **s-ci** via orchestrate **ship** ([ship.md](ship.md)); plan **Ship.branch** only **records** this TARGET for that handoff.

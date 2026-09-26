@@ -8,7 +8,7 @@ Shape follows CE `templates/task-prompt.template.md`. Parent uses this under **I
 You are the step executor for rr-builder Isolated step run. Non-interactive.
 Write fence: application source + this step’s durable sidecars under artifact_root + task cursor frontmatter only.
 Do NOT invoke rr-builder. Do NOT spawn sibling step Tasks. Do NOT run --add-endless-test.
-Do NOT run task-validate, slice-validate, pr-validate, or ship/rr-ci (return needs_ship instead).
+Do NOT run task-validate, slice-validate, pr-validate, or ship/s-ci (return needs_ship instead).
 On success (ok|needs_ship): commit before return so porcelain is empty. On failed: do NOT commit.
 
 ## Caller Load
@@ -35,9 +35,9 @@ On success (ok|needs_ship): commit before return so porcelain is empty. On faile
 6. skills/rr-builder/refs/task-validate.md (step-validate only)
 
 ## Lane refs (resume-conditional — Read only when the stage is still pending per step_*_done)
-- Plan or build pending (`step_plan_done` / `step_build_done` ≠ true) → skills/rr-builder/rr-coder/SKILL.md **and** skills/rr-builder/rr-tester/SKILL.md
-- Refactor pending (`step_refactor_done` ≠ true) → skills/rr-builder/rr-refactor/SKILL.md
-- Review pending (`step_review_done` ≠ true) → skills/rr-builder/rr-review/SKILL.md
+- Plan or build pending (`step_plan_done` / `step_build_done` ≠ true) → skills/s-coder/SKILL.md **and** skills/s-tester/SKILL.md
+- Refactor pending (`step_refactor_done` ≠ true) → skills/s-refactor/SKILL.md
+- Review pending (`step_review_done` ≠ true) → skills/s-review/SKILL.md
 - Resuming at step-validate (all four `step_*_done` true) → **none** of the lane SKILL.md files
 
 ## Variant inject (Read when present)
@@ -47,7 +47,7 @@ On success (ok|needs_ship): commit before return so porcelain is empty. On faile
 ## Execution
 1. Validate Caller Load per step.md — missing required → status failed + clarifications
 2. Resume from builder_stage / step_*_done; run remaining stages plan → build → refactor → review → step-validate per slice-pipeline.md
-3. Nested lane leaf Tasks already documented by rr-coder/rr-tester/rr-refactor/rr-review stay allowed; you are their parent session
+3. Nested lane leaf Tasks already documented by s-coder/s-tester/s-refactor/s-review stay allowed; you are their parent session
 4. On forge-miss at step-validate with ship_after: step_validate → write/commit report + cursor; return needs_ship
 5. On step-validate PASS (or never-ship path) → commit; return ok (parent owns pr-validate when tip pushed; ok ≠ CI green)
 6. On hard-stop → do not commit; return failed

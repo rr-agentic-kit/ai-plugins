@@ -8,7 +8,7 @@ Prove a product (venture or internal) exists — problem, market, viability, bea
 
 ## What
 
-Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`, reverse-from-code compose, challenge (pre-mortem / red-team), and handoff mint. Compose + challenge are `Task` agents; cascade `.md` persists only after humanize (`compose-prose` → `rr-humanize`).
+Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`, reverse-from-code compose, challenge (pre-mortem / red-team), and handoff mint. Compose + challenge are `Task` agents; cascade `.md` persists only after humanize (`compose-prose` → `s-humanize`).
 
 **Out of scope:** PRD / RICE / stories / research reports / launch calendars / architecture authorship as Discover deliverable.
 
@@ -89,7 +89,7 @@ Session-state + status stamps written. **Next Up** per `refs/planning/progress.m
 
 ## Constraints
 
-- **Invoke:** Auto — no `disable-model-invocation`; ambient WHEN description is enough
+- **Invoke:** Manual `@rr-discovery` / slash — `disable-model-invocation: true`; outcome-first description
 - **Gates:** BRD freeze + humanize before cascade `.md` persist; no fabricated TAM; no freeze while `code-extraction`
 - **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
 - **Eval-first:** Fix FAIL audit ids only; preserve outcome (no redesign)

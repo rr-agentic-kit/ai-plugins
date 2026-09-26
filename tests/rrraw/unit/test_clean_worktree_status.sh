@@ -2,7 +2,7 @@
 # Smoke: clean-merged-local-branches.sh --worktree-status
 set -euo pipefail
 
-SCRIPT="$(cd "$(dirname "$0")/../../../plugins/rrraw/skills/rr-git/scripts" && pwd)/clean-merged-local-branches.sh"
+SCRIPT="$(cd "$(dirname "$0")/../../../plugins/rrraw/skills/s-git/scripts" && pwd)/clean-merged-local-branches.sh"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 

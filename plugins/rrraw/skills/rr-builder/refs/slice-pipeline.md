@@ -25,9 +25,9 @@ Below, paths written as `docs/rr/tasks/{slice_id}/…` mean **`{artifact_root}/�
 
 ```
 slice ready
-  → task-list                    # rr-prepare L1
+  → task-list                    # s-prepare L1
     → [ per task:
-          task detail              # rr-prepare L2 (+ steps breakdown)
+          task detail              # s-prepare L2 (+ steps breakdown)
           → [ per task-step:
                 plan → build → refactor → review → step-validate
                   ⇄ [ ship? ]      # shippable: forge-miss → ship → re-validate (before PASS)
@@ -38,22 +38,22 @@ slice ready
           → forge landing → pr-validate   # when tip pushed; skip never/carry-to-next
         ]
   → slice validate
-  → slice delivered              # residual ship boundary → rr-ci when nothing shipped mid-slice
+  → slice delivered              # residual ship boundary → s-ci when nothing shipped mid-slice
 ```
 
-Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate routes there when the cursor is still in prep (no detailed buildable work yet).
+Prepare phases (task-list, task detail) remain **s-prepare**. Orchestrate routes there when the cursor is still in prep (no detailed buildable work yet).
 
 ## Task-step stage contracts
 
 | Stage | What builder does | Loads | Executes code? | Done-when |
 |-------|-------------------|-------|----------------|-----------|
 | **plan** | Ensure feature branch ([feature-branch.md](feature-branch.md)), then produce/enrich step plan + assessment only | [plan-knowledge.md](plan-knowledge.md) allowlist (includes feature-branch) | **No** app source (git branch create/checkout OK) | Branch settled + sidecar `{NNNN}-{step}.plan.md` complete per [plan-schema.md](plan-schema.md) (Verify = checkboxes; incl. **Ship**); set `step_plan_done: true` |
-| **build** | Implement the step | Current `{NNNN}-{step}.plan.md` + minimal task Goal/Obligations if needed; full **rr-coder** + **rr-tester** (code **and** tests for the step). **Do not** Read other steps’ `.plan.md` files or inlined plan prose from the task body | **Yes** | Code + tests for the step land; step verify checks runnable; set `step_build_done: true` |
-| **refactor** | Behavior-invariant coder-rule refactor on step **build-touched** MR scope | **rr-refactor** (`epoch_cap: 5` default) | Via inline fix path | Skip or converge + lean `{NNNN}-{step}.refactor.md` written; set `step_refactor_done: true` (see below) |
-| **review** | Full multi-lane review with fix, endless until clear | **rr-review** with **`--fix --all --endless`** (forced) | Via review fix path | Endless exit success **and** task sidecar `{NNNN}-{step}.review.md` present; set `step_review_done: true` |
+| **build** | Implement the step | Current `{NNNN}-{step}.plan.md` + minimal task Goal/Obligations if needed; full **s-coder** + **s-tester** (code **and** tests for the step). **Do not** Read other steps’ `.plan.md` files or inlined plan prose from the task body | **Yes** | Code + tests for the step land; step verify checks runnable; set `step_build_done: true` |
+| **refactor** | Behavior-invariant coder-rule refactor on step **build-touched** MR scope | **s-refactor** (`epoch_cap: 5` default) | Via inline fix path | Skip or converge + lean `{NNNN}-{step}.refactor.md` written; set `step_refactor_done: true` (see below) |
+| **review** | Full multi-lane review with fix, endless until clear | **s-review** with **`--fix --all --endless`** (forced) | Via review fix path | Endless exit success **and** task sidecar `{NNNN}-{step}.review.md` present; set `step_review_done: true` |
 | **step-validate** / **task-validate** | Rubric + persist report; mark Verify checkboxes on item PASS | [task-validate.md](task-validate.md) | No (assessment) | Report at `{NNNN}-{step}.validate.md` / `{NNNN}.task-validate.md` with plan + per-item PASS/FAIL; forge-miss FAIL → **ship** then re-validate |
-| **ship** | Resolve branch/base; hand off **rr-ci**; return to validate | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` | Via rr-ci only | [ship.md](ship.md) done-when; set `step_ship_done: true` when step-scoped; re-enter validate |
-| **pr-validate** | After forge landing **pushed**: poll CI → PASS or fix → re-push → re-poll | [pr-validate.md](pr-validate.md) then `skills/rr-ci/SKILL.md` | Via rr-ci / ad-hoc fix only | Report PASS + `step_pr_validate_done: true` (step); skip when never/carry-to-next |
+| **ship** | Resolve branch/base; hand off **s-ci**; return to validate | [ship.md](ship.md) then `skills/s-ci/SKILL.md` | Via s-ci only | [ship.md](ship.md) done-when; set `step_ship_done: true` when step-scoped; re-enter validate |
+| **pr-validate** | After forge landing **pushed**: poll CI → PASS or fix → re-push → re-poll | [pr-validate.md](pr-validate.md) then `skills/s-ci/SKILL.md` | Via s-ci / ad-hoc fix only | Report PASS + `step_pr_validate_done: true` (step); skip when never/carry-to-next |
 | **slice validate** | Rubric: did **slice** hit slice goal / AC; persist report | [slice-validate.md](slice-validate.md) | No (assessment) | `docs/rr/tasks/{slice_id}/slice-validate.md` with plan + per-item PASS/FAIL |
 
 ### Stage procedures (orchestrate)
@@ -67,42 +67,42 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.plan.md` + Steps pointer `→ plan: \`…\`` |
 | **Done-when** | Branch settled; six sections present; **Verify hooks** are `- [ ]` checkboxes; `step_plan_done: true` |
 | **Hard-stops** | Still on `main`/`master` without ensure; missing Ship; Verify as free prose |
-| **Nested** | None (knowledge allowlist — not rr-coder) |
+| **Nested** | None (knowledge allowlist — not s-coder) |
 
 #### build
 
 | | |
 |--|--|
-| **Loads** | Current `{NNNN}-{step}.plan.md` (only plan among plans); thin Goal/Obligations; `skills/rr-builder/rr-coder/SKILL.md` + `skills/rr-builder/rr-tester/SKILL.md` |
+| **Loads** | Current `{NNNN}-{step}.plan.md` (only plan among plans); thin Goal/Obligations; `skills/s-coder/SKILL.md` + `skills/s-tester/SKILL.md` |
 | **Inputs** | Plan Goal/Approach/Verify hooks; allowlisted code/test refs as coder/tester require |
 | **Durable output** | Application source + tests (no new task sidecar required) |
 | **Done-when** | Step code+tests land; Verify hooks runnable; `step_build_done: true`; `step_build_base_sha` recorded at build start (`git rev-parse HEAD` before the first build commit) |
 | **Hard-stops** | Missing plan sidecar; inventing scope beyond Non-goals |
-| **Nested** | **rr-coder**, **rr-tester** |
+| **Nested** | **s-coder**, **s-tester** |
 
 #### refactor
 
 | | |
 |--|--|
-| **Loads** | `skills/rr-builder/rr-refactor/SKILL.md`; scope rule below |
+| **Loads** | `skills/s-refactor/SKILL.md`; scope rule below |
 | **Inputs** | MR ∩ **build-touched** paths; `epoch_cap: 5` |
 | **Scratch** | Optional `.ai/refactor/<runId>/` (`state.json`, epochs) — not durable SoT |
 | **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md` (lean note); optional `→ refactor:` pointer |
 | **Done-when** | Empty intersection → skip note + `step_refactor_done: true`; else converge/skip-or-partial + lean note written + `step_refactor_done: true` |
-| **Hard-stops** | Collector/verify unrecoverable stop per rr-refactor (ends chain) |
-| **Nested** | **rr-refactor** (`--refactor` handoff: chat lean summary only, no required `report.md`) |
+| **Hard-stops** | Collector/verify unrecoverable stop per s-refactor (ends chain) |
+| **Nested** | **s-refactor** (`--refactor` handoff: chat lean summary only, no required `report.md`) |
 
 #### review
 
 | | |
 |--|--|
-| **Loads** | `skills/rr-builder/rr-review/SKILL.md`; force `--fix --all --endless` |
+| **Loads** | `skills/s-review/SKILL.md`; force `--fix --all --endless` |
 | **Inputs** | Step MR/workspace scope; brief sources; `max_epochs` default 5 |
 | **Scratch** | `.ai/review/<runId>/` (brief/assess/challenge/`report.md`) |
 | **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md`; optional `→ review:` pointer |
 | **Done-when** | Endless success (clear or warnings-security-only, residual probe clean) **and** task review sidecar `{NNNN}-{step}.review.md` on disk; **then** set `step_review_done: true` |
 | **Hard-stops** | Epoch cap without clear; unchallenged report; empty allowlist; endless “success” chat without writing the task sidecar; setting `step_review_done` / advancing without sidecar present |
-| **Nested** | **rr-review** → rr-coder / rr-tester / rr-security-auditor lanes |
+| **Nested** | **s-review** → s-coder / s-tester / s-security lanes |
 
 #### step-validate / task-validate
 
@@ -114,29 +114,29 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | **Marking** | Item PASS → flip matching `- [x]` on plan/task Verify; FAIL leaves `- [ ]` (report SoT for FAIL) |
 | **Done-when** | Report written; overall PASS only if all required items PASS; **shippable:** forge landing satisfied ([task-validate.md](task-validate.md) — push to open PR tip **or** carry-to-next) before cursor advance |
 | **Hard-stops** | Non-forge FAIL; forge-miss → **ship** then re-enter (not a permanent stop under auto); advancing with orphaned validate sidecar (no open-PR push and no carry-to-next) |
-| **Nested** | None (assessment); forge probe via **rr-ci** preflight when shippable |
+| **Nested** | None (assessment); forge probe via **s-ci** preflight when shippable |
 
 #### ship
 
 | | |
 |--|--|
-| **Loads** | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` |
+| **Loads** | [ship.md](ship.md) then `skills/s-ci/SKILL.md` |
 | **Inputs** | Plan **Ship** (`branch` / `ship_after` / `base`) |
-| **Durable output** | Open PR/MR via rr-ci; `active_ship_branch` / `ship_base_branch` on summary |
+| **Durable output** | Open PR/MR via s-ci; `active_ship_branch` / `ship_base_branch` on summary |
 | **Done-when** | [ship.md](ship.md); `step_ship_done: true` when step-scoped; return to validate |
-| **Hard-stops** | rr-ci failure / missing branch |
-| **Nested** | **rr-ci** |
+| **Hard-stops** | s-ci failure / missing branch |
+| **Nested** | **s-ci** |
 
 #### pr-validate
 
 | | |
 |--|--|
-| **Loads** | [pr-validate.md](pr-validate.md) then `skills/rr-ci/SKILL.md` |
+| **Loads** | [pr-validate.md](pr-validate.md) then `skills/s-ci/SKILL.md` |
 | **Inputs** | Open tip after forge landing push; prior validate sidecars on tip |
 | **Durable output** | `{NNNN}-{step}.pr-validate.md` or `{NNNN}.pr-validate.md` |
 | **Done-when** | [pr-validate.md](pr-validate.md); `step_pr_validate_done: true` when step-scoped; **skip** when `ship_after: never` or carry-to-next |
 | **Hard-stops** | Epoch cap (5); wait timeout; non-Sonar unrecoverable; engineer decline |
-| **Nested** | **rr-ci** (`pre-merge-status`, `debug-pipeline`, `--fix --sonar`) |
+| **Nested** | **s-ci** (`pre-merge-status`, `debug-pipeline`, `--fix --sonar`) |
 
 #### slice validate
 
@@ -153,12 +153,12 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 
 | Stage / mode | Behavior |
 |--------------|----------|
-| **plan** (orchestrate) | **Read** [plan-knowledge.md](plan-knowledge.md). Run [feature-branch.md](feature-branch.md) ensure **first**. Then load remaining allowlist refs in **one parallel** tool turn ([plan-knowledge.md](plan-knowledge.md)). Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run rr-coder/rr-tester implement procedures. |
-| **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `skills/rr-builder/rr-coder/SKILL.md` **and** `skills/rr-builder/rr-tester/SKILL.md` in **one parallel** turn. Prefer step Verify hooks over full tester flag-routing when orchestrate already scoped the step. |
-| **refactor** (orchestrate) | **Read** `skills/rr-builder/rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Durable: lean `{NNNN}-{step}.refactor.md`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
-| **review** (orchestrate) | **Read** `skills/rr-builder/rr-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). Durable terminal: `{NNNN}-{step}.review.md` (scratch under `.ai/review/`). |
-| **ship** (orchestrate) | **Read** [ship.md](ship.md), then `skills/rr-ci/SKILL.md`. Do **not** invent forge CLI in builder. |
-| **pr-validate** (orchestrate) | **Read** [pr-validate.md](pr-validate.md), then `skills/rr-ci/SKILL.md`. Wait/fix probes stay rr-ci; do **not** invent forge wait CLI in builder. |
+| **plan** (orchestrate) | **Read** [plan-knowledge.md](plan-knowledge.md). Run [feature-branch.md](feature-branch.md) ensure **first**. Then load remaining allowlist refs in **one parallel** tool turn ([plan-knowledge.md](plan-knowledge.md)). Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run s-coder/s-tester implement procedures. |
+| **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `skills/s-coder/SKILL.md` **and** `skills/s-tester/SKILL.md` in **one parallel** turn. Prefer step Verify hooks over full tester flag-routing when orchestrate already scoped the step. |
+| **refactor** (orchestrate) | **Read** `skills/s-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Durable: lean `{NNNN}-{step}.refactor.md`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
+| **review** (orchestrate) | **Read** `skills/s-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). Durable terminal: `{NNNN}-{step}.review.md` (scratch under `.ai/review/`). |
+| **ship** (orchestrate) | **Read** [ship.md](ship.md), then `skills/s-ci/SKILL.md`. Do **not** invent forge CLI in builder. |
+| **pr-validate** (orchestrate) | **Read** [pr-validate.md](pr-validate.md), then `skills/s-ci/SKILL.md`. Wait/fix probes stay s-ci; do **not** invent forge wait CLI in builder. |
 | Explicit lane flag | Full-skill **handoff** — see [routing.md](routing.md). No pipeline advance past that skill’s done-when. |
 
 ## Cursor persistence (minimal v1)
@@ -186,12 +186,12 @@ Update fields when a stage’s done-when passes — **before** looping or stoppi
 
 When stage is **refactor** (not `--refactor` handoff):
 
-1. Resolve MR file list (rr-review MR recipe in `skills/rr-builder/rr-review/refs/params.md`).
+1. Resolve MR file list (s-review MR recipe in `skills/s-review/refs/params.md`).
 2. Narrow to files touched during the current step's **build** only, from the pre-build snapshot: cursor `step_build_base_sha` (recorded at build start per the Cursor persistence table). **Do not** intersect with review-touched paths.
 3. **Empty intersection** → **skip** refactor with lean `{NNNN}-{step}.refactor.md` (status `skipped`) or chat skip note; set `step_refactor_done: true` — do **not** stop the slice.
-4. Pass resolved scope as `payload.refactor.paths` + `scope: MR` + `epoch_cap: 5` to **rr-refactor**.
+4. Pass resolved scope as `payload.refactor.paths` + `scope: MR` + `epoch_cap: 5` to **s-refactor**.
 
-**Build-touched scope helper** (stdout → value only; mirrors the rr-test-endless helper pattern):
+**Build-touched scope helper** (stdout → value only; mirrors the s-test-endless helper pattern):
 
 ```bash
 # Requires step_build_base_sha from {NNNN}.md frontmatter (required field when build ran).
@@ -216,10 +216,10 @@ If cursor shows `step_review_done: true` and `step_refactor_done: false` (legacy
 Probe order — **first match wins** (this is the **next** stage for `scope: next`, and the head of the remaining path for `scope: step` / `task` / `slice`). Read only frontmatter fields above + current step plan **Ship** when noted — do **not** invent completion from scanning step markdown narrative.
 
 1. **No pin-complete kernel / no `slice_id`** → stop or AskQuestion (need plan freeze / path).
-2. **Missing / incomplete prepare** (`outlined` rows, or `prepare_status` ≠ `complete`) → stage **prepare** → load **rr-prepare**.
+2. **Missing / incomplete prepare** (`outlined` rows, or `prepare_status` ≠ `complete`) → stage **prepare** → load **s-prepare**.
 3. **Active task** has next **task-step** with `step_plan_done` ≠ `true` → **plan**.
 4. **`step_plan_done: true` and `step_build_done` ≠ `true`** → **build**.
-5. **`step_build_done: true` and `step_refactor_done` ≠ `true`** → **refactor** (full **rr-refactor** per scope rule above; apply mid-flight migration reset after done-when when prior `step_review_done` was `true`).
+5. **`step_build_done: true` and `step_refactor_done` ≠ `true`** → **refactor** (full **s-refactor** per scope rule above; apply mid-flight migration reset after done-when when prior `step_review_done` was `true`).
 6. **`step_refactor_done: true` and `step_review_done` ≠ `true`** → **review** (`--fix --all --endless`).
 7. **`step_review_done: true`** → **step-validate** (until PASS recorded for this step).
 8. **While on step-validate** — Run [task-validate.md](task-validate.md) for step scope (incl. Ship-intent review when `never`; Forge/PR when shippable). Branch table:
@@ -229,7 +229,7 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
    | **Forge / PR FAIL** ∧ `ship_after: step_validate` ∧ `step_ship_done` ≠ `true` | **Ship** ([ship.md](ship.md)); after ship done-when → return here (re-validate). Under `drive: auto`, chain ship → re-validate without asking. |
    | Other **FAIL** | Leave `builder_stage: step_validate`; hard-stop chaining under `scope: step\|task\|slice`. |
    | **PASS** ∧ `ship_after: never` | `step_ship_done` / `step_pr_validate_done` satisfied (skip) → go to 10. |
-   | **PASS** ∧ shippable | Open PR already proven; `step_ship_done` should be `true`. Satisfy **forge landing** ([task-validate.md](task-validate.md) Forge landing — rr-ci push validate+cursor docs onto open tip, **or** carry-to-next) → go to 9. Do **not** enter ship-after-PASS for the forge-miss gate (`ship_after: step_validate` create path stays before PASS). |
+   | **PASS** ∧ shippable | Open PR already proven; `step_ship_done` should be `true`. Satisfy **forge landing** ([task-validate.md](task-validate.md) Forge landing — s-ci push validate+cursor docs onto open tip, **or** carry-to-next) → go to 9. Do **not** enter ship-after-PASS for the forge-miss gate (`ship_after: step_validate` create path stays before PASS). |
 
 9. **While on pr-validate (step)** — After forge landing. Branch table:
 
@@ -261,7 +261,7 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
 12. **While on pr-validate (task)** — Same as step 9 for task scope ([pr-validate.md](pr-validate.md) → `{NNNN}.pr-validate.md`). Skip when never/carry-to-next. PASS → final-task-step close / next task or step 13.
 
 13. **All tasks validated** → **slice validate** (orchestrate `scope: slice` only — skip under feature).
-14. **Slice validate PASS** → stop: **slice delivered** → point engineer to **rr-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
+14. **Slice validate PASS** → stop: **slice delivered** → point engineer to **s-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
 
 Explicit lane flag wins over this cursor even if `builder_stage` says otherwise ([input-resolution.md](input-resolution.md)).
 
@@ -306,7 +306,7 @@ Linear pipeline usually yields **one** ready stage (that item is also **`(next)`
 
 | Owner | Owns |
 |-------|------|
-| **Parent** | resolve / mode / load; **prepare**; spawn one `generalPurpose` Task per remaining task-step; **dirty-tree gate** after each return; **ship** / **rr-ci**; **pr-validate** (when open tip landed); **task-validate**; **slice-validate** + delivered (`scope: slice` only) |
+| **Parent** | resolve / mode / load; **prepare**; spawn one `generalPurpose` Task per remaining task-step; **dirty-tree gate** after each return; **ship** / **s-ci**; **pr-validate** (when open tip landed); **task-validate**; **slice-validate** + delivered (`scope: slice` only) |
 | **Executor** | That task-step’s inner pipeline `plan → build → refactor → review → step-validate` (resume from cursor `builder_stage` / `step_*_done`). Spec: [executors/step.md](executors/step.md). Prompt: [templates/step-task.template.md](templates/step-task.template.md). Executor `ok` does **not** imply CI green. |
 
 Parent does **not** implement the step inline under this cell ([routing.md](routing.md) anti-pattern).
@@ -346,7 +346,7 @@ After each Task return (and after parent post-ship commit), parent runs `git sta
 
 ### `needs_ship`
 
-Executor may return `needs_ship` after writing/committing a forge-miss step-validate report (forge POST stays in parent). Parent runs [ship.md](ship.md) → **rr-ci**, re-runs step-validate **inline** (assessment only), commits cursor/validate, dirty-gates, runs [pr-validate.md](pr-validate.md) when an open tip was landed, then spawns the next step Task (or proceeds to task-validate).
+Executor may return `needs_ship` after writing/committing a forge-miss step-validate report (forge POST stays in parent). Parent runs [ship.md](ship.md) → **s-ci**, re-runs step-validate **inline** (assessment only), commits cursor/validate, dirty-gates, runs [pr-validate.md](pr-validate.md) when an open tip was landed, then spawns the next step Task (or proceeds to task-validate).
 
 ### Nested-skill leaf Tasks
 

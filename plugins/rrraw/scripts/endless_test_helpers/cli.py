@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic helpers for rr-test-endless orchestration phases."""
+"""Deterministic helpers for s-test-endless orchestration phases."""
 
 from __future__ import annotations
 
@@ -232,9 +232,7 @@ def cmd_manifest_table(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="rr-test-endless orchestration helpers"
-    )
+    parser = argparse.ArgumentParser(description="s-test-endless orchestration helpers")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_probe = sub.add_parser("packing-probes")

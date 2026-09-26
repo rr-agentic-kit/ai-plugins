@@ -26,7 +26,7 @@
 
 Ids: `DEC-n` or feature-scoped revs — **not** `ADR-*`.
 
-Human brief restates Context+Decision for reviewers. Persist only after `compose-prose` → `rr-humanize`.
+Human brief restates Context+Decision for reviewers. Persist only after `compose-prose` → `s-humanize`.
 
 ## Rules
 

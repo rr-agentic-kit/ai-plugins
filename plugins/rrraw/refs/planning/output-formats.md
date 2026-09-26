@@ -95,7 +95,7 @@ Create `--output-dir` if it does not exist. Create `raw-history/` on first Q&A. 
 
 ### Tasks (`docs/rr/tasks/`)
 
-Global under `docs/rr/tasks/` — **not** per-track folders. **Never** copy-on-write when opening a next track. Out of cascade validator scope (same class as `future.md`). Authored by **rr-prepare** (builder tech plan); not Plan compose.
+Global under `docs/rr/tasks/` — **not** per-track folders. **Never** copy-on-write when opening a next track. Out of cascade validator scope (same class as `future.md`). Authored by **s-prepare** (builder tech plan); not Plan compose.
 
 ```
 docs/rr/tasks/
@@ -303,7 +303,7 @@ pins:
 | Fail freeze | Smell-fail AC without hold; Effort without standing record or Effort drivers; UI-facing without UX-shape; empty `delta_paths` when mechanism needed; shrinking the full requirement table to “match the slice” |
 | Validator (when file present) | Required-field + `delta_paths` file existence — `EXECUTE_SLICE_*` codes; judgment owns smell/WWAS |
 
-Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. Execute prep = **rr-prepare** (builder lane) — Plan has no separate tech-planning ceremony; thin tech ADRs may be completed at prepare. After prepare, implement via **rr-coder** (no auto-chain from prepare).
+Kernel contract detail: Plan `skills/rr-planner/refs/execute-handoff.md`. Execute prep = **s-prepare** (builder lane) — Plan has no separate tech-planning ceremony; thin tech ADRs may be completed at prepare. After prepare, implement via **s-coder** (no auto-chain from prepare).
 
 ## `later.md`
 
@@ -466,7 +466,7 @@ Required version stamps on every mint (from Discover phase status): `track`, `do
 
 ## Cascade prose persist
 
-After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`rr-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing constitution/architecture/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md). After successful persist, skill runs silent lexicon harvest ([project-lexicon.md](project-lexicon.md)).
+After compose agent draft: orchestrating skill runs `skills/rr-discovery/refs/compose-prose.md` (`s-humanize` generate/rewrite + scan) before treating cascade `.md` as final. Same gate for Plan PRD, standing constitution/architecture/deltas, and conditional session markdown artifacts. Reading order and Human brief: [doc-standards/dual-audience.md](doc-standards/dual-audience.md). After successful persist, skill runs silent lexicon harvest ([project-lexicon.md](project-lexicon.md)).
 
 ## Status merge
 

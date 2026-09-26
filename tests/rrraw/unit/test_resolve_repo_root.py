@@ -1,4 +1,4 @@
-"""Unit tests for rr-git resolve_repo_root."""
+"""Unit tests for s-git resolve_repo_root."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ SCRIPTS = (
     / "plugins"
     / "rrraw"
     / "skills"
-    / "rr-git"
+    / "s-git"
     / "scripts"
 )
 sys.path.insert(0, str(SCRIPTS))

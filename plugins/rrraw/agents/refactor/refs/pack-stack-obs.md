@@ -5,8 +5,8 @@
 ## Load (setup once; pack assumes already in session)
 
 1. Detected language/framework refs from coder SKILL matrix (e.g. `.java` → `java.md` + version; Spring Boot → `java.spring.md` + `orm-principles.md`)
-2. `skills/rr-builder/rr-coder/refs/observability.md`
-3. `skills/rr-builder/rr-coder/refs/compliance-rubric.md` when citing **CP013**, **CP019**–**CP021**, **CP028**–**CP030**
+2. `skills/s-coder/refs/observability.md`
+3. `skills/s-coder/refs/compliance-rubric.md` when citing **CP013**, **CP019**–**CP021**, **CP028**–**CP030**
 
 ## Scan procedure
 

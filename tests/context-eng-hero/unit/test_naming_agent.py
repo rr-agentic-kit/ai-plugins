@@ -85,16 +85,16 @@ def test_detect_nested_agent():
     assert m.detect_type(Path("agents/planning/challenge.md")) == "agent"
 
 
-def test_nested_skill_name_matches_leaf_folder(tmp_path: Path):
+def test_top_level_skill_name_matches_leaf_folder(tmp_path: Path):
     root = tmp_path / "plugin"
-    skill = root / "skills" / "rr-builder" / "rr-prepare" / "SKILL.md"
+    skill = root / "skills" / "s-prepare" / "SKILL.md"
     skill.parent.mkdir(parents=True)
     skill.write_text(
         "---\n"
-        "name: rr-prepare\n"
-        "description: Nested skill fixture for leaf-folder path match.\n"
+        "name: s-prepare\n"
+        "description: Top-level specialist skill fixture for leaf-folder path match.\n"
         "---\n\n"
-        "# rr-prepare\n\n"
+        "# s-prepare\n\n"
         "## Purpose\n\nPrepare.\n\n"
         "## When to use\n\nPrepare.\n\n"
         "## When not to use\n\nCode.\n\n"
@@ -112,6 +112,6 @@ def test_nested_skill_name_matches_leaf_folder(tmp_path: Path):
         "| None yet | — | — | — |\n",
         encoding="utf-8",
     )
-    results = m.run_checks(root, "skills/rr-builder/rr-prepare/SKILL.md")
+    results = m.run_checks(root, "skills/s-prepare/SKILL.md")
     row = result_by_id(results, "static.name.path-match")
     assert row["result"] == "PASS"

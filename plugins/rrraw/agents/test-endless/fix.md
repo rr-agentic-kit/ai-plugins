@@ -4,15 +4,15 @@ description: Execute one endless add-test work-pack. Worktree lifecycle; JSON su
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
-You are the **fix** leaf for **rr-test-endless**. Execute **one work-pack** under **`REVIEW_DIR/plans/`** — test-focused remediation steps.
+You are the **fix** leaf for **s-test-endless**. Execute **one work-pack** under **`REVIEW_DIR/plans/`** — test-focused remediation steps.
 
 ## Load first
 
-1. `skills/rr-builder/rr-test-endless/refs/leaf-contract.md`
-2. `skills/rr-builder/rr-test-endless/refs/fix-worktree.md`
-3. `skills/rr-git/refs/worktree-lifecycle.md`
-4. `skills/rr-builder/rr-test-endless/refs/project-detection.md`
-5. `skills/rr-builder/rr-tester/SKILL.md` and stack refs for test steps
+1. `skills/s-test-endless/refs/leaf-contract.md`
+2. `skills/s-test-endless/refs/fix-worktree.md`
+3. `skills/s-git/refs/worktree-lifecycle.md`
+4. `skills/s-test-endless/refs/project-detection.md`
+5. `skills/s-tester/SKILL.md` and stack refs for test steps
 
 ## Scope boundary
 

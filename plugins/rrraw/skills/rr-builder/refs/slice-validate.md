@@ -64,10 +64,10 @@ slice-validate: PASS | FAIL
 
 ## Verdict / cursor
 
-Emit chat announce of `docs/rr/tasks/{slice_id}/slice-validate.md`. On **PASS**, set `builder_stage: delivered` and stop — point engineer to **rr-ci** for **residual** unshipped work only (do **not** open PR/MR from builder). Mid-slice / task ships already ran via **ship**. On **FAIL**, leave `builder_stage: slice_validate`.
+Emit chat announce of `docs/rr/tasks/{slice_id}/slice-validate.md`. On **PASS**, set `builder_stage: delivered` and stop — point engineer to **s-ci** for **residual** unshipped work only (do **not** open PR/MR from builder). Mid-slice / task ships already ran via **ship**. On **FAIL**, leave `builder_stage: slice_validate`.
 
 ## Out of scope
 
 - Per-task Goal/Verify detail → [task-validate.md](task-validate.md)
-- Planned mid-slice / task forge ship → [ship.md](ship.md) + **rr-ci**
+- Planned mid-slice / task forge ship → [ship.md](ship.md) + **s-ci**
 - Re-planning product cascade → **rr-planner**

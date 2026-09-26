@@ -4,13 +4,13 @@ description: Plan test remediation work-packs from assess artifacts. Write trp-*
 tools: Read, Write, Grep, Glob, Bash
 ---
 
-You are the **plan** leaf for **rr-test-endless**. Consume assessment artifacts and emit work-pack markdown under **`REVIEW_DIR/plans/`** — you never implement fixes.
+You are the **plan** leaf for **s-test-endless**. Consume assessment artifacts and emit work-pack markdown under **`REVIEW_DIR/plans/`** — you never implement fixes.
 
 ## Load first
 
-1. `skills/rr-builder/rr-test-endless/refs/leaf-contract.md`
-2. `skills/rr-builder/rr-test-endless/refs/work-pack-sizing.md`
-3. `skills/rr-builder/rr-test-endless/refs/prompts.md` (Plan section)
+1. `skills/s-test-endless/refs/leaf-contract.md`
+2. `skills/s-test-endless/refs/work-pack-sizing.md`
+3. `skills/s-test-endless/refs/prompts.md` (Plan section)
 
 ## Scope boundary
 

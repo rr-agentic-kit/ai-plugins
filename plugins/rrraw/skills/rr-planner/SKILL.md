@@ -1,6 +1,7 @@
 ---
 name: rr-planner
-description: Flag-driven Plan — goal-likelihood for Discover OMTM via honest Effort + slice kernel. After Discover freeze; setup/challenge/freeze-slice. Market→rr-discovery.
+description: /rr-planner — honest RICE Effort + slice kernel after Discover freeze; PRD compose, freeze-slice, challenge.
+disable-model-invocation: true
 ---
 
 # rr-planner
@@ -9,7 +10,7 @@ description: Flag-driven Plan — goal-likelihood for Discover OMTM via honest E
 
 ## Purpose
 
-Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sitting yields **honest RICE Effort** (cost drivers in constitution/delta — tech and/or UX) and a **buildable slice kernel** (`execute-slice.yaml`) so future Execute starts fused code+test without inventing stack, mechanism, or cost-driving UX shape. Artifacts include full feature requirement sets, scored backlog, standing constitution (+ tech ADRs on demand), per-feature deltas, WWAS AC, and compact freeze. **Success** = raises the odds the builder reaches the frozen Discover objective / OMTM — Effort honesty + pin-complete kernel are **necessary preconditions**, not the finish line. Freeze only when further Plan work stops moving that likelihood **and** no open standing red flag / Discover-reopen blocks it — **not** product-doc section coverage or smell-clean ceremony. Discover (ES→MRD→BRD + `business-case.yaml`) is owned by `rr-discovery`. This skill owns Plan Q&A and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`. Ambient context-budget hooks (Cursor + Claude) inject soft/hard attention when the plugin is installed — [context-budget.md](refs/context-budget.md).
+Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sitting yields **honest RICE Effort** (cost drivers in constitution/delta — tech and/or UX) and a **buildable slice kernel** (`execute-slice.yaml`) so future Execute starts fused code+test without inventing stack, mechanism, or cost-driving UX shape. Artifacts include full feature requirement sets, scored backlog, standing constitution (+ tech ADRs on demand), per-feature deltas, WWAS AC, and compact freeze. **Success** = raises the odds the builder reaches the frozen Discover objective / OMTM — Effort honesty + pin-complete kernel are **necessary preconditions**, not the finish line. Freeze only when further Plan work stops moving that likelihood **and** no open standing red flag / Discover-reopen blocks it — **not** product-doc section coverage or smell-clean ceremony. Discover (ES→MRD→BRD + `business-case.yaml`) is owned by `rr-discovery`. This skill owns Plan Q&A and routing. Compose, research, and challenge run as non-interactive `Task` agents under `agents/planning/*`. Cascade prose persists only after `skills/rr-discovery/refs/compose-prose.md` → `s-humanize`. Ambient context-budget hooks (Cursor + Claude) inject soft/hard attention when the plugin is installed — [context-budget.md](refs/context-budget.md).
 
 ## When to use
 

@@ -52,7 +52,7 @@ Full quality matrix (Black, Mypy, Bandit, pip-audit, coverage, Sonar): see `CONT
 
 ## Conventions
 
-- Skill prefixes: `recipe-*` (context-eng-hero, jobseeker); `rr-*` (rrraw discovery/planner/test)
+- Skill prefixes: `recipe-*` (context-eng-hero, jobseeker); rrraw public `rr-*` (discovery/planner/builder); manual specialists `s-*`
 - Commands sub-divisions:
   - `-fix` focuses on adjusting wrong behavior based on previous assessment/review or human input
   - `-design|add|create` for start something new

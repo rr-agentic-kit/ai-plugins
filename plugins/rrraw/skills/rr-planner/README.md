@@ -8,13 +8,13 @@ Specify what to build after Discover proved the bet — with system judgment in 
 
 ## What
 
-Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX; Plan-owned tech + global UX baseline), on-demand **tech ADRs** (`architecture.md`), feature deltas (decision-lite mechanism, Effort drivers, UX-shape), WWAS AC, selection status, slice freeze (`execute-slice.yaml`), research, technical challenge (pre-mortem + red-team), and **context-budget detect / `--optimize`**. Discover (ES→MRD→BRD + business-case) is `rr-discovery`. Cascade `.md` persists only after `skills/rr-discovery/refs/compose-prose.md` → `rr-humanize`.
+Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX; Plan-owned tech + global UX baseline), on-demand **tech ADRs** (`architecture.md`), feature deltas (decision-lite mechanism, Effort drivers, UX-shape), WWAS AC, selection status, slice freeze (`execute-slice.yaml`), research, technical challenge (pre-mortem + red-team), and **context-budget detect / `--optimize`**. Discover (ES→MRD→BRD + business-case) is `rr-discovery`. Cascade `.md` persists only after `skills/rr-discovery/refs/compose-prose.md` → `s-humanize`.
 
 **Context budget:** `scripts/context_budget.sh` (tiktoken soft≥5k / hard≥8k). Dual-runtime plugin hooks (Cursor `hooks/cursor.json` + Claude `hooks/hooks.json`) inject soft/hard attention receipts when plan docs grow or the prompt mentions `rr-planner`. Skill detect after `standing` and before research/challenge; hard → `CONTEXT_BUDGET_EXCEEDED` + scoped load — not auto-rewrite. SoT: [refs/context-budget.md](refs/context-budget.md). Monorepo hook authoring: `.agents/hooks.md`.
 
 **Explicitly no traditional sprints** (no capacity/velocity theater). Sequencing language: **slice / phase / selected requirements**. Release/version bundling of frozen slices is a later Plan add-on — not this skill’s inventiveness.
 
-**Out of scope:** Execute prepare/implement / ship-check / ticket writing — builder (**rr-prepare**, **rr-coder**). Plan has no separate tech-planning ceremony; thin tech ADRs may complete at prepare.
+**Out of scope:** Execute prepare/implement / ship-check / ticket writing — builder (**s-prepare**, **s-coder**). Plan has no separate tech-planning ceremony; thin tech ADRs may complete at prepare.
 
 ## Actions
 
@@ -110,7 +110,7 @@ Session-state + status stamps written. **Next Up** per `refs/planning/progress.m
 
 ## Constraints
 
-- **Invoke:** Auto — no `disable-model-invocation`; ambient WHEN description is enough
+- **Invoke:** Manual `@rr-planner` / slash — `disable-model-invocation: true`; outcome-first description
 - **Gates:** Entry gate (frozen BRD + handoff); humanize before cascade `.md` persist; Effort requires standing record + Effort drivers this pass; smell-fail / hollow kernel blocks freeze; hard context budget blocks full-load (`CONTEXT_BUDGET_EXCEEDED`)
 - **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
 - **Dual-runtime:** Hooks + scripts ship for Cursor and Claude; document any parity gap

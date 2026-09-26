@@ -24,7 +24,7 @@ Ground the initiative in market reality — segments, competitors, trends — wi
 | **Customer needs** | Unmet needs mapped to an executive-summary metric | Ranked leaves: `basic` / `performance` / `delighter` |
 | **Market risks** | External threats — regulation, commoditization, disruption | Prose (unnumbered); impact × likelihood in the section |
 
-Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for this layer — do not flatten needs into MoSCoW. Sizing is a required evidence-backed section, not a research-phase deferral (`market_type: internal` skips TAM). Ranked leaves carry `Rationale`. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `rr-humanize`. Binding Gate 7 at this level (`skills/rr-discovery/refs/expert-panel.md`).
+Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for this layer — do not flatten needs into MoSCoW. Sizing is a required evidence-backed section, not a research-phase deferral (`market_type: internal` skips TAM). Ranked leaves carry `Rationale`. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `s-humanize`. Binding Gate 7 at this level (`skills/rr-discovery/refs/expert-panel.md`).
 
 ## Extraction method (discovery)
 
@@ -36,7 +36,7 @@ Prefix `MRD`. Mint `MRD-n` for customer needs only. Kano is the native model for
 6. Classify needs as Kano `basic` / `performance` / `delighter` — do not use Must/Should/Could. Mint rationales for ranked needs.
 7. Write or refresh **Human brief** from locked facts last — claim-check; no invented claims (`refs/planning/doc-standards/dual-audience.md`).
 8. Flag residual gaps beyond the claim-class budget → `research_deferred[]` with a named evidence bar, or Gate 7 `hold`.
-9. Persist cascade `.md` only after skill `compose-prose` → `rr-humanize`.
+9. Persist cascade `.md` only after skill `compose-prose` → `s-humanize`.
 
 ## Traceability
 

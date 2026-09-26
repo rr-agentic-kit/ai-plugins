@@ -94,21 +94,21 @@ scope: MR | all                   # --scope MR|PR|all|full
 paths: []                         # optional positional narrowers
 ```
 
-Rules mirror `skills/rr-builder/rr-review/refs/params.md`. Incompatible `--fix` + `--ci` → stop with one-line error. `--endless` + `--ci` → stop. `--endless` without `--fix` under handoff → stop or force `outcome: fix`. **Handoff `--fix` forces `endless: true`** (same as auto) — do not run single-shot fix-then-exit.
+Rules mirror `skills/s-review/refs/params.md`. Incompatible `--fix` + `--ci` → stop with one-line error. `--endless` + `--ci` → stop. `--endless` without `--fix` under handoff → stop or force `outcome: fix`. **Handoff `--fix` forces `endless: true`** (same as auto) — do not run single-shot fix-then-exit.
 
 **Auto review stage:** ignore report-only omission — set `outcome: fix`, `lanes: [code, test, security]`, `endless: true`, `max_epochs: 5` (or parsed `--max-epochs`).
 
 ## Tester flags (under `--tester` handoff)
 
-When `lane: tester`, pass through normalized flags per `skills/rr-builder/rr-tester/refs/input-resolution.md`. Parent does not re-parse the test conflict matrix.
+When `lane: tester`, pass through normalized flags per `skills/s-tester/refs/input-resolution.md`. Parent does not re-parse the test conflict matrix.
 
 ## Endless test flags (under `--add-endless-test` handoff)
 
-When `lane: add_endless_test`, normalize per `skills/rr-builder/rr-test-endless/refs/input-resolution.md` into `payload.endless_test`. Parent does not run the orchestration loop — hand off to **rr-test-endless** only. Drive/scope ignored.
+When `lane: add_endless_test`, normalize per `skills/s-test-endless/refs/input-resolution.md` into `payload.endless_test`. Parent does not run the orchestration loop — hand off to **s-test-endless** only. Drive/scope ignored.
 
 ## Refactor flags (under `--refactor` handoff)
 
-When `lane: refactor`, normalize per `skills/rr-builder/rr-refactor/refs/input-resolution.md` into `payload.refactor`. Parent does not run the epoch loop — hand off to **rr-refactor** only. Drive/scope ignored.
+When `lane: refactor`, normalize per `skills/s-refactor/refs/input-resolution.md` into `payload.refactor`. Parent does not run the epoch loop — hand off to **s-refactor** only. Drive/scope ignored.
 
 | NL pattern | Lane |
 |------------|------|
@@ -162,9 +162,9 @@ step_index: null | integer
 plan_path: null | string
 prepare: null | { kernel_path, slice_id }
 review: null | { lanes, outcome, endless, max_epochs, scope, paths }
-test: null | object   # rr-tester normalized payload
-endless_test: null | { max_epochs, max_parallel, start, scope }   # rr-test-endless
-refactor: null | { scope, paths, epoch_cap }   # rr-refactor
+test: null | object   # s-tester normalized payload
+endless_test: null | { max_epochs, max_parallel, start, scope }   # s-test-endless
+refactor: null | { scope, paths, epoch_cap }   # s-refactor
 security_scope: null | { scope, paths }
 code_scope: null | { scope, paths, plan_excerpt }
 ```
@@ -181,7 +181,7 @@ code_scope: null | { scope, paths, plan_excerpt }
 - `--feature` with missing intent/desc and user declines AskQuestion
 - No lane/mode and user declines AskQuestion
 - Manual gate declined / user declines continue
-- Request is clearly **rr-planner** or **rr-ci**-only → redirect per [anti-overlap.md](anti-overlap.md)
+- Request is clearly **rr-planner** or **s-ci**-only → redirect per [anti-overlap.md](anti-overlap.md)
 - Orchestrate with no pin-complete kernel / no `slice_id` → stop or AskQuestion
 - Hard stop from stage failure / validate FAIL / endless review max-epochs without clear exit (do not chain further under `step` / `task` / `slice`)
 - Feature mode after task-validate done-when — do not chain to slice-validate / delivered

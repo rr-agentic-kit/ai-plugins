@@ -4,8 +4,8 @@
 
 ## Load (only if not already in session)
 
-1. `skills/rr-builder/rr-coder/refs/code.principles.md` § Visibility / encapsulation
-2. `skills/rr-builder/rr-coder/refs/compliance-rubric.md` — **CP031**
+1. `skills/s-coder/refs/code.principles.md` § Visibility / encapsulation
+2. `skills/s-coder/refs/compliance-rubric.md` — **CP031**
 3. Stack language refs when known (modifier vocabulary)
 
 ## Procedure

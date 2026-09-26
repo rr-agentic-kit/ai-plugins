@@ -1,7 +1,7 @@
 {
   "name": "rrraw",
   "displayName": "RRRaw",
-  "version": "0.0.6-rc-2",
+  "version": "0.0.6-rc-5",
   "description": "Discover (ES\u2192BRD + business-case) + Plan (PRD+) + build/test/review + local git + forge-agnostic CI",
   "license": "Unlicense",
   "keywords": [
@@ -31,8 +31,20 @@
     "./skills/rr-discovery/",
     "./skills/rr-planner/",
     "./skills/rr-builder/",
-    "./skills/rr-git/",
-    "./skills/rr-ci/"
+    "./skills/s-prepare/",
+    "./skills/s-coder/",
+    "./skills/s-tester/",
+    "./skills/s-security/",
+    "./skills/s-review/",
+    "./skills/s-refactor/",
+    "./skills/s-test-endless/",
+    "./skills/s-ci/",
+    "./skills/s-gh/",
+    "./skills/s-glab/",
+    "./skills/s-publish/",
+    "./skills/s-deploy/",
+    "./skills/s-git/",
+    "./skills/s-humanize/"
   ],
   "agents": "./agents/",
   "hooks": "./hooks/cursor.json"
