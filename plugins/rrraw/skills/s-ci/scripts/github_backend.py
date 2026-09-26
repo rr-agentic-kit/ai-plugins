@@ -5,7 +5,7 @@ from argparse import Namespace
 from typing import Any
 
 import emit
-from errors import GitError
+from errors import GhError, GitError
 from forge import detect
 from gh import GhClient, default_gh
 from gitutil import current_branch, merge_base_refs, repo_root, resolve_pr_base
@@ -252,7 +252,8 @@ def _add_preflight(client: GhClient, args: Namespace) -> int:
                     "message": "PR already exists",
                 },
             )
-    except Exception:
+    except GhError:
+        # No open PR for --head (or gh probe failed) → create path.
         pass
     return emit.succeed(
         "mr-add-preflight",

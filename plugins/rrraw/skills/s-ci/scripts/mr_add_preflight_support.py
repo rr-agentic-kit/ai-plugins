@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import emit
-from emit import omit_empty
 from gitutil import (
     DEFAULT_LOCAL_BRANCHES,
     already_merged,
@@ -25,7 +24,7 @@ def emit_result(status: str, *, extra: dict[str, str] | None = None) -> dict[str
     result: dict[str, str] = {"status": status}
     if extra:
         result.update(extra)
-    return omit_empty(result)
+    return emit.omit_empty(result)
 
 
 def _emit_needs_branch_from_default() -> int:
