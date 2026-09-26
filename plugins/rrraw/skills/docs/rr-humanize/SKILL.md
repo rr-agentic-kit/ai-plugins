@@ -4,6 +4,7 @@ description: >-
   Humanize docs and MR prose. Load for generate/rewrite, AI-tell removal, or
   --voice/--tone flags. Keywords: humanize, de-AI, readability.
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Humanize

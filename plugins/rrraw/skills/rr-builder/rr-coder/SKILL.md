@@ -2,6 +2,7 @@
 name: rr-coder
 description: Production code standards (SOLID, CPNNN, architecture). Via --coder, review code lane, or orchestrate plan/build (drive/scope per parent).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # rr-coder

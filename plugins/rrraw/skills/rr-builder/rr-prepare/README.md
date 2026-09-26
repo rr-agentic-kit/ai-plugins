@@ -37,7 +37,7 @@ Owns tech-decision gate (lazy tech ADR), L1 ordered summary, L2 task detail, L3 
 
 ### Invoke
 
-Parent **rr-builder** loads this nested skill on `--prepare` handoff or orchestrate **prepare** stage (`disable-model-invocation: true` — no ambient auto-invocation; still callable directly by name).
+Parent **rr-builder** loads this nested skill on `--prepare` handoff or orchestrate **prepare** stage (`disable-model-invocation` / `user-invocable: false`).
 
 ### Intake
 

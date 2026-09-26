@@ -44,7 +44,7 @@ Chunk geometry: **`skills/rr-builder/rr-review/refs/chunking.md`** only.
 
 ### Invoke
 
-Internal lane — **`disable-model-invocation: true`** (no ambient auto-invocation; still callable directly by name). Parent **`rr-builder --add-endless-test`** sets envelope.
+Internal lane only — **`disable-model-invocation: true`**, **`user-invocable: false`**. Parent **`rr-builder --add-endless-test`** sets envelope.
 
 ### Intake
 

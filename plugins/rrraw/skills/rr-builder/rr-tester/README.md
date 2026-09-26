@@ -59,7 +59,7 @@ Determinism hooks block completion on verify/oracle failure; epoch residuals sur
 - Exactly one primary action (or `--init` exclusivity)
 - Defaults: `--scope diff`, `--target auto`, `--output md`, `--max-epochs 3`
 - Agent paths: `agents/test/*` relative to plugin root (`refs/agent-index.md`)
-- `disable-model-invocation: true` (no ambient auto-invocation; still callable directly by name)
+- `disable-model-invocation: true` / `user-invocable: false`
 
 ## Notes
 

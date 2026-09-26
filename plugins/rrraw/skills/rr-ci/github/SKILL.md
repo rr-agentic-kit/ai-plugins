@@ -1,6 +1,7 @@
 ---
 name: github
 disable-model-invocation: true
+user-invocable: false
 description: GitHub-specific PR, issue, Actions, and gh/MCP patterns. Loaded by rr-ci after detect-remote returns github — not listed as a top-level plugin skill.
 ---
 

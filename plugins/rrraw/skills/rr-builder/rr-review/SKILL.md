@@ -2,6 +2,7 @@
 name: rr-review
 description: "Multi-lane review under .ai/review/<runId>/. --review nested flags, or orchestrate/handoff --fix (forces endless until clear)."
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # rr-review

@@ -48,7 +48,7 @@ Mechanical tool seeds (Checkstyle/Biome/Spotless) plus mandatory LLM assess pack
 
 ### Invoke
 
-Parent **rr-builder** handoff or orchestrate refactor stage — no ambient model auto-invocation (`disable-model-invocation: true`); still callable directly by name.
+Parent **rr-builder** handoff or orchestrate refactor stage — not user-invocable directly (`disable-model-invocation: true`).
 
 ### Intake
 
@@ -74,7 +74,7 @@ Convergence status + lean note/summary; parent sets **`step_refactor_done: true`
 
 ## Constraints
 
-- `disable-model-invocation: true` — no ambient auto-invocation; still user-invocable directly by name.
+- `disable-model-invocation: true`, `user-invocable: false` — parent-only orchestration.
 - Default scope: **Current MR**; `--scope all` / `--scope full` for full repo; positional paths narrow scope.
 - **`Task`** collector only when scope splits by module (**>50** files).
 - Epoch cap default **5** (`--epoch-cap`).
