@@ -93,7 +93,7 @@ def rr_root(docs: Path) -> Path:
 
 
 def tasks_dir(docs: Path) -> Path:
-    """``docs/rr/tasks/`` — reserved global task tree (not CoW'd on open-next)."""
+    """``docs/rr/tasks/`` — global task tree (registry + slices; not CoW'd)."""
     return rr_root(docs) / TASKS_DIR
 
 

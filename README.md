@@ -45,6 +45,6 @@ See each plugin’s `README.md` under `plugins/` for component details.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, pre-commit, quality gates, tests, CI, SonarCloud, and plugin validation.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, lefthook, quality gates, tests, CI, SonarCloud, and plugin validation.
 
 When you fork, edit `owner` / `author` placeholders in marketplace and plugin manifests. Add a `repository` URL to plugin manifests once the remote is known.

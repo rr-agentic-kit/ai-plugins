@@ -23,7 +23,7 @@ Before minting structure, recommend `prd_shape` + `scope_mode` (+ optional `arch
 | Market shape | B2C, persona-heavy | B2B, buyer≠user |
 | What gets prioritized | Outcomes / JTBD first | Capabilities / RICE-on-features first |
 | WIP style | Stories before capabilities named | Features first; stories as usage angles |
-| Downstream need | Slice kernel later | Needs architecture spine sooner |
+| Downstream need | Slice kernel later | Needs constitution INDEX sooner |
 | NFR criticality | Few product-level NFRs | Several NFRs are product commitments on PRD |
 
 **Output:** `prd_shape: story_led | feature_led | hybrid` + `scope_mode: discovery | closed`. Revisit only on explicit user change or objective shift.
@@ -43,7 +43,7 @@ Before minting structure, recommend `prd_shape` + `scope_mode` (+ optional `arch
 | **Acceptance (WWAS)** | Why / What / observable Acceptance — product pass/fail | Prose or leaves tied to selected requirements; smell-gate before slice freeze |
 | **Out of scope** | Product-level exclusions (inherits exec non-goals) | Ranked leaves; no RICE |
 
-Prefix `PRD`. Product scoping + observable AC. **P-tags only on requirement leaves.** No MoSCoW. No sprint / capacity / velocity ceremony. No release-phasing doc in this pass. Personas stay a section; stories name a persona in the body — they do not parent to a persona id. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `rr-humanize`.
+Prefix `PRD`. Product scoping + observable AC. **P-tags only on requirement leaves.** No MoSCoW. No sprint / capacity / velocity ceremony. No release-phasing doc in this pass. Personas stay a section; stories name a persona in the body — they do not parent to a persona id. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `s-humanize`.
 
 Selection: `_status_: deferred | selected | in_progress | delivered` on leaves. Selecting “build now” **never** deletes/shrinks the full set and never invents a second scope doc. Language: **slice / phase**.
 
@@ -56,7 +56,7 @@ Persist **factors only** — composed `(R×I×C)/E` score is **not stored**.
 | **Reach** | ✓ | ✓ | 10–100% of a **named** target — state the denominator |
 | **Impact** | ✓ | ✓ | `0.25` Minimal · `0.5` Low · `1` Medium · `2` High · `3` Massive |
 | **Confidence** | ✓ | ✓ | `low`→0.5 · `medium`→0.8 · `high`→1.0 |
-| **Effort** | ✓ | — | Fibonacci `1, 2, 3, 5, 8, 13` on **features only** — **refuse** without same-sitting architecture (spine and/or feature delta) that cites **Effort drivers**; UI-facing also needs UX-shape (or `n/a` + reason) |
+| **Effort** | ✓ | — | Fibonacci `1, 2, 3, 5, 8, 13` on **features only** — **refuse** without same-sitting standing record (constitution and/or feature delta) that cites **Effort drivers**; UI-facing also needs UX-shape (or `n/a` + reason) |
 
 Stories score **RIC** (no Effort). Features score full **RICE**. Goals use `primary`/`support` only. Requirement leaves use P1–P3. Out-of-scope items get no RICE factors. Framework choice: `skills/rr-planner/refs/prioritization-lens.md`.
 
@@ -69,7 +69,7 @@ After scoring, validate RICE/RIC consistency and adherence to parent feature int
 | Kind | Where |
 |------|-------|
 | Product-facing NFR / WWAS AC | PRD |
-| Standing invariants | `architecture.md` (+ constitution) |
+| Standing invariants | `constitution.md` (+ tech `architecture.md` / ADRs on demand) |
 | Feature mechanism | `deltas/<feature-id>.md` |
 | Discover early parking only | Root `tech.md` — **Plan does not author AC/ADR there** |
 
@@ -85,7 +85,7 @@ Follow `skills/rr-planner/refs/plan-interview.md`: objective → capability → 
 6. Capture full requirement set with P1–P3; select via status.
 7. WWAS + `skills/rr-planner/refs/req-smell.md` before slice freeze.
 8. Write or refresh **Human brief** from locked facts last — claim-check; no invented claims (`refs/planning/doc-standards/dual-audience.md`).
-9. Persist cascade `.md` only after skill `compose-prose` → `rr-humanize`.
+9. Persist cascade `.md` only after skill `compose-prose` → `s-humanize`.
 10. Slice freeze → `skills/rr-planner/refs/execute-handoff.md`.
 
 ## Traceability (C2-7)

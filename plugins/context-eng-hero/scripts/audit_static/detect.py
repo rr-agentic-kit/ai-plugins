@@ -6,6 +6,15 @@ from pathlib import Path
 def _detect_skill_type(parts: tuple[str, ...], name: str) -> str | None:
     if len(parts) >= 3 and parts[0] == "skills" and name == "readme.md":
         return "skill-readme"
+    # skills/<name>/refs/executors/<role>.md — parent-only Task executor
+    if (
+        len(parts) >= 5
+        and parts[0] == "skills"
+        and parts[2] in {"refs", "references"}
+        and parts[3] == "executors"
+        and name.endswith(".md")
+    ):
+        return "inline-executor"
     # skills/<name>/refs/**/*.md  (incl. doc-standards/)
     if (
         len(parts) >= 4

@@ -4,7 +4,7 @@
 
 **Load when:** Scoring Effort, freezing a slice, or a capability needs a binding mechanism / UX-shape choice.
 
-**Does not:** Dump full stack trees into the spine. Does not author product AC as test code. Does not use root `tech.md` for Plan AC/ADR. Does not own pixels, components, or library calls (Execute).
+**Does not:** Dump full stack trees into constitution. Does not author product AC as test code. Does not use root `tech.md` for Plan AC/ADR. Does not own pixels, components, or library calls (Execute). Does not full-load fat architecture on every feature.
 
 ## Cost-driver test
 
@@ -12,28 +12,33 @@ Record a Plan decision only when **(a)** independent builders would diverge with
 
 | Capture | Where |
 |---------|-------|
-| Cross-feature invariant (tech or global UX baseline) | `architecture.md` spine (`Binds` / `Prevents` / `Rule`) |
-| Feature-local mechanism + Effort drivers + UX-shape | `deltas/<feature-id>.md` — reference spine, do not restate |
+| Cross-feature invariant (tech or global UX baseline) | `constitution.md` INDEX (`Binds` / `Prevents` / `Rule`) |
+| True tech ADR (stack / integration / data-model standing) | `architecture.md` / `adrs/` — `ADR-n` — load on cite only |
+| Feature-local mechanism + Effort drivers + UX-shape | `deltas/<feature-id>.md` (decision-lite) — reference constitution, do not restate |
 | Product pass/fail | PRD WWAS AC — observable, not implementation |
 
 ## Three altitudes
 
 | Altitude | Owns | Out |
 |----------|------|-----|
-| **Standing** | Spine + constitution invariants; global interaction / design-system baseline when Bind/Prevent would diverge | Feature mechanism |
-| **Feature** | Delta Decision, Effort drivers, UX-shape (or `n/a`), ADR-lite Rejections | Pixel DoR, component trees |
+| **Standing** | Constitution INDEX (+ optional invariant shards); cited tech ADRs on demand | Feature mechanism |
+| **Feature** | Delta Decision, Effort drivers, UX-shape (or `n/a`), decision-lite Rejections | Pixel DoR, component trees |
 | **Implementation** | Execute fused code+test | Plan — inventing wizard-vs-form, new integration boundaries, or cost-driving states here fails the altitude wall |
+
+## Scoped load (dual-lens)
+
+Load **constitution index** + **that feature’s delta** + **cited tech ADR only**. Do not dump the whole architecture corpus. Hard budget exceed → [context-budget.md](context-budget.md) / `CONTEXT_BUDGET_EXCEEDED`.
 
 ## Same-sitting rule
 
 No feature RICE Effort and no slice freeze until:
 
-1. Architecture decision for that capability exists in this pass (spine update and/or feature delta) with **Decision** + **Effort drivers** (2–5 bullets naming what made Effort = N).
+1. Architecture/standing decision for that capability exists in this pass (constitution and/or feature delta and/or cited ADR) with **Decision** + **Effort drivers** (2–5 bullets naming what made Effort = N).
 2. UI-facing features include **UX-shape** (interaction pattern, surfaces/flow, cost-relevant states — or explicit `n/a` with reason for pure backend).
 
-Draft spine rev is allowed; **draft ≠ missing** Decision / Effort drivers. Broken obligations are not.
+Draft constitution/architecture rev is allowed; **draft ≠ missing** Decision / Effort drivers. Broken obligations are not.
 
-Refuse Effort-without-architecture. Refuse Effort unless the same-sitting delta/spine cites **Effort drivers**. Fibonacci remains a relative size, not sprint capacity.
+Refuse Effort-without-architecture (meaning: without standing/mechanism record). Refuse Effort unless the same-sitting delta/constitution cites **Effort drivers**. Fibonacci remains a relative size, not sprint capacity.
 
 ## Mapping prompts (one at a time)
 
@@ -42,22 +47,24 @@ Refuse Effort-without-architecture. Refuse Effort unless the same-sitting delta/
 3. What must never happen (`Prevents`)?
 4. What UX cost drivers apply (wizard vs form, permission/empty/error states) — or `n/a` why?
 5. What is deferred / out of this slice?
-6. **Auth / access specialization:** when nature reflection ([nature-expectation-packs.md](nature-expectation-packs.md)) surfaces access axes, which are in play (invite / register-tenant / session login / IdP / mailbox OAuth)? Mechanism + Effort drivers **per axis** in delta/spine — a **merged access model** fails altitude honesty ([domain-routing.md](domain-routing.md)).
+6. **Auth / access specialization:** when nature reflection ([nature-expectation-packs.md](nature-expectation-packs.md)) surfaces access axes, which are in play (invite / register-tenant / session login / IdP / mailbox OAuth)? Mechanism + Effort drivers **per axis** in delta/constitution — a **merged access model** fails altitude honesty ([domain-routing.md](domain-routing.md)).
 
 ## Anti-patterns
 
 - Happy-Path Effort (coding-only; ignore UX or integration cost drivers)
-- **Merged access model** — one Decision that collapses invite ≠ register-tenant ≠ login ≠ IdP ≠ mailbox OAuth; fails cost-driver and altitude honesty
-- Restating the full spine inside a feature delta
+- **Merged access model** — one Decision that collapses invite ≠ register-tenant ≠ login ≠ IdP ≠ mailbox OAuth
+- Restating the full constitution inside a feature delta
 - Routing Plan AC to `tech.md`
 - Effort as a PM guess with no system judgment / no Effort drivers cite
-- Execute inventing Plan-altitude shape (wizard vs form, new integration boundary)
+- Execute inventing Plan-altitude shape
 - Hi-fi wireframes / Figma as Plan Definition of Ready
 - Sprint / capacity language
+- Silent full-load of fat architecture / all deltas under research or dual-lens
 
 ## Done-when
 
-- Capability under score has spine and/or delta entry with Decision + Effort drivers
+- Capability under score has constitution and/or delta entry with Decision + Effort drivers
 - UI-facing: UX-shape present (or explicit out-of-slice); pure backend: UX-shape `n/a` + reason
-- Delta cites spine; no spine copy-paste
+- Delta cites standing law; no copy-paste
 - AC remains product-observable (WWAS)
+- Load stayed scoped (no corpus dump)

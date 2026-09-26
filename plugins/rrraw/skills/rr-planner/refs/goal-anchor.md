@@ -21,9 +21,10 @@ When input is unclear or ambiguous:
 
 1. **Name the ambiguity** — State what is unclear in one sentence.
 2. **Offer 2–4 concrete options** (not open-ended unless necessary).
-3. **Deliver per `question_mode`:**
+3. **Deliver per effective `question_mode`:**
    - `ask` (default) → `AskQuestion` with options
-   - `text` → numbered options inline in chat; user replies in conversation
+   - `text` → full context + recommendation + numbered/bulleted options inline in chat; user replies in conversation
+   - `auto` → pick `delivery` per question at surface time (heuristic below); record `delivery` on turn + `pending_clarifications[]`
 4. **Capture nuance** — If user picks "other" or adds qualifiers, record full text, not just the label.
 5. **Re-anchor** — After resolution, restate the decision tied to the user's stated goal.
 6. **Append history** — After every Q&A turn, append to `raw-history/{UTC}.yaml` (`refs/planning/output-formats.md`).
@@ -78,7 +79,7 @@ At **every** Plan phase transition (before marking a phase todo `completed`, adv
 
 1. Ask: does continuing **this exact step, as written**, still serve the real goal for **this real scenario** — or has something diverged that the fixed procedure did not anticipate?
 2. If yes (still serves) → proceed; record a one-line reflection when non-obvious (auto-close when alternatives unlikely).
-3. If no / uncertain → stop advancing: AskQuestion, scoped `--challenge` (**standard**), or Plan→Discover reopen — do not execute the next hard-coded step because the checklist says so. Two+ plausible alternatives → AskQuestion required.
+3. If no / uncertain → stop advancing: founder question (delivery per effective `question_mode`), scoped `--challenge` (**standard**), or Plan→Discover reopen — do not execute the next hard-coded step because the checklist says so. Two+ plausible alternatives → founder question required (not hardcoded `AskQuestion`).
 4. Open standing red flags and Discover-reopen candidates always count as “uncertain” until founder accept or route.
 
 This is **not** user-invoked `--challenge` and **not** smells ([req-smell.md](req-smell.md)). When auto-reflection finds load-bearing mismatch, escalate to standard challenge or upstream reopen.
@@ -140,12 +141,23 @@ Do not copy `flips_when`, evidence claims, or graveyard snapshots into this log.
 
 ## Question patterns
 
-| Pattern | `ask` mode | `text` mode |
-|---------|------------|-------------|
-| Single-select | `AskQuestion` single-select | Numbered list; "reply with number" |
-| Multi-select | `AskQuestion` multi-select | Bulleted options; "reply with numbers or names" |
-| Confirm | `AskQuestion` confirm | "Confirm: [statement] — yes/no?" |
-| Free-text follow-up | `AskQuestion` with Other | "Or describe in your own words:" |
+| Pattern | `ask` mode | `text` mode | `auto` mode (per-question) |
+|---------|------------|-------------|----------------------------|
+| Single-select | `AskQuestion` single-select | Numbered list; "reply with number" | Short (≤3 terse options, question ≤~120 chars) → `AskQuestion`; else → inline text |
+| Multi-select | `AskQuestion` multi-select | Bulleted options; "reply with numbers or names" | ≥3 substantive options or long labels → inline text |
+| Confirm | `AskQuestion` confirm | "Confirm: [statement] — yes/no?" | Yes/no or short confirm → `AskQuestion` |
+| Free-text follow-up | `AskQuestion` with Other | "Or describe in your own words:" | Long prompt or multi-paragraph fork → inline text always |
+| Challenge remediation fork | `AskQuestion` when effective `ask` | Full A\|B\|C context inline when effective `text` | Multi-paragraph post-report fork → **text** always ([challenge-layers.md](../../../refs/planning/challenge-layers.md)) |
+
+**Auto heuristic (canonical):** when effective mode is `auto`, choose `delivery` per clarification:
+
+| Signal | Deliver as |
+|--------|------------|
+| Question text > ~120 chars **or** any option label > ~60 chars **or** ≥3 options with substantive prose | **text** — full context, recommendation, numbered/bulleted options in chat |
+| Short confirm, single-select ≤3 terse options, yes/no | **AskQuestion** |
+| Multi-paragraph remediation fork (challenge post-report) | **text** (always under auto) |
+
+Discover copy stays in sync: [goal-anchor.md](../../rr-discovery/refs/goal-anchor.md) § Question patterns.
 
 After each answer: append raw-history YAML, then update the decision/assumption log in session state, then continue the current Plan phase. Off-level answers: classify owner first ([note-sessions.md](note-sessions.md)); `type: note_routed` when parked.
 
@@ -153,4 +165,12 @@ Posture confirm: `type: project_posture`, `user_confirmed: true`. New Must after
 
 ## Session completion signals
 
-Phrase recognition only ("done", "that's enough", "good to proceed", "move on", "next level", "stop", "pause", "done for now"). Advance vs stop is [cascade.md](cascade.md) Advancing vs stopping — one rule. "move on" is not a gate bypass; that table's exceptions (binding `hold`/`kill`, open queue) still apply.
+Phrase recognition only ("done", "that's enough", "good to proceed", "move on", "next level", "stop", "pause", "done for now").
+
+| Signal | Action |
+|--------|--------|
+| **Advance** | Phase Done-when met; auto-reflection clear; no binding Gate 7 `hold`/`kill`; clarifications drained or accepted |
+| **Stop / pause** | User stop/pause; pending clarifications; binding panel `hold`/`kill`; open quality debt without risk-accept |
+| **Do not offer freeze** | Standing red flag / Discover-reopen open; smell-clean alone — freeze bar per [execute-handoff.md](execute-handoff.md) |
+
+"move on" is not a gate bypass. Cascade order / humanize-before-select: [cascade.md](cascade.md).

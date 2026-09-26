@@ -159,7 +159,7 @@ pins: {}
 ## ES-1: Competitive window
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
 
-> Why now.
+Why now.
 """}
     write_planning(tmp_path, files)
     items = planning_items(tmp_path)

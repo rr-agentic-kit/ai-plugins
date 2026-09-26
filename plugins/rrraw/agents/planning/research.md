@@ -31,14 +31,15 @@ Function-style executor for post-composition market evaluation. Non-interactive 
 Required context:
 
 - `payload.output_dir`
-- Composed docs in `output_dir` (executive-summary through prd `.md` as available; yaml cascade files are stale input already rewritten at resolve)
+- **Scoped** composed docs — constitution INDEX + briefs/sections in research scope + load-bearing deltas (do **not** read all `{stem}.md`). Hard budget → `CONTEXT_BUDGET_EXCEEDED`
 - `session_state.assumptions` (prioritize unvalidated)
 - Load `skills/rr-planner/refs/research-method.md` for methodology
+- Load `skills/rr-planner/refs/context-budget.md` for load contract
 - Load `refs/planning/contracts.md` § research for output schema
 
 ## Execution
 
-1. Read all planning `{stem}.md` docs from `payload.output_dir`.
+1. Load scoped planning docs from `payload.output_dir` (constitution INDEX + in-scope sections + load-bearing deltas) — **no corpus dump**.
 2. Extract claims, assumptions, and gaps needing external validation.
 3. Plan research queries per iteration (3–5 queries each).
 4. Execute web searches; collect citations per research-method format.

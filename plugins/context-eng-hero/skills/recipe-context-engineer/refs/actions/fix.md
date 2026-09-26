@@ -16,11 +16,14 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 | `design/skill.md` | `fix-3-apply` (skills) |
 | `design/command.md` | `fix-3-apply` (commands) |
 | `design/agent.md` | `fix-3-apply` (agents) |
+| `design/inline-executor.md` | `fix-2-plan`, `fix-3-apply` (`refs/executors/*.md`, `skill.orchestration.agent-inject` FAIL, or Task spawn touch) |
+| `templates/executor.template.md` | `fix-3-apply` (inline executor) |
+| `templates/task-prompt.template.md` | `fix-3-apply` (orchestrator parent spawning Tasks) |
 | `readme-spec.md` | `fix-3-apply` (skill folders) |
 | `lexicon-spec.md` | `fix-2-plan`, `fix-3-apply` (`acronyms.*` / `glossary.*` FAILs) |
 | `templates/acronyms.template.md` | `fix-3-apply` (missing/wrong ACRONYMS.md) |
 | `templates/glossary.template.md` | `fix-3-apply` (missing/wrong GLOSSARY.md) |
-| `helper-cli.md` | `fix-3-apply` (when `scripts/`; SCRIPTABLE report waste → lean-emit recipe) |
+| `helper-cli.md` | `fix-3-apply` (when `scripts/` exists **or** deterministic fetch/filter/id-keyed write; SCRIPTABLE report waste → lean-emit recipe) |
 | `template-required-map.md` | `fix-3-apply` |
 | `templates/<type>.template.md` (per `classify.md`) | `fix-3-apply` |
 | Prior audit or test report | `fix-1-read` if supplied |
@@ -44,7 +47,7 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 ### Step 3: `fix-3-apply`
 
 - **Outcome:** Edits applied to draft.
-- **Done when:** All planned fixes applied in memory or working copy—including lexicon companion creates/updates when those ids failed. When absorbing **SCRIPTABLE** report/scaffold waste, apply `helper-cli.md` **Lean emit + schema + render** rather than expanding prose scaffolding.
+- **Done when:** All planned fixes applied in memory or working copy—including lexicon companion creates/updates when those ids failed. When absorbing **SCRIPTABLE** fetch/filter/id-keyed or report/scaffold waste, apply `helper-cli.md` (add or extend a thin script with filtered stdout, or **Lean emit + schema + render** for reports) rather than expanding prose scaffolding.
 
 ### Step 4: `fix-4-gates`
 

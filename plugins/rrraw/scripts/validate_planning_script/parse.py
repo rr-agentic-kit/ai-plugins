@@ -197,6 +197,15 @@ def _parse_inline_body_block(
 ) -> int:
     if index < len(lines) and BODY_QUOTE_RE.match(lines[index]):
         _, index = _capture_blockquote(lines, index)
+        if not migrate:
+            issues.append(
+                Issue.error(
+                    "STALE_FORMAT",
+                    "blockquote (>) leaf body is stale; "
+                    "run validate_planning.sh --rewrite",
+                    item_id,
+                )
+            )
         return index
     if index >= len(lines) or not lines[index].strip():
         return index
@@ -212,16 +221,6 @@ def _parse_inline_body_block(
         )
         _, index = _consume_list_meta(lines, index, item_id, issues)
         return index
-    if migrate:
-        _, index = _capture_free_body(lines, index)
-        return index
-    issues.append(
-        Issue.error(
-            "BODY_NOT_BLOCKQUOTE",
-            "leaf body must be a markdown blockquote (>)",
-            item_id,
-        )
-    )
     _, index = _capture_free_body(lines, index)
     return index
 

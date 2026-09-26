@@ -58,7 +58,7 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **Progressive disclosure** — Body ≤ ~200 lines or refs plan declared; heavy detail in `refs/`; **one hop** from SKILL (no ref→ref chains)
 - **Audience boundary** — Human vs agent vs both explicit; not "everyone"
 - **Invoke mode** — Auto / Slash-or-parent / Background chosen before drafting `description` and flags (`design/skill.md`)
-- **Scripts folder** — If `scripts/` exists: agent **runs** helpers via shell; do not paste script bodies into SKILL (`refs/helper-cli.md`)
+- **Scripts folder** — If `scripts/` exists: agent **runs** helpers via shell; do not paste script bodies into SKILL (`refs/helper-cli.md`). **Deterministic fetch/filter/id-keyed write** (agent reinvents the chain or dumps raw API output) → script before prose, even when `scripts/` is absent yet — token cost and stable exits beat another allowlisted one-liner.
 - **README** — Sibling spec with Why/What/When; does not restate Procedure (`refs/readme-spec.md`)
 - **ACRONYMS + GLOSSARY** — Both companions at resolved path; table shape; harvest overloaded plugin-wide senses, not flags/templates (`refs/lexicon-spec.md`)
 - **Skill UX (input/delivery)** — Create/design: resolve **skill-ux-delivery** before draft (`gate-prompts.md`); wire README **UX → Clarify/Close** + SKILL Orchestration / Execution rules from that choice—do not rewrite Purpose/Procedure from the gate alone
@@ -86,6 +86,15 @@ Check before authoring. Surface gaps the user did not mention; do not re-ask wha
 - **Error exit codes** — Failure modes map to predictable behavior
 - **argument-hint** — Declared in frontmatter when args are expected
 - **No internal ref paths** — Body delegates to skill action; no `refs/` or `plugins/` paths in user-facing body
+
+### Inline executor
+
+- **Not under `agents/`** — Parent-only role lives in `refs/executors/<role>.md`; no YAML discovery frontmatter (`design/inline-executor.md`)
+- **Caller Load table** — **Inputs** documents required vs stable hard-links vs variant inject; parent documents inject list on orchestrator (`skill.orchestration.agent-inject`)
+- **Spawn type** — `generalPurpose` + Read executor + Caller Load; not catalog subagent types
+- **Lean emit** — When report is SCRIPTABLE: `emit: lean-json` + `lean_out` scratch path; parent renders — executor does not paste template bodies
+- **No nested Task** — Single-shot; parent owns merge and write gates
+- **No parent re-invoke** — Executor MUST NOT invoke orchestrating skill for same job
 
 ### Agent
 

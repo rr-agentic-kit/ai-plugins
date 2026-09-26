@@ -2,7 +2,7 @@
 
 When a skill folder includes `scripts/`, the agent **runs** them via shell—it does **not** load script source into context as documentation.
 
-Load with **create**, **fix**, **design**, and **audit** when `scripts/` exists under the target skill.
+Load with **create**, **fix**, **design**, and **audit** when the target skill has `scripts/` **or** the case is a deterministic fetch/filter/id-keyed write that should become a script (see **When to add `scripts/`**).
 
 ## Core rule
 
@@ -16,22 +16,23 @@ Anthropic agent-skills guidance: scripts are **executed**, not loaded as docs.
 
 ## When to add `scripts/`
 
-- Repeatable multi-step workflow where the agent would otherwise invent the same shell chain every time
+- A user case that is the **same fetch, filter, or id-keyed write every time** — the agent would re-type the chain or dump raw API payloads into context
+- Stdout must be **only the fields the next step needs** (ids, filtered rows, stable envelopes) — not URLs, full GraphQL objects, or lists the agent re-filters in chat
+- Shell (`#!/bin/sh` + `gh`/`jq`/thin glue) is enough; no general SDK layer required
+- Repeatable multi-step workflow where the agent would otherwise invent the same shell chain every turn
 - Deterministic structure checks (see plugin `scripts/audit_static.py` as reference)
 - Fat CLI that polls internally so the agent waits one invocation
 - **Report scaffolding + severity math** from lean JSON (see **Lean emit + schema + render** below; CE exemplar `scripts/render_ce_report.py`)
 
-**Not for:** one-off `git`/`glab` calls documented once; general SDK layers; inline bash chains that belong in a single documented command.
+**Not for:** general SDK layers; one-off prose-only guidance with no repeated invent/dump waste. A **single** documented `git`/`gh` one-liner is fine when it is not reinvented every run — when the miss is unfiltered payloads or missing id-keyed writes, add the script instead of more markdown.
 
 ### Improve helpers (plugin root)
 
 | Invoke | Role |
 |--------|------|
 | `python3 scripts/audit_static.py . <rel>` | Static gate |
-| `python3 scripts/render_ce_report.py <kind> --in <json> --out <md>` | Validate lean JSON against `templates/reports/<kind>.schema.json`, Jinja-render markdown; agent must not Write full bodies |
-| `git add -- $(cat .ai/learning/ce-improve/<run-id>/touch-list.txt)` | After Write-gate Approve promote only — scoped stage; never `git add -A` |
-
-Exit **2** from `render_ce_report.py` = schema/JSON error — fix lean JSON from stderr `path: message` lines and re-run.
+| `python3 scripts/render_ce_report.py <kind> --in <json> --out <md>` | Validate lean JSON against `templates/reports/<kind>.schema.json`, Jinja-render markdown; agent must not Write full bodies. Exit **2** = schema/JSON error **or** smashed markdown tables (fix JSON/j2, re-run). |
+| `.ai/learning/ce-improve/<run-id>/touch-list.txt` | After Write-gate Approve promote — inventory of promoted paths for close narrative only; **never** `git add` |
 
 ## Lean emit + schema + render
 

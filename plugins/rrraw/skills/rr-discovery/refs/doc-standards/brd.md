@@ -25,7 +25,7 @@ Translate market context into business outcomes the organization must achieve. B
 | **Dependencies** | Internal teams, systems, approvals required | Ranked leaves |
 | **Business risks** | Organizational, financial, reputational risks with mitigations | Prose (unnumbered); impact × likelihood bullets |
 
-Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won’t is how stakeholders cut scope. Mint `BRD-n` for objectives, rules, and dependencies only. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `rr-humanize`.
+Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won’t is how stakeholders cut scope. Mint `BRD-n` for objectives, rules, and dependencies only. Write Human brief last from locked facts (or outline then refresh) — no invented claims. Persist only after `compose-prose` → `s-humanize`.
 
 ## Extraction method (discovery)
 
@@ -37,7 +37,7 @@ Prefix `BRD`. This is the business-negotiation layer — Must/Should/Could/Won�
 6. Each objective gets a success criterion testable at business level, in that leaf’s body.
 7. Record build / buy / partner for strategic capabilities; founder/team execution risk when venture posture.
 8. Write or refresh **Human brief** from locked facts last — claim-check; no invented claims (`refs/planning/doc-standards/dual-audience.md`).
-9. Persist cascade `.md` only after skill `compose-prose` → `rr-humanize`.
+9. Persist cascade `.md` only after skill `compose-prose` → `s-humanize`.
 
 ## Traceability
 

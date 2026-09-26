@@ -15,13 +15,16 @@ Conditional procedure when skill **Classify** + **Clarify** ends with writing a 
 | `design/skill.md` | `design-2-clarify`, `design-3-draft` (skills) |
 | `design/command.md` | `design-3-draft` (commands) |
 | `design/agent.md` | `design-3-draft` (agents) |
+| `design/inline-executor.md` | `design-3-draft` (`refs/executors/*.md` or orchestrator gaining Task spawn) |
+| `templates/executor.template.md` | `design-3-draft` (inline executor) |
+| `templates/task-prompt.template.md` | `design-3-draft` (orchestrator parent spawning Tasks) |
 | `gate-prompts.md` | `design-2-clarify` (skills: skill-ux-delivery) |
 | `readme-spec.md` | `design-3-draft` (skill folders) |
 | `templates/readme.template.md` | `design-3-draft` (skill README) |
 | `lexicon-spec.md` | `design-3-draft` (ACRONYMS + GLOSSARY) |
 | `templates/acronyms.template.md` | `design-3-draft` (ACRONYMS.md) |
 | `templates/glossary.template.md` | `design-3-draft` (GLOSSARY.md) |
-| `helper-cli.md` | `design-3-draft` (when `scripts/`) |
+| `helper-cli.md` | `design-3-draft` (when `scripts/` exists **or** deterministic fetch/filter/id-keyed write) |
 | `template-required-map.md` | `design-3-draft` |
 | `templates/<type>.template.md` (per `classify.md`) | `design-3-draft` |
 | `shared-write-gates.md` | `design-4-gates` |

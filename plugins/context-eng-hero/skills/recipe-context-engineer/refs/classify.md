@@ -11,6 +11,7 @@ Pick the **narrowest** type. Load at orchestration step 2 and action classify st
 | **Ref file** | Skill-private `refs/*.md` (or `references/*.md`) — not an entry point; loaded because parent SKILL / action Ref index names it |
 | **Command** | Named slash entry with fixed input/output contract |
 | **Agent** | Isolated-role Task executor with Role / Tools and boundaries / Stop / Inputs / Outputs (`agents/` or `agents/<group>/`) |
+| **Inline executor** | Parent-only Task executor under `refs/executors/<role>.md` — agent body shape, no discovery frontmatter; spawned via `generalPurpose` + Caller Load |
 | **Rule** | Always-on or glob-scoped constraint |
 | **Workflow** | Multi-step orchestration with delegation and per-step outputs |
 
@@ -23,12 +24,13 @@ Do not merge types. A folder with SKILL.md + `refs/` is **Skill+Ref**, not plain
 | `skills/<name>/SKILL.md` only | Skill |
 | `skills/<name>/SKILL.md` + `refs/` or `references/` | Skill+Ref |
 | `skills/<name>/refs/<topic>.md` (no SKILL edit) | Ref file |
+| `skills/<name>/refs/executors/<role>.md` | Inline executor |
 | `commands/<name>.md` | Command |
 | `agents/<name>.md` or `agents/<group>/<name>.md` | Agent |
 | `.cursor/rules/*.mdc` or `rules/` | Rule |
 | `*workflow*.md` with Steps + Delegation | Workflow |
 
-Templates: `templates/skill.template.md` (Skill or Skill+Ref), `templates/ref-file.template.md`, plus type-specific templates in `templates/`.
+Templates: `templates/skill.template.md` (Skill or Skill+Ref), `templates/ref-file.template.md`, `templates/executor.template.md` (inline executor), `templates/task-prompt.template.md` (orchestrator parent spawning Tasks), plus other type-specific templates in `templates/`.
 
 ## Routing (fix vs redesign)
 

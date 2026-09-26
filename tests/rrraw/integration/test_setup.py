@@ -18,7 +18,7 @@ traces_from: none
 ## ES-1: Competitive window
 _parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must
 
-> Why now.
+Why now.
 """
 
 
@@ -63,7 +63,7 @@ def test_setup_greenfield(tmp_path: Path, capsys: object) -> None:
     assert rows["plan status.yaml"][0] == "created"
     assert rows["cascade format"][0] == "ok"
     assert rows["cascade versioning"][0] == "ok"
-    assert rows["pr validate workflow"][0] == "created"
+    assert "pr validate workflow" not in rows
     assert docs.is_dir()
     rr = docs / "rr"
     assert rr.is_dir()
@@ -77,9 +77,7 @@ def test_setup_greenfield(tmp_path: Path, capsys: object) -> None:
     assert (plan / "status.yaml").is_file()
     assert (rr / "agent.plan.md").is_file()
     workflow = tmp_path / ".github" / "workflows" / "rrr-validate-planning.yml"
-    assert workflow.is_file()
-    assert "HAND_BUMP" in workflow.read_text(encoding="utf-8")
-    assert "docs/rr/**" in workflow.read_text(encoding="utf-8")
+    assert not workflow.exists()
     assert not (rr / "future.md").exists()
     for stem in vp.DISCOVERY_STEMS:
         assert not (discovery / f"{stem}.md").exists()

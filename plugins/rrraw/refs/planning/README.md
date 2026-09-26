@@ -6,7 +6,7 @@
 |-----|------|
 | [baselines.md](baselines.md) | **Version law** — track, docs/product patches, pins, unlock, ship ceremony, rejected patterns |
 | [challenge-layers.md](challenge-layers.md) | Challenge tiers, freeze-suggest, risk-accept, solid-subset advance |
-| [setup.md](setup.md) | `--setup` bootstrap + **PR-scoped** `validate_planning` wire |
+| [setup.md](setup.md) | `--setup` bootstrap of `docs/rr/` (no host CI wire); plugin-runtime `validate_planning` |
 | [output-formats.md](output-formats.md) | Layout, status, handoff YAML shapes |
 | [project-lexicon.md](project-lexicon.md) | Host `docs/GLOSSARY.md` + `ACRONYMS.md` silent harvest |
 | [agent-config.md](agent-config.md) / [agent.plan.md](agent.plan.md) | Injection + tripwire template |
@@ -28,7 +28,7 @@ Plugin Spec (process-ownership UX): [`INTENT.md`](../../INTENT.md).
 | **rr-planner** (flow) | Yes | Slice freeze, pins across dirs, open-next |
 | **Future Execute** (flow) | Yes | Product ship / track lock; same model — do not invent a third |
 | Compose / challenge planning agents | Pins/rev **read-only**; skill mints | Agents do not write `status.yaml` |
-| **rr-humanize** | **No** | Prose pass only |
+| **s-humanize** | **No** | Prose pass only |
 | **Git helpers** (if any) | **No** | VCS ≠ planning SemVer |
 | **rr-test** | **No** | Orthogonal quality path |
 

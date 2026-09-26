@@ -42,17 +42,7 @@ Shared layout SoT: `design/design-core.md` **Shared knowledge layout**.
 
 ## Access economy (agents) — hardness rule
 
-**Calling a Task ≠ shipping under `agents/`.** File under plugin `agents/**/*.md` registers a **catalog** subagent (`name` + `description` → Cursor Task types / Claude `@`-mention every session). Parent skill spawning Task / Agent with prompt “Read `refs/executors/….md` + Caller Load” is still an isolated one-shot executor—spec loads **only when that Task runs**; no ambient catalog entry.
-
-| Mechanism | What it does | Session cost |
-|-----------|--------------|--------------|
-| File under plugin `agents/**/*.md` | Registers a **catalog** subagent | Description uploaded every session; user can invoke outside the parent skill |
-| Parent skill spawns Task with Read of skill `refs/executors/….md` + Caller Load | Isolated one-shot executor | Spec loads only when that Task runs; no catalog entry |
-
-| Need | Pick |
-|------|------|
-| Discoverable Task / `@`-mention role (any skill or user may invoke) | **Plugin `agents/`** — collision-aware `name` (= file stem); not bare global nouns that collide across plugins |
-| Parent-only executor (one owning skill; must not ambient-discover) | Owning skill **`refs/executors/<role>.md`** (e.g. `compliance`, `opportunity`) — short role names OK under the skill; **never** `agents/` |
+**Calling a Task ≠ shipping under `agents/`.** File under plugin `agents/**/*.md` registers a **catalog** subagent (`name` + `description` → Cursor Task types / Claude `@`-mention every session). Parent-only executors under skill `refs/executors/` are **not** catalog agents — implementation SoT: `design/inline-executor.md`.
 
 1. **Body tool fence is always required** (portable) — **Tools and boundaries** with MUST / MUST NOT. Frontmatter `tools` / `disallowedTools` are **not** dual-runtime SoT.
 2. Marketplace default frontmatter: `name` + `description` only, unless author opts into a runtime. (**Catalog agents only** — parent-only executors under `refs/executors/` have **no** discovery frontmatter.)

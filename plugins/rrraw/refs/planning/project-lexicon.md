@@ -2,7 +2,7 @@
 
 **Owner:** Host-repo domain lexicon under `docs/` — skill-owned (Discover + Plan). Silent create/merge only. Not validator input. Not a cascade stem. Not Discover parking (`docs/rr/`).
 
-**Load when:** After [compose-prose.md](../../skills/rr-discovery/refs/compose-prose.md) succeeds (every cascade `.md` persist); after `--from-code` research persist ([from-code.md](../../skills/rr-discovery/refs/from-code.md)).
+**Load when:** After [compose-prose.md](../../skills/rr-discovery/refs/compose-prose.md) succeeds (every cascade `.md` persist); after `--from-code` research persist ([from-code.md](../../skills/rr-discovery/refs/from-code.md)); **before founder-facing challenge decisions** when `{PROJECT_ROOT}/docs/GLOSSARY.md` exists (Read probe — step 5 challenge path).
 
 **Does not:** AskQuestion about terms; mint empty files at `--setup`; overwrite or delete rows; dump rrraw plugin vocabulary into host files; let compose Task agents write these files.
 
@@ -66,7 +66,7 @@ Empty table only transient until first row. Optional `Notes` column may be omitt
 | rrraw / plugin vocabulary | `freeze`, `slice`, `spine`, `cascade`, `challenge`, `nature`, Discover/Plan ceremony terms |
 | Ubiquitous web/tech unless the *project* redefines them | HTTP, JSON, URL, API (as generic), REST |
 | Plugin-root companions | Do **not** copy `plugins/rrraw/GLOSSARY.md` / `ACRONYMS.md` into host `docs/` |
-| Humanize AI-tell wipe | Not `skills/docs/rr-humanize` `lexicon.md` — different concern |
+| Humanize AI-tell wipe | Not `skills/docs/s-humanize` `lexicon.md` — different concern |
 
 ## Triggers
 
@@ -74,6 +74,7 @@ Empty table only transient until first row. Optional `Notes` column may be omitt
 |---------|----------|
 | After compose-prose succeeds (every cascade `.md` persist) | Scan humanized prose + co-persisted item labels for new acronyms / overloaded domain terms → merge |
 | After `--from-code` research persist | Seed from `session_state.from_code_evidence.domain_language` (and related domain strings) before/with first compose — same merge rules |
+| Before founder-facing challenge Qs (Plan step 5) | **Read probe:** when `{PROJECT_ROOT}/docs/GLOSSARY.md` exists, Read it (and `ACRONYMS.md` when present) before surfacing post-report / cheaper-first clarifications — do not AskQuestion on domain terms the user cannot decode |
 | Files missing | Create on first successful merge only |
 | Files exist, wrong shape | Repair H1/table headers silently; preserve rows |
 

@@ -105,11 +105,12 @@ def format_meta_line(meta: dict[str, str]) -> str:
     return " | ".join(parts)
 
 
-def wrap_blockquote(body: str) -> str:
+def format_body(body: str) -> str:
+    """Emit canonical plain leaf body (no `>` prefix)."""
     stripped = body.strip("\n")
     if not stripped.strip():
         return ""
-    return "\n".join(">" if not line else f"> {line}" for line in stripped.splitlines())
+    return stripped
 
 
 def _meta_for_emit(item: Item) -> dict[str, str]:
@@ -176,7 +177,7 @@ def rewrite_markdown(text: str, source_file: str) -> tuple[str, list[Issue]]:
         out.append(format_meta_line(_meta_for_emit(item)))
         if body.strip():
             out.append("")
-            out.append(wrap_blockquote(body))
+            out.append(format_body(body))
         if i < len(lines) and lines[i].strip():
             out.append("")
     rewritten = "\n".join(out)
@@ -215,7 +216,7 @@ def _render_yaml_items(
         body = bodies.get(item.id, "")
         if body.strip():
             out.append("")
-            out.append(wrap_blockquote(body))
+            out.append(format_body(body))
         out.append("")
 
 

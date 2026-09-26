@@ -16,6 +16,7 @@ def run_keys(ctx: AuditContext) -> list[CheckResult]:
         "workflow",
         "skill-readme",
         "ref-file",
+        "inline-executor",
         "acronyms",
         "glossary",
         "unknown",

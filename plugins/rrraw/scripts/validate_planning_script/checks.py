@@ -137,7 +137,14 @@ def _check_cross_doc_parent(item: Item, by_id: dict[str, Item]) -> list[Issue]:
     parent = by_id[item.parent]
     child_lv = PREFIX_LEVEL[item.prefix]
     parent_lv = PREFIX_LEVEL[parent.prefix]
-    if parent_lv != child_lv - 1:
+    # PRD exception (C2-7): PRD items may parent >=1 ES or >=1 BRD id (OR),
+    # so BRD (level-1) and ES (level-2... via the walk MRD→ES) parents are
+    # legal for PRD; ES is two levels up from BRD but one walk away from the
+    # PRD's own chain, so allow ES (level-3) explicitly.
+    allowed_levels = {child_lv - 1}
+    if item.prefix == "PRD":
+        allowed_levels.update({child_lv - 2, child_lv - 3})
+    if parent_lv not in allowed_levels:
         issues.append(
             Issue.error(
                 "LEVEL_SKIP",

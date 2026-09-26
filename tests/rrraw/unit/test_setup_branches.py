@@ -35,17 +35,8 @@ injection:
         setup_mod.parse_agent_config(text)
 
 
-def test_setup_pr_validate_workflow_idempotent(tmp_path: Path) -> None:
-    first = setup_mod.setup_pr_validate_workflow(tmp_path)
-    assert first[0] == "created"
-    path = tmp_path / ".github" / "workflows" / "rrr-validate-planning.yml"
-    assert path.is_file()
-    assert "HAND_BUMP" in path.read_text(encoding="utf-8")
-    second = setup_mod.setup_pr_validate_workflow(tmp_path)
-    assert second == ("ok", "matches template")
-    path.write_text("stale\n", encoding="utf-8")
-    third = setup_mod.setup_pr_validate_workflow(tmp_path)
-    assert third[0] == "fixed"
+def test_setup_pr_validate_workflow_removed() -> None:
+    assert not hasattr(setup_mod, "setup_pr_validate_workflow")
 
 
 def test_setup_plans_directory_when_path_is_file(tmp_path: Path) -> None:
@@ -97,6 +88,35 @@ def test_setup_cascade_format_not_directory(tmp_path: Path) -> None:
     status, message = setup_mod.setup_cascade_format(blocker)
     assert status == "failed"
     assert "not a directory" in message
+
+
+def test_setup_cascade_format_fails_when_blockquote_remains(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    phase = tmp_path / "discovery"
+    phase.mkdir()
+    (phase / "brd.md").write_text(
+        "---\n"
+        "doc_type: brd\n"
+        'track: "0.1"\n'
+        'doc_rev: "?"\n'
+        "pins: {}\n"
+        "created: 2026-01-01T00:00:00Z\n"
+        "---\n\n"
+        "### BRD-1: Title\n"
+        "_parent_: — | _kind_: leaf | _spec_: draft | _moscow_: Must | "
+        "_rationale_: r-001\n\n"
+        "> Stale body\n",
+        encoding="utf-8",
+    )
+
+    def _noop_rewrite(planning_dir: Path, *, empty_ok: bool = False) -> list:
+        return []
+
+    monkeypatch.setattr(setup_mod, "rewrite_planning_dir", _noop_rewrite)
+    status, message = setup_mod.setup_cascade_format(phase)
+    assert status == "failed"
+    assert "blockquote" in message.lower()
 
 
 def test_setup_cascade_versioning_yaml_read_error(tmp_path: Path) -> None:

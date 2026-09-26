@@ -8,6 +8,7 @@ import audit_static as m
 import pytest
 from audit_static import models as models_mod
 from audit_static.models import AuditContext
+
 from conftest import FIXTURE_CASES, all_pass, result_by_id
 
 

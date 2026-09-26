@@ -32,7 +32,8 @@ def test_rewrite_yaml_to_md(tmp_path: Path):
     assert by_id["PRD-1.1"].reach == "40% of monthly active users"
     prd = (tmp_path / "prd.md").read_text(encoding="utf-8")
     assert "_parent_: PRD-1" in prd
-    assert "> As a guest, I can complete checkout without an account." in prd
+    assert "As a guest, I can complete checkout without an account." in prd
+    assert "> As a guest" not in prd
 
 
 def test_rewrite_list_meta_to_inline(tmp_path: Path):
@@ -52,7 +53,8 @@ Why now.
     text = (tmp_path / "executive-summary.md").read_text(encoding="utf-8")
     assert "- **Parent:**" not in text
     assert "_parent_: — | _kind_: leaf | _spec_: ready | _moscow_: Must" in text
-    assert "> Why now." in text
+    assert "Why now." in text
+    assert "> Why now." not in text
     issues = vp.validate_dir(tmp_path)
     assert "STALE_FORMAT" not in error_codes(issues)
     assert error_codes(issues) == set(), [i.format() for i in issues]
@@ -199,7 +201,8 @@ def test_rewrite_migrates_old_prd_shape_without_rice(tmp_path: Path):
     assert "_impact_:" not in text
     assert "_confidence_:" not in text
     assert "_effort_:" not in text
-    assert "> As a guest shopper, I can pay without creating an account." in text
+    assert "As a guest shopper, I can pay without creating an account." in text
+    assert "> As a guest shopper" not in text
     issues = vp.validate_dir(tmp_path)
     assert "NEEDS_RICE_RESCORE" not in error_codes(issues)
 

@@ -7,6 +7,7 @@ from pathlib import Path
 import audit_static as m
 from audit_static.models import AuditContext
 from audit_static.runners.lexicon import run_lexicon
+
 from conftest import result_by_id
 
 

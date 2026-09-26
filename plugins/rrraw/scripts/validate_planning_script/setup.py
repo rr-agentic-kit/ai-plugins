@@ -16,8 +16,6 @@ from .constants import (
     INJECTION_FENCE_RE,
     PLAN_DIR,
     PLAN_STEMS,
-    PR_VALIDATE_WORKFLOW_REL,
-    PR_VALIDATE_WORKFLOW_TEMPLATE_PATH,
     ROOT_SOT_FILENAMES,
     RRR_STATUS_NAME,
     SETUP_SECTIONS,
@@ -25,6 +23,7 @@ from .constants import (
 )
 from .layout_migrate import migrate_docs_layout
 from .models import Issue, has_errors
+from .parse import parse_planning_dir
 from .rewrite import rewrite_planning_dir
 from .workspace import (
     compute_mint_hash,
@@ -254,6 +253,16 @@ def setup_status(
     return "ok", "complete + mint_hash"
 
 
+def _blockquote_stale_issues(phase_dir: Path) -> list[Issue]:
+    """Probe: `>` leaf bodies must be gone after rewrite (plain prose SoT)."""
+    _, issues = parse_planning_dir(phase_dir)
+    return [
+        issue
+        for issue in issues
+        if issue.code == "STALE_FORMAT" and "blockquote" in issue.message
+    ]
+
+
 def setup_cascade_format(phase_dir: Path) -> tuple[str, str]:
     if not phase_dir.is_dir():
         return "failed", f"{phase_dir} is not a directory"
@@ -270,13 +279,17 @@ def setup_cascade_format(phase_dir: Path) -> tuple[str, str]:
         return "failed", "; ".join(
             issue.message for issue in issues if issue.severity == "error"
         )
+    stale = _blockquote_stale_issues(phase_dir)
+    if stale:
+        sample = "; ".join(issue.format() for issue in stale[:3])
+        return "failed", f"blockquote leaf bodies remain after rewrite: {sample}"
     after = {
         path.name: path.read_bytes()
         for path in phase_dir.iterdir()
         if path.is_file() and path.stem in stems and path.suffix in {".md", ".yaml"}
     }
     if before != after:
-        return "fixed", "rewrote list-meta/yaml to canonical md"
+        return "fixed", "rewrote list-meta/yaml/> bodies to canonical md"
     return "ok", _MSG_ALREADY_CANONICAL
 
 
@@ -314,30 +327,6 @@ def setup_cascade_versioning(phase_dir: Path) -> tuple[str, str]:
     if "created" in outcomes:
         return "created", "inserted track/doc_rev/pins/created"
     return "ok", _MSG_ALREADY_CANONICAL
-
-
-def setup_pr_validate_workflow(repo_root: Path) -> tuple[str, str]:
-    """Install PR-scoped validate_planning workflow (fail closed on HAND_BUMP)."""
-    try:
-        template = PR_VALIDATE_WORKFLOW_TEMPLATE_PATH.read_text(encoding="utf-8")
-    except OSError as exc:
-        return "failed", f"missing workflow template: {exc}"
-    if not template.strip():
-        return "failed", "workflow template is empty"
-    expected = template if template.endswith("\n") else template + "\n"
-    path = repo_root / PR_VALIDATE_WORKFLOW_REL
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        if not path.is_file():
-            path.write_text(expected, encoding="utf-8")
-            return "created", "wrote PR validate workflow"
-        current = path.read_text(encoding="utf-8")
-        if current == expected:
-            return "ok", "matches template"
-        path.write_text(expected, encoding="utf-8")
-        return "fixed", "overwrote to template"
-    except OSError as exc:
-        return "failed", str(exc)
 
 
 def _merge_cascade_outcomes(
@@ -408,7 +397,6 @@ def run_setup(docs: Path, repo_root: Path) -> int:
     ]
     results.append(("cascade format", *_merge_cascade_outcomes(format_outcomes)))
     results.append(("cascade versioning", *_merge_cascade_outcomes(version_outcomes)))
-    results.append(("pr validate workflow", *setup_pr_validate_workflow(repo_root)))
     by_name = {name: (status, message) for name, status, message in results}
     failed = False
     for name in SETUP_SECTIONS:

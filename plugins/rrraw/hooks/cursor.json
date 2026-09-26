@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "./hooks/context_budget_hook.sh --runtime cursor",
+        "timeout": 30
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "./hooks/context_budget_hook.sh --runtime cursor",
+        "timeout": 30
+      }
+    ]
+  }
+}

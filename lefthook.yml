@@ -1,0 +1,152 @@
+# Local git hooks. Install: `lefthook install`
+# Mirrors .github/workflows/python-quality.yml plus GitHub config checks.
+# Tool versions via `uv run` / uv.lock (same as CI).
+
+# doublestar: ** matches any depth including zero (scripts/*.py, not only nested).
+glob_matcher: doublestar
+
+output:
+  - meta
+  - summary
+  - success
+  - failure
+  - execution
+  - execution_out
+  - execution_info
+  - skips
+
+pre-commit:
+  parallel: false
+  follow: true
+  jobs:
+    # Always tick rc before quality. A one-path `files:` + {files} keeps lefthook
+    # from skipping on an empty index without expanding the whole tree onto the
+    # argv ( `{all_files}` hits ARG_MAX / multi-chunk re-runs and breaks).
+    # Do NOT use stage_fixed: it only re-adds already-staged paths — bump writes
+    # version files that usually were not staged. Explicit git add is required.
+    # Stage even when Claude local sync fails after the write.
+    - name: bump-plugins-rc
+      skip:
+        - merge-commit
+      files: "printf '%s\\n' pyproject.toml"
+      run: |
+        : {files}
+        set +e
+        uv run python scripts/bump_plugins_version.py rc
+        status=$?
+        set -e
+        git add -- \
+          pyproject.toml \
+          uv.lock \
+          plugins/*/.cursor-plugin/plugin.json \
+          plugins/*/.claude-plugin/plugin.json
+        exit "$status"
+
+    - name: quality
+      group:
+        parallel: true
+        jobs:
+          - name: whitespace
+            run: git diff --cached --check
+
+          - name: check-yaml
+            glob: "*.{yml,yaml}"
+            run: |
+              uv run python -c '
+              import sys
+              from pathlib import Path
+              import yaml
+              e = 0
+              for p in sys.argv[1:]:
+                  try:
+                      yaml.safe_load(Path(p).read_text(encoding="utf-8"))
+                  except Exception as exc:
+                      print(f"{p}: {exc}")
+                      e = 1
+              raise SystemExit(e)
+              ' {staged_files}
+
+          - name: check-json
+            glob: ".github/**/*.json"
+            run: |
+              uv run python -c '
+              import json, sys
+              from pathlib import Path
+              e = 0
+              for p in sys.argv[1:]:
+                  try:
+                      json.loads(Path(p).read_text(encoding="utf-8"))
+                  except Exception as exc:
+                      print(f"{p}: {exc}")
+                      e = 1
+              raise SystemExit(e)
+              ' {staged_files}
+
+          - name: actionlint
+            glob: ".github/workflows/*.{yml,yaml}"
+            run: actionlint {staged_files}
+
+          - name: validate-plugin-versions
+            run: uv run python scripts/validate_plugin_versions.py
+
+          # py-only: markdown/skill edits under plugins/ must not trip the Python
+          # suite (red suite → --no-verify → skipped bump).
+          - name: ruff
+            glob:
+              - "**/*.py"
+              - "pyproject.toml"
+            run: >
+              uv run ruff check
+              plugins/context-eng-hero/scripts
+              plugins/rrraw/scripts
+              scripts
+              tests/context-eng-hero
+              tests/rrraw
+              tests/scripts
+
+          - name: black
+            glob:
+              - "**/*.py"
+              - "pyproject.toml"
+            run: >
+              uv run black --check
+              plugins/context-eng-hero/scripts
+              plugins/rrraw/scripts
+              scripts
+              tests/context-eng-hero
+              tests/rrraw
+              tests/scripts
+
+          - name: mypy
+            glob:
+              - "plugins/*/scripts/**/*.py"
+              - "pyproject.toml"
+            run: uv run mypy
+
+          - name: bandit
+            glob: "plugins/*/scripts/**/*.py"
+            run: >
+              uv run bandit -r
+              plugins/context-eng-hero/scripts
+              plugins/rrraw/scripts
+              -c pyproject.toml
+
+          - name: pip-audit
+            glob:
+              - "pyproject.toml"
+              - "uv.lock"
+            run: >
+              bash -c 'uv export --frozen --format requirements.txt -o /tmp/requirements.txt >/dev/null
+              && uv run pip-audit -r /tmp/requirements.txt'
+
+          - name: pytest
+            glob:
+              - "**/*.py"
+              - "pyproject.toml"
+            run: >
+              uv run pytest tests/ -v
+              --cov=plugins/context-eng-hero/scripts
+              --cov=plugins/rrraw/scripts
+              --cov=scripts
+              --cov-report=term-missing
+              --cov-report=xml

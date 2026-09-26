@@ -1,16 +1,16 @@
 {# Compliance report — scaffolding only; findings come from lean JSON. #}
-{%- macro sev_line(bucket) -%}
+{% macro sev_line(bucket) -%}
 {%- if bucket -%}{{ bucket.pass | int }}/{{ bucket.total | int }}{%- else -%}0/0{%- endif -%}
-{%- endmacro -%}
-{%- set sev = severity or {} -%}
-{%- set sum = summary or {} -%}
-{%- set tgt = target or {} -%}
-{%- set title = tgt.title or tgt.path -%}
-{%- if sum.verdict == "FAIL" -%}
-{%- set default_next = "FAIL: fix every FAIL in this report" -%}
-{%- else -%}
-{%- set default_next = "PASS: ship or run behavior test if unverified" -%}
-{%- endif -%}
+{%- endmacro %}
+{% set sev = severity or {} %}
+{% set sum = summary or {} %}
+{% set tgt = target or {} %}
+{% set title = tgt.title or tgt.path %}
+{% if sum.verdict == "FAIL" %}
+{% set default_next = "FAIL: fix every FAIL in this report" %}
+{% else %}
+{% set default_next = "PASS: ship or run behavior test if unverified" %}
+{% endif -%}
 # Audit: {{ tgt.type }} — {{ title }}
 
 ## Target
@@ -35,11 +35,9 @@
 
 | id | Severity | PASS/FAIL | Evidence |
 |----|----------|-----------|----------|
-{%- for row in checks or [] %}
-| {{ row.id }} | {{ row.severity }} | {{ row.result }} | {{ row.evidence }} |
-{%- else %}
-| — | — | — | (none) |
-{%- endfor %}
+{% for row in checks or [] %}| {{ row.id }} | {{ row.severity }} | {{ row.result }} | {{ row.evidence }} |
+{% else %}| — | — | — | (none) |
+{% endfor %}
 
 ## Recommended next step (user)
 - {{ recommended_next | default(default_next, true) }}

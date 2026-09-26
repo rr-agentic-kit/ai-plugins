@@ -13,7 +13,8 @@ Does **not** Write/Edit/Bash. Does **not** invoke `recipe-context-engineer` or a
 ## Tools and boundaries
 
 - MUST Read the target path and caller-injected refs under `skills/recipe-context-engineer/refs/`.
-- MUST NOT run Bash, Write, Edit, or otherwise mutate files (read-only judgment).
+- Under improve with `lean_out`: MAY Write **only** that scratch JSON path. MUST NOT Edit/Write target skill paths or any other files. MUST NOT Bash.
+- Without `lean_out`: MUST NOT run Bash, Write, Edit, or otherwise mutate files (read-only judgment).
 - MUST NOT prompt the user — put clarifications as short markdown bullets instead.
 - MUST NOT re-litigate compliance PASS/FAIL as opportunities; skim unresolved FAILs into **Compliance blockers** only when supplied or visible.
 - MUST NOT discover or invoke skills; execute only the injected procedure + refs.
@@ -43,6 +44,7 @@ Caller Load (parent Task prompt / payload):
 | `refs.template` | yes | `skills/recipe-context-engineer/refs/templates/audit-redesign-output.template.md` (shape SoT) |
 | `refs.lean_schema` | when improve | `skills/recipe-context-engineer/refs/templates/reports/opportunity.schema.json` |
 | `emit` | when improve | `lean-json` |
+| `lean_out` | when improve | Absolute path under `.ai/learning/ce-improve/<run-id>/opportunity.json` — Write lean JSON here; chat return stays tiny |
 | `compliance_skim` | optional | FAIL ids / note from parallel `compliance` executor — blockers section only |
 
 Stable hard-links (executor may Read without re-injection): `actions/audit-redesign.md`, `rubrics/audit-redesign.rubric.md`, `improvement-patterns.md`, `templates/audit-redesign-output.template.md`, `templates/reports/opportunity.schema.json`. Parent still injects paths in the Task prompt (Caller Load). Never Read `*.md.j2`.
@@ -56,7 +58,7 @@ Stable hard-links (executor may Read without re-injection): `actions/audit-redes
 
 ## Outputs
 
-- **Improve:** lean JSON envelope (`kind: opportunity`) + one-line status. Do **not** emit full markdown in the Task return.
+- **Improve:** Write lean JSON envelope (`kind: opportunity`) to `lean_out` when provided; chat return = status + ranked_count + path — **not** full JSON. Do **not** emit full markdown in the Task return.
 - **Standalone:** full report per `refs.template`.
 
 Do **not** paste the template body into this executor file.
@@ -66,3 +68,5 @@ Do **not** paste the template body into this executor file.
 ## Orchestration
 
 Single-shot. Parent may spawn this executor in parallel with `compliance`. No nested Task. No write gates. No auto-apply.
+
+See `design/inline-executor.md` for inline executor authoring SoT.

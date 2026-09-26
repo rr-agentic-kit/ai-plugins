@@ -5,6 +5,7 @@ from __future__ import annotations
 import tomllib
 
 import pytest
+
 from conftest import REPO_ROOT, m
 
 

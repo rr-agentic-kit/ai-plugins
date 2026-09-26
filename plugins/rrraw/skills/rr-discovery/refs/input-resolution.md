@@ -73,14 +73,26 @@ Allowed JSON on disk (not selected by `--format`): `items.json` and `session-sta
 
 ### Question mode
 
-| Flag | `question_mode` |
-|------|-----------------|
+| Layer | Field | Values |
+|-------|-------|--------|
+| Persisted config | `preferences.question_mode` | `ask` (default) \| `text` \| `auto` |
+| Payload | `question_mode` | Resolved from preferences; `--text-mode` overrides to `text` for this invocation only |
+| Per-question (when effective = `auto`) | `delivery` | `ask` \| `text` — chosen per clarification at surface time |
+
+| Flag / signal | `question_mode` |
+|---------------|-----------------|
 | _(default)_ | `ask` — structured `AskQuestion` |
-| `--text-mode` | `text` — questions inline in chat |
+| `--text-mode` | `text` — questions inline in chat (this invocation only) |
+| NL during resolve (“use auto question mode”, “auto question mode”) | `auto` — confirm-once persist to `preferences.question_mode` |
+| Resume | Read stored `preferences.question_mode`; default `ask` when absent |
+
+**Effective mode:** `payload.question_mode` after `--text-mode` override. All Q&A surfaces honor **effective** delivery: `text` → inline chat; `ask` → `AskQuestion`; `auto` → per-question heuristic ([goal-anchor.md](goal-anchor.md) § Question patterns). Record chosen `delivery` on each raw-history turn and in `pending_clarifications[]`.
 
 ### Questions per cycle
 
 Address-loop batch size. Persisted in `session-state.json` `preferences.questions_per_cycle`. Default never silently rises above `1` without explicit opt-in.
+
+**Anti-trigger:** QPC sizes AskQuestion batches only (N Q → N A per address cycle). It does **not** schedule `--challenge` / re-attest — `refs/planning/challenge-layers.md`.
 
 | Flag | `preferences.questions_per_cycle` |
 |------|-----------------------------------|
@@ -93,7 +105,7 @@ Confirm-once (same pattern as [project-posture.md](project-posture.md)): on firs
 
 | Flag | Behavior |
 |------|----------|
-| `--resume` | Load `session-state.json` from `--output-dir`; continue from `checkpoint.current_level`; append Q&A to `raw_history_path`. Route: `resume`. |
+| `--resume` | Project `session-state.json` via `scripts/session_state.sh view` from `--output-dir`; continue from `checkpoint.current_level`; append Q&A to `raw_history_path`. Route: `resume`. Full-file `Read` of the checkpoint is a procedure fail. |
 | Auto-resume | If `session-state.json` exists in `--output-dir` and user says "continue" / "resume" in NL → treat as `--resume` |
 
 `--resume` = continue-open. It does not start `--change` and does not rediscover from 0.
@@ -158,13 +170,15 @@ Parse `deep` as a challenge mode — bare `--challenge` is **standard**, not dee
 
 ### Stale cascade rewrite
 
-After a successful payload, before any `Task` (discover, challenge, resume): if `output_dir` already has cascade docs (`{stem}.md` or stale `{stem}.yaml` for `executive-summary`/`mrd`/`brd`), run:
+After a successful payload, before any `Task` (discover, challenge, resume): if `output_dir` already has cascade docs (`{stem}.md` or stale `{stem}.yaml` for `executive-summary`/`mrd`/`brd`), run from the **loaded skill’s plugin root** (same package as this skill — not an older cache version):
 
 ```bash
 sh scripts/validate_planning.sh --rewrite <output_dir>
 ```
 
-Same for `--input` when it is a directory of cascade docs and differs from `output_dir`. `--rewrite` converts list-meta and `{stem}.yaml` to canonical `{stem}.md` and deletes the yaml sibling. Skip when no cascade files exist (greenfield). Do not treat yaml as a live `--format`.
+Same for `--input` when it is a directory of cascade docs and differs from `output_dir`. `--rewrite` migrates list-meta, `{stem}.yaml` → canonical `{stem}.md` (deletes the yaml sibling), and **`>` blockquote leaf bodies → plain prose**. Skip when no cascade files exist (greenfield). Do not treat yaml as a live `--format`. Remaining `>` bodies are `STALE_FORMAT` until rewrite succeeds.
+
+**Anti-trigger:** Never require `>` on leaf bodies. Never refuse removing `>`. Before any format refuse, Read `refs/planning/doc-standards/item-schema.md` §Canonical item surface from the same plugin root as the script (batch) — do not Grep older cache copies or invent `BODY_NOT_BLOCKQUOTE`.
 
 ## NL intent fallback
 
@@ -231,7 +245,7 @@ NL tokens `greenfield`, `brownfield`, `existing`, `signed v1` **seed** the [proj
 
 ## Status-first routing
 
-Load `docs/rr/rrr-status.yaml` (glance; fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml` (or `{PROJECT_ROOT}/docs/rr/{track}/discovery/status.yaml` when `output_dir` is a next-track phase dir) and `session-state.json`. Pick **one** route. Do not start posture until this pick is done.
+Load `docs/rr/rrr-status.yaml` (glance; fall back to legacy `docs/rrr-status.yaml`), then `{output_dir}/status.yaml` (or `{PROJECT_ROOT}/docs/rr/{track}/discovery/status.yaml` when `output_dir` is a next-track phase dir). For checkpoint: run `sh scripts/session_state.sh view --path {output_dir}/session-state.json` (preset `resume`) — **never** `Read` the whole `session-state.json` into context. Pick **one** route. Do not start posture until this pick is done. Missing file → no checkpoint (`MISSING_CHECKPOINT` when `--resume`).
 
 | `payload.route` | When |
 |-----------------|------|

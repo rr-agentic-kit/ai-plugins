@@ -4,7 +4,7 @@
 
 **Load when:** Every resolve (status-first pick); freeze / `--change` / open-next; compose frontmatter (`track`, `doc_rev`, `pins`); product ship / unlock.
 
-**Package index:** [README.md](README.md) — versioning is Shared under `refs/planning/`; **flow skills only** (Discover, Plan, future Execute). Non-loaders: `rr-humanize`, git helpers, `rr-test`. No skill-local `baselines.md` stubs.
+**Package index:** [README.md](README.md) — versioning is Shared under `refs/planning/`; **flow skills only** (Discover, Plan, future Execute). Non-loaders: `s-humanize`, git helpers, `rr-test`. No skill-local `baselines.md` stubs.
 
 Item identity, spec, PRD `status` / `priority`, and Effort provenance stay in [doc-standards/item-schema.md](doc-standards/item-schema.md). This ref does not change them. Tickets and technical docs stay out — they target `track` + item id.
 
@@ -51,7 +51,7 @@ Market SemVer: patch = compatible; minor = additive public surface; major = brea
 |-----|----------|---------|
 | Skill (Discover or Plan; future Execute) | **docs patch** on freeze / lock-target / obligation-preserving edit; **product patch** on ship/hotfix; **track** open-next after confirm | hand-edit `track` / frozen rev / pins / mint_hash |
 | Compose | prose/items only; no version fields | all version fields |
-| PR CI (setup-installed) | FAIL on `HAND_BUMP`, `STALE_PIN`, … | mint or classify track major/minor |
+| Plugin `validate_planning.sh` (skill-invoked) | FAIL on `HAND_BUMP`, `STALE_PIN`, … | mint or classify track major/minor; install host CI |
 
 ### Rejected patterns
 
@@ -59,7 +59,8 @@ Market SemVer: patch = compatible; minor = additive public surface; major = brea
 |---------|------------|
 | Shared patch across product and docs | Patches must diverge independently |
 | Per-doc SEMVER as the human version | Humans talk track; `doc_rev` is pin identity only |
-| CI minting or failing major/minor policy | Skill judgment after confirm; CI is mechanical only |
+| Plugin validator minting or failing major/minor policy | Skill judgment after confirm; validator is mechanical only |
+| Host-repo PR CI for planning validation | Plugin owns validate at skill runtime; host keeps artifacts only ([setup.md](setup.md)) |
 | Inline forward markers (`[0.2]` tags inside living `0.1` files) | Dual systems, digest death, noisy diffs, task races, per-doc SemVer creep |
 | Every PRD / doc tweak → track minor | **0.999 failure mode** — use docs patch instead |
 | Immutable full-tree CoW (`docs/0.1/`, `docs/0.2/` as default) | Heavy duplication; weak patch-on-shipped-track — compliance zip-per-release only, not default |
@@ -126,7 +127,8 @@ levels:
   #   status: frozen | draft | ?
   #   requirement_ids: [PRD-3.1, PRD-3.2]
   #   execute_kernel: execute-slice.yaml
-  #   architecture_rev: draft | integer
+  #   constitution_rev: draft | integer   # prefer
+  #   architecture_rev: draft | integer   # dual-read during transition
 next_levels: {}           # populated iff next is set; same per-doc shape
 challenge:                # current track; next_challenge mirrors next_levels
   prd:
@@ -155,6 +157,8 @@ next_challenge: {}
 Digest = `sha256:` + hex of canonical JSON for that doc’s `items.json` records (`sort_keys`, no whitespace variance). Do not hash markdown (frontmatter would be circular).
 
 Skill writes phase detail on first compose, freeze / lock-target / confirmed major-minor, and challenge attestation updates. Skill refreshes summary on phase transition / freeze / ship. Compose does not write either.
+
+**Pre-challenge sync (batch):** Before any challenge `Task`, skill refreshes `levels.*.digest` from live `items.json` and aligns `slice.requirement_ids` to `execute-slice.yaml` pins when a slice exists — one write step (with attestation dirtiness as usual). Do not challenge against lagged `status.yaml`.
 
 ### Challenge attestation
 
@@ -220,7 +224,7 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
     rrr-status.yaml          # SUMMARY
     agent.plan.md            # tripwire
     future.md / tech.md / later.md
-    tasks/                   # reserved (global; not CoW on open-next)
+    tasks/                   # global ids + {slice_id}/ (not CoW on open-next)
     0.1/
       discovery/
         status.yaml          # DETAIL — ES/MRD/BRD
@@ -232,9 +236,9 @@ ES `pins: {}`. Child pins the immediate parent only. `doc_rev` must match `statu
         status.yaml          # DETAIL — PRD + optional slice
         session-state.json
         prd.md
-        architecture.md      # standing spine (invariants)
-        constitution.md      # optional; when arch_doc_mode: split
-        deltas/              # per-feature ADR-lite deltas
+        constitution.md      # standing law (always-load INDEX)
+        architecture.md      # tech ADRs only (on-demand)
+        deltas/              # per-feature decision-lite product-deltas
           <feature-id>.md
         execute-slice.yaml   # compact 5-field Execute kernel (on slice freeze)
         …
@@ -313,10 +317,10 @@ Compose does not increment anything. After Gate 6+7 pass for a level **or** afte
 Primary Plan freeze unit is a **selected requirement slice**, not the whole PRD table.
 
 1. Smell-gate AC (`req-smell` + WWAS) pass or explicit hold.
-2. Same-sitting architecture exists for selected capabilities (spine and/or feature deltas) with **Decision** + **Effort drivers**; UI-facing needs **UX-shape** (or `n/a` + reason). Architecture rev may be `draft` — **draft ≠ missing** Decision/drivers.
-3. Write/overwrite `docs/rr/{track}/plan/execute-slice.yaml` (5-field kernel + pins; Constraints cite delta/spine obligations; `delta_paths` must exist) — [output-formats.md](output-formats.md).
+2. Same-sitting standing record exists for selected capabilities (constitution and/or feature deltas; cited tech ADR when needed) with **Decision** + **Effort drivers**; UI-facing needs **UX-shape** (or `n/a` + reason). Constitution/architecture rev may be `draft` — **draft ≠ missing** Decision/drivers.
+3. Write/overwrite `docs/rr/{track}/plan/execute-slice.yaml` (5-field kernel + pins; Constraints cite delta/constitution obligations; `delta_paths` must exist) — [output-formats.md](output-formats.md).
 4. Stamp `plan/status.yaml` `slice:` with requirement ids + kernel path; do **not** shrink/delete deferred requirement rows.
-5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is. Execute starts fused code+test from the kernel — no separate tech-planning step.
+5. Unfreeze classify for obligation breaks stays the existing three-path table almost as-is. Execute prep = **s-prepare**; Plan has no separate tech-planning ceremony (thin tech ADRs may complete at prepare).
 6. Whole-PRD freeze remains optional structure lock only — not the default handoff to Execute.
 
 Refuse freeze when Effort lacks drivers, UI-facing selected features lack UX-shape, or Constraints only restate product goals. See Plan `skills/rr-planner/refs/execute-handoff.md`.
@@ -374,7 +378,7 @@ One `{PROJECT_ROOT}/docs/rr/tech.md`. Same tier as `later.md` / `future.md`. **N
 | Rule | |
 |------|--|
 | Discover | Skill may append early mechanism notes that surface before Plan owns architecture. |
-| Plan | **Does not** author product AC, integration contracts, or ADRs here. Standing truth = `docs/rr/{track}/plan/architecture.md` (+ optional `constitution.md`) and `docs/rr/{track}/plan/deltas/<feature-id>.md`. |
+| Plan | **Does not** author product AC, integration contracts, or ADRs here. Standing truth = `docs/rr/{track}/plan/constitution.md` (+ on-demand `architecture.md` tech ADRs) and `docs/rr/{track}/plan/deltas/<feature-id>.md`. |
 | Not a cascade doc | Never mint item ids; never run Gates 1–7 against this file. |
 
 ## `later.md` — deferred-topic parking lot
@@ -404,18 +408,18 @@ Skill on each resolve (does not wait for the agent to notice): if `rrr-status.ya
 
 Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one line). Do not create `AGENTS.md` (or successors) from nothing.
 
-## CI / validator — mechanical only (PR-scoped)
+## Validator — mechanical only (plugin-runtime)
 
 `validate_planning.sh` may FAIL these. It must not mint versions and must not FAIL "this looks like a minor."
 
-**Authoritative scope is the pull request.** Framework `--setup` wires a host-repo PR check ([setup.md](setup.md)). Local pre-push / agent preflight may run the same script optionally — local-only validation is **insufficient**. Hand-edit of mint fields must fail the **merge**, not hope an agent notices.
+**Authoritative scope is the plugin run** (skill steps: rewrite, compose gates, explicit validate, optional agent preflight from the plugin package). Framework `--setup` does **not** wire host-repo PR/Actions checks ([setup.md](setup.md)). Host CI for planning validation is **out of scope** — consumer repos store `docs/rr/` artifacts only.
 
 | Check | When | Owner |
 |-------|------|-------|
-| `HAND_BUMP`, `STALE_PIN`, `PARENT_UNFROZEN`, `REV_WHILE_OPEN`, maturity codes | **PR** CI on planning paths (`docs/rr/**`) | `validate_planning*` installed by **framework setup** |
-| Same codes | Optional local pre-push / agent preflight | same script |
+| `HAND_BUMP`, `STALE_PIN`, `PARENT_UNFROZEN`, `REV_WHILE_OPEN`, maturity codes | When plugin runs `validate_planning.sh` on phase dirs | `validate_planning*` in the **plugin** package |
+| Same codes | Optional agent/local preflight from plugin root | same script |
 | patch vs open-next vs unfreeze | On `--change` / upstream freeze | skill judgment |
-| Unlock / product ship policy | Before minting `next` or shipping product | skill (not CI classification) |
+| Unlock / product ship policy | Before minting `next` or shipping product | skill (not validator classification) |
 
 | Code | Condition |
 |------|-----------|
@@ -426,13 +430,14 @@ Do not dump pairing rules into `CLAUDE.md` / `AGENTS.md` (more than that one lin
 | `INVALID_MATURITY` | Frontmatter or `levels.<stem>.maturity` set to a value other than `code-extraction` \| `draft` |
 | `CODE_EXTRACTION_FROZEN` | Integer `rev` / `doc_rev` while maturity is still `code-extraction` |
 
-Removed from CI (never emit): `NEXT_LOCKED`, `CURRENT_NOT_PATCH`. Independent patches (`product 0.1.3` / `docs 0.1.7`) are valid. `future.md` and `agent.plan.md` are not cascade input. `challenge` / `next_challenge` are judgment/process only — never a script FAIL.
+Removed from validator (never emit): `NEXT_LOCKED`, `CURRENT_NOT_PATCH`. Independent patches (`product 0.1.3` / `docs 0.1.7`) are valid. `future.md` and `agent.plan.md` are not cascade input. `challenge` / `next_challenge` are judgment/process only — never a script FAIL.
 
 ## What this ref does not do
 
 - Tickets, technical docs, or `.mdc` rule files.
 - A second `lines.yaml`.
 - Shared patch; per-doc SEMVER as the human version; inline `[N.M]` forward markers; track bump on every PRD edit.
-- CI minting or failing major/minor policy.
+- Validator minting or failing major/minor policy.
+- Host-repo PR CI for planning validation (plugin-runtime only).
 - Auto-unfreeze; bump on compose; silent rediscover.
-- Version procedure in `rr-humanize`, git helpers, or `rr-test`.
+- Version procedure in `s-humanize`, git helpers, or `rr-test`.

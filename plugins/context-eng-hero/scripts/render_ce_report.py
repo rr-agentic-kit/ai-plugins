@@ -12,7 +12,7 @@ Usage (from context-eng-hero plugin root or monorepo with paths):
   python3 scripts/render_ce_report.py reflection --in in.json --out out.md
 
 Stdout: one line `wrote <path>` on success. Exit 0 on success; exit 2 on
-validation / I/O / JSON errors (stderr paths for the LLM to fix).
+validation / I/O / JSON / smashed-table errors (stderr paths for the LLM to fix).
 """
 
 from __future__ import annotations
@@ -91,17 +91,44 @@ def _validate(data: dict[str, Any], schema_path: Path) -> None:
         raise SystemExit(2)
 
 
+def _assert_markdown_tables_ok(body: str) -> None:
+    """Fail closed when Jinja whitespace smashed table rows onto one line."""
+    for line in body.splitlines():
+        stripped = line.lstrip()
+        # Header separator glued to a data row: |---|...|| col |
+        if "||" in line and (
+            stripped.startswith("|--")
+            or stripped.startswith("| ---")
+            or (stripped.startswith("|") and "---|" in stripped[:48])
+        ):
+            raise ValueError(
+                "smashed markdown table row (header/separator glued to data "
+                "with '||'); fix Jinja whitespace (avoid trim_blocks eating "
+                "newlines between rows)"
+            )
+        # Multiple data rows glued on one line
+        if "||" in line and stripped.startswith("|") and not stripped.startswith("|--"):
+            raise ValueError(
+                "smashed markdown table row (data rows glued with '||'); "
+                "fix Jinja whitespace (avoid trim_blocks eating newlines between rows)"
+            )
+
+
 def _render(kind: str, data: dict[str, Any], reports_dir: Path) -> str:
     stem = _KIND_STEM[kind]
     env = Environment(
         loader=FileSystemLoader(str(reports_dir)),
         autoescape=select_autoescape(enabled_extensions=()),
-        trim_blocks=True,
-        lstrip_blocks=True,
+        # trim_blocks/lstrip_blocks eat the newline after {% for %}, gluing
+        # GFM table rows into one line (`||`). Keep false for report markdown.
+        trim_blocks=False,
+        lstrip_blocks=False,
         keep_trailing_newline=True,
     )
     template = env.get_template(f"{stem}.md.j2")
-    return template.render(**data)
+    body = template.render(**data)
+    _assert_markdown_tables_ok(body)
+    return body
 
 
 def main() -> int:

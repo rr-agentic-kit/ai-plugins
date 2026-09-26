@@ -8,7 +8,7 @@ Prove a product (venture or internal) exists — problem, market, viability, bea
 
 ## What
 
-Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`, reverse-from-code compose, challenge (pre-mortem / red-team), and handoff mint. Compose + challenge are `Task` agents; cascade `.md` persists only after humanize (`compose-prose` → `rr-humanize`).
+Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`, reverse-from-code compose, challenge (pre-mortem / red-team), and handoff mint. Compose + challenge are `Task` agents; cascade `.md` persists only after humanize (`compose-prose` → `s-humanize`).
 
 **Out of scope:** PRD / RICE / stories / research reports / launch calendars / architecture authorship as Discover deliverable.
 
@@ -30,13 +30,14 @@ Owns posture, optional ideation, cascade `executive-summary` → `mrd` → `brd`
 
 - Proving a bet before PRD (`--discover` / `--executive-summary` / `--mrd` / `--brd`)
 - Reverse Discover docs from shipped code (`--from-code`)
-- Bootstrap or repair `docs/` (`--setup`) — does not start discover
+- Bootstrap or repair `docs/` (`--setup`) — does not start discover; does **not** install host planning CI
 - Continue a paused Discover session (`--resume` selector) or challenge ES/MRD/BRD (`--challenge`)
 
 ### Avoid when
 
 - Need Plan (PRD / research / feature backlog) → `rr-planner`
 - Implementation, code review, tickets, analytics/CI (unless intent is Discover docs from source)
+- Expecting the host repo’s Actions to validate planning docs — plugin-runtime only
 
 ## Philosophy
 
@@ -57,7 +58,7 @@ Flags (`--setup` / `--discover` / `--from-code` / `--challenge` / `--challenge d
 
 ### Intake
 
-Status-first (summary → phase status + session-state); resolve emits payload before cascade. From-code: research root = `--input` or `PROJECT_ROOT`.
+Status-first (summary → phase status + session-state **via** `scripts/session_state.sh view`); resolve emits payload before cascade. From-code: research root = `--input` or `PROJECT_ROOT`.
 
 ### Clarify
 
@@ -88,7 +89,7 @@ Session-state + status stamps written. **Next Up** per `refs/planning/progress.m
 
 ## Constraints
 
-- **Invoke:** Auto — no `disable-model-invocation`; ambient WHEN description is enough
+- **Invoke:** Manual `@rr-discovery` / slash — `disable-model-invocation: true`; outcome-first description
 - **Gates:** BRD freeze + humanize before cascade `.md` persist; no fabricated TAM; no freeze while `code-extraction`
 - **Paths:** Plugin-root relative only — no `..` in skill/ref markdown
 - **Eval-first:** Fix FAIL audit ids only; preserve outcome (no redesign)

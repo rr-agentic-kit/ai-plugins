@@ -16,10 +16,12 @@ Before first PRD compose:
 |-------|--------|-----------|
 | `prd_shape` | `story_led` \| `feature_led` \| `hybrid` | User-confirmed once |
 | `scope_mode` | `discovery` \| `closed` | User-confirmed once |
-| `arch_doc_mode` | `combined` \| `split` | User-confirmed once — `combined` = constitution section in architecture; `split` = `constitution.md` |
+| `arch_doc_mode` | `constitution-primary` (**prefer**) \| `legacy-combined` (transition only) | User-confirmed once — primary = always-load `constitution.md`; architecture = tech ADRs only. `legacy-combined` = fat architecture still embeds constitution — migrate via `--optimize`, do not mint new combined blobs |
 | `interview_mode` | `coach` \| `fast` | Optional; offer once per Plan session ([plan-interview.md](plan-interview.md)) |
 
-Persist on `session_state.project_posture`. Compose/standing layer read these for structure ([prd.md](doc-standards/prd.md), [architecture.md](doc-standards/architecture.md)).
+Persist on `session_state.project_posture`. Compose/standing layer read these for structure ([prd.md](doc-standards/prd.md), [constitution.md](doc-standards/constitution.md), [architecture.md](doc-standards/architecture.md)).
+
+Legacy values `combined` / `split`: treat `split` as `constitution-primary`; treat `combined` as `legacy-combined` and offer optimize migrate.
 
 ## Legend consumption
 
@@ -34,6 +36,7 @@ Persist on `session_state.project_posture`. Compose/standing layer read these fo
 | Do | Do not |
 |----|--------|
 | Run PRD-shape + arch_doc_mode before minting structure | Skip entry gate because posture exists |
+| Prefer constitution-primary standing law | Mint new constitution-inside-architecture blobs |
 | Cite frozen BRD MoSCoW when inheriting | Apply MoSCoW cut-pass on PRD |
 | Park market/viability reopen to Discover | Re-litigate signed BRD Must in Plan |
 | Offer Coach/Fast once | Invent sprint / release-plan ceremony this pass |
@@ -42,5 +45,6 @@ Persist on `session_state.project_posture`. Compose/standing layer read these fo
 
 - Composing PRD without confirmed Discover posture / handoff
 - Running a PRD MoSCoW cut-pass instead of RICE + P-tags on requirements
-- Effort without architecture mode / standing layer ([system-design.md](system-design.md))
+- Effort without standing law / dual-lens ([system-design.md](system-design.md))
 - Re-opening signed BRD Must as Plan inventiveness
+- Misnamed “architecture spine” absorbing product constitution (context bloat)
