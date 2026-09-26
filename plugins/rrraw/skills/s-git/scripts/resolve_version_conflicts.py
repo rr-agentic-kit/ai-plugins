@@ -74,7 +74,7 @@ def _parse_version(raw: str) -> tuple[tuple[int, ...], int, int]:
     """Sort key: (release_tuple, is_final, rc_num). Final > rc of same base."""
     text = raw.strip().strip("\"'")
     match = re.match(
-        r"^(\d+(?:\.\d+)*)(?:-rc-(\d+))?$",
+        r"^(\d+(?:\.\d+)*)(?:-rc-?(\d+))?$",
         text,
         flags=re.IGNORECASE,
     )
