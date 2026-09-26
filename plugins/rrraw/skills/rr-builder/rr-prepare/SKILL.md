@@ -2,7 +2,6 @@
 name: rr-prepare
 description: Decompose pin-complete execute-slice into docs/rr/tasks. Via --prepare, prepare NL, or orchestrate prepare (drive/scope per parent).
 disable-model-invocation: true
-user-invocable: false
 ---
 
 # rr-prepare

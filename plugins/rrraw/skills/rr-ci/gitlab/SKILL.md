@@ -1,7 +1,6 @@
 ---
 name: gitlab
 disable-model-invocation: true
-user-invocable: false
 description: GitLab MR, issue, pipeline, glab/MCP, and .gitlab-ci.yml. Loaded by rr-ci when detect-remote returns gitlab — not a top-level plugin skill.
 ---
 

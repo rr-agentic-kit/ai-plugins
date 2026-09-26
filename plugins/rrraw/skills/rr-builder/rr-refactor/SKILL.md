@@ -2,7 +2,6 @@
 name: rr-refactor
 description: Fixed-point behavior-invariant coder-rule refactoring via rr-builder --refactor or orchestrate refactor stage.
 disable-model-invocation: true
-user-invocable: false
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task, AskUserQuestion, TodoWrite
 ---
 

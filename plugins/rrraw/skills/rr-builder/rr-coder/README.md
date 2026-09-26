@@ -39,7 +39,7 @@ Applies principles to **application source** only (implement, refactor, or code-
 - Dedicated test paths excluded from production findings
 - Review maps via `refs/compliance-rubric.md` + `refs/severity-triage.md`
 - Fix path is inline in the parent session
-- Loaded with `disable-model-invocation: true` / `user-invocable: false` — parent **Read** only
+- Loaded with `disable-model-invocation: true` (no ambient auto-invocation) via parent **Read** — still callable directly by name
 
 ## Notes
 

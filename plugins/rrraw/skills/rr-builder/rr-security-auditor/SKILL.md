@@ -2,7 +2,6 @@
 name: rr-security-auditor
 description: OWASP audit with confidence gating. Via rr-builder --security, rr-review security lane, or builder stages that load this skill; report-only.
 disable-model-invocation: true
-user-invocable: false
 ---
 
 # rr-security-auditor

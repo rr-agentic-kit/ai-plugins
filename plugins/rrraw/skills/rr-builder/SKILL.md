@@ -64,7 +64,7 @@ Lane → path mapping SoT: [refs/routing.md](refs/routing.md) **Handoff load tab
 
 **Path pattern:** `skills/rr-builder/<lane>/SKILL.md` (e.g. `skills/rr-builder/rr-coder/SKILL.md`) — nested **under this skill's own folder**, never a sibling `skills/<lane>/` at the plugin's top level. Any bare `<lane>/SKILL.md` or `<lane>/refs/...` reference anywhere in this pack (routing.md, slice-pipeline.md, executors/, input-resolution.md) resolves against `skills/rr-builder/`, not against `skills/`. A "does this nested skill exist" check must stat `skills/rr-builder/<lane>/`, not `skills/<lane>/` — do not report a lane missing from a top-level `skills/` listing alone.
 
-Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
+Nested skills set `disable-model-invocation: true` (no ambient model auto-invocation) but stay user-invocable — an engineer may call a lane directly. Parent-inline `Read`-by-path (this SKILL.md's own Load steps, [refs/routing.md](refs/routing.md), etc.) is unaffected by either setting.
 
 ## Shared refs
 

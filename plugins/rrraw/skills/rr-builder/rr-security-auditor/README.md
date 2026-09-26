@@ -40,7 +40,7 @@ Audits scoped code for OWASP Top 10, secrets exposure, and language-specific vul
 - Confidence and Do-not-flag rules in `refs/confidence.md` are authoritative
 - Language refs (`*.secure.md`) load when stack is identified
 - Under **rr-review**, severity-triage + confidence gates both apply
-- `disable-model-invocation: true` / `user-invocable: false`
+- `disable-model-invocation: true` (no ambient auto-invocation; still callable directly by name)
 
 ## Notes
 

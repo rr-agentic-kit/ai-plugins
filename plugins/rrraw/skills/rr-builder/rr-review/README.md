@@ -67,7 +67,7 @@ Flat locked filenames under `REVIEW_DIR` scratch (see `refs/artifacts.md`); endl
 - Scratch `REVIEW_DIR` = `.ai/review/<runId>/` (`runId` = `yyyymmdd-NN` local)
 - Orchestrate done-when requires task review sidecar when cursor present — hard-stop if missing
 - Security lane is report-only on `--fix`
-- `disable-model-invocation: true` / `user-invocable: false`
+- `disable-model-invocation: true` (no ambient auto-invocation; still callable directly by name)
 
 ## Notes
 
