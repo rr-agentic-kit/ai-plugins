@@ -1,0 +1,367 @@
+name: release-control
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - "release/**"
+      - master
+  create:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Release control command"
+        required: true
+        type: choice
+        options:
+          - open
+          - rc
+          - promote
+          - hotfix
+          - next-minor
+      branch:
+        description: "Branch name (e.g. release/0.1.0 or hotfix/0.1.1)"
+        required: false
+        type: string
+      version:
+        description: "Optional version for next-minor or open recovery"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-control-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      command: ${{ steps.plan.outputs.command }}
+      branch: ${{ steps.plan.outputs.branch }}
+      skip_bump: ${{ steps.plan.outputs.skip_bump }}
+    steps:
+      - name: Plan release action
+        id: plan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          CREATE_REF_TYPE: ${{ github.event.ref_type }}
+          CREATE_REF: ${{ github.event.ref }}
+        run: |
+          set -euo pipefail
+          skip_bump=false
+          if [[ "$ACTOR" == "github-actions[bot]" ]]; then
+            skip_bump=true
+          fi
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            if [[ "$PR_MERGED" != "true" ]]; then
+              {
+                echo "command=skip"
+                echo "branch="
+                echo "skip_bump=true"
+              } >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            base="$PR_BASE"
+            head="$PR_HEAD"
+            if [[ "$base" == release/* ]]; then
+              {
+                echo "command=rc"
+                echo "branch=$head"
+              } >> "$GITHUB_OUTPUT"
+            elif [[ "$base" == "master" && "$head" == release/* ]]; then
+              {
+                echo "command=promote"
+                echo "branch=$head"
+              } >> "$GITHUB_OUTPUT"
+            elif [[ "$base" == "master" && "$head" == hotfix/* ]]; then
+              {
+                echo "command=hotfix"
+                echo "branch=$head"
+              } >> "$GITHUB_OUTPUT"
+            else
+              {
+                echo "command=skip"
+                echo "branch="
+              } >> "$GITHUB_OUTPUT"
+            fi
+          elif [[ "$EVENT_NAME" == "create" && "$CREATE_REF_TYPE" == "branch" ]]; then
+            branch="$CREATE_REF"
+            branch="${branch#refs/heads/}"
+            if [[ "$branch" == release/* ]]; then
+              {
+                echo "command=open"
+                echo "branch=$branch"
+              } >> "$GITHUB_OUTPUT"
+              skip_bump=false
+            else
+              {
+                echo "command=skip"
+                echo "branch="
+              } >> "$GITHUB_OUTPUT"
+            fi
+          else
+            {
+              echo "command=skip"
+              echo "branch="
+            } >> "$GITHUB_OUTPUT"
+          fi
+          echo "skip_bump=$skip_bump" >> "$GITHUB_OUTPUT"
+
+  bump:
+    needs: resolve
+    if: >-
+      always() &&
+      needs.resolve.result == 'success' &&
+      needs.resolve.outputs.command != 'skip' &&
+      needs.resolve.outputs.command != '' &&
+      (
+        needs.resolve.outputs.command == 'open' ||
+        needs.resolve.outputs.skip_bump != 'true'
+      )
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.control.outputs.version }}
+      next_version: ${{ steps.control.outputs.next_version }}
+      next_branch: ${{ steps.control.outputs.next_branch }}
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: >-
+            ${{
+              needs.resolve.outputs.command == 'open' && needs.resolve.outputs.branch ||
+              needs.resolve.outputs.command == 'rc' && github.event.pull_request.base.ref ||
+              (needs.resolve.outputs.command == 'promote' || needs.resolve.outputs.command == 'hotfix') && 'master' ||
+              github.ref_name
+            }}
+          token: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python 3.14
+        run: uv python install 3.14
+
+      - name: Sync dependencies
+        run: uv sync --all-groups
+
+      - name: Configure release bot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run release control
+        id: control
+        env:
+          BUMP_SKIP_INSTALL: "1"
+        run: |
+          set -euo pipefail
+          cmd="${{ needs.resolve.outputs.command }}"
+          branch="${{ needs.resolve.outputs.branch }}"
+          args=( "$cmd" )
+          if [[ -n "$branch" ]]; then
+            args+=( --branch "$branch" )
+          fi
+          mapfile -t lines < <(uv run python scripts/ci_release_control.py "${args[@]}")
+          printf '%s\n' "${lines[@]}"
+          for line in "${lines[@]}"; do
+            key="${line%%=*}"
+            value="${line#*=}"
+            case "$key" in
+              version|next_version|next_branch) echo "$key=$value" >> "$GITHUB_OUTPUT" ;;
+            esac
+          done
+
+      - name: Commit and push version bump
+        id: commit
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git add pyproject.toml uv.lock plugins/*/.cursor-plugin/plugin.json plugins/*/.claude-plugin/plugin.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No version files changed"
+            exit 0
+          fi
+          git commit -m "[release-bot] ${{ needs.resolve.outputs.command }} -> ${{ steps.control.outputs.version }}"
+          if [[ "${{ needs.resolve.outputs.command }}" == "promote" || "${{ needs.resolve.outputs.command }}" == "hotfix" ]]; then
+            target="master"
+          elif [[ "${{ needs.resolve.outputs.command }}" == "rc" ]]; then
+            target="${{ github.event.pull_request.base.ref }}"
+          else
+            target="${{ needs.resolve.outputs.branch != '' && needs.resolve.outputs.branch || github.ref_name }}"
+          fi
+          git push origin "HEAD:refs/heads/${target}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: [resolve, bump]
+    if: >-
+      always() &&
+      needs.resolve.result == 'success' &&
+      needs.bump.result == 'success' &&
+      contains(fromJSON('["promote", "hotfix"]'), needs.resolve.outputs.command)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Tag and create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="${{ needs.bump.outputs.version }}"
+          tag="v${version}"
+          git tag "$tag"
+          git push origin "$tag"
+          gh release create "$tag" --generate-notes --target master --title "$version"
+
+  open-next-release:
+    needs: [resolve, bump, release]
+    if: >-
+      always() &&
+      needs.resolve.result == 'success' &&
+      needs.bump.result == 'success' &&
+      needs.release.result == 'success' &&
+      needs.resolve.outputs.command == 'promote'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          token: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Open next minor release branch
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          next_branch="${{ needs.bump.outputs.next_branch }}"
+          if [[ -z "$next_branch" ]]; then
+            echo "next_branch output missing" >&2
+            exit 1
+          fi
+          if git ls-remote --exit-code --heads origin "$next_branch" >/dev/null 2>&1; then
+            echo "release branch already exists: $next_branch" >&2
+            exit 1
+          fi
+          git branch "$next_branch" master
+          git push -u origin "$next_branch"
+
+  dispatch:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.control.outputs.version }}
+      next_version: ${{ steps.control.outputs.next_version }}
+      next_branch: ${{ steps.control.outputs.next_branch }}
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch != '' && inputs.branch || github.ref_name }}
+          token: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python 3.14
+        run: uv python install 3.14
+
+      - name: Sync dependencies
+        run: uv sync --all-groups
+
+      - name: Configure release bot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run release control
+        id: control
+        env:
+          BUMP_SKIP_INSTALL: "1"
+        run: |
+          set -euo pipefail
+          args=( "${{ inputs.action }}" )
+          if [[ -n "${{ inputs.branch }}" ]]; then
+            args+=( --branch "${{ inputs.branch }}" )
+          fi
+          if [[ -n "${{ inputs.version }}" ]]; then
+            args+=( --version "${{ inputs.version }}" )
+          fi
+          mapfile -t lines < <(uv run python scripts/ci_release_control.py "${args[@]}")
+          printf '%s\n' "${lines[@]}"
+          for line in "${lines[@]}"; do
+            key="${line%%=*}"
+            value="${line#*=}"
+            case "$key" in
+              version|next_version|next_branch) echo "$key=$value" >> "$GITHUB_OUTPUT" ;;
+            esac
+          done
+
+      - name: Commit and push version bump
+        id: commit
+        if: inputs.action != 'next-minor'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git add pyproject.toml uv.lock plugins/*/.cursor-plugin/plugin.json plugins/*/.claude-plugin/plugin.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "[release-bot] ${{ inputs.action }} -> ${{ steps.control.outputs.version }}"
+          target="${{ inputs.branch != '' && inputs.branch || github.ref_name }}"
+          git push origin "HEAD:refs/heads/${target}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Tag and create GitHub release
+        if: contains(fromJSON('["promote", "hotfix"]'), inputs.action)
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git fetch origin master
+          git checkout master
+          git pull --ff-only origin master
+          version="${{ steps.control.outputs.version }}"
+          tag="v${version}"
+          git tag "$tag"
+          git push origin "$tag"
+          gh release create "$tag" --generate-notes --target master --title "$version"
+
+      - name: Open next minor release branch
+        if: inputs.action == 'promote'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          next_branch="${{ steps.control.outputs.next_branch }}"
+          if git ls-remote --exit-code --heads origin "$next_branch" >/dev/null 2>&1; then
+            echo "release branch already exists: $next_branch" >&2
+            exit 1
+          fi
+          git fetch origin master
+          git checkout master
+          git pull --ff-only origin master
+          git branch "$next_branch" master
+          git push -u origin "$next_branch"

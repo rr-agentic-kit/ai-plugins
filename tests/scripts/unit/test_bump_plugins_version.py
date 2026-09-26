@@ -63,10 +63,11 @@ def test_write_manifest_preserves_key_order(tmp_path: Path):
 
 
 def test_increment_local_keeps_plugin_manager_spelling():
-    assert bump.increment_local(Version("0.0.4")) == "0.0.4-rc-1"
+    assert bump.increment_local(Version("0.0.4")) == "0.0.4-rc1"
     assert bump.increment_local(Version("0.0.2-beta-4")) == "0.0.2-beta-5"
     assert bump.increment_local(Version("0.0.2b4")) == "0.0.2-beta-5"
-    assert bump.increment_local(Version("0.0.4-rc-1")) == "0.0.4-rc-2"
+    assert bump.increment_local(Version("0.0.4rc1")) == "0.0.4-rc2"
+    assert bump.increment_local(Version("0.0.4-rc1")) == "0.0.4-rc2"
 
 
 def test_rc_increments_local_prerelease(mini_repo, monkeypatch, capsys):
@@ -118,10 +119,10 @@ def test_rc_starts_prerelease_from_stable(mini_repo, monkeypatch, capsys):
     assert bump.main(["rc"]) == 0
 
     assert calls == [["lock"]]
-    assert vp._read_pyproject_version(root / "pyproject.toml") == "0.0.4-rc-1"
-    assert set(_manifest_versions(root).values()) == {"0.0.4-rc-1"}
+    assert vp._read_pyproject_version(root / "pyproject.toml") == "0.0.4-rc1"
+    assert set(_manifest_versions(root).values()) == {"0.0.4-rc1"}
     assert syncs == [root]
-    assert "0.0.4 => 0.0.4-rc-1" in capsys.readouterr().out
+    assert "0.0.4 => 0.0.4-rc1" in capsys.readouterr().out
 
 
 def test_rc_propagates_sync_failure(mini_repo, monkeypatch):
@@ -131,7 +132,30 @@ def test_rc_propagates_sync_failure(mini_repo, monkeypatch):
     monkeypatch.setattr(bump, "sync_claude_local", lambda _root: 1)
 
     assert bump.main(["rc"]) == 1
-    assert vp._read_pyproject_version(root / "pyproject.toml") == "0.0.4-rc-1"
+    assert vp._read_pyproject_version(root / "pyproject.toml") == "0.0.4-rc1"
+
+
+def test_rc_skips_install_with_no_install_flag(mini_repo, monkeypatch):
+    root = mini_repo(pyproject_version="0.0.4", plugins={"foo": "0.0.4"})
+    monkeypatch.setattr(bump, "REPO_ROOT", root)
+    monkeypatch.setattr(bump, "run_uv", lambda *a, **k: None)
+    monkeypatch.setattr(
+        bump, "sync_claude_local", lambda *_a, **_k: pytest.fail("sync must not run")
+    )
+
+    assert bump.main(["rc", "--no-install"]) == 0
+
+
+def test_rc_skips_install_when_env_set(mini_repo, monkeypatch):
+    root = mini_repo(pyproject_version="0.0.4", plugins={"foo": "0.0.4"})
+    monkeypatch.setattr(bump, "REPO_ROOT", root)
+    monkeypatch.setattr(bump, "run_uv", lambda *a, **k: None)
+    monkeypatch.setenv("BUMP_SKIP_INSTALL", "1")
+    monkeypatch.setattr(
+        bump, "sync_claude_local", lambda *_a, **_k: pytest.fail("sync must not run")
+    )
+
+    assert bump.main(["rc"]) == 0
 
 
 def test_patch_does_not_sync_claude(mini_repo, monkeypatch):
