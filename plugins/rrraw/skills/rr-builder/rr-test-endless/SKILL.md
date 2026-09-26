@@ -2,7 +2,6 @@
 name: rr-test-endless
 description: Coverage-first endless test perfection loop via rr-builder --add-endless-test. Default 5 epochs.
 disable-model-invocation: true
-user-invocable: false
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task, AskUserQuestion, TodoWrite
 ---
 
