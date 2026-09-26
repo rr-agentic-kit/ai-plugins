@@ -130,8 +130,23 @@ Do not open work PRs into `master`. After the first train is seeded, there is al
 
 **Recovery / dispatch:**
 
+Maintainer path (dispatches `.github/workflows/release-control.yml` via `gh`):
+
 ```bash
-uv run python scripts/ci_release_control.py {open|rc|promote|hotfix|next-minor} --branch release/0.1.0
+just release active
+just release open
+just release rc
+just release promote
+just release hotfix hotfix/0.1.1
+just release seed 0.2.0 --yes
+just branch-new feat/foo --base release/0.1.0
+just create-pr --title "…" --description "…"
+```
+
+CI path (version bumps inside the workflow checkout):
+
+```bash
+just ci-release {open|rc|promote|hotfix|next-minor} --branch release/0.1.0
 ```
 
 Or trigger the `release-control` workflow manually. Bot pushes use secret `RELEASE_BOT_TOKEN` when branch protection requires bypass; otherwise `GITHUB_TOKEN`.
