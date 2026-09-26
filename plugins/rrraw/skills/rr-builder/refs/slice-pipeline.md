@@ -73,7 +73,7 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 
 | | |
 |--|--|
-| **Loads** | Current `{NNNN}-{step}.plan.md` (only plan among plans); thin Goal/Obligations; `rr-coder/SKILL.md` + `rr-tester/SKILL.md` |
+| **Loads** | Current `{NNNN}-{step}.plan.md` (only plan among plans); thin Goal/Obligations; `skills/rr-builder/rr-coder/SKILL.md` + `skills/rr-builder/rr-tester/SKILL.md` |
 | **Inputs** | Plan Goal/Approach/Verify hooks; allowlisted code/test refs as coder/tester require |
 | **Durable output** | Application source + tests (no new task sidecar required) |
 | **Done-when** | Step code+tests land; Verify hooks runnable; `step_build_done: true`; `step_build_base_sha` recorded at build start (`git rev-parse HEAD` before the first build commit) |
@@ -84,7 +84,7 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 
 | | |
 |--|--|
-| **Loads** | `rr-refactor/SKILL.md`; scope rule below |
+| **Loads** | `skills/rr-builder/rr-refactor/SKILL.md`; scope rule below |
 | **Inputs** | MR ∩ **build-touched** paths; `epoch_cap: 5` |
 | **Scratch** | Optional `.ai/refactor/<runId>/` (`state.json`, epochs) — not durable SoT |
 | **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.refactor.md` (lean note); optional `→ refactor:` pointer |
@@ -96,7 +96,7 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 
 | | |
 |--|--|
-| **Loads** | `rr-review/SKILL.md`; force `--fix --all --endless` |
+| **Loads** | `skills/rr-builder/rr-review/SKILL.md`; force `--fix --all --endless` |
 | **Inputs** | Step MR/workspace scope; brief sources; `max_epochs` default 5 |
 | **Scratch** | `.ai/review/<runId>/` (brief/assess/challenge/`report.md`) |
 | **Durable output** | `docs/rr/tasks/{slice_id}/{NNNN}-{step}.review.md`; optional `→ review:` pointer |
@@ -154,9 +154,9 @@ Prepare phases (task-list, task detail) remain **rr-prepare**. Orchestrate route
 | Stage / mode | Behavior |
 |--------------|----------|
 | **plan** (orchestrate) | **Read** [plan-knowledge.md](plan-knowledge.md). Run [feature-branch.md](feature-branch.md) ensure **first**. Then load remaining allowlist refs in **one parallel** tool turn ([plan-knowledge.md](plan-knowledge.md)). Emit plan per [plan-schema.md](plan-schema.md) to `{NNNN}-{step}.plan.md`. Do **not** run rr-coder/rr-tester implement procedures. |
-| **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `rr-coder/SKILL.md` **and** `rr-tester/SKILL.md` in **one parallel** turn. Prefer step Verify hooks over full tester flag-routing when orchestrate already scoped the step. |
-| **refactor** (orchestrate) | **Read** `rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Durable: lean `{NNNN}-{step}.refactor.md`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
-| **review** (orchestrate) | **Read** `rr-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). Durable terminal: `{NNNN}-{step}.review.md` (scratch under `.ai/review/`). |
+| **build** (orchestrate) | **Read** current step plan `{NNNN}-{step}.plan.md` (read-budget: this file only among plans), optional thin task Goal/Obligations, then nested `skills/rr-builder/rr-coder/SKILL.md` **and** `skills/rr-builder/rr-tester/SKILL.md` in **one parallel** turn. Prefer step Verify hooks over full tester flag-routing when orchestrate already scoped the step. |
+| **refactor** (orchestrate) | **Read** `skills/rr-builder/rr-refactor/SKILL.md` with scope resolved below; default `epoch_cap: 5`. Durable: lean `{NNNN}-{step}.refactor.md`. Mid-flight migration: if entering refactor with `step_review_done: true`, after refactor done-when **reset** `step_review_done: false` so review re-runs on cleaned code. |
+| **review** (orchestrate) | **Read** `skills/rr-builder/rr-review/SKILL.md`; force `--fix --all --endless` regardless of user omission. Pass `max_epochs` (default 5). Durable terminal: `{NNNN}-{step}.review.md` (scratch under `.ai/review/`). |
 | **ship** (orchestrate) | **Read** [ship.md](ship.md), then `skills/rr-ci/SKILL.md`. Do **not** invent forge CLI in builder. |
 | **pr-validate** (orchestrate) | **Read** [pr-validate.md](pr-validate.md), then `skills/rr-ci/SKILL.md`. Wait/fix probes stay rr-ci; do **not** invent forge wait CLI in builder. |
 | Explicit lane flag | Full-skill **handoff** — see [routing.md](routing.md). No pipeline advance past that skill’s done-when. |
@@ -186,7 +186,7 @@ Update fields when a stage’s done-when passes — **before** looping or stoppi
 
 When stage is **refactor** (not `--refactor` handoff):
 
-1. Resolve MR file list (rr-review MR recipe in `rr-review/refs/params.md`).
+1. Resolve MR file list (rr-review MR recipe in `skills/rr-builder/rr-review/refs/params.md`).
 2. Narrow to files touched during the current step's **build** only, from the pre-build snapshot: cursor `step_build_base_sha` (recorded at build start per the Cursor persistence table). **Do not** intersect with review-touched paths.
 3. **Empty intersection** → **skip** refactor with lean `{NNNN}-{step}.refactor.md` (status `skipped`) or chat skip note; set `step_refactor_done: true` — do **not** stop the slice.
 4. Pass resolved scope as `payload.refactor.paths` + `scope: MR` + `epoch_cap: 5` to **rr-refactor**.

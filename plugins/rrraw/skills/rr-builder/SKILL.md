@@ -42,7 +42,7 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
 |------|----------|
 | **Isolated step run** (`drive: auto` ∧ `scope: task\|slice`, orchestrate only) | Parent spawns one sequential `generalPurpose` Task per remaining task-step. Inject: [refs/executors/step.md](refs/executors/step.md) + [refs/templates/step-task.template.md](refs/templates/step-task.template.md) + Caller Load (required / stable hard-links / variant) from the executor. Stage contracts live in [refs/slice-pipeline.md](refs/slice-pipeline.md). Parent owns ship + **pr-validate** when tip pushed; executor stops at step-validate forge landing (`ok` ≠ CI green). |
 | Handoffs / `--auto --step` / `--manual` / `--feature` | Nested skills are path-loaded `Read`s only (parent-inline). |
-| Nested exceptions | `--add-endless-test` → **rr-test-endless** owns `Task` dispatch to `agents/test-endless/*` per `rr-test-endless/refs/orchestration.md`; `--refactor` → **rr-refactor** may `Task` `refactor-collector` when >50 files per `rr-refactor/refs/agent-index.md` (fix stays inline). Inside a step executor, those same leaf Tasks stay allowed — the executor **is** the parent session for nested lanes. |
+| Nested exceptions | `--add-endless-test` → **rr-test-endless** owns `Task` dispatch to `agents/test-endless/*` per `skills/rr-builder/rr-test-endless/refs/orchestration.md`; `--refactor` → **rr-refactor** may `Task` `refactor-collector` when >50 files per `skills/rr-builder/rr-refactor/refs/agent-index.md` (fix stays inline). Inside a step executor, those same leaf Tasks stay allowed — the executor **is** the parent session for nested lanes. |
 
 **Delivery channels:** Prefer **AskUserQuestion** (Claude) / AskQuestion (Cursor) for missing kernel/`slice_id`/feature intent, ambiguous mode, manual confirm/ready-pick, feature-mode origin probe, plan-stage feature-branch probe (not on `main`/`master`), and irreversible forks. Text-mode: same options as prose; do not stall waiting for a widget.
 
@@ -60,7 +60,9 @@ TodoWrite `merge: false` with ids `resolve`, `mode`, `load`, `execute` when the 
 
 ## Nested skills (path-loaded only)
 
-Lane → path mapping SoT: [refs/routing.md](refs/routing.md) **Handoff load table** (carries each lane's stop notes). Seven nested skills — rr-prepare, rr-coder, rr-tester, rr-security-auditor, rr-review, rr-refactor, rr-test-endless — live in this folder, are path-loaded `Read`s only, and are not listed in `plugin.json` (README Constraints).
+Lane → path mapping SoT: [refs/routing.md](refs/routing.md) **Handoff load table** (carries each lane's stop notes). Seven nested skills — rr-prepare, rr-coder, rr-tester, rr-security-auditor, rr-review, rr-refactor, rr-test-endless — are path-loaded `Read`s only and are not listed in `plugin.json` (README Constraints).
+
+**Path pattern:** `skills/rr-builder/<lane>/SKILL.md` (e.g. `skills/rr-builder/rr-coder/SKILL.md`) — nested **under this skill's own folder**, never a sibling `skills/<lane>/` at the plugin's top level. Any bare `<lane>/SKILL.md` or `<lane>/refs/...` reference anywhere in this pack (routing.md, slice-pipeline.md, executors/, input-resolution.md) resolves against `skills/rr-builder/`, not against `skills/`. A "does this nested skill exist" check must stat `skills/rr-builder/<lane>/`, not `skills/<lane>/` — do not report a lane missing from a top-level `skills/` listing alone.
 
 Nested skills set `disable-model-invocation: true` and `user-invocable: false`.
 

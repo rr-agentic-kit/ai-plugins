@@ -22,7 +22,7 @@
 ## Do not load on plan
 
 - rr-coder / rr-tester full `SKILL.md` Procedures (implement / test excellence runs)
-- Language / framework matrix under `rr-coder/refs/` (java, typescript, react-*, …)
+- Language / framework matrix under `skills/rr-builder/rr-coder/refs/` (java, typescript, react-*, …)
 - Review-only packs: `compliance-rubric.md`, `severity-triage.md`, `observability.md` (unless this turn is review — it is not)
 - `testability.md` (build/implement seam — load under **build**)
 

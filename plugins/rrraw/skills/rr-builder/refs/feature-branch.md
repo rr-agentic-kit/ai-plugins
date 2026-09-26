@@ -24,7 +24,7 @@ At **plan** stage start — before writing `{NNNN}-{step}.plan.md`. Re-check is 
 
 ## Ensure procedure
 
-0. **Precondition:** Confirm every nested skill directory this stage's Loads row names ([routing.md](routing.md) **Orchestrate stage → load** / [slice-pipeline.md](slice-pipeline.md) Stage contracts) exists on disk. Missing → stop with a one-line reason (`SKILL.md` Missing ref rule) **before** any checkout/branch mutation below — do not `EnterWorktree` / create / rename a branch for a stage whose nested skill can't run.
+0. **Precondition:** Confirm every nested skill directory this stage's Loads row names ([routing.md](routing.md) **Orchestrate stage → load** / [slice-pipeline.md](slice-pipeline.md) Stage contracts) exists on disk **at `skills/rr-builder/<lane>/`** — nested under this skill's own folder, not a sibling `skills/<lane>/`. Check the exact qualified path each table now gives; do not stat a top-level `skills/` listing and conclude a lane is missing because it isn't a sibling of `rr-builder`. Missing → stop with a one-line reason (`SKILL.md` Missing ref rule) **before** any checkout/branch mutation below — do not `EnterWorktree` / create / rename a branch for a stage whose nested skill can't run.
 1. Resolve repo root; `git branch --show-current` → `HEAD_BRANCH`. Read `payload.drive` from the run (orchestrate / feature).
 2. Build `TARGET=feat/{NNNN}-{step}-{short-desc}` from the step Goal (kebab).
 3. Branch on `HEAD_BRANCH` — **first match wins**:

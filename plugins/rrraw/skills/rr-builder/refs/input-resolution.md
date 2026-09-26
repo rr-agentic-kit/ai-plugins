@@ -94,21 +94,21 @@ scope: MR | all                   # --scope MR|PR|all|full
 paths: []                         # optional positional narrowers
 ```
 
-Rules mirror `rr-review/refs/params.md`. Incompatible `--fix` + `--ci` → stop with one-line error. `--endless` + `--ci` → stop. `--endless` without `--fix` under handoff → stop or force `outcome: fix`. **Handoff `--fix` forces `endless: true`** (same as auto) — do not run single-shot fix-then-exit.
+Rules mirror `skills/rr-builder/rr-review/refs/params.md`. Incompatible `--fix` + `--ci` → stop with one-line error. `--endless` + `--ci` → stop. `--endless` without `--fix` under handoff → stop or force `outcome: fix`. **Handoff `--fix` forces `endless: true`** (same as auto) — do not run single-shot fix-then-exit.
 
 **Auto review stage:** ignore report-only omission — set `outcome: fix`, `lanes: [code, test, security]`, `endless: true`, `max_epochs: 5` (or parsed `--max-epochs`).
 
 ## Tester flags (under `--tester` handoff)
 
-When `lane: tester`, pass through normalized flags per `rr-tester/refs/input-resolution.md`. Parent does not re-parse the test conflict matrix.
+When `lane: tester`, pass through normalized flags per `skills/rr-builder/rr-tester/refs/input-resolution.md`. Parent does not re-parse the test conflict matrix.
 
 ## Endless test flags (under `--add-endless-test` handoff)
 
-When `lane: add_endless_test`, normalize per `rr-test-endless/refs/input-resolution.md` into `payload.endless_test`. Parent does not run the orchestration loop — hand off to **rr-test-endless** only. Drive/scope ignored.
+When `lane: add_endless_test`, normalize per `skills/rr-builder/rr-test-endless/refs/input-resolution.md` into `payload.endless_test`. Parent does not run the orchestration loop — hand off to **rr-test-endless** only. Drive/scope ignored.
 
 ## Refactor flags (under `--refactor` handoff)
 
-When `lane: refactor`, normalize per `rr-refactor/refs/input-resolution.md` into `payload.refactor`. Parent does not run the epoch loop — hand off to **rr-refactor** only. Drive/scope ignored.
+When `lane: refactor`, normalize per `skills/rr-builder/rr-refactor/refs/input-resolution.md` into `payload.refactor`. Parent does not run the epoch loop — hand off to **rr-refactor** only. Drive/scope ignored.
 
 | NL pattern | Lane |
 |------------|------|

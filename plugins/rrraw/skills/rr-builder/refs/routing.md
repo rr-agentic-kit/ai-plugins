@@ -14,15 +14,17 @@ When `payload.mode: feature`:
 
 **SoT for lane → nested-SKILL.md mapping.** SKILL.md carries a one-line pointer to this table only — update this table first when lanes change. Exact one nested `SKILL.md` **Read**. Stop at that skill’s done-when. Do **not** re-enter orchestration or advance `builder_stage` past the handoff lane.
 
+**Path pattern:** every `Load` below is nested under this skill's own folder — `skills/rr-builder/<lane>/SKILL.md` — not a sibling `skills/<lane>/`.
+
 | `payload.lane` | Load | Notes |
 |----------------|------|-------|
-| `prepare` | `rr-prepare/SKILL.md` | Stop after L3; no auto-chain to coder |
-| `coder` | `rr-coder/SKILL.md` | Implement/refactor only for scoped request |
-| `tester` | `rr-tester/SKILL.md` | Forward test payload; parent does not re-parse conflicts |
-| `security` | `rr-security-auditor/SKILL.md` | Report-only |
-| `review` | `rr-review/SKILL.md` | Nested `--code|--test|--security|--all|--fix|--ci|--endless` per `rr-review/refs/params.md` |
-| `refactor` | `rr-refactor/SKILL.md` | Fixed-point behavior-invariant refactor; `Task` `refactor-collector` only when >50 files per `rr-refactor/refs/agent-index.md` |
-| `add_endless_test` | `rr-test-endless/SKILL.md` | Coverage-first multi-epoch loop; `Task` for gateway + leaf agents per `rr-test-endless/refs/orchestration.md` |
+| `prepare` | `skills/rr-builder/rr-prepare/SKILL.md` | Stop after L3; no auto-chain to coder |
+| `coder` | `skills/rr-builder/rr-coder/SKILL.md` | Implement/refactor only for scoped request |
+| `tester` | `skills/rr-builder/rr-tester/SKILL.md` | Forward test payload; parent does not re-parse conflicts |
+| `security` | `skills/rr-builder/rr-security-auditor/SKILL.md` | Report-only |
+| `review` | `skills/rr-builder/rr-review/SKILL.md` | Nested `--code|--test|--security|--all|--fix|--ci|--endless` per `skills/rr-builder/rr-review/refs/params.md` |
+| `refactor` | `skills/rr-builder/rr-refactor/SKILL.md` | Fixed-point behavior-invariant refactor; `Task` `refactor-collector` only when >50 files per `skills/rr-builder/rr-refactor/refs/agent-index.md` |
+| `add_endless_test` | `skills/rr-builder/rr-test-endless/SKILL.md` | Coverage-first multi-epoch loop; `Task` for gateway + leaf agents per `skills/rr-builder/rr-test-endless/refs/orchestration.md` |
 
 After review `--ci` findings: **Read** `skills/rr-ci/SKILL.md` for forge POST. Do not open PR from other lanes.
 
@@ -34,11 +36,11 @@ Local worktree / destructive git during review `--fix`: **Read** `skills/rr-git/
 
 | Stage | Pointer |
 |-------|---------|
-| **prepare** | Full `rr-prepare/SKILL.md` |
+| **prepare** | Full `skills/rr-builder/rr-prepare/SKILL.md` |
 | **plan** | [plan-knowledge.md](plan-knowledge.md) + [plan-schema.md](plan-schema.md) |
-| **build** | Full `rr-coder/SKILL.md` **and** `rr-tester/SKILL.md` |
-| **refactor** | Full `rr-refactor/SKILL.md` — scope = MR ∩ **build-touched** paths; see [slice-pipeline.md](slice-pipeline.md) |
-| **review** | Full `rr-review/SKILL.md` with forced `--fix --all --endless` |
+| **build** | Full `skills/rr-builder/rr-coder/SKILL.md` **and** `skills/rr-builder/rr-tester/SKILL.md` |
+| **refactor** | Full `skills/rr-builder/rr-refactor/SKILL.md` — scope = MR ∩ **build-touched** paths; see [slice-pipeline.md](slice-pipeline.md) |
+| **review** | Full `skills/rr-builder/rr-review/SKILL.md` with forced `--fix --all --endless` |
 | **step_validate** / **task_validate** | [task-validate.md](task-validate.md) |
 | **ship** | [ship.md](ship.md) then `skills/rr-ci/SKILL.md` |
 | **pr_validate** | [pr-validate.md](pr-validate.md) then `skills/rr-ci/SKILL.md` |
@@ -53,9 +55,9 @@ When `rr-review` runs assess:
 
 | Lane | Nested skill |
 |------|--------------|
-| `code` | `rr-coder/SKILL.md` |
-| `test` | `rr-tester/SKILL.md` |
-| `security` | `rr-security-auditor/SKILL.md` |
+| `code` | `skills/rr-builder/rr-coder/SKILL.md` |
+| `test` | `skills/rr-builder/rr-tester/SKILL.md` |
+| `security` | `skills/rr-builder/rr-security-auditor/SKILL.md` |
 
 Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-review**; lane rubrics stay in nested skills.
 
@@ -77,7 +79,7 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **rr-revie
 - Shipping only *after* validate PASS when the forge gate is what blocks PASS (wrong order).
 - Serial-loading co-named plan allowlist / build nested `SKILL.md` Reads that [plan-knowledge.md](plan-knowledge.md) / [slice-pipeline.md](slice-pipeline.md) mark for one parallel turn.
 - Using **rr-builder** for exec-summary / PRD authoring → **rr-planner**.
-- **`Task`** for refactor fix worker (fix is inline only per `rr-refactor/refs/inline-fix.md`).
+- **`Task`** for refactor fix worker (fix is inline only per `skills/rr-builder/rr-refactor/refs/inline-fix.md`).
 
 ### Nested Task (isolation cell)
 
