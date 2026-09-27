@@ -27,10 +27,11 @@ Do **not** invent `gh`/`glab` flags in builder. Follow `skills/s-ci/refs/pipelin
 
 ## Wait
 
-1. Poll via s-ci `pre-merge-status` until pipeline/checks leave the pending set.
-2. Backoff ~30–60s between polls.
-3. Wall timeout default ~30 min → hard-stop with one-line reason.
-4. Pending CI is **wait**, not FAIL.
+1. **GitHub + known run id** — `skills/s-gh/scripts/wait-run.py RUN_ID` `[--repo owner/repo]` (from `gh run list` or push output). Do **not** invent inline `gh run view` / `python -c` poll chains. Then run s-ci `pre-merge-status` once for the authoritative all-checks verdict (`verdict`, `blockers`).
+2. **No run id** (GitLab or GitHub without a run id) — poll s-ci `pre-merge-status` until pipeline/checks leave the pending set (forge-neutral fallback).
+3. Backoff ~30–60s between `pre-merge-status` polls (`wait-run.py` uses its own bounded `--interval`, default 30s).
+4. Wall timeout default ~30 min (`wait-run.py --timeout`, default 1800s) → hard-stop with one-line reason.
+5. Pending CI is **wait**, not FAIL.
 
 ## Verdict / fix loop
 
