@@ -142,7 +142,12 @@ def test_gitlab_pipeline_url(repo: Path) -> None:
     assert any("pipelines/555/jobs" in str(call) for call in glab.calls)
 
 
-def test_github_branch_fallback_status_normalization(repo: Path) -> None:
+def test_github_branch_fallback_status_normalization(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Branch fallback calls gitutil.current_branch() in cwd; CI checkouts are
+    # often detached HEAD, so pin the branch instead of depending on the worktree.
+    monkeypatch.setattr(github_backend, "current_branch", lambda: "feat/ci-fix")
     gh = _FakeGh()
     args = Namespace(
         ref=None,
@@ -153,7 +158,11 @@ def test_github_branch_fallback_status_normalization(repo: Path) -> None:
     )
     code = github_backend._debug_pipeline(gh, args)
     assert code == 1
-    payload = _last_github_result(gh)
+    assert any(
+        call[:2] == ["run", "list"] and "--branch" in call and "feat/ci-fix" in call
+        for call in gh.calls
+    )
+    payload = _last_github_result(gh, monkeypatch)
     assert payload["status"] == "failed_job"
     assert payload["failed_job_id"] == "222"
     assert payload["failed_job_name"] == "build"
@@ -233,9 +242,10 @@ def test_gitlab_forge_mismatch() -> None:
     assert code == 1
 
 
-def _last_github_result(gh: _FakeGh) -> dict[str, Any]:
+def _last_github_result(gh: _FakeGh, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
     # Indirect: re-run minimal path and inspect via monkeypatched emit if needed.
     # Here we re-invoke logic by checking file + call args; for status use a fresh call.
+    monkeypatch.setattr(github_backend, "current_branch", lambda: "feat/ci-fix")
     args = Namespace(
         ref=None, run_id=None, job_id=None, save_log=False, artifacts=False
     )
@@ -249,10 +259,6 @@ def _last_github_result(gh: _FakeGh) -> dict[str, Any]:
 
     import emit
 
-    original = emit.succeed
-    emit.succeed = fake_succeed  # type: ignore[assignment]
-    try:
-        github_backend._debug_pipeline(gh, args)
-    finally:
-        emit.succeed = original
+    monkeypatch.setattr(emit, "succeed", fake_succeed)
+    github_backend._debug_pipeline(gh, args)
     return captured
