@@ -86,7 +86,12 @@ Mid-flight cursors without `pr_validate` / missing `step_pr_validate_done`: trea
 
 - Report written with overall **PASS**.
 - Tip still includes prior validate sidecars (re-push after fixes if dirty).
+- **While the PR is still open:** this stage's own report + cursor flip (`step_pr_validate_done: true`) committed and pushed onto that PR's tip via s-ci — this push is pr-validate's closing act; it is what makes the PR merge-ready, not paperwork left for later.
 - `step_pr_validate_done: true` when step-scoped.
+
+## Premature merge
+
+If pr-validate is entered and finds the PR **already merged/closed** — meaning the push above never happened before the PR closed — this is a **process anomaly**, not routine [task-validate.md](task-validate.md) carry-to-next (that fallback is scoped to step-/task-validate reports on a not-yet-opened tip, not this stage's own report on a tip that closed out from under it). Announce the anomaly in chat, still evaluate CI evidence retroactively (forge checks on the merged PR) for PASS/FAIL, then hand off to **s-ci** for a minimal docs-only commit scoped to this step's report + cursor flip alone (direct push to the base branch when allowed; else the smallest possible follow-up PR). Do **not** defer that commit into the next step's feature branch or ship — this step closes its own paperwork.
 
 ## Hard-stops
 
