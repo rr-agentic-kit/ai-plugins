@@ -14,6 +14,8 @@ Fallback: `python3 <plugin-root>/skills/s-ci/scripts/cli.py <command> [args]` (P
 
 Optional `--forge github|gitlab` overrides `detect-remote`.
 
+Forge-agnostic URL parse (no origin probe): `rr-ci parse-ci-url <run-or-job-url>` → `result.forge` / `owner` / `repo` (+ `run_id` / `job_id`).
+
 ## Envelope
 
 ```json

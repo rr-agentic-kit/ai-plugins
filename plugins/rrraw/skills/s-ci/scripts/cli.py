@@ -14,6 +14,7 @@ import mr_ensure_review_instructions
 import mr_inline_anchors
 import mr_review_submit
 import mr_skip_threads
+import parse_ci_url_cmd
 import pending_reviews
 import pipeline_security_reports
 import pre_merge_status
@@ -22,7 +23,9 @@ import sonar_list_issues
 from emit import fail
 from forge import detect
 
-_FORGE_AGNOSTIC = frozenset({"detect-remote", "sonar-list-issues", "pull-dependabot"})
+_FORGE_AGNOSTIC = frozenset(
+    {"detect-remote", "parse-ci-url", "sonar-list-issues", "pull-dependabot"}
+)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -37,6 +40,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     detect_remote.add_parser(subparsers)
+    parse_ci_url_cmd.add_parser(subparsers)
     debug_pipeline.add_parser(subparsers)
     code_quality_reports.add_parser(subparsers)
     pipeline_security_reports.add_parser(subparsers)

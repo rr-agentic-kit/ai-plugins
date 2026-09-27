@@ -16,7 +16,8 @@ build-backend = "hatchling.build"
 packages = ["."]
 only-include = [
   "cli.py", "__main__.py", "emit.py", "errors.py", "ci_url.py", "gitutil.py",
-  "glab.py", "gh.py", "forge.py", "detect_remote.py", "github_backend.py",
+  "glab.py", "gh.py", "forge.py", "detect_remote.py", "parse_ci_url_cmd.py",
+  "github_backend.py",
   "poll.py", "job_trace.py", "code_quality_reports.py", "pipeline_util.py",
   "debug_pipeline.py", "pipeline_security_reports.py", "mr_add_preflight.py",
   "mr_add_preflight_support.py", "mr_common.py", "mr_ensure_review_instructions.py",
