@@ -24,3 +24,11 @@ def ci_file(name: str) -> Path:
 def ci_rel(path: Path) -> str:
     """Repo-relative posix path for envelope `log_path` / chat announce."""
     return path.relative_to(Path(repo_root())).as_posix()
+
+
+def ci_artifacts_dir(artifact_id: str) -> Path:
+    """Repo-root `.ai/ci/artifacts/<id>/` — mkdir if missing."""
+    safe = Path(artifact_id).name
+    path = ci_dir() / "artifacts" / safe
+    path.mkdir(parents=True, exist_ok=True)
+    return path

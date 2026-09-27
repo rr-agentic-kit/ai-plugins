@@ -1,43 +1,40 @@
-# s-ci / GitHub
+# s-gh
 
-GitHub nested skill. Loaded by **s-ci** only after `detect-remote` returns `github`. Not plugin-listed. Runtime: [SKILL.md](SKILL.md).
+GitHub apply skill — peer entry with **s-ci** / **s-glab**. Direct `/s-gh` when forge is GitHub; or loaded by **s-ci** after `detect-remote`. Runtime: [SKILL.md](SKILL.md).
 
 ## Why
 
-Keep GitHub-only `gh`/MCP and Actions patterns out of the forge-agnostic root while still sharing the same `s-ci` CLI command names.
+GitHub-only `gh`/MCP and Actions patterns live here; shared ship/fix policy lives in `refs/ci/`.
 
 ## What
 
-Routes PR upsert (create if missing, update if exists), Actions debug, **bounded Actions run wait** (`scripts/wait-run.py`), inline review comments, **open review-thread list/reply** (`scripts/open-review-threads.sh`), current-PR thread fixes (triage + edit + reply by thread `id`), security/quality reports, and pre-merge checks through **gh** or GitHub MCP.
+Routes PR upsert, Actions debug, bounded run wait (`scripts/wait-run.py`), review threads, pipeline fix apply rows, Sonar fix, security/quality reports, and pre-merge checks.
 
-**Out of scope:** GitLab/`glab`, local-only git, publish/deploy mechanics (siblings), inventing `s-ci` subcommands.
+**Out of scope:** GitLab, local-only git, publish/deploy (siblings), inventing unlisted CLI.
 
 ## When
 
 ### Use when
 
-- Parent s-ci selected GitHub and the task is PR, Actions, or review work
+- GitHub remote and PR/issue/Actions/review/fix/ship task
+- Same invoke shapes as **s-ci** (ship routes, `--draft`, `--fix`, `--fix --sonar`, `--pull-dependabot`)
 
 ### Avoid when
 
-- GitLab remotes → sibling `gitlab`
-- Local git without a PR → `s-git`
-- Pages/releases/packages → sibling `publish`; Helm/K8s/Argo → sibling `deployment`
+- GitLab → **s-glab**; forge unknown → **s-ci**; local git → **s-git**
 
 ## Constraints
 
-- `disable-model-invocation` — load by path from parent only
-- Do not invent `gh` flags or `s-ci` subcommands — parent `SCRIPTS-SPEC.md`
-- Inline comment rules: [refs/inline-comments.md](refs/inline-comments.md)
+- **Policy:** `refs/ci/`
+- **CLI:** parent `skills/s-ci/scripts/`, [SCRIPTS-SPEC.md](../s-ci/SCRIPTS-SPEC.md)
+- Inline comments: [refs/inline-comments.md](refs/inline-comments.md)
 
 ## Notes
 
 ```
-github/
+s-gh/
 ├── SKILL.md
-├── README.md
-├── scripts/
-│   ├── wait-run.py
-│   └── open-review-threads.sh
-└── refs/   # cli, inline-comments, mcp, workflow-rules
+├── scripts/   # wait-run.py, open-review-threads.sh
+└── refs/      # cli, inline-comments, mcp, workflow-rules
+refs/ci/       # shared forge-agnostic policy
 ```

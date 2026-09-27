@@ -1,41 +1,39 @@
-# s-ci / GitLab
+# s-glab
 
-GitLab nested skill. Loaded by **s-ci** only after `detect-remote` returns `gitlab`. Not plugin-listed. Runtime: [SKILL.md](SKILL.md).
+GitLab apply skill — peer entry with **s-ci** / **s-gh**. Direct `/s-glab` when forge is GitLab; or loaded by **s-ci** after `detect-remote`. Runtime: [SKILL.md](SKILL.md).
 
 ## Why
 
-Keep GitLab-only `glab`/MCP and `.gitlab-ci.yml` patterns out of the forge-agnostic root while sharing the same `s-ci` CLI surface.
+GitLab-only `glab`/MCP and `.gitlab-ci.yml` patterns live here; shared ship/fix policy lives in `refs/ci/`.
 
 ## What
 
-Routes MR upsert (create if missing, update if exists), pipeline debug, inline threads, CI quality/security reports, and pre-merge checks through **glab** or GitLab MCP.
+Routes MR upsert, pipeline debug, inline threads, pipeline fix apply rows, Sonar fix, CI quality/security reports, and pre-merge checks.
 
-**Out of scope:** GitHub/`gh`, local-only git, publish/deploy mechanics (siblings), inventing `s-ci` subcommands.
+**Out of scope:** GitHub, local-only git, publish/deploy (siblings), `--pull-dependabot` (GitHub only).
 
 ## When
 
 ### Use when
 
-- Parent s-ci selected GitLab and the task is MR, pipeline, or review work
+- GitLab remote and MR/issue/pipeline/review/fix/ship task
+- Same invoke shapes as **s-ci** except `--pull-dependabot`
 
 ### Avoid when
 
-- GitHub remotes → sibling `github`
-- Local git without an MR → `s-git`
-- Pages/registry → sibling `publish`; Helm/K8s/Argo → sibling `deployment`
+- GitHub → **s-gh**; forge unknown → **s-ci**; local git → **s-git**
 
 ## Constraints
 
-- `disable-model-invocation` — load by path from parent only
-- Do not invent `glab` flags or `s-ci` subcommands — parent `SCRIPTS-SPEC.md`
-- Inline / `new_line` rules: [refs/inline-comments.md](refs/inline-comments.md)
-- Default MR ship flags: SKILL **Default MR ship** (not duplicated in [refs/cli.md](refs/cli.md))
+- **Policy:** `refs/ci/`
+- **CLI:** parent `skills/s-ci/scripts/`, [SCRIPTS-SPEC.md](../s-ci/SCRIPTS-SPEC.md)
+- Default MR ship flags: SKILL **Default MR ship**
 
 ## Notes
 
 ```
-gitlab/
+s-glab/
 ├── SKILL.md
-├── README.md
 └── refs/   # cli, inline-comments, mcp, pipeline-*, mr-resolve, …
+refs/ci/    # shared forge-agnostic policy
 ```

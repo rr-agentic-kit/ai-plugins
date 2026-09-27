@@ -16,15 +16,21 @@ TypeScript 5.7+ with `strict: true`. Target ES2022+. Treat **6.x** as current wh
     "verbatimModuleSyntax": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "skipLibCheck": true,
-    "types": ["node"]
+    "skipLibCheck": true
   }
 }
 ```
 
 `moduleResolution: "node"` + `module: "ESNext"` causes infinite compilation hang — always use `"bundler"` or `"nodenext"`.
 
-**TS 6.x `types`:** Default is an **empty** `types` array — `@types/*` is no longer auto-included. If Node globals (`process`, `Buffer`, `__dirname`) are needed, set `"types": ["node"]` (and keep `@types/node` as a **devDependency** aligned with the project’s Node major). Use the project package manager (`pnpm` / `npm` / `yarn` per lockfile)—do not invent a different one from IDE hints.
+**`types` is stack-gated — not universal:**
+
+| Stack | `compilerOptions.types` |
+|-------|-------------------------|
+| Node / backend (needs `process`, `Buffer`, `__dirname`) | `"types": ["node"]` + `@types/node` as a **devDependency** aligned with the project’s Node major |
+| Browser / React / DOM-only | Omit `types` (or list DOM-related entries only) — do **not** co-load `"node"` by default |
+
+**TS 6.x:** Default is an **empty** `types` array — `@types/*` is no longer auto-included. Use the project package manager (`pnpm` / `npm` / `yarn` per lockfile)—do not invent a different one from IDE hints.
 
 ### Root / tooling configs in `include`
 
@@ -52,14 +58,28 @@ Framework-generated tsconfigs (e.g. SvelteKit `.svelte-kit/tsconfig.json`) often
 | Result type (`{ ok, value/error }`) | Throwing for expected failure paths |
 | `readonly` on arrays/tuples in APIs | Mutable array params that get mutated |
 | `replaceAll` for string replacement | `replace` (replaces first match only; easy to miss) |
-| Optional chaining (`?.`) for nullable access | `obj && obj.trim()` or `obj && obj.prop` (S6582) |
+| Optional chaining (`?.`) for nullable access | `obj && obj.trim()`, `obj && obj.prop`, `x === undefined \|\| x.prop`, `x == null \|\| x.prop` (S6582) |
 | `RegExp.exec(str)` for single-match extraction | `str.match(regex)` when regex has no `g` flag (S6594) |
 | `expect(xs).toHaveLength(n)` (Jest/Vitest) | `expect(xs.length).toBe(n)` (S5906) |
 | Most-specific matcher (`toBeNull`, `toBeUndefined`, `toEqual`, …) | Generic `toBeTruthy` / `toBeFalsy` when a specific matcher exists (S5906) |
 
-## Type Safety Patterns
+This table is the **SoT** for TypeScript Prefer/Avoid. Sections below are worked examples or unique pitfalls—not a second rule list.
 
-### Discriminated Unions
+### Optional chaining (S6582) — worked example
+
+```typescript
+// Avoid
+if (connection === undefined || connection.status !== 'healthy' || !connection.refreshToken)
+
+// Prefer
+if (connection?.status !== 'healthy' || !connection?.refreshToken)
+```
+
+`connection === undefined` is redundant once `connection?.status` and `connection?.refreshToken` use optional chaining — `undefined?.status` is `undefined` (not `'healthy'`), and `undefined?.refreshToken` is falsy.
+
+## Type Safety Patterns (worked examples)
+
+### Discriminated unions + Result
 
 ```typescript
 type Result<T, E = Error> =
@@ -69,7 +89,7 @@ type Result<T, E = Error> =
 
 Compiler enforces exhaustive handling. Never use optional fields for variant states.
 
-### Branded Types
+### Branded types
 
 ```typescript
 declare const __brand: unique symbol;
@@ -81,9 +101,7 @@ type OrderId = Brand<string, 'OrderId'>;
 function userId(id: string): UserId { return id as UserId; }
 ```
 
-Prevents mixing domain primitives. Use for IDs, sanitized strings, validated inputs.
-
-### Exhaustive Switch
+### Exhaustive switch
 
 ```typescript
 function assertNever(x: never): never {
@@ -97,8 +115,6 @@ switch (status) {
 }
 ```
 
-Adding a new union member forces compile errors at every switch.
-
 ### `satisfies` + `as const`
 
 ```typescript
@@ -106,7 +122,6 @@ const routes = {
   home: '/',
   users: '/users',
 } as const satisfies Record<string, string>;
-// Keys validated, values preserved as literal types
 ```
 
 ## Error Handling
@@ -143,12 +158,12 @@ catch (error: unknown) {
 
 - `Promise.allSettled` when operations are independent and partial failure is OK
 - `Promise.all` only when all-or-nothing semantics are required
-- `AbortController` + `signal` for cancellable operations and timeouts
-- `using` keyword (TS 5.2+) for disposable resources: `using handle = getResource()`
+- `AbortController` + `signal` for cancellable operations and timeouts (**not** `using` — `AbortController` is not `Disposable` in the standard lib)
+- `using` only for values that implement `Disposable` / `AsyncDisposable` (or `DisposableStack` when teaching explicit dispose scopes)
 
 ```typescript
 async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
-  using controller = new AbortController();
+  const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), ms);
   try {
     return await fetch(url, { signal: controller.signal });
@@ -166,14 +181,14 @@ async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
 - Avoid barrel exports (`export *`) — breaks tree-shaking, hides dependency graph
 - Use `verbatimModuleSyntax: true` to enforce explicit type imports
 
-## Common Mistakes
+## Common Mistakes (unique pitfalls)
+
+Prefer/Avoid covers unions, `satisfies`, Result, `any`/`as`, S6582, matchers. This table is **only** non-overlapping traps:
 
 | Pattern | Problem | Fix |
 |---------|---------|-----|
 | `obj!.prop` | Hides null bugs | Guard or throw with context |
-| `as SomeType` | Bypasses type checker | Narrow with `in`, `instanceof`, or discriminant |
 | `enum Foo {}` | Numeric enums leak, tree-shake poorly | `as const` object or union type |
-| `any` anywhere | Disables type checking entirely | `unknown` + narrowing |
 | `Promise<void>` fire-and-forget | Swallows errors silently | `await` or `.catch()` |
 | Index signature `[k: string]: T` | Allows any key | `Record<KnownKeys, T>` or `Map` |
 | `JSON.parse()` unvalidated | Returns `any`, no runtime safety | Validate with schema (Zod, Valibot, ArkType) |
@@ -184,13 +199,24 @@ async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
 
 ## Node types probe (implement / fix)
 
-Before adding `@types/node` or rewriting `process` imports, check in order:
+Before adding `@types/node` or rewriting `process` imports, run the helper (cwd = app/package root; optional `--file` = the failing `.ts`):
 
-1. Is `@types/node` already a devDependency? Is `"types": ["node"]` (or equivalent) in the active tsconfig?
-2. Is the failing file listed under that project’s `include` (or covered by a glob)? Framework-generated includes often omit root tooling configs.
-3. Only then: add `@types/node` + `types: ["node"]`, **or** add the file to `include`, **or** use `node:process` / a triple-slash reference.
+```bash
+python3 skills/s-coder/scripts/node_types_probe.py --cwd . [--file path/to/file.ts]
+```
+(from the rrraw plugin root)
 
-**Anti-trigger:** Do not treat the IDE’s stock “install `@types/node` via npm” tip as the diagnosis when step 1 already passes.
+Parse stdout JSON. Branch on `result.verdict` / `result.next_action` — do **not** re-invent package.json / tsconfig / include checks in prose.
+
+| `verdict` | Meaning |
+|-----------|---------|
+| `ready` | Dep + `types: ["node"]` + file covered (when `--file` given) |
+| `missing_dep` | Add `@types/node` (honor lockfile package manager) |
+| `missing_types` | Set `"types": ["node"]` in the **active** tsconfig (Node/backend only) |
+| `file_outside_include` | Add file to `include`, or use `node:process` / triple-slash if intentional |
+| `no_package_json` / `no_tsconfig` | Stop; resolve project root / config first |
+
+**Anti-trigger:** Do not treat the IDE’s stock “install `@types/node` via npm” tip as the diagnosis when the helper already reports `ready` or only `file_outside_include`.
 
 ## Logging / Diagnostics
 

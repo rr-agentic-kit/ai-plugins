@@ -5,12 +5,14 @@ from argparse import Namespace
 from typing import Any
 
 import emit
-from errors import GhError, GitError
+from ci_url import CiUrl, is_ci_url, parse_ci_url_or_raise
+from errors import CiUrlError, GhError, GitError
 from forge import detect
 from gh import GhClient, default_gh
 from gitutil import current_branch, merge_base_refs, repo_root, resolve_pr_base
+from job_trace import filter_error_lines
 from mr_inline_anchors import parse_unified_diff_plus_lines
-from paths import ci_file, ci_rel
+from paths import ci_artifacts_dir, ci_file, ci_rel
 from pre_merge_status import assemble_verdict
 
 
@@ -69,57 +71,229 @@ def _pr_number(client: GhClient, explicit: str | None) -> str:
     return number
 
 
-def _debug_pipeline(client: GhClient, args: Namespace) -> int:
-    branch = current_branch()
-    listing = client.cli(
-        [
-            "run",
-            "list",
-            "--branch",
-            branch,
-            "--limit",
-            "1",
-            "--json",
-            "databaseId,status,conclusion,url,displayTitle,headSha",
-        ]
-    )
-    runs = json.loads(listing) if listing.strip() else []
-    if not runs:
-        return emit.succeed(
-            "debug-pipeline",
-            {"status": "no_pipeline", "error_lines": [], "failed_job_id": ""},
+def _github_repo_flags(owner: str | None, repo: str | None) -> list[str]:
+    if owner and repo:
+        return ["--repo", f"{owner}/{repo}"]
+    return []
+
+
+def _normalize_github_status(conclusion: str | None, status: str | None) -> str:
+    normalized = (conclusion or "").lower()
+    run_status = (status or "").lower()
+    if normalized in {"failure", "timed_out", "cancelled"}:
+        return "failed_job"
+    if normalized == "success":
+        return "success"
+    if not conclusion and run_status in {
+        "in_progress",
+        "queued",
+        "pending",
+        "waiting",
+        "requested",
+    }:
+        return "running"
+    if not conclusion:
+        return "running"
+    return "success"
+
+
+def _failed_step_from_job(job: dict[str, Any]) -> str:
+    for step in job.get("steps") or []:
+        if step.get("conclusion") == "failure":
+            return str(step.get("name") or "")
+    return ""
+
+
+def _find_failed_github_job(
+    jobs: list[dict[str, Any]], *, job_id: str | None = None
+) -> dict[str, str] | None:
+    for job in jobs:
+        database_id = str(job.get("databaseId") or job.get("id") or "")
+        if job_id and database_id != str(job_id):
+            continue
+        if job.get("conclusion") == "failure":
+            return {
+                "failed_job_id": database_id,
+                "failed_job_name": str(job.get("name") or ""),
+                "failed_step": _failed_step_from_job(job),
+            }
+    return None
+
+
+def _resolve_github_target(
+    ref: str | None,
+    run_id: str | None,
+    job_id: str | None,
+) -> tuple[CiUrl | None, str | None, str | None, str | None, list[str]]:
+    repo_flags: list[str] = []
+    if ref and is_ci_url(ref):
+        parsed = parse_ci_url_or_raise(ref)
+        if parsed.forge != "github":
+            raise CiUrlError(
+                "forge_mismatch", f"URL forge is {parsed.forge}, expected github"
+            )
+        repo_flags = _github_repo_flags(parsed.owner, parsed.repo)
+        return (
+            parsed,
+            run_id or parsed.run_id,
+            job_id or parsed.job_id,
+            None,
+            repo_flags,
         )
-    run = runs[0]
-    run_id = str(run.get("databaseId", ""))
-    conclusion = str(run.get("conclusion") or run.get("status") or "")
-    error_lines: list[str] = []
-    failed_job_id = ""
+    return None, run_id, job_id, ref, repo_flags
+
+
+def _github_run_view(
+    client: GhClient,
+    run_id: str,
+    *,
+    repo_flags: list[str],
+    fields: str,
+) -> dict[str, Any]:
+    raw = client.cli(
+        ["run", "view", run_id, *repo_flags, "--json", fields],
+    )
+    payload = json.loads(raw) if raw.strip() else {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _github_jobs(
+    client: GhClient,
+    run_id: str,
+    *,
+    repo_flags: list[str],
+) -> list[dict[str, Any]]:
+    payload = _github_run_view(
+        client,
+        run_id,
+        repo_flags=repo_flags,
+        fields="jobs",
+    )
+    jobs = payload.get("jobs") or []
+    return jobs if isinstance(jobs, list) else []
+
+
+def _download_github_artifacts(
+    client: GhClient,
+    run_id: str,
+    dest_dir: Any,
+    *,
+    repo_flags: list[str],
+) -> None:
+    client.cli(["run", "download", run_id, "-D", str(dest_dir), *repo_flags])
+
+
+def _debug_pipeline(client: GhClient, args: Namespace) -> int:
+    command = "debug-pipeline"
+    ref = getattr(args, "ref", None)
+    explicit_run_id = getattr(args, "run_id", None)
+    explicit_job_id = getattr(args, "job_id", None)
+    save_log = getattr(args, "save_log", False)
+    artifacts = getattr(args, "artifacts", False)
+
+    try:
+        _parsed, run_id, job_id, _pr_ref, repo_flags = _resolve_github_target(
+            ref, explicit_run_id, explicit_job_id
+        )
+    except CiUrlError as exc:
+        return emit.fail(command, exc.code, str(exc))
+
+    if not run_id:
+        branch = current_branch()
+        listing = client.cli(
+            [
+                "run",
+                "list",
+                "--branch",
+                branch,
+                *repo_flags,
+                "--limit",
+                "1",
+                "--json",
+                "databaseId,status,conclusion,url,displayTitle,headSha",
+            ]
+        )
+        runs = json.loads(listing) if listing.strip() else []
+        if not runs:
+            return emit.succeed(
+                command,
+                {"status": "no_pipeline", "error_lines": [], "failed_job_id": ""},
+            )
+        run = runs[0]
+        run_id = str(run.get("databaseId", ""))
+    else:
+        run = _github_run_view(
+            client,
+            run_id,
+            repo_flags=repo_flags,
+            fields="databaseId,status,conclusion,url,displayTitle,headSha",
+        )
+
+    run_url = str(run.get("url") or "")
+    conclusion = str(run.get("conclusion") or "")
+    run_status = str(run.get("status") or "")
+    status = _normalize_github_status(conclusion or None, run_status or None)
+
+    if status in {"success", "running"}:
+        return emit.succeed(
+            command,
+            {
+                "status": status,
+                "error_lines": [],
+                "failed_job_id": "",
+                "run_url": run_url,
+                "pipeline_id": run_id,
+            },
+        )
+
+    jobs = _github_jobs(client, run_id, repo_flags=repo_flags)
+    failed = _find_failed_github_job(jobs, job_id=job_id)
+    if not failed:
+        return emit.fail(
+            command,
+            "no_failed_job",
+            "no failed jobs found",
+            result={
+                "status": "no_failed_job",
+                "error_lines": [],
+                "failed_job_id": "",
+                "run_url": run_url,
+                "pipeline_id": run_id,
+            },
+        )
+
     full_log = ""
-    if conclusion in {"failure", "timed_out", "cancelled"}:
-        try:
-            full_log = client.cli(["run", "view", run_id, "--log-failed"])
-            error_lines = [line for line in full_log.splitlines() if line.strip()][:40]
-        except Exception:
-            error_lines = []
-        jobs_raw = client.cli(["run", "view", run_id, "--json", "jobs"])
-        jobs = json.loads(jobs_raw).get("jobs") or []
-        for job in jobs:
-            if job.get("conclusion") == "failure":
-                failed_job_id = str(job.get("databaseId") or job.get("name") or "")
-                break
-    status = "failed" if conclusion == "failure" else conclusion or "unknown"
+    error_lines: list[str] = []
+    log_args = ["run", "view", run_id, *repo_flags]
+    if job_id:
+        log_args.extend(["--job", str(job_id), "--log"])
+    else:
+        log_args.append("--log-failed")
+    try:
+        full_log = client.cli(log_args)
+        error_lines = filter_error_lines(full_log)
+    except Exception:
+        error_lines = []
+
     result: dict[str, Any] = {
-        "status": status,
+        "status": "failed_job",
         "error_lines": error_lines,
-        "failed_job_id": failed_job_id,
+        "failed_job_id": failed["failed_job_id"],
+        "failed_job_name": failed["failed_job_name"],
+        "failed_step": failed["failed_step"],
+        "run_url": run_url,
         "pipeline_id": run_id,
     }
-    if getattr(args, "save_log", False) and full_log:
-        stem = failed_job_id or run_id or "unknown"
+    if save_log and full_log:
+        stem = failed["failed_job_id"] or run_id or "unknown"
         path = ci_file(f"job-{stem}.log")
         path.write_text(full_log, encoding="utf-8")
         result["log_path"] = ci_rel(path)
-    return emit.succeed("debug-pipeline", result)
+    if artifacts:
+        dest = ci_artifacts_dir(failed["failed_job_id"] or run_id)
+        _download_github_artifacts(client, run_id, dest, repo_flags=repo_flags)
+        result["artifacts_dir"] = ci_rel(dest)
+    return emit.succeed(command, result, exit_code=1)
 
 
 def _code_quality(client: GhClient) -> int:

@@ -16,7 +16,7 @@ Same evidence bar for human and bot/AI comments — never auto-apply unverified 
 
 ## Once per run
 
-Derive a one-line **task boundary** from PR/MR title, summary (above `---`), and linked ticket (`gh pr view` / `glab mr view`). Example: *"Add retry logic to payment webhook handler."* Gate scope against this boundary for every comment.
+Derive a one-line **task boundary** from PR/MR title, summary (above `---`), and linked ticket (forge PR/MR view). Example: *"Add retry logic to payment webhook handler."* Gate scope against this boundary for every comment.
 
 ## Gates (per comment)
 
@@ -43,7 +43,7 @@ Pipeline SAST / dependency / secrets findings → escalate to org scanner / secu
 
 ## Optional reply skeletons
 
-**Reply transport (GitHub):** use the thread GraphQL `id` from `skills/s-gh/scripts/open-review-threads.sh` list output with `--reply` — not a PR discussion URL or REST comment id.
+**Reply transport:** use the active forge skill **Reply to thread** row — thread id from the forge open-review-threads list, not a discussion URL or REST comment id.
 
 **Implemented:** `Addressed in [commit]. [what changed]`
 
