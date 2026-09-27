@@ -39,6 +39,7 @@
 | shippable | Step/task with `ship_after` of `step_validate` or `task_validate` | Feature branch alone; `never` | Validate PASS requires open PR/MR for `Ship.branch`; tip push then **pr-validation** |
 | prior_open_pr | Plan Ship `base`: tip of latest still-open PR in same `pr_group` chain | Always base = default branch | Stacked PRs; fall back to default if none open |
 | capability atom | Smallest prepare task that delivers observable value (or unlocks it) | Full PRD leaf; pure rename | Grain rubric in s-prepare |
+| Pipeline fix | s-ci / s-gh / s-glab `--fix`: policy in `refs/ci/fix/pipeline-fix.md`; apply via forge skill rows | Bare CI weakening; ad-hoc debug without pipeline-fix ref | Shared policy `refs/ci/`; apply s-gh/s-glab |
 | Sonar fix | s-ci `--fix --sonar`: scripted issue list + agent remediations; no human issue dump | Cursor sonar-list/fix slash skills; CI `code-quality-reports` | Envelope via `sonar-list-issues` |
 | pull-dependabot | s-ci CLI/skill path: merge `origin/dependabot/**` → verify → delete remotes | Renovate onboarding; ad-hoc chat merge loops; Dependabot security alerts | Invoke `--pull-dependabot`; agent only on exit 2 |
 | INTENT | Plugin-level Spec (Why/What/When/Philosophy/UX/Constraints) | Plugin README overview | [INTENT.md](INTENT.md); UX owns process-ownership |

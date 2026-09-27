@@ -41,8 +41,14 @@ def test_ci_file_strips_path_traversal(repo: Path) -> None:
     assert target.name == "escape.log"
 
 
+class _NoopGlab:
+    def cli(self, args: list[str]) -> str:
+        return ""
+
+
 def test_save_log_writes_under_ai_ci(repo: Path) -> None:
     result = debug_pipeline._failed_job_result(
+        _NoopGlab(),
         {"failed_job_id": "99"},
         ["boom"],
         "full trace\n",
@@ -56,6 +62,7 @@ def test_save_log_writes_under_ai_ci(repo: Path) -> None:
 
 def test_no_save_log_skips_disk(repo: Path) -> None:
     result = debug_pipeline._failed_job_result(
+        _NoopGlab(),
         {"failed_job_id": "1"},
         [],
         "x",

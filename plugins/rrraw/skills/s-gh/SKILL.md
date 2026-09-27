@@ -1,87 +1,95 @@
 ---
 name: s-gh
 disable-model-invocation: true
-description: /s-gh — GitHub PR, issue, Actions, and gh/MCP patterns; also loaded by s-ci after detect-remote.
+description: /s-gh — GitHub PR, issue, Actions; ship routes, --fix [<url|id>], --fix --sonar, --pull-dependabot; gh/MCP apply.
 ---
 
-# s-ci / GitHub
+# s-gh
 
-Loaded only from parent **s-ci** `SKILL.md` when `result.forge` is `github`.
+**Human overview:** [README.md](README.md)
+
+**Shared policy:** `refs/ci/` — shapes, templates, fix/sonar rules.
+
+**CLI:** `uv run --project skills/s-ci/scripts rr-ci <command>` — `skills/s-ci/scripts/README.md`, `skills/s-ci/SCRIPTS-SPEC.md`.
 
 ## Purpose
 
-Route GitHub PR, **issue**, Actions, review, and check-run work through **gh** (if installed) or GitHub MCP. Generic PR/MR title/description rules stay in parent `refs/pr-mr-templates.md`.
+GitHub **apply layer**: PR/issue/Actions/review through **gh** (or MCP). Load `refs/ci/**` for policy; this skill owns task rows, [refs/cli.md](refs/cli.md), and scripts.
 
 ## When to use
 
-Parent **s-ci** already selected GitHub. Do not load for GitLab remotes.
+- GitHub remote (direct `/s-gh` or delegated from **s-ci**)
+- Open or update a PR (including commit/push): `--create-pr` / `--update-pr` / `--add-pr` / `-pr-mr` aliases — all upsert
+- Optional `--draft` with ship — disk title/body gate per `refs/ci/task-shapes.md`
+- Draft/create GitHub issue (including cross-repo `owner/repo`)
+- Pipeline / Actions failure, CI reports, review submit
+- **`--fix [<run|job URL|PR id>]`** — pipeline fix per `refs/ci/fix/pipeline-fix.md`
+- **`--fix --sonar`** — per `refs/ci/sonar-fix.md`
+- **`--pull-dependabot`** — per `refs/ci/pull-dependabot.md` (GitHub only)
 
 ## When not to use
 
-- GitLab MRs / `glab` → sibling **gitlab** skill
-- Local git without a PR → **s-git**
-- Helm/K8s/Argo → sibling **deployment** skill
-- Pages/releases/packages → sibling **publish** skill
+- GitLab → **s-glab**
+- Local git without PR → **s-git**
+- Publish/deploy → **s-publish** / **s-deploy**
+- Forge unknown → **s-ci** (detect + delegate)
 
 ## Procedure
 
-1. **Tool** — `which gh`; if missing, [refs/mcp.md](refs/mcp.md). Done: gh or MCP.
-2. **CLI** — `uv run --project <rrraw-plugin>/skills/s-ci/scripts rr-ci <command>` (parent `scripts/README.md`). Same command names as GitLab; GitHub backend maps them. Done: envelope parsed. For issue create, use allowlisted `gh` in [refs/cli.md](refs/cli.md) — not an `rr-ci` subcommand.
-3. **Forge target** — If parent set forge target `owner/repo`, pass `--repo owner/repo` on every `gh` issue/PR call that must hit that project. Default: cwd origin from `detect-remote`.
-4. **Task row:**
+TodoWrite: `refs/ci/task-shapes.md`. Skip **s-ci** forge step when entered direct and origin is GitHub.
+
+1. **root** — `REPO_ROOT` via `skills/s-git/refs/repo-root.md`. Safety ref when history rewrite / discard possible.
+2. **title** — **PR ship only.** Load `refs/ci/pr-mr-templates.md`. Skip for issue, `--fix`, `--fix --sonar`, `--pull-dependabot`.
+3. **load** — Read [refs/cli.md](refs/cli.md); run `mr-add-preflight` when PR ship. Co-load `refs/ci/**` rows per task-shape.
+4. **execute** — Matching task row below. Stop on first hard failure.
 
 | Task | Read / run |
 |------|------------|
 | gh syntax | [refs/cli.md](refs/cli.md) |
 | **Issue create** | Steps **Issue create** below |
 | **PR ship** | `mr-add-preflight` then **Default PR ship** below |
-| Review comments on diff lines | `mr-ci-review-preflight` then [refs/inline-comments.md](refs/inline-comments.md) — GitHub `diff_refs` may be empty until parity; still run preflight for allowlist/MR metadata |
-| **Open review threads** | `scripts/open-review-threads.sh` — filtered stdout (`id`, `path`, `line`, `outdated`, `comments`; no `url`) |
-| **Reply to thread** | `scripts/open-review-threads.sh --reply <thread_id> --body "…"` (or `--body-file`); use `id` from list output — not a discussion URL |
-| **Fix current-PR threads** | Read parent `refs/review-comment-triage.md`; triage each thread; edit this branch when implement; reply with `--reply` + thread `id`; do **not** resolve on false positives (`mr-skip-threads` is skip-only, not reply) |
-| Thread disposition (triage rules) | Parent `refs/review-comment-triage.md` (Read from s-ci root; do not invent path) |
-| **Wait for Actions run** | `scripts/wait-run.py RUN_ID` `[--repo owner/repo]` — one JSON `status`/`conclusion` on completion; do **not** invent inline `gh run view` poll chains |
-| Failed Actions run | `debug-pipeline` `[PR_NUMBER]` — `result.status`, `result.error_lines`, `result.failed_job_id` (check-run / job id) |
+| **Pipeline fix** (`--fix`) | `refs/ci/fix/pipeline-fix.md` + `debug-pipeline`; verify via `wait-run.py`, `pre-merge-status`, `gh run rerun` |
+| Review comments on diff lines | `mr-ci-review-preflight` then [refs/inline-comments.md](refs/inline-comments.md) |
+| **Open review threads** | `scripts/open-review-threads.sh` |
+| **Reply to thread** | `scripts/open-review-threads.sh --reply <thread_id> --body "…"` |
+| **Fix current-PR threads** | `refs/ci/review-comment-triage.md`; edit branch; reply with thread `id` |
+| **Wait for Actions run** | `scripts/wait-run.py RUN_ID` `[--repo owner/repo]` |
+| Failed Actions run | `debug-pipeline` `[PR_NUMBER\|RUN_URL]` |
 | Code scanning / quality | `code-quality-reports` |
-| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues --lean` (default: open PR for current branch) |
-| Security / Dependabot / code scanning | `pipeline-security-reports` — treat `merge_blocked` as merge-state dirty when GitHub reports failing required checks |
+| **Sonar fix** (`--fix --sonar`) | `refs/ci/sonar-fix.md` + `sonar-list-issues --lean` |
+| Security / Dependabot / code scanning | `pipeline-security-reports` |
 | Resolve review threads | `mr-skip-threads` |
 | PR add preflight | `mr-add-preflight` |
 | Review body note | `mr-ensure-review-instructions` |
-| Review decision | `mr-review-submit` (`gh pr review`) |
+| Review decision | `mr-review-submit` |
 | Pending reviews | `pending-reviews` |
 | Workflow `if:` / artifact paths | [refs/workflow-rules.md](refs/workflow-rules.md) |
 | MCP fallback | [refs/mcp.md](refs/mcp.md) |
 
-**Fallback (no matching row):** Use the named `s-ci` subcommand from parent `SCRIPTS-SPEC.md` if listed; else stop — do not invent `gh` flags or issue workflows.
-
-Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: false`, auth missing, preflight escalate).
+**Fallback:** named `s-ci` subcommand from `skills/s-ci/SCRIPTS-SPEC.md` if listed; else stop.
 
 ### Issue create
 
-1. Draft title + body in chat (or body file under `.ai/ci/` if large). Done: draft shown.
-2. AskQuestion (or prose options): **Create as drafted** | **Edit draft** | **Abort**. Stop on Abort.
-3. On approve: `gh issue create --repo <forge-target> --title "…" --body "…"` (omit `--repo` when target is cwd origin). Syntax: [refs/cli.md](refs/cli.md). Done: issue URL reported. Stop: create fails or auth missing.
+1. Draft title + body in chat (or body file under `.ai/ci/` if large).
+2. AskQuestion: **Create as drafted** | **Edit draft** | **Abort**. Stop on Abort.
+3. On approve: `gh issue create --repo <forge-target> --title "…" --body "…"`. Syntax: [refs/cli.md](refs/cli.md).
 
 ### Default PR ship
 
-For `--create-pr` / `--update-pr` / `--add-pr` / `--create-pr-mr` / `--update-pr-mr` / `--add-pr-mr` / prose “create|open|update|add PR” — **one upsert path**. Title/body: parent step **title** (after skill `--draft` gate if any, prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). Pass handoff/user base as `mr-add-preflight --base <name>` when known. After `mr-add-preflight`, use `result.base_branch` on forge create/edit. Branch on `result.status`:
+One upsert path for all ship routes. Title/body from step **title** (prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). After `mr-add-preflight`, branch on `result.status`:
 
-- **`exists`** — push commits if needed; `gh pr edit --title … --body-file …` when title/body should change; `gh pr edit --base <base_branch>` when the PR base differs from `result.base_branch`. Do **not** convert ready↔draft. Done: existing PR URL (`result.mr_url`). Never open a second PR for the branch.
-- **`ready_create`** — `gh pr create --draft --base <base_branch> --fill --title "…" --body-file …`. Always pass forge `--draft` and `--base` from preflight. Do **not** invent merge-method flags on create. Done: draft PR created. Stop: create fails.
-- Other preflight statuses (`error`, `no_commits`, `escalate_*`, `needs_branch_from_default`) → stop or escalate per envelope; do not invent a create.
-
-Skill `--draft` is the parent human title/body gate — distinct from forge `--draft` (always on create).
+- **`exists`** — push if needed; `gh pr edit` title/body/base when needed. Do **not** convert ready↔draft.
+- **`ready_create`** — `gh pr create --draft --base <base_branch> …`. Always forge `--draft` + `--base` from preflight.
+- Other preflight statuses → stop or escalate per envelope.
 
 ### Pre-merge
 
-When asked — run `pre-merge-status` once; branch on `result.verdict` / `result.blockers`; report one-line verdict. Do **not** invent five sequential probes. Done: report emitted. Stop: `verdict == blocked` (next action from `blockers`; `debug-pipeline` only when checks fail).
+Run `pre-merge-status` once; branch on `result.verdict` / `result.blockers`. Do **not** invent poll chains — use `wait-run.py` when run id known.
 
 ## Invariants
 
-- After workflow fixes: commit/push allowed (parent s-ci); re-run with `gh run rerun RUN_ID --failed`.
-- Do not invent `s-ci` subcommands — parent `SCRIPTS-SPEC.md`.
-- Do not invent `gh` flags — only [refs/cli.md](refs/cli.md) + task rows above.
-- Do not re-create inline `gh run view` / `python -c` poll loops — use `scripts/wait-run.py`.
-- Inline comment line/diff rules: [refs/inline-comments.md](refs/inline-comments.md).
-- Create/update ship routes are aliases; never invent a second PR for the same branch.
+- Policy in `refs/ci/**` — do not restate templates or fix rules here.
+- After workflow fixes: commit/push allowed; re-run with `gh run rerun RUN_ID --failed`.
+- Do not invent `gh` flags — [refs/cli.md](refs/cli.md) + task rows only.
+- Inline comments: [refs/inline-comments.md](refs/inline-comments.md).
+- Never open a second PR for the same branch.

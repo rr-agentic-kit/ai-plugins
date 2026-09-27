@@ -1,6 +1,6 @@
 # PR / MR title and description
 
-**When:** Creating or updating a GitHub pull request or GitLab merge request. Forge-specific `gh` / `glab` flags live in the nested forge skill.
+**When:** Creating or updating a GitHub pull request or GitLab merge request. Forge-specific create/edit flags live in the active forge skill.
 
 ## Title
 
@@ -73,10 +73,9 @@ Revisit the below-the-fold section after pushes that change user-visible behavio
 
 ### Apply
 
-- GitHub: `gh pr create` / `gh pr edit` with the body file.
-- GitLab: `glab mr create` / `glab mr update -d`.
+Forge upsert uses the active skill **Default PR ship** or **Default MR ship** row with title + body file from disk or context.
 
-### `--draft` disk gate (parent ship)
+### `--draft` disk gate (ship routes)
 
 When the invoke includes `--draft` (or prose asks to draft title/description first):
 
@@ -84,6 +83,6 @@ When the invoke includes `--draft` (or prose asks to draft title/description fir
 2. Report both paths. AskQuestion (or prose): **Ship** | **Keep draft only** | **I'll edit**.
 3. **Keep draft only** → stop; leave files.
 4. **I'll edit** → do not rewrite the files; after the user continues, **re-read** both paths and use that content (user edition wins). AskQuestion again.
-5. **Ship** → nested forge upsert uses the current disk title/body. Forge create always includes `gh`/`glab` `--draft` (and `--base` / `--target-branch` from preflight); skill `--draft` is only this disk gate.
+5. **Ship** → forge upsert uses the current disk title/body. Forge create always includes forge `--draft` (and `--base` / `--target-branch` from preflight); skill `--draft` is only this disk gate.
 
-Without `--draft`, authoring may still write a body file for CLI `--body-file`. The parent step **title** still runs the **Summary readability gate** before forge create/edit (humanize or AskQuestion when dense).
+Without `--draft`, authoring may still write a body file for CLI `--body-file`. The ship **title** step still runs the **Summary readability gate** before forge create/edit (humanize or AskQuestion when dense).

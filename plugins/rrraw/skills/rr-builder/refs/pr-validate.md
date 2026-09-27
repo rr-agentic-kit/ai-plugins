@@ -20,10 +20,10 @@
 | Need | s-ci path |
 |------|------------|
 | Wait / status | `pre-merge-status` (or forge nested equivalent) |
-| Non-Sonar job failures | `debug-pipeline` then ad-hoc code/test fix |
+| Non-Sonar job failures | `/s-ci --fix <run URL>` or forge-direct `--fix` (policy: `refs/ci/fix/pipeline-fix.md`) |
 | Sonar / quality findings | `/s-ci --fix --sonar` |
 
-Do **not** invent `gh`/`glab` flags in builder. Follow `skills/s-ci/refs/pipeline-fix-rules.md` (no disable/bypass without AskQuestion).
+Do **not** invent `gh`/`glab` flags in builder. Follow `refs/ci/fix/pipeline-fix-rules.md` (no disable/bypass without AskQuestion). Invoke `/s-ci --fix` or forge-direct **s-gh** / **s-glab**.
 
 ## Wait
 
@@ -39,7 +39,7 @@ Do **not** invent `gh`/`glab` flags in builder. Follow `skills/s-ci/refs/pipelin
 |---------|--------|
 | **PASS** | `verdict == ready` **or** pipeline/checks success with no blocking security/quality blockers per pre-merge envelope |
 | **FAIL → Sonar / quality** | Hand off **`/s-ci --fix --sonar`**; after remediations → s-ci update/push tip → re-enter wait |
-| **FAIL → other jobs** | `debug-pipeline` → ad-hoc code/test fix in working tree → s-ci update/push tip → re-enter wait |
+| **FAIL → other jobs** | `/s-ci --fix <run URL>` → s-ci update/push tip → re-enter wait |
 | **Unrecoverable** (non-Sonar) | Hard-stop with one-line reason |
 
 **Epoch cap:** `epoch_cap: 5` (same as review). Each push→re-poll cycle counts one epoch. Hitting the cap without PASS → hard-stop.
