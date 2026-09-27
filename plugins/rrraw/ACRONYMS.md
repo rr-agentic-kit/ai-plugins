@@ -34,4 +34,6 @@
 | WBS | Work Breakdown Structure | s-prepare ordered task tree under `docs/rr/tasks/` |
 | NL | Natural Language | Parent/user invoke without an explicit path or flag |
 | TBD | To Be Defined | Reserved for unspecified future builder stages — **refactor** is implemented via **s-refactor** |
+| TR | Task run | `auto` × `task`\|`slice` isolation cell; SoT `task-run.md` |
+| BU | Build unit | Task-plan implement slice; one build phase Task each |
 | Sonar | SonarQube / SonarCloud analysis | s-ci `--fix --sonar` + `sonar-list-issues` |

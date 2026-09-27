@@ -102,7 +102,9 @@ If pr-validate is entered and finds the PR **already merged/closed** — meaning
 
 ## Isolation-cell ownership
 
-Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)): **parent owns** pr-validation (with ship / post-`needs_ship` re-validate). Executor `ok` does **not** imply CI green. After clean `ok` or post-ship re-validate+commit, if open tip → parent pr-validate before next spawn / task-validate.
+Under **task run** ([task-run.md](task-run.md)): **pr-validate runs in a phase Task** ([executors/phase.md](executors/phase.md), `phase: pr_validate`). Parent spawns after task-validate PASS + forge landing push; parent does **not** inline CI wait/fix logs. Validate phase `ok` does **not** imply CI green. After post-ship re-validate+commit, if open tip → spawn pr-validate phase Task before scope stop / next task.
+
+**Step-mode** (`--step`, mid-flight step granularity): parent-inline pr-validate unchanged ([slice-pipeline.md](slice-pipeline.md)).
 
 ## Out of scope
 
