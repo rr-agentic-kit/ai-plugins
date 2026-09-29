@@ -3,36 +3,14 @@ name: python-quality
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches:
-      - master
-      - "release/**"
-      - "hotfix/**"
   push:
-    branches:
-      - master
-      - "release/**"
-      - "hotfix/**"
+    branches: [master]
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  pr-base-guard:
-    if: github.event_name == 'pull_request' && github.base_ref == 'master'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Reject non-release PRs into master
-        env:
-          HEAD_REF: ${{ github.head_ref }}
-        run: |
-          if [[ "$HEAD_REF" == release/* || "$HEAD_REF" == hotfix/* ]]; then
-            echo "Allowed PR head for master: $HEAD_REF"
-            exit 0
-          fi
-          echo "PRs into master must come from release/** or hotfix/** (head: $HEAD_REF)" >&2
-          exit 1
-
   quality:
     runs-on: ubuntu-latest
     steps:

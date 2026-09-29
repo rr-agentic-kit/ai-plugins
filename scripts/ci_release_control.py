@@ -87,7 +87,7 @@ def resolve_branch(args: argparse.Namespace) -> str:
 
 def run_open(branch: str, repo_root: Path) -> int:
     base = parse_release_branch(branch)
-    target = f"{base}-rc1"
+    target = f"{base}-rc-1"
     bump.set_lockstep_version(target, repo_root)
     _emit(action="open", branch=branch, version=target)
     return 0

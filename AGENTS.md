@@ -7,7 +7,6 @@ Dual-runtime plugin marketplace (Cursor + Claude Code). Plugins live under `plug
 - Plugins are **self-contained** under `plugins/`. Do not reference paths outside `plugins/` in plugin markdown unless documenting an explicit cross-plugin dependency.
 - Plugin Python scripts must have tests in `tests/<plugin>/`. Tests are not part of the install artifact; they run in this monorepo and CI only. Tests live only under `tests/<plugin>/` or `tests/scripts/` — never under `plugins/`.
 - **Version alignment:** `pyproject.toml` `[project].version` must match each plugin’s `.cursor-plugin/plugin.json` and `.claude-plugin/plugin.json` `version` fields. Run `uv run python scripts/validate_plugin_versions.py` from repo root before committing manifest or version bumps.
-- **Release-target PRs:** Open work (`feat/`, `chore/`, `fix/`, …) against the active `release/X.Y.0`, not `master`. Only `release/**` and `hotfix/**` merge to `master`. CI owns RC ticks and stable graduation via `scripts/ci_release_control.py` / `.github/workflows/release-control.yml`; manual `bump_plugins_version.py` is recovery-only (`--no-install` in CI).
 - **Monorepo vs install:** When working inside `plugins/<name>/` as an installed artifact, do not assume `tests/`, repo-root `pyproject.toml`, `uv.lock`, or `../../` exist. In a full monorepo checkout, those paths are available at the repo root—use this file and `CONTRIBUTING.md`, not plugin `CLAUDE.md`, for maintainer workflows.
 - **Dual-runtime parity:** Prefer full Cursor + Claude Code parity for skills, commands, agents, hooks, scripts, and both `plugin.json` manifests. If a capability is runtime-specific, document the gap in the plugin README and leave a tracked follow-up — do not silently ship one-runtime-only behavior for marketplace plugins.
 
@@ -20,22 +19,15 @@ Dual-runtime plugin marketplace (Cursor + Claude Code). Plugins live under `plug
 
 ```bash
 uv sync --all-groups
-just test-scripts -v
-uv run pytest tests/context-eng-hero/ -v   # or tests/rrraw/
+uv run pytest tests/ -v
+uv run pytest tests/context-eng-hero/ -v   # or tests/rrraw/, tests/scripts/
 uv run ruff check plugins/context-eng-hero/scripts plugins/rrraw/scripts scripts tests/context-eng-hero tests/rrraw tests/scripts
-just validate-versions
-just install-claude
-just bump {major|minor|patch|rc|stable}  # rc runs install_claude_local unless --no-install / BUMP_SKIP_INSTALL=1
-just release active
-just release open
-just branch-new feat/foo --base release/0.1.0
-just create-pr --title "…" --description "…"
-just ci-release {open|rc|promote|hotfix|next-minor} --branch release/X.Y.0
+uv run python scripts/validate_plugin_versions.py
+uv run python scripts/install_claude_local.py
+uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}  # rc also runs install_claude_local
 claude plugin validate .
 claude plugin validate ./plugins/context-eng-hero
 ```
-
-Equivalent one-liners use `uv run python scripts/<script>.py` when `just` is unavailable.
 
 Full quality matrix (Black, Mypy, Bandit, pip-audit, coverage, Sonar): see `CONTRIBUTING.md`.
 

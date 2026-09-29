@@ -2,16 +2,9 @@
 
 **Audience:** `rr-builder` orchestrate **plan** stage. **No** application source edits.
 
-**Outcome:** Keep task + **build** context small — one step plan per file so build does not load every step’s plan; under **task run**, one task plan covers remaining work as build units.
+**Outcome:** Keep task + **build** context small — one step plan per file so build does not load every step’s plan.
 
-## Variants
-
-| Granularity | Path | When |
-|-------------|------|------|
-| **Step plan** (default) | `{artifact_root}/{NNNN}-{step}.plan.md` | `pipeline_granularity: step` or mid-flight step mode |
-| **Task plan** | `{artifact_root}/{NNNN}.plan.md` | Task run (`pipeline_granularity: task`) — locked at first write |
-
-## Persist path (canonical — step plan)
+## Persist path (canonical)
 
 Write the six required sections to:
 
@@ -94,44 +87,3 @@ Record after feature-branch ensure. Do **not** invent a second branch naming sch
 - Setting `Ship.branch` to something other than the settled feature-branch name
 - Using `ship_after: never` for a step that is intended to open a PR this step (wrong non-shippable label)
 - Requiring an open PR when `ship_after: never` was confirmed (inventing a forge gate for non-shippable work)
-
-## Task plan variant (`{NNNN}.plan.md`)
-
-**Audience:** Task run ([task-run.md](task-run.md)) after prepare complete for remaining steps. **No** application source edits.
-
-On first write, set `pipeline_granularity: task` on `{NNNN}.md` (immutable for this task run).
-
-### Required sections
-
-| Section | Content |
-|---------|---------|
-| **Goal** | One observable outcome for the **remaining** task work (prose OK) |
-| **Build units** | Ordered list; per unit: unit goal, seams/files (≤ ~15 files each), `- [ ]` **unit hooks** (light verify runnable in build) |
-| **Risks** | Residual risks / unknowns (prose OK) |
-| **Verify hooks** | Task-level **markdown checklist** — `- [ ]` items for **task-validate** (not duplicated in unit hooks) |
-| **Non-goals** | Explicit exclusions (prose OK) |
-| **Ship** | Single ship block for the task — see table below |
-
-**Sizing:** If a remaining step would exceed ~15 files, split into multiple build units in **Build units** so each build executor stays within context budget.
-
-### Ship (task plan)
-
-Record after [feature-branch.md](feature-branch.md) task-run ensure (`feat/{NNNN}-{short-desc}`).
-
-| Field | Values | Meaning |
-|-------|--------|---------|
-| `branch` | Exact branch name | Task feature branch |
-| `ship_after` | `task_validate` \| `never` | **`step_validate` in legacy step plans is treated as `task_validate` under task run.** `never` = non-shippable |
-| `base` | `default` \| `prior_open_pr` | PR/MR base (ignored when `never`) |
-
-Under `drive: auto` slice runs, auto tip-chain between tasks: when branching from a prior same-slice `feat/{NNNN}-*` tip, default `base: prior_open_pr` per [feature-branch.md](feature-branch.md).
-
-### Task plan done-when
-
-0. Feature branch settled per feature-branch **Task-run branch**.
-1. Sidecar `{NNNN}.plan.md` exists with all sections.
-2. Every build unit has ≥1 unit hook checkbox; **Verify hooks** has ≥1 task-level checkbox.
-3. `pipeline_granularity: task` set; `task_plan_done: true`.
-4. **No** application source edits (git branch create/checkout OK).
-
-Optional frontmatter: `task_id`, `slice_id`, `unit_count`.

@@ -20,18 +20,18 @@
 | Need | s-ci path |
 |------|------------|
 | Wait / status | `pre-merge-status` (or forge nested equivalent) |
-| Non-Sonar job failures | `/s-ci --fix <run URL>` or forge-direct `--fix` (policy: `refs/ci/fix/pipeline-fix.md`) |
+| Non-Sonar job failures | `debug-pipeline` then ad-hoc code/test fix |
 | Sonar / quality findings | `/s-ci --fix --sonar` |
 
-Do **not** invent `gh`/`glab` flags in builder. Follow `refs/ci/fix/pipeline-fix-rules.md` (no disable/bypass without AskQuestion). Invoke `/s-ci --fix` or forge-direct **s-gh** / **s-glab**.
+Do **not** invent `gh`/`glab` flags in builder. Follow `skills/s-ci/refs/pipeline-fix-rules.md` (no disable/bypass without AskQuestion).
 
 ## Wait
 
-1. **GitHub + known run id** — `skills/s-gh/scripts/wait-run.py RUN_ID` `[--repo owner/repo]` (from `gh run list` or push output). Do **not** invent inline `gh run view` / `python -c` poll chains. Then run s-ci `pre-merge-status` once for the authoritative all-checks verdict (`verdict`, `blockers`).
-2. **No run id** (GitLab or GitHub without a run id) — poll s-ci `pre-merge-status` until pipeline/checks leave the pending set (forge-neutral fallback).
-3. Backoff ~30–60s between `pre-merge-status` polls (`wait-run.py` uses its own bounded `--interval`, default 30s).
-4. Wall timeout default ~30 min (`wait-run.py --timeout`, default 1800s) → hard-stop with one-line reason.
-5. Pending CI is **wait**, not FAIL.
+1. Poll via s-ci `pre-merge-status` until pipeline/checks leave the pending set. On GitHub, prefer the blocking `gh run watch <RUN_ID> --exit-status` ([s-gh/refs/cli.md](../../s-gh/refs/cli.md)) over a manual sleep/backoff loop — it is the allowlisted wait primitive precisely because ad hoc short-sleep polling is disallowed for agents.
+2. Backoff ~30–60s between polls when no blocking watch command exists for the forge.
+3. Wall timeout default ~30 min → hard-stop with one-line reason.
+4. Pending CI is **wait**, not FAIL.
+5. **Self-retrigger:** writing and pushing *this stage's own* `{NNNN}(-{step}).pr-validate.md` report (or any cursor-only commit) is itself a new commit. On repos whose CI listens to `synchronize`, that push starts a **new** run — poll/watch that run too before Done-when, not just the run that justified writing the report.
 
 ## Verdict / fix loop
 
@@ -39,7 +39,7 @@ Do **not** invent `gh`/`glab` flags in builder. Follow `refs/ci/fix/pipeline-fix
 |---------|--------|
 | **PASS** | `verdict == ready` **or** pipeline/checks success with no blocking security/quality blockers per pre-merge envelope |
 | **FAIL → Sonar / quality** | Hand off **`/s-ci --fix --sonar`**; after remediations → s-ci update/push tip → re-enter wait |
-| **FAIL → other jobs** | `/s-ci --fix <run URL>` → s-ci update/push tip → re-enter wait |
+| **FAIL → other jobs** | `debug-pipeline` → ad-hoc code/test fix in working tree → s-ci update/push tip → re-enter wait |
 | **Unrecoverable** (non-Sonar) | Hard-stop with one-line reason |
 
 **Epoch cap:** `epoch_cap: 5` (same as review). Each push→re-poll cycle counts one epoch. Hitting the cap without PASS → hard-stop.
@@ -86,12 +86,12 @@ Mid-flight cursors without `pr_validate` / missing `step_pr_validate_done`: trea
 
 - Report written with overall **PASS**.
 - Tip still includes prior validate sidecars (re-push after fixes if dirty).
-- **While the PR is still open:** this stage's own report + cursor flip (`step_pr_validate_done: true`) committed and pushed onto that PR's tip via s-ci — this push is pr-validate's closing act; it is what makes the PR merge-ready, not paperwork left for later.
+- The commit that persisted **this** report + cursor frontmatter was pushed to the open tip, and — if that specific push triggered a new CI run — that run also reached a terminal **PASS**. A poll taken *before* this report-commit was pushed is not evidence for the tip that now exists.
 - `step_pr_validate_done: true` when step-scoped.
 
-## Premature merge
+## Anti-trigger: report-push retrigger
 
-If pr-validate is entered and finds the PR **already merged/closed** — meaning the push above never happened before the PR closed — this is a **process anomaly**, not routine [task-validate.md](task-validate.md) carry-to-next (that fallback is scoped to step-/task-validate reports on a not-yet-opened tip, not this stage's own report on a tip that closed out from under it). Announce the anomaly in chat, still evaluate CI evidence retroactively (forge checks on the merged PR) for PASS/FAIL, then hand off to **s-ci** for a minimal docs-only commit scoped to this step's report + cursor flip alone (direct push to the base branch when allowed; else the smallest possible follow-up PR). Do **not** defer that commit into the next step's feature branch or ship — this step closes its own paperwork.
+Do **not** treat `gh pr view --json mergeable` (or any other cached merge-state field) as evidence of CI conclusion for the latest push — `mergeable` reflects diff conflicts, not check/pipeline status. Before declaring `scope: step` / `task` / `slice` closed, re-resolve pipeline/checks (`pre-merge-status`, or the forge run list) keyed to the **current** HEAD SHA, not the SHA that was true when an earlier poll passed.
 
 ## Hard-stops
 
@@ -102,9 +102,7 @@ If pr-validate is entered and finds the PR **already merged/closed** — meaning
 
 ## Isolation-cell ownership
 
-Under **task run** ([task-run.md](task-run.md)): **pr-validate runs in a phase Task** ([executors/phase.md](executors/phase.md), `phase: pr_validate`). Parent spawns after task-validate PASS + forge landing push; parent does **not** inline CI wait/fix logs. Validate phase `ok` does **not** imply CI green. After post-ship re-validate+commit, if open tip → spawn pr-validate phase Task before scope stop / next task.
-
-**Step-mode** (`--step`, mid-flight step granularity): parent-inline pr-validate unchanged ([slice-pipeline.md](slice-pipeline.md)).
+Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)): **parent owns** pr-validation (with ship / post-`needs_ship` re-validate). Executor `ok` does **not** imply CI green. After clean `ok` or post-ship re-validate+commit, if open tip → parent pr-validate before next spawn / task-validate.
 
 ## Out of scope
 

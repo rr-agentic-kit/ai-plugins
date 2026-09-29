@@ -19,7 +19,7 @@ Resolve under **`artifact_root`** when `payload.feature.artifact_root` is set; o
 |-------|--------|
 | Task artifact | `{artifact_root}/{NNNN}.md` |
 | Goal / Obligations / Verify | Task body (task-validate) or current step plan Goal / **Verify hooks** checkboxes (step-validate) |
-| Ship block | Current `{NNNN}-{step}.plan.md` **Ship** (step-validate); any step with pending `ship_after: task_validate` (task-validate); task plan `{NNNN}.plan.md` **Ship** (task run) |
+| Ship block | Current `{NNNN}-{step}.plan.md` **Ship** (step-validate); any step with pending `ship_after: task_validate` (task-validate) |
 | Evidence | Diffs, test results, step notes from build/refactor/review; forge probe when shippable |
 
 ## Validation plan (derive checklist)
@@ -30,7 +30,6 @@ Build the report’s **Validation plan** from:
 |-------|--------------|
 | **step-validate** | Plan **Verify hooks** (`- [ ]` items) + Goal of step + Obligations (if cited for the step) + **Forge / PR** when shippable + **Ship intent** when `never` |
 | **task-validate** | Task **Verify / done** checkboxes + Goal + Obligations + Open risks / Non-goals gates + **Forge / PR** for any pending `ship_after: task_validate` + **Ship intent** review when `never` |
-| **task-validate (task run)** | Task plan **Verify hooks** + all build-unit **unit hooks** + Goal + Obligations + **Forge / PR** when task plan `ship_after: task_validate` + **Ship intent** when `never` |
 
 Do **not** invent criteria absent from plan/task. Each plan/task checkbox becomes one report row.
 
@@ -103,18 +102,17 @@ Validate writes the report **after** the forge-miss → **ship** → re-validate
 |----------------|------------|
 | **step-validate** | Current step plan `Ship.branch` when shippable; else `active_ship_branch` from `task-summary.md` |
 | **task-validate** | Any pending `ship_after: task_validate` plan’s `Ship.branch`; **else** (all steps used `step_validate` / `never`) → **last open step Ship PR** = `active_ship_branch` or the latest still-open PR whose head matches a step `Ship.branch` in this task |
-| **task-validate (task run)** | Task plan `Ship.branch` only — single forge tip for the task |
 
 | Situation | Required action before advancing `step_index` / next task / declaring `scope: step\|task` complete |
 |-----------|-----------------------------------------------------------|
-| Open PR/MR whose head matches tip resolution above | Hand off **s-ci** update/push so the validate sidecar(s) written this stage, flipped Verify checkboxes, and cursor frontmatter are on that tip. **Step-mode final task-step:** tip **must** receive **both** `{NNNN}-{step}.validate.md` (last step) **and** `{NNNN}.task-validate.md` (+ cursor) before scope stop — push in one s-ci handoff when both are dirty. **Task run:** tip **must** receive `{NNNN}.task-validate.md` only (no per-step validate sidecar requirement). |
+| Open PR/MR whose head matches tip resolution above | Hand off **s-ci** update/push so the validate sidecar(s) written this stage, flipped Verify checkboxes, and cursor frontmatter are on that tip. **Final task-step / task-validate:** tip **must** receive **both** `{NNNN}-{step}.validate.md` (last step) **and** `{NNNN}.task-validate.md` (+ cursor) before scope stop — push in one s-ci handoff when both are dirty. **This push is itself a new commit** — on repos where CI listens to `synchronize`, it can start a new run; that run must also reach PASS (via [pr-validate.md](pr-validate.md)) before the scope boundary is declared closed, not just the run that justified writing the report. |
 | No open PR (e.g. already merged) and those paths are dirty/uncommitted | **Carry-to-next:** leave them dirty (or note them); next [feature-branch.md](feature-branch.md) ensure **must** carry them onto the new `feat/…` branch; next **ship** **must** include them in the s-ci commit set. Do **not** invent a dedicated PR solely for validate docs |
 
-**Probe (done-when):** tip contains the required sidecar(s) for this stage **or** carry-to-next was applied and announced. **Step-mode** last-step / `scope: step` or `task`: tip (or carry set) includes `{NNNN}.task-validate.md` **and** the final `{NNNN}-{step}.validate.md`. **Task run:** tip (or carry set) includes `{NNNN}.task-validate.md` only.
+**Probe (done-when):** tip contains the required sidecar(s) for this stage **or** carry-to-next was applied and announced, **and** the CI run triggered by that sidecar-landing push (if any) reached a terminal PASS. For last-step / task close under `scope: step` or `task`: tip (or carry set) includes `{NNNN}.task-validate.md` **and** the final `{NNNN}-{step}.validate.md`.
 
-**Stop-rule:** Do **not** treat shippable step/task-validate as closed (do **not** advance cursor / stop `--step`/`--task`) while the validate sidecar(s) (+ matching Verify checkbox flips) are uncommitted **and** absent from the open PR tip **and** carry-to-next was not applied.
+**Stop-rule:** Do **not** treat shippable step/task-validate as closed (do **not** advance cursor / stop `--step`/`--task`) while the validate sidecar(s) (+ matching Verify checkbox flips) are uncommitted **and** absent from the open PR tip **and** carry-to-next was not applied. Also do **not** close while a CI run triggered by the sidecar-landing push itself is still pending or unresolved — re-check `pre-merge-status` (or the forge run list) against the **current** HEAD SHA before declaring PASS-complete; a poll taken before that push is not evidence for the tip that now exists.
 
-**Anti-trigger:** Do **not** claim PASS-complete from chat alone when forge tip lacks the validate sidecar. Do **not** skip task-validate forge landing because no step had `ship_after: task_validate` — use tip resolution above.
+**Anti-trigger:** Do **not** claim PASS-complete from chat alone when forge tip lacks the validate sidecar. Do **not** skip task-validate forge landing because no step had `ship_after: task_validate` — use tip resolution above. Do **not** treat a cached/stale merge-state field (e.g. `gh pr view --json mergeable`) as proof the sidecar-landing push's own CI run is clean — confirm via `pre-merge-status`.
 
 Chat: announce the persisted path (`…validate.md` or `…task-validate.md`) **and** whether landing was **pushed** or **carry-to-next**.
 
@@ -122,13 +120,13 @@ Chat: announce the persisted path (`…validate.md` or `…task-validate.md`) **
 
 ### Isolation-cell exception (`auto` × `task` \| `slice`)
 
-**SoT for the dirty-porcelain / carry-to-next isolation exception** — [task-run.md](task-run.md) Dirty-tree gate, ship.md, and routing.md point here.
+**SoT for the dirty-porcelain / carry-to-next isolation exception** — slice-pipeline.md Dirty-tree gate, ship.md, and routing.md point here.
 
-Under **task run** ([task-run.md](task-run.md)):
+Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)):
 
-- **Dirty porcelain is a hard-stop** — parent must not advance / spawn the next phase Task while `git status --porcelain` is non-empty. Carry-to-next does **not** waive this gate in this cell (other drive×scope cells keep carry-to-next).
-- **Parent owns** ship on `needs_ship` from validate phase; re-runs task-validate **inline** after ship. **pr-validate** runs in a **phase Task** when an open tip was landed — not parent-inline.
-- Validate phase executor may return `needs_ship` with a committed forge-miss report; forge POST stays in parent via [ship.md](ship.md).
+- **Dirty porcelain is a hard-stop** — parent must not advance / spawn the next step Task while `git status --porcelain` is non-empty. Carry-to-next does **not** waive this gate in this cell (other drive×scope cells keep carry-to-next).
+- **Parent owns** task-validate (and post-`needs_ship` step-validate re-run) **and pr-validate** when an open tip was landed. After parent ship + inline re-validate, parent **commits** cursor/validate sidecars so the dirty-tree gate can PASS before the next spawn.
+- Executor-owned step-validate may return `needs_ship` with a committed forge-miss report; forge POST stays in parent via [ship.md](ship.md).
 
 ## Out of scope
 

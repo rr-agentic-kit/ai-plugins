@@ -1,40 +1,42 @@
-# s-gh
+# s-ci / GitHub
 
-GitHub apply skill — peer entry with **s-ci** / **s-glab**. Direct `/s-gh` when forge is GitHub; or loaded by **s-ci** after `detect-remote`. Runtime: [SKILL.md](SKILL.md).
+GitHub nested skill. Loaded by **s-ci** only after `detect-remote` returns `github`. Not plugin-listed. Runtime: [SKILL.md](SKILL.md).
 
 ## Why
 
-GitHub-only `gh`/MCP and Actions patterns live here; shared ship/fix policy lives in `refs/ci/`.
+Keep GitHub-only `gh`/MCP and Actions patterns out of the forge-agnostic root while still sharing the same `s-ci` CLI command names.
 
 ## What
 
-Routes PR upsert, Actions debug, bounded run wait (`scripts/wait-run.py`), review threads, pipeline fix apply rows, Sonar fix, security/quality reports, and pre-merge checks.
+Routes PR upsert (create if missing, update if exists), Actions debug, inline review comments, **open review-thread list/reply** (`scripts/open-review-threads.sh`), current-PR thread fixes (triage + edit + reply by thread `id`), security/quality reports, and pre-merge checks through **gh** or GitHub MCP.
 
-**Out of scope:** GitLab, local-only git, publish/deploy (siblings), inventing unlisted CLI.
+**Out of scope:** GitLab/`glab`, local-only git, publish/deploy mechanics (siblings), inventing `s-ci` subcommands.
 
 ## When
 
 ### Use when
 
-- GitHub remote and PR/issue/Actions/review/fix/ship task
-- Same invoke shapes as **s-ci** (ship routes, `--draft`, `--fix`, `--fix --sonar`, `--pull-dependabot`)
+- Parent s-ci selected GitHub and the task is PR, Actions, or review work
 
 ### Avoid when
 
-- GitLab → **s-glab**; forge unknown → **s-ci**; local git → **s-git**
+- GitLab remotes → sibling `gitlab`
+- Local git without a PR → `s-git`
+- Pages/releases/packages → sibling `publish`; Helm/K8s/Argo → sibling `deployment`
 
 ## Constraints
 
-- **Policy:** `refs/ci/`
-- **CLI:** parent `skills/s-ci/scripts/`, [SCRIPTS-SPEC.md](../s-ci/SCRIPTS-SPEC.md)
-- Inline comments: [refs/inline-comments.md](refs/inline-comments.md)
+- `disable-model-invocation` — load by path from parent only
+- Do not invent `gh` flags or `s-ci` subcommands — parent `SCRIPTS-SPEC.md`
+- Inline comment rules: [refs/inline-comments.md](refs/inline-comments.md)
 
 ## Notes
 
 ```
-s-gh/
+github/
 ├── SKILL.md
-├── scripts/   # wait-run.py, open-review-threads.sh
-└── refs/      # cli, inline-comments, mcp, workflow-rules
-refs/ci/       # shared forge-agnostic policy
+├── README.md
+├── scripts/
+│   └── open-review-threads.sh
+└── refs/   # cli, inline-comments, mcp, workflow-rules
 ```

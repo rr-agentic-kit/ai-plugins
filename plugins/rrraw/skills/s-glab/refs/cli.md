@@ -4,7 +4,7 @@ Do not copy `glab --help` into context. Run `glab <command> --help` for flags.
 
 ## MR title and description
 
-Shared policy `refs/ci/pr-mr-templates.md`. Default create flags: nested SKILL **Default MR ship**.
+Parent skill `refs/pr-mr-templates.md`. Default create flags: nested SKILL **Default MR ship**.
 
 ```bash
 glab mr create --draft --target-branch BASE --fill --yes --squash-before-merge --remove-source-branch -t "..." -d "..."

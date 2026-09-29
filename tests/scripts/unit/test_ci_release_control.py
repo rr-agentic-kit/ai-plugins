@@ -42,23 +42,23 @@ def test_open_sets_rc1(mini_repo, monkeypatch, capsys):
     assert crc.main(["open", "--branch", "release/0.1.0", "--repo", str(root)]) == 0
 
     out = capsys.readouterr().out
-    assert "version=0.1.0-rc1" in out
+    assert "version=0.1.0-rc-1" in out
     assert calls == [["lock"]]
 
 
 def test_rc_ticks_prerelease(mini_repo, monkeypatch, capsys):
-    root = mini_repo(pyproject_version="0.1.0-rc1", plugins={"foo": "0.1.0-rc1"})
+    root = mini_repo(pyproject_version="0.1.0-rc-1", plugins={"foo": "0.1.0-rc-1"})
     monkeypatch.setattr(crc, "REPO_ROOT", root)
     monkeypatch.setattr(crc.bump, "REPO_ROOT", root)
     monkeypatch.setattr(crc.bump, "run_uv", lambda *a, **k: None)
 
     assert crc.main(["rc", "--repo", str(root)]) == 0
 
-    assert "version=0.1.0-rc2" in capsys.readouterr().out
+    assert "version=0.1.0-rc-2" in capsys.readouterr().out
 
 
 def test_promote_emits_next_branch(mini_repo, monkeypatch, capsys):
-    root = mini_repo(pyproject_version="0.1.0-rc3", plugins={"foo": "0.1.0-rc3"})
+    root = mini_repo(pyproject_version="0.1.0-rc-3", plugins={"foo": "0.1.0-rc-3"})
     monkeypatch.setattr(crc, "REPO_ROOT", root)
     monkeypatch.setattr(crc.bump, "REPO_ROOT", root)
     monkeypatch.setattr(
@@ -76,7 +76,7 @@ def test_promote_emits_next_branch(mini_repo, monkeypatch, capsys):
 
 
 def test_promote_rejects_branch_version_mismatch(mini_repo, monkeypatch):
-    root = mini_repo(pyproject_version="0.1.0-rc1", plugins={"foo": "0.1.0-rc1"})
+    root = mini_repo(pyproject_version="0.1.0-rc-1", plugins={"foo": "0.1.0-rc-1"})
     monkeypatch.setattr(crc.bump, "run_bump", lambda *_a, **_k: "0.9.0")
 
     assert crc.main(["promote", "--branch", "release/0.1.0", "--repo", str(root)]) == 1

@@ -27,7 +27,6 @@
 - [ ] Tool emptiness ≠ skip
 - [ ] Empty array valid only after a real Phase 8 pass with no violations
 - [ ] Do not invent meters/spans/new log sites as `fix`
-- [ ] TypeScript: flag `x == null` / `x === undefined` / `x &&` before property access as `language_ref` → optional chain (`?.`) per `typescript.md` Prefer/Avoid (S6582)
 
 ## Output shape
 

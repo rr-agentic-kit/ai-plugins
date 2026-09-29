@@ -7,18 +7,12 @@ Honor collector **`disposition`** on every item. Complete one full pass over all
 ## God methods (`god_method`, Phase 2)
 
 - Target: ≤20–30 lines per method; extract one logical responsibility per new function.
-- **`fix`** — extract until the method meets the line/responsibility target; **do not** stop after one extraction when more remain.
-- **`clarify`** — ownership note only when extraction boundary is ambiguous but behavior-invariant; else leave for human.
-- **`escalate_human`** — published API surface, cross-module contract, or uncertain seam — **no** silent extract.
-- **Done when:** method ≤ target **or** remaining work is `clarify` / `escalate_human` / `no_progress`.
+- **Do not** stop after one extraction — continue until the method meets the target.
 
 ## God classes / large modules (`god_class`, Phase 3)
 
 - Split by responsibility; use facades and clear module boundaries where the rubric applies.
-- **`fix`** — continue structural splits until findings are **resolved** (not a single partial move).
-- **`clarify`** — minimal ownership note when split boundary is unclear but behavior-invariant.
-- **`escalate_human`** — SPI / package export / framework registration / multi-artifact move — **no** silent split.
-- **Done when:** structural findings resolved **or** remaining items are `clarify` / `escalate_human` / `no_progress`.
+- **Continue** until structural findings are **resolved**, not partially.
 
 ## Cohesion (`mixed_responsibility`, Phase 4)
 
@@ -44,10 +38,10 @@ Honor collector **`disposition`** on every item. Complete one full pass over all
 
 ## Language / framework (`language_ref`, Phase 8)
 
-- **Cite:** Apply Prefer/Avoid and MUST from loaded stack refs (cite **`CPNNN`** or ref **§heading**), including assertion Prefer/Avoid (e.g. TypeScript S5906) and optional-chain Prefer/Avoid (TypeScript S6582: `x === undefined \|\| x.prop`, `x == null \|\| x.prop`, `x && x.prop` → `x?.prop`) when execute rewrites those violations or edits `expect(...)` / assertions.
+- Apply Prefer/Avoid and MUST from loaded stack refs (cite **`CPNNN`** or ref **§heading**), including assertion Prefer/Avoid (e.g. TypeScript S5906 most-specific matchers) when execute rewrites Prefer/Avoid violations or edits `expect(...)` / assertions.
 - **`fix`** — behavior-invariant cleanup only (e.g. JSpecify instead of Jakarta-as-nullness; drop duplicate internal null/blank guards when boundary BV already covers).
 - **`clarify`** / **`escalate_human`** — introducing `@Valid` / new BV where requests were previously accepted; flipping service `@Validated`; any change that would alter HTTP/status or thrown validation errors — **do not** apply.
-- **Hard stop:** If a listed **`fix`** would still change observable I/O — treat as semantic conflict: **stop** and escalate. Keep examples off this stop line.
+- If a listed **`fix`** would still change observable I/O — treat as semantic conflict: **stop** and escalate.
 
 ## Observability (`observability`, Phase 8, CP028–CP030)
 
@@ -58,7 +52,4 @@ Honor collector **`disposition`** on every item. Complete one full pass over all
 
 ## Other violations
 
-Fix per phase/order in the manifest (magic numbers, nesting, DRY, naming).
-
-- **MUST — Sonar test-path skip:** Sonar **remediation** rows on **test-only** paths: skip (Sonar-only loop → **s-ci**).
-- **MUST — assertion non-waiver:** That skip does **not** waive Phase 8 Prefer/Avoid assertion hygiene when execute already touches assertions.
+Fix per phase/order in the manifest (magic numbers, nesting, DRY, naming). Sonar **remediation** rows on **test-only** paths: skip (Sonar-only loop → **s-ci**). That skip does **not** waive Phase 8 Prefer/Avoid assertion hygiene when execute already touches assertions.

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import subprocess
 import sys
@@ -45,17 +44,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         choices=KINDS,
         help=(
             "Increment kind. rc starts or ticks a local prerelease "
-            "(0.0.4 → 0.0.4-rc1, 0.0.2-beta-4 → 0.0.2-beta-5) so plugin "
-            "managers refresh, then runs install_claude_local unless skipped. "
+            "(0.0.4 → 0.0.4-rc-1, 0.0.2-beta-4 → 0.0.2-beta-5) so plugin "
+            "managers refresh, then runs install_claude_local. "
             "stable graduates a prerelease (0.0.2-beta-4 → 0.0.2)."
-        ),
-    )
-    parser.add_argument(
-        "--no-install",
-        action="store_true",
-        help=(
-            "Skip install_claude_local after rc. Also skipped when "
-            "BUMP_SKIP_INSTALL=1 is set."
         ),
     )
     return parser.parse_args(argv)
@@ -74,13 +65,11 @@ def pep440_max(versions: dict[str, str]) -> Version:
 def increment_local(version: Version) -> str:
     """Start or tick a prerelease so Claude/Cursor cache a new version string."""
     if version.pre is None:
-        return f"{version.base_version}-rc1"
+        return f"{version.base_version}-rc-1"
     letter, num = version.pre
     if not isinstance(num, int):
         raise SystemExit(f"cannot increment prerelease {version.pre}")
     name = _PRE_LABEL.get(str(letter), str(letter))
-    if name == "rc":
-        return f"{version.base_version}-rc{num + 1}"
     return f"{version.base_version}-{name}-{num + 1}"
 
 
@@ -189,10 +178,6 @@ def set_lockstep_version(version: str, repo_root: Path) -> str:
     return version
 
 
-def should_skip_install(args: argparse.Namespace) -> bool:
-    return args.no_install or os.environ.get("BUMP_SKIP_INSTALL") == "1"
-
-
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
@@ -200,7 +185,7 @@ def main(argv: list[str] | None = None) -> int:
     except (json.JSONDecodeError, ValueError) as exc:
         print(f"bump_plugins_version: {exc}", file=sys.stderr)
         return 1
-    if args.kind == "rc" and not should_skip_install(args):
+    if args.kind == "rc":
         return sync_claude_local(REPO_ROOT)
     return 0
 

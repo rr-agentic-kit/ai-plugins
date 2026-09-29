@@ -39,4 +39,4 @@ Choose a **static or registry** destination and the CI job pattern that uploads 
 ## Invariants
 
 - Auth, tag immutability, and token logging: [refs/ci-publish.md](refs/ci-publish.md) + [refs/destinations.md](refs/destinations.md) — do not restate here.
-- Release notes below `---` in the PR/MR (`refs/ci/pr-mr-templates.md`) when CI parses them.
+- Release notes below `---` in the PR/MR (parent `refs/pr-mr-templates.md`) when CI parses them.

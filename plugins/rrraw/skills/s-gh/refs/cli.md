@@ -13,6 +13,7 @@ gh pr review --approve
 gh pr review --request-changes --body "..."
 gh run list --branch "$BRANCH" --limit 1
 gh run view RUN_ID --log-failed
+gh run watch RUN_ID --exit-status
 gh run rerun RUN_ID --failed
 gh issue create --repo OWNER/REPO --title "..." --body "..."
 gh issue create --title "..." --body-file body.md
@@ -20,20 +21,7 @@ gh issue create --title "..." --body-file body.md
 
 Default ship create always includes `--draft` and `--base` from `mr-add-preflight` `result.base_branch`. Prefer `gh` over raw `curl` to `api.github.com` when `gh` is authenticated. JSON: `gh … --json fields`. Use `--repo OWNER/REPO` when forge target ≠ cwd origin.
 
-## Wait for Actions run (`scripts/wait-run.py`)
-
-Plugin-relative path: `skills/s-gh/scripts/wait-run.py`. Requires `gh`. Polls `gh run view` without a shell; suppresses intermediate pending output.
-
-```bash
-wait-run.py RUN_ID [--repo OWNER/REPO] [--interval SEC] [--timeout SEC]
-```
-
-- `RUN_ID` — positional or `RUN_ID` env (workflow run database id).
-- `--repo` — forward to `gh run view` when forge target ≠ cwd origin.
-- `--interval` — poll seconds (**5–120**, default **30**).
-- `--timeout` — wall seconds (**60–7200**, default **1800**).
-
-Stdout: one JSON object on completion, e.g. `{"status":"completed","conclusion":"success"}`. Exit **0** when the run completes (any conclusion, including `failure`). Exit **1** timeout; **2** `gh` failure; **3** malformed JSON. Do **not** re-create inline `gh run view | python -c` poll chains — use this helper.
+`gh run watch RUN_ID --exit-status` blocks until a run finishes and exits non-zero on failure — the sanctioned wait for a run in progress ([pr-validate.md](../../rr-builder/refs/pr-validate.md) Wait). Prefer it over a manual sleep/re-poll loop.
 
 ## Open review threads (`scripts/open-review-threads.sh`)
 
