@@ -1,61 +1,47 @@
 ---
 name: s-glab
 disable-model-invocation: true
-description: /s-glab — GitLab MR, issue, pipeline; ship routes (--create-mr / …), --fix [<url|id>], --fix --sonar; glab/MCP apply.
+description: /s-glab — GitLab MR, issue, pipeline, glab/MCP, and .gitlab-ci.yml; also loaded by s-ci after detect-remote.
 ---
 
-# s-glab
+# s-ci / GitLab
 
-**Human overview:** [README.md](README.md)
-
-**Shared policy:** `refs/ci/` — shapes, templates, fix/sonar rules.
-
-**CLI:** `uv run --project skills/s-ci/scripts rr-ci <command>` — `skills/s-ci/scripts/README.md`, `skills/s-ci/SCRIPTS-SPEC.md`.
+Loaded only from parent **s-ci** `SKILL.md` when `result.forge` is `gitlab`.
 
 ## Purpose
 
-GitLab **apply layer**: MR/issue/pipeline/review through **glab** (or MCP). Load `refs/ci/**` for policy; this skill owns task rows, [refs/cli.md](refs/cli.md), and forge refs.
+Route GitLab MR, **issue**, pipeline, discussion, and CI report work through **glab** (if installed) or **GitLab MCP**. Generic PR/MR title/description rules stay in parent `refs/pr-mr-templates.md`.
 
 ## When to use
 
-- GitLab remote (direct `/s-glab` or delegated from **s-ci**)
-- Open or update an MR (including commit/push): `--create-mr` / `--update-mr` / `--add-mr` / `-pr-mr` aliases — all upsert
-- Optional `--draft` with ship — disk title/body gate per `refs/ci/task-shapes.md`
-- Draft/create GitLab issue (including cross-repo path)
-- Pipeline failure, CI reports, review submit
-- **`--fix [<job URL|MR iid>]`** — pipeline fix per `refs/ci/fix/pipeline-fix.md`
-- **`--fix --sonar`** — per `refs/ci/sonar-fix.md`
+Parent **s-ci** already selected GitLab. Do not load for GitHub remotes.
 
 ## When not to use
 
-- GitHub → **s-gh**
-- Local git without MR → **s-git**
-- Publish/deploy → **s-publish** / **s-deploy**
-- **`--pull-dependabot`** — GitHub only (**s-gh**)
-- Forge unknown → **s-ci**
+- GitHub PRs / Actions → sibling **github** skill
+- Local git without an MR → **s-git**
+- Helm/K8s/Argo deploy mechanics → sibling **deployment** skill
+- Pages/registry publish → sibling **publish** skill
 
 ## Procedure
 
-TodoWrite: `refs/ci/task-shapes.md`. Skip **s-ci** forge step when entered direct and origin is GitLab.
-
-1. **root** — `REPO_ROOT` via `skills/s-git/refs/repo-root.md`. Safety ref when history rewrite / discard possible.
-2. **title** — **MR ship only.** Load `refs/ci/pr-mr-templates.md`. Skip for issue, `--fix`, `--fix --sonar`.
-3. **load** — Read [refs/cli.md](refs/cli.md); run `mr-add-preflight` when MR ship. Co-load `refs/ci/**` rows per task-shape.
-4. **execute** — Matching task row below. Stop on first hard failure.
+1. **Tool** — `which glab`; if missing, [refs/mcp.md](refs/mcp.md). Done: glab or MCP.
+2. **CLI** — From target repo: `uv run --project <rrraw-plugin>/skills/s-ci/scripts rr-ci <command>` (parent `scripts/README.md`). Done: envelope parsed. For issue create, use allowlisted `glab` in [refs/cli.md](refs/cli.md) — not an `rr-ci` subcommand.
+3. **Forge target** — If parent set forge target `owner/repo` (or GitLab path), pass `--repo` on issue/MR calls that must hit that project. Default: cwd origin from `detect-remote`.
+4. **Task row** — Read only the matching ref:
 
 | Task | Read / run |
 |------|------------|
 | glab syntax | [refs/cli.md](refs/cli.md) |
 | **Issue create** | Steps **Issue create** below |
 | **MR ship** | `mr-add-preflight` then **Default MR ship** below |
-| **Pipeline fix** (`--fix`) | `refs/ci/fix/pipeline-fix.md` + `debug-pipeline`; verify via `pre-merge-status`, `glab ci retry` |
 | Inline MR threads | `mr-ci-review-preflight` then optional `mr-inline-anchors`, then [refs/inline-comments.md](refs/inline-comments.md) |
-| Thread disposition / reply | `refs/ci/review-comment-triage.md` |
+| Thread disposition / reply | Parent `refs/review-comment-triage.md` (Read from s-ci root; do not invent path) |
 | Resolve open MR | [refs/mr-resolve.md](refs/mr-resolve.md) |
-| Failed pipeline | `debug-pipeline` `[MR_IID\|PIPELINE_OR_JOB_URL]` |
-| CI code-quality | `code-quality-reports` |
-| **Sonar fix** (`--fix --sonar`) | `refs/ci/sonar-fix.md` + `sonar-list-issues --lean` |
-| Pipeline security | `pipeline-security-reports` |
+| Failed pipeline | `debug-pipeline` `[MR_IID]` — branch on `result.status`, `result.error_lines`, `result.failed_job_id` |
+| CI code-quality | `code-quality-reports` — `result.reports.count`, `result.reports.nodes` |
+| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues --lean` (default: open MR for current branch) |
+| Pipeline security | `pipeline-security-reports` — `result.merge_blocked`, `result.findings.*` |
 | Bulk resolve threads | `mr-skip-threads` |
 | MR add preflight | `mr-add-preflight` |
 | Review instructions note | `mr-ensure-review-instructions` |
@@ -66,30 +52,34 @@ TodoWrite: `refs/ci/task-shapes.md`. Skip **s-ci** forge step when entered direc
 | Security reports when-to-use | [refs/pipeline-security-reports.md](refs/pipeline-security-reports.md) |
 | MCP fallback | [refs/mcp.md](refs/mcp.md) |
 
-**Fallback:** named `s-ci` subcommand from `skills/s-ci/SCRIPTS-SPEC.md` if listed; else stop.
+**Fallback (no matching row):** Use the named `s-ci` subcommand from parent `SCRIPTS-SPEC.md` if listed; else stop — do not invent `glab` flags or issue workflows.
+
+Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: false`, auth missing, preflight escalate).
 
 ### Issue create
 
-1. Draft title + body in chat (or body file under `.ai/ci/` if large).
-2. AskQuestion: **Create as drafted** | **Edit draft** | **Abort**. Stop on Abort.
-3. On approve: `glab issue create --repo <forge-target> -t "…" -d "…"`. Syntax: [refs/cli.md](refs/cli.md).
+1. Draft title + body in chat (or body file under `.ai/ci/` if large). Done: draft shown.
+2. AskQuestion (or prose options): **Create as drafted** | **Edit draft** | **Abort**. Stop on Abort.
+3. On approve: `glab issue create --repo <forge-target> -t "…" -d "…"` (omit `--repo` when target is cwd origin). Syntax: [refs/cli.md](refs/cli.md). Done: issue URL reported. Stop: create fails or auth missing.
 
 ### Default MR ship
 
-One upsert path for all ship routes. Title/body from step **title** (prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). After `mr-add-preflight`, branch on `result.status`:
+For `--create-mr` / `--update-mr` / `--add-mr` / `--create-pr-mr` / `--update-pr-mr` / `--add-pr-mr` / prose “create|open|update|add MR” — **one upsert path**. Title/body: parent step **title** (after skill `--draft` gate if any, prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). Pass handoff/user base as `mr-add-preflight --base <name>` when known. After `mr-add-preflight`, use `result.base_branch` on forge create/update. Branch on `result.status`:
 
-- **`exists`** — push if needed; `glab mr update` title/description/target when needed. Do **not** convert ready↔draft.
-- **`ready_create`** — `glab mr create --draft --target-branch <base_branch> …`. Always forge `--draft` + `--target-branch` from preflight.
-- Other preflight statuses → stop or escalate per envelope.
+- **`exists`** — push commits if needed; `glab mr update` with title/description from disk when they should change; `glab mr update --target-branch <base_branch>` when the MR target differs from `result.base_branch`. Do **not** convert ready↔draft. Done: existing MR URL (`result.mr_url`). Never open a second MR for the branch.
+- **`ready_create`** — `glab mr create --draft --target-branch <base_branch> --fill --yes --squash-before-merge --remove-source-branch` plus title/description. Always pass forge `--draft` and `--target-branch` from preflight. Done: draft MR created. Stop: create fails.
+- Other preflight statuses (`error`, `no_commits`, `escalate_*`, `needs_branch_from_default`) → stop or escalate per envelope; do not invent a create.
+
+Skill `--draft` is the parent human title/body gate — distinct from forge `--draft` (always on create).
 
 ### Pre-merge
 
-Run `pre-merge-status` once; branch on `result.verdict` / `result.blockers`.
+When asked — run `pre-merge-status` once; branch on `result.verdict` / `result.blockers`; report one-line verdict. Do **not** invent five sequential probes. Done: report emitted. Stop: `verdict == blocked` (next action from `blockers`; `debug-pipeline` only when pipeline fails).
 
 ## Invariants
 
-- Policy in `refs/ci/**` — do not restate templates or fix rules here.
-- After pipeline fixes: commit/push allowed; retry with `glab ci retry JOB_ID`.
-- Do not invent `glab` flags — [refs/cli.md](refs/cli.md) + task rows only.
-- Inline / `new_line` rules: [refs/inline-comments.md](refs/inline-comments.md).
-- Never open a second MR for the same branch.
+- After pipeline fixes: commit/push allowed (parent s-ci); retry with `glab ci retry JOB_ID`.
+- Do not invent `s-ci` subcommands — parent `SCRIPTS-SPEC.md`.
+- Do not invent `glab` flags — only [refs/cli.md](refs/cli.md) + task rows above.
+- Inline comment / `new_line` rules: [refs/inline-comments.md](refs/inline-comments.md).
+- Create/update ship routes are aliases; never invent a second MR for the same branch.

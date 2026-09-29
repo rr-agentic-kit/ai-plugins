@@ -19,6 +19,29 @@ pre-commit:
   parallel: false
   follow: true
   jobs:
+    # Always tick rc before quality. A one-path `files:` + {files} keeps lefthook
+    # from skipping on an empty index without expanding the whole tree onto the
+    # argv ( `{all_files}` hits ARG_MAX / multi-chunk re-runs and breaks).
+    # Do NOT use stage_fixed: it only re-adds already-staged paths — bump writes
+    # version files that usually were not staged. Explicit git add is required.
+    # Stage even when Claude local sync fails after the write.
+    - name: bump-plugins-rc
+      skip:
+        - merge-commit
+      files: "printf '%s\\n' pyproject.toml"
+      run: |
+        : {files}
+        set +e
+        uv run python scripts/bump_plugins_version.py rc
+        status=$?
+        set -e
+        git add -- \
+          pyproject.toml \
+          uv.lock \
+          plugins/*/.cursor-plugin/plugin.json \
+          plugins/*/.claude-plugin/plugin.json
+        exit "$status"
+
     - name: quality
       group:
         parallel: true

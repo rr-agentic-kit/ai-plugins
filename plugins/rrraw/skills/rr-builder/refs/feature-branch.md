@@ -1,29 +1,6 @@
 # Feature branch for task-steps
 
-**Audience:** `rr-builder` orchestrate **plan** stage (before writing the step plan). Naming SoT + ensure procedure. **Task run** uses **Task-run branch** below instead of per-step `TARGET`.
-
-## Task-run branch
-
-**When:** Task run ([task-run.md](task-run.md)) at task-plan start — before writing `{NNNN}.plan.md`.
-
-**Name (SoT):**
-
-```
-feat/{NNNN}-{short-desc}
-```
-
-| Token | Meaning |
-|-------|---------|
-| `{NNNN}` | Zero-padded task id |
-| `{short-desc}` | Kebab-case from task Goal (≤6 words; no spaces) |
-
-One branch per task for all build units. Re-check is a no-op when HEAD already matches `feat/{NNNN}-{short-desc}` or acceptable Stay.
-
-**Auto tip-chain (slice):** Under `drive: auto` ∧ `scope: slice`, when advancing to the **next** task and HEAD is `feat/{prior-NNNN}-*` from a shipped/open prior task, `git checkout -b feat/{NNNN}-{short-desc}` from current HEAD without AskQuestion; default task plan `Ship.base: prior_open_pr`. Same dirty-tree carry-to-next rule as step tip-chain.
-
-**Probe** (not on main/master; not after auto tip-chain): same AskQuestion options as step ensure — Stay \| New from base \| Rename \| Abort.
-
-Record settled branch in task plan **Ship.branch** ([plan-schema.md](plan-schema.md) task plan variant).
+**Audience:** `rr-builder` orchestrate **plan** stage (before writing the step plan). Naming SoT + ensure procedure.
 
 ## Name (SoT)
 

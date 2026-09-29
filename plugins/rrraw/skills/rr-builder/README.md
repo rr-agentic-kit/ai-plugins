@@ -55,8 +55,8 @@ Defaults: orchestrate without drive/scope → `auto` × `step`. `--feature` → 
 ## Philosophy
 
 - **Orchestrate by default; feature / handoff on explicit flag** — `--feature` is a third mode (mint + `scope=task`); explicit lane never silently re-enters orchestrate; drive/scope do not mutate handoff lanes
-- **Task run (`auto` × `task`\|`slice`)** — task plan then build Task per unit → one refactor → one review Task → one task-validate → ship at task end → pr-validate Task when tip pushed; parent read-fence (no app source / CI logs); dirty-tree gate after each Task; `--isolate auto` (default) uses hybrid phase thresholds
-- **`--feature` stays parent-inline** — not in the task-run cell; still stops at task-validate
+- **Isolated step run (`auto` × `task`\|`slice`)** — one sequential `generalPurpose` Task per remaining task-step (same working tree; no worktree; never parallel); parent owns prepare / dirty-tree gate / ship / **pr-validate** / task-validate / slice-validate; executor owns plan→build→refactor→review→step-validate (`ok` ≠ CI green); dirty porcelain after a Task → hard-stop (no silent-commit; carry-to-next does not waive this cell)
+- **`--feature` stays parent-inline** — not in the isolation cell this pass; still stops at task-validate
 - **Default auto × step** — no drive/scope flags chain the current task-step to step-validate PASS + forge landing + pr-validate when tip pushed (parent-inline); stop boundaries incl. the final-step `--step` ≡ `--task` equivalence are SoT-owned by `refs/slice-pipeline.md` **Scope stop boundaries** — do not park on `task_validate` and exit; prepare-only cursor stops after prepare
 - **Validate reports land on forge** — shippable step/task-validate PASS is incomplete until the sidecars (+ Verify/cursor) are on the tip or carried to the next ship; mechanics SoT: `refs/task-validate.md` **Forge landing**
 - **PR validation after tip push** — do not advance past a landed open tip until CI is clean (or skip when never/carry-to-next); wait/fix via **s-ci**; SoT: `refs/pr-validate.md`
@@ -95,13 +95,13 @@ Nested skill / stage owns artifacts; `--feature` writes under `artifact_root` (`
 
 ### Close
 
-Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard stop, dirty-tree gate under task run, or decline). `--feature` stops at task-validate. Handoff does not auto-advance the pipeline. Shippable validate forge-miss → **ship** → **s-ci** → re-validate → forge landing push → **pr-validate**. Under task run, validate `needs_ship` → parent ship + inline re-validate + commit + pr-validate phase Task (when tip open). Slice validate PASS → **delivered** → residual **s-ci** only. Load **s-ci** also after review `--ci`.
+Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard stop, dirty-tree gate under Isolated step run, or decline). `--feature` stops at task-validate. Handoff does not auto-advance the pipeline. Shippable validate forge-miss → **ship** → **s-ci** → re-validate → forge landing push → **pr-validate**. Under Isolated step run, executor `needs_ship` → parent ship + inline re-validate + commit + pr-validate (when tip open) before the next step Task. Slice validate PASS → **delivered** → residual **s-ci** only. Load **s-ci** also after review `--ci`.
 
 ## Constraints
 
 - Explicit lane flag wins over cursor; drive/scope ignored on handoff
-- `--feature` incompatible with lane flags and with `--slice` / `--next` / `--step`; never invents `docs/rr/` in non-rr repos; never advances past task-validate; stays parent-inline (not task run)
-- Task run (`auto` × `task`\|`slice`): sequential phase Tasks only; dirty-tree gate after each return; no parallel build units; no `git worktree`; parent read-fence
+- `--feature` incompatible with lane flags and with `--slice` / `--next` / `--step`; never invents `docs/rr/` in non-rr repos; never advances past task-validate; stays parent-inline (not Isolated step run)
+- Isolated step run (`auto` × `task`\|`slice`): sequential step Tasks only; dirty-tree gate after each return; no parallel steps; no `git worktree`
 - Nested skills are not listed in `plugin.json` — parent **Read**s them
 - `--fix` and `--ci` are mutually exclusive under `--review`
 - Manual `--slice` never offers **blocked** stages as runnable
@@ -117,4 +117,4 @@ Nested lane skills intentionally fail context-engineer `static.name.path-match` 
 
 Layout: `refs/` (router + feature + pipeline + validate + plan allowlist/schema + ship + executors/templates), `s-prepare/`, `s-coder/`, `s-tester/`, `s-security/`, `s-review/`, `s-refactor/`.
 
-After task-run redesign writes: shared write gates (static → reflect → pre-ship → write); recommend post-redesign re-audit on `skills/rr-builder/SKILL.md` and `refs/pr-validate.md` (do not treat prior audit FAILs as mandatory absorb list).
+After Isolated step run / pr-validate redesign writes: shared write gates (static → reflect → pre-ship → write); recommend post-redesign re-audit on `skills/rr-builder/SKILL.md` and `refs/pr-validate.md` (do not treat prior audit FAILs as mandatory absorb list).

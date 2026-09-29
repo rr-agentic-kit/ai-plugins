@@ -32,11 +32,11 @@
 
 ### Post-PASS landing (shippable)
 
-When re-validate reaches overall **PASS** and an open PR still exists for the tip, hand off **s-ci** again to push the validate report(s) + Verify checkbox flips + cursor frontmatter **before** advancing or stopping. Full tip resolution, final-step "both sidecars" rule, and carry-to-next SoT: [task-validate.md](task-validate.md) **Forge landing** — do not restate it here. After push → **pr-validate** ([pr-validate.md](pr-validate.md)); skip when carry-to-next / `never`.
+When re-validate reaches overall **PASS** and an open PR still exists for the tip, hand off **s-ci** again to push the validate report(s) + Verify checkbox flips + cursor frontmatter **before** advancing or stopping. Full tip resolution, final-step "both sidecars" rule, and carry-to-next SoT: [task-validate.md](task-validate.md) **Forge landing** — do not restate it here. That push is itself a new commit and can start a new CI run — **always** enter **pr-validate** ([pr-validate.md](pr-validate.md)) after it and wait for that run's own PASS before advancing or stopping; skip pr-validate only when carry-to-next / `never`, never because an earlier poll already looked clean.
 
-### Task-run scope (`auto` × `task` \| `slice`, task granularity)
+### Isolation-cell exception (`auto` × `task` \| `slice`)
 
-Under **task run** ([task-run.md](task-run.md)): **ship is task-scoped only** — one ship at end of task when task plan `ship_after: task_validate` (legacy `step_validate` on step plans is treated as `task_validate`). **Ship stays in parent** on `needs_ship` from validate phase. Parent runs this stage → **s-ci**, re-runs task-validate **inline**, **commits** cursor/validate sidecars, dirty-tree gate, then spawns **pr-validate** phase Task when tip open. Dirty-porcelain SoT: [task-validate.md](task-validate.md) Isolation-cell exception.
+Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)): **ship stays in parent**. When a step executor returns `needs_ship`, parent runs this stage → **s-ci**, re-runs step-validate **inline** (assessment only), **commits** cursor/validate sidecars, then runs the dirty-tree gate before spawning the next step Task. Dirty-porcelain rules SoT: [task-validate.md](task-validate.md) Isolation-cell exception (carry-to-next does not waive the gate in this cell).
 
 ## Done-when
 

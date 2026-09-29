@@ -2,8 +2,6 @@
 
 **Audience:** `rr-builder` orchestrate **plan** stage only. Fixed Read set — do **not** dump s-coder/s-tester full Required Knowledge or language matrices.
 
-**Task run:** The task plan (`{NNNN}.plan.md`) uses this **same allowlist**, loaded **once per task** at task-plan time ([task-run.md](task-run.md)). Do not re-load the full allowlist per build unit.
-
 ## Always Read
 
 1. [feature-branch.md](feature-branch.md) — ensure `feat/{NNNN}-{step}-{short-desc}` **before** writing the plan (**first**, alone if branch may change).

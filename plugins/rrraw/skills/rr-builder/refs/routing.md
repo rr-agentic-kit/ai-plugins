@@ -73,8 +73,7 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **s-review
 - Emitting shippable **step-validate** / **task-validate** PASS without an open PR for `Ship.branch`.
 - Advancing past shippable validate with sidecars absent from tip and no carry-to-next — rules SoT: [task-validate.md](task-validate.md) Forge landing (isolation cell: dirty porcelain is always a hard-stop).
 - Advancing past a landed open tip with failing/pending CI — rules SoT: [pr-validate.md](pr-validate.md).
-- Parent-inline implement / reading app source or CI logs under **task run** (`auto` × `task|slice`) — spawn [executors/phase.md](executors/phase.md) per [task-run.md](task-run.md); parent read-fence applies.
-- Per-step review under task-run — one review Task over the full task diff ([task-run.md](task-run.md)).
+- Parent-inline implement of a task-step under **Isolated step run** (`auto` × `task|slice`) — spawn [executors/step.md](executors/step.md) instead ([slice-pipeline.md](slice-pipeline.md)).
 - Requiring Forge/PR when `ship_after: never` was confirmed (non-shippable).
 - Skipping planned **ship** when shippable validate fails the Forge/PR gate (`ship_after` is not `never`).
 - Shipping only *after* validate PASS when the forge gate is what blocks PASS (wrong order).
@@ -82,6 +81,6 @@ Review orchestration (brief, chunk, Challenge, merge report) stays in **s-review
 - Using **rr-builder** for exec-summary / PRD authoring → **rr-planner**.
 - **`Task`** for refactor fix worker (fix is inline only per `skills/s-refactor/refs/inline-fix.md`).
 
-### Nested Task (task run)
+### Nested Task (isolation cell)
 
-Under task run ([task-run.md](task-run.md)), the **phase executor** is the parent session for nested lane skills. Leaf Tasks those skills already document (`refactor-collector`, tester agents, s-test-endless leaves, etc.) stay allowed. Forbidden from the phase executor: re-invoke **rr-builder**; spawn Tasks for a different phase; run `--add-endless-test`. Parent must not Read review reports or CI logs (read-fence).
+Under Isolated step run, the **step executor** is the parent session for nested lane skills. Leaf Tasks those skills already document (`refactor-collector`, tester agents, s-test-endless leaves, etc.) stay allowed. Forbidden from the step executor: re-invoke **rr-builder**; spawn sibling step Tasks; run `--add-endless-test`.

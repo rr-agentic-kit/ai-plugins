@@ -55,7 +55,6 @@ feature:
 |------|-------|--------|
 | `--auto` \| `--manual` | `payload.drive` | `auto` \| `manual` |
 | `--next` \| `--step` \| `--task` \| `--slice` | `payload.scope` | `next` \| `step` \| `task` \| `slice` |
-| `--isolate all` \| `--isolate auto` | `payload.isolate` | `all` \| `auto` (default `auto` when omitted) |
 
 **Defaults:**
 
@@ -73,21 +72,11 @@ Conflicting pairs (`--auto` + `--manual`, or any two of `--next` \| `--step` \| 
 
 Reject retired `--full` with one-line: `use --slice` (no alias).
 
-### Granularity lock (`pipeline_granularity`)
-
-| Rule | Detail |
-|------|--------|
-| Default | New tasks under `auto` × `task` \| `slice` use `pipeline_granularity: task` (set on first `{NNNN}.plan.md` write) |
-| Lock | Once `task` or `step` is written, granularity is **immutable** for that task until the task completes |
-| Mid-flight | `pipeline_granularity: step` tasks finish the in-flight step under step-mode rules, then switch to task plan for **remaining** steps |
-| `--isolate all` | Every task-run phase (plan, refactor, task-validate) spawns a phase Task regardless of thresholds |
-| `--isolate auto` | Hybrid thresholds per [task-run.md](task-run.md) Isolation policy |
-
-**Drive × scope behavior** (execution SoT: [slice-pipeline.md](slice-pipeline.md) + [task-run.md](task-run.md)):
+**Drive × scope behavior** (execution SoT: [slice-pipeline.md](slice-pipeline.md)):
 
 | | `--next` | `--step` | `--task` | `--slice` |
 |---|----------|----------|----------|-----------|
-| **`--auto`** | Run cursor-next stage; stop when its done-when met | Chain until step boundary: non-final → step-validate PASS; **final** step (or cursor on `task_validate`) → task-validate PASS ≡ `--task` for that run (prepare-only: stop after prepare) | **Task run** ([task-run.md](task-run.md)) until task-validate PASS | **Task run** per task then slice-validate until **delivered** or hard stop |
+| **`--auto`** | Run cursor-next stage; stop when its done-when met | Chain until step boundary: non-final → step-validate PASS; **final** step (or cursor on `task_validate`) → task-validate PASS ≡ `--task` for that run (prepare-only: stop after prepare) | **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)) until task-validate PASS | **Isolated step run** then parent validate until **delivered** or hard stop |
 | **`--manual`** | Present next stage; wait for confirm/edit; execute that one | Same step boundary (incl. last-step ≡ task); AskQuestion before each stage | Same task boundary; AskQuestion before each stage | Ready vs **blocked**; mark cursor **`(next)`**; AskQuestion among ready; re-list until boundary / decline / hard stop |
 
 **Breaking:** no compat aliases for retired top-level review-only entry flags (`--code` / `--test` / `--all` / `--fix` / `--ci` as sole top-level router). Those nested flags apply **under `--review`** only (or via auto review stage). Multiple explicit lane flags → stop: `one lane flag only`.
@@ -166,7 +155,6 @@ prepare:
 mode: orchestrate | feature | handoff
 drive: auto | manual          # orchestrate + feature; default auto; omit or ignore on handoff
 scope: next | step | task | slice   # orchestrate: default step; feature: forced task; omit or ignore on handoff
-isolate: auto | all           # orchestrate task-run only; default auto — see Granularity lock
 lane: null | prepare | coder | tester | security | review | refactor | add_endless_test
 feature: null | { title, project_kind, artifact_root, slice_id, feature_id, branch, base }
 builder_stage: null | prepare | plan | build | refactor | review | step_validate | task_validate | slice_validate | delivered

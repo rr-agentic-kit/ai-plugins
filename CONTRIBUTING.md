@@ -18,7 +18,7 @@ uv sync --all-groups
 lefthook install
 ```
 
-Non-merge commits run the quality jobs in [`lefthook.yml`](lefthook.yml). Skip with `LEFTHOOK=0` or `git commit --no-verify`.
+Non-merge commits run `scripts/bump_plugins_version.py rc` (stages version files; stdout via lefthook `execution_out`), then the quality jobs in [`lefthook.yml`](lefthook.yml). Skip with `LEFTHOOK=0` or `git commit --no-verify`.
 
 First-time baseline (optional, matches CI lint/format/type/security hooks):
 
@@ -74,9 +74,7 @@ uv run pytest tests/ -v \
 
 ## CI
 
-[`.github/workflows/python-quality.yml`](.github/workflows/python-quality.yml) runs Ruff, Black, Mypy, Bandit, pip-audit, pytest with `coverage.xml`, and SonarCloud on pull requests and pushes to `master`, `release/**`, and `hotfix/**`. PRs into `master` must come from `release/**` or `hotfix/**` (enforced by the `pr-base-guard` job).
-
-Release versioning is owned by [`.github/workflows/release-control.yml`](.github/workflows/release-control.yml): merges into an active `release/X.Y.0` tick the RC; promoting `release/X.Y.0` → `master` graduates to stable, tags, creates a GitHub Release, and opens `release/X.(Y+1).0` at `-rc1`. Hotfixes merge `hotfix/X.Y.Z` → `master` and ship patch `X.Y.Z`. See **Release branches** below.
+[`.github/workflows/python-quality.yml`](.github/workflows/python-quality.yml) runs Ruff, Black, Mypy, Bandit, pip-audit, pytest with `coverage.xml`, and SonarCloud on pull requests and pushes to `master`.
 
 ### SonarCloud (one-time setup)
 
@@ -109,47 +107,10 @@ uv run python scripts/validate_plugin_versions.py
 Lockstep bump (lifts every plugin to the PEP 440 max, then increments):
 
 ```bash
-uv run python scripts/bump_plugins_version.py {major|minor|patch|rc|stable}
+uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}
 ```
 
-RC strings use `{base}-rc{N}` (for example `0.1.0-rc1`, not `0.1.0-rc-1`). CI sets `BUMP_SKIP_INSTALL=1`; local `rc` still runs `install_claude_local` unless you pass `--no-install`. Manual bumps are for recovery only — routine RC ticks and stable graduation run in CI.
-
-## Release branches
-
-**PR base policy (hard):**
-
-| Head branch | PR base | Effect |
-|-------------|---------|--------|
-| Work branches (`feat/`, `chore/`, `fix/`, `bug/`, `docs/`, …) | Active `release/X.Y.0` | Merge ticks RC on the release branch |
-| `release/X.Y.0` | `master` | Promote when the train is done |
-| `hotfix/X.Y.Z` | `master` | Patch release from branch name |
-
-Do not open work PRs into `master`. After the first train is seeded, there is always an active `release/*`; promoting `release/X.Y.0` auto-opens the next minor `release/X.(Y+1).0` at `-rc1`. Major trains (`release/1.0.0`, etc.) are opened only via `workflow_dispatch` on `release-control` with `action=open`.
-
-**One-time migration:** create `release/0.1.0` from current `master`; CI sets `0.1.0-rc1`. The abandoned `0.0.6-rc-*` line on `master` is not shipped.
-
-**Recovery / dispatch:**
-
-Maintainer path (dispatches `.github/workflows/release-control.yml` via `gh`):
-
-```bash
-just release active
-just release open
-just release rc
-just release promote
-just release hotfix hotfix/0.1.1
-just release seed 0.2.0 --yes
-just branch-new feat/foo --base release/0.1.0
-just create-pr --title "…" --description "…"
-```
-
-CI path (version bumps inside the workflow checkout):
-
-```bash
-just ci-release {open|rc|promote|hotfix|next-minor} --branch release/0.1.0
-```
-
-Or trigger the `release-control` workflow manually. Bot pushes use secret `RELEASE_BOT_TOKEN` when branch protection requires bypass; otherwise `GITHUB_TOKEN`.
+`rc` starts or ticks a local prerelease (`0.0.4` → `0.0.4-rc-1`, `0.0.2-beta-4` → `0.0.2-beta-5`) so Claude Code / Cursor cache a new version, then runs `install_claude_local`. Non-merge commits run `rc` automatically via lefthook (see Setup). `stable` graduates a prerelease (`0.0.2-beta-4` → `0.0.2`); `patch` does not (`0.0.2-beta-4` → `0.0.3`). Re-run the validator after a manual bump.
 
 ## Plugin validation
 
