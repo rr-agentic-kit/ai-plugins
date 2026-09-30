@@ -27,7 +27,7 @@ Do **not** invent `gh`/`glab` flags in builder. Follow `skills/s-ci/refs/pipelin
 
 ## Wait
 
-1. Poll via s-ci `pre-merge-status` until pipeline/checks leave the pending set. On GitHub, prefer the blocking `gh run watch <RUN_ID> --exit-status` ([s-gh/refs/cli.md](../../s-gh/refs/cli.md)) over a manual sleep/backoff loop — it is the allowlisted wait primitive precisely because ad hoc short-sleep polling is disallowed for agents.
+1. Poll via s-ci `pre-merge-status <PR#>` (pass the PR number; the bare form can fail on some `gh` versions) until pipeline/checks leave the pending set. On GitHub, prefer the blocking `gh run watch <RUN_ID> --exit-status` ([s-gh/refs/cli.md](../../s-gh/refs/cli.md)) over a manual sleep/backoff loop — it is the allowlisted wait primitive precisely because ad hoc short-sleep polling is disallowed for agents.
 2. Backoff ~30–60s between polls when no blocking watch command exists for the forge.
 3. Wall timeout default ~30 min → hard-stop with one-line reason.
 4. Pending CI is **wait**, not FAIL.
