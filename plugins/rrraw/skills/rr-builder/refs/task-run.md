@@ -98,7 +98,7 @@ After each Task return (and after parent post-ship commit), parent runs `git sta
 
 ### `needs_ship`
 
-Executor may return `needs_ship` after writing/committing a forge-miss task-validate report. Parent runs [ship.md](ship.md) → **s-ci**, re-runs task-validate **inline** (assessment only), commits cursor/validate, dirty-gates, then spawns **pr-validate** Task when an open tip was landed.
+Executor may return `needs_ship` after writing/committing a forge-miss task-validate report. Parent runs [ship.md](ship.md) → **s-ci** (push + draft-PR upsert need no confirm under `drive: auto` — [ship.md](ship.md) **Stop / anti-trigger**), re-runs task-validate **inline** (assessment only), commits cursor/validate, dirty-gates, then spawns **pr-validate** Task when an open tip was landed.
 
 ### Nested-skill leaf Tasks
 
@@ -125,6 +125,7 @@ Prefer extending `{NNNN}.md` frontmatter — no third parallel state file.
 | `task_review_done` | `{NNNN}.md` | `true` \| `false` |
 | `task_ship_done` | `{NNNN}.md` | `true` \| `false`; treat as `true` when `ship_after: never` |
 | `task_pr_validate_done` | `{NNNN}.md` | `true` \| `false`; treat as `true` when skipped (`never` / carry-to-next) |
+| `builder_stage` (mirror) | `task-summary.md` | Parent-only: set at plan handoff, ship, forge-landing push (`pr_validate`) and task close; phase executors never write `task-summary.md` |
 | `active_ship_branch` | `task-summary.md` | Last resolved ship head ([feature-branch.md](feature-branch.md) / task plan Ship) |
 | `ship_base_branch` | `task-summary.md` | Last resolved PR/MR base |
 
