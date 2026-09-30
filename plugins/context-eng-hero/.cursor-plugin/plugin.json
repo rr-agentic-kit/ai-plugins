@@ -1,7 +1,7 @@
 {
   "name": "context-eng-hero",
   "displayName": "Context Eng Hero",
-  "version": "0.0.6-rc-19",
+  "version": "0.0.6-rc-21",
   "description": "Design and validate skills, agents, commands, and context artifacts",
   "license": "Unlicense",
   "keywords": [
@@ -16,5 +16,6 @@
     "skills",
     "agents",
     "prompts"
-  ]
+  ],
+  "hooks": "./hooks/cursor.json"
 }

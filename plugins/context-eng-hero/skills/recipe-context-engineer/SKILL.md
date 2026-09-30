@@ -2,7 +2,7 @@
 name: recipe-context-engineer
 description: Hardens scoped skills, commands, rules, agents, and workflows via gated design and write loops—slash or explicit Read only.
 disable-model-invocation: true
-allowed-tools: Read, Write, Edit, Bash(python3 scripts/audit_static.py*), Bash(python3 scripts/render_ce_report.py*), Task, AskQuestion, TodoWrite
+allowed-tools: Read, Write, Edit, Bash(python3 scripts/audit_static.py*), Bash(python3 scripts/render_ce_report.py*), Bash(scripts/auto_learn.sh*), Task, AskQuestion, TodoWrite
 ---
 
 # Context engineer
@@ -42,7 +42,7 @@ Every invocation follows this loop. Compress steps only when the user message al
             Done when: matching post-*-routing gate or Next Up emitted
 ```
 
-**Intent seeding:** User states an action ("audit this", "fix the skill", "learn from this miss", `--learn` / `--learn --auto`, `--improve` / "improve this `<path>`") → skip step 3, go to step 5. `--improve` / improve-this still requires a declared path. `--learn --auto` skips learn AskQuestion confirms (bind defaults when signals present; no **post-learn-routing** — **Next Up** after handover).
+**Intent seeding:** User states an action ("audit this", "fix the skill", "learn from this miss", `--learn` / `--learn --auto` / `--auto-learn`, `--improve` / "improve this `<path>`") → skip step 3, go to step 5. `--improve` / improve-this still requires a declared path. `--learn --auto` ≡ `--auto-learn`: silent learn (no AskQuestion) then auto-start absorb on plugin source; skip **post-learn-routing** — **Next Up** after absorb (or skip when zero gaps).
 
 **No deferral:** After step 6, if the user picks a follow-on, re-enter at step 5—do not tell them to type a command.
 
@@ -103,7 +103,7 @@ Load these only when the active action Ref index names them (create/design/extra
 | improve | Parallel audits → merge → fix then redesign under write gates | `refs/actions/improve.md` |
 | fix | Edits for existing intent + whole-artifact opportunity-clean | `refs/actions/fix.md` |
 | redesign | Change outcome/scope + write gates | `refs/actions/redesign.md` |
-| learn | Gap package from a live run miss—patch or friction (no skill edits); `--learn --auto` skips confirms | `refs/actions/learn.md` |
+| learn | Gap package from a live run miss—patch or friction; `--learn` interactive; `--learn --auto` ≡ `--auto-learn` = silent learn + absorb on plugin source | `refs/actions/learn.md` |
 | test | Behavior probe report | `refs/actions/test.md` |
 | diff | Two-path tradeoff summary | `refs/actions/diff.md` |
 | design | Inline write from classify/clarify | `refs/actions/design.md` |

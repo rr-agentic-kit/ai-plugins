@@ -8,6 +8,7 @@
 | EVAL-FIRST | Eval-first (legacy FAIL-scope phrasing) | Prefer **author-to-bar**; FAIL-scoped ≠ thin draft |
 | AUTHOR-TO-BAR | Author-to-bar / first-write completeness | Type rubric + opportunity-clean before Write; improve-clean on disk = proof |
 | LEARN-HANDOVER | Learn handover package | Live-miss absorb input for fix/redesign |
+| AUTO-LEARN | Silent learn + absorb | `--learn --auto` ≡ `--auto-learn`; Stop-hook inject path |
 | Skill+Ref | Skill plus progressive-disclosure refs pack | Artifact type; not a single file |
 | STRUCTURE | Structure failure pattern | Missing required shape/sections |
 | NOISE | Noise failure pattern | Low-signal / bloated prose |

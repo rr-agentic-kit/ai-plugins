@@ -1,13 +1,13 @@
 # Action: learn (internal)
 
-Package an evidence-backed gap list from a **live run miss** (failure **or** friction) on an **existing** skill. Never edits the target skill definition—absorb via **fix** or **redesign**.
+Package an evidence-backed gap list from a **live run miss** (failure **or** friction) on an **existing** skill. Steps 1–4 never edit the target skill definition—absorb via **fix** or **redesign** (interactive routing, or auto via `learn-5-absorb`).
 
 ## Drive
 
 | Mode | Behaviour |
 |------|-----------|
-| **interactive** (default) | AskQuestion when bind overlays need choice; after handover, **post-learn-routing** |
-| **`--auto`** | No AskQuestion for bind overlays when stated defaults apply; approve/skip every remaining learn AskQuestion so steps 1→5 run straight through; after handover, **Next Up** only (skip **post-learn-routing**). Does **not** auto-start fix/redesign |
+| **`--learn`** (interactive, default) | AskQuestion when bind overlays need choice; after handover, **post-learn-routing** |
+| **`--learn --auto`** ≡ **`--auto-learn`** | Same silent path: no AskQuestion; bind defaults when signals present; learn steps 1–4; **then auto-start absorb** (fix or redesign per handover Incorporate hint) on **plugin source** only; skip **post-learn-routing**; close with **Next Up**. Zero default-selected `skill_gap` topics → write handover (or skip file) + **Next Up**; do **not** invent absorb. Unresolvable absorb-into / cache-only → stop (never invent source). After successful absorb write gates, delete user-project `LEARN-HANDOVER.*`. Re-entry guard: if this turn was started by the Stop-hook inject, complete once then allow stop (no second auto-learn loop) |
 
 ## Ref index (Read at step)
 
@@ -16,21 +16,22 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 | `disambiguation.md` | `learn-1-bind` |
 | `questioning.md` | `learn-1-bind` |
 | `learn-intake.md` | `learn-1-bind` |
-| `ui-brand.md` | `learn-1-bind` (banner); `learn-5-close` (Next Up under `--auto`) |
+| `ui-brand.md` | `learn-1-bind` (banner `LEARN` or `AUTO-LEARN`); `learn-6-close` (Next Up under auto) |
 | Target `SKILL.md` + named action refs | `learn-2-investigate` (effort bar) |
 | Sibling README (if present) | `learn-2-investigate` — When/What mismatch only |
 | `improvement-patterns.md` | `learn-2-investigate`, `learn-3-topics` (absorb craft bar / anti-patterns) |
 | `templates/learn-topics.template.md` | `learn-3-topics` (build/input — **not** chat-emit) |
 | `templates/learn-handover.template.md` | `learn-4-handover` |
-| `gate-prompts.md` | `learn-5-close` (**post-learn-routing**; skip under `--auto`) |
-| `close-contract.md` | `learn-5-close` |
+| `gate-prompts.md` | `learn-6-close` (**post-learn-routing**; skip under auto); absorb uses fix/redesign gates |
+| `close-contract.md` | `learn-6-close` |
+| Matching `actions/fix.md` or `actions/redesign.md` | Auto absorb only (`learn-5-absorb`, per Incorporate hint) |
 
 ## Steps
 
 ### Step 1: `learn-1-bind`
 
 - **Outcome:** Target skill and miss source are bound; **three path roles** resolved per `learn-intake.md`.
-- **Done when:** (1) **Read-from** path = readable `SKILL.md` (source or cache OK **read-only** for investigation); (2) **Write-handover** path = **user project** (`docs/rr/LEARN-HANDOVER.<skill>.md` when `docs/rr/` exists, else project-root); (3) **Absorb-into** path = **plugin source** checkout only (never `~/.claude/plugins/cache/**` or other installed runtime copies); (4) miss source = this chat’s run (default) and/or user problem statement; banner `CE ► LEARN` per `ui-brand.md`. If absorb-into unclear → AskQuestion once (source path / describe location) — under `--auto`, bind with stated defaults when signals present; unresolvable source still stops (see Stop).
+- **Done when:** (1) **Read-from** path = readable `SKILL.md` (source or cache OK **read-only** for investigation); (2) **Write-handover** path = **user project** (`docs/rr/LEARN-HANDOVER.<skill>.md` when `docs/rr/` exists, else project-root); (3) **Absorb-into** path = **plugin source** checkout only (never `~/.claude/plugins/cache/**` or other installed runtime copies); (4) miss source = this chat’s run (default) and/or user problem statement; banner `CE ► LEARN` or `CE ► AUTO-LEARN` per `ui-brand.md`. If absorb-into unclear → AskQuestion once (source path / describe location) — under auto, bind with stated defaults when signals present; unresolvable source still stops (see Stop).
 
 ### Step 2: `learn-2-investigate`
 
@@ -45,12 +46,17 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 ### Step 4: `learn-4-handover`
 
 - **Outcome:** Lean handover from **default-selected `skill_gap`** topics only, written in the **user project**.
-- **Done when:** Handover filled from `templates/learn-handover.template.md`; write under the **user project** (prefer `docs/rr/LEARN-HANDOVER.<skill-name>.md` when `docs/rr/` exists, else project-root `LEARN-HANDOVER.<skill-name>.md`). **Target** + **Incorporate hint** list **absorb-into (plugin source)** paths — not cache. Incorporate hints stay lean but **mechanism-complete and craft-safe** (would not immediately fail opportunity-clean). **Stop-rule:** never write handover or absorb edits under `~/.claude/plugins/cache/**` / installed runtime skill trees. If user-project path unwritable → chat-only draft + one path AskQuestion (under `--auto`, state path failure and stop — do not invent a path). No full chat paste.
+- **Done when:** Handover filled from `templates/learn-handover.template.md`; write under the **user project** (prefer `docs/rr/LEARN-HANDOVER.<skill-name>.md` when `docs/rr/` exists, else project-root `LEARN-HANDOVER.<skill-name>.md`). **Target** + **Incorporate hint** list **absorb-into (plugin source)** paths — not cache. Incorporate hints stay lean but **mechanism-complete and craft-safe** (would not immediately fail opportunity-clean). **Stop-rule:** never write handover or absorb edits under `~/.claude/plugins/cache/**` / installed runtime skill trees. If user-project path unwritable → chat-only draft + one path AskQuestion (under auto, state path failure and stop — do not invent a path). No full chat paste. Zero default-selected `skill_gap` → skip handover file when empty is clearer, or write a no-gaps note; proceed to close without absorb.
 
-### Step 5: `learn-5-close`
+### Step 5: `learn-5-absorb` (auto only)
 
-- **Outcome:** User routed to absorb or stop.
-- **Done when:** Interactive → **post-learn-routing** per `gate-prompts.md` → Incorporate now (fix or redesign per handover hint) \| Revise topics \| Done. Under `--auto` → write handover, then **Next Up** only (no **post-learn-routing** AskQuestion).
+- **Outcome:** Selected `skill_gap` topics absorbed into **plugin source** via nested fix or redesign.
+- **Done when:** Under interactive → skip (absorb is a **post-learn-routing** choice). Under auto → if ≥1 default-selected `skill_gap`, run **fix** or **redesign** per handover Incorporate hint on **absorb-into** paths only (existing classify routing + write gates); delete user-project `LEARN-HANDOVER.*` after successful write gates. Zero selected gaps → skip absorb. Unresolvable / cache-only absorb-into → stop (never invent source).
+
+### Step 6: `learn-6-close`
+
+- **Outcome:** User routed to absorb or stop (interactive); auto ends after absorb (or skip).
+- **Done when:** Interactive → **post-learn-routing** per `gate-prompts.md` → Incorporate now (fix or redesign per handover hint) \| Revise topics \| Done. Under auto → after absorb (or skip), **Next Up** only (no **post-learn-routing** AskQuestion).
 
 ## Investigation effort bar (hard rules)
 
@@ -68,9 +74,11 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 
 ## Stop
 
-- Learn **never** edits the target skill definition (absorb via **fix** / **redesign** on **plugin source** only).
+- Learn **never** edits the target skill definition during steps 1–4 (absorb via **fix** / **redesign** on **plugin source** only — interactive via routing; auto via `learn-5-absorb`).
 - Learn **never** writes into runtime/cache/installed skill copies — handover → **user project**; absorb → **source**.
-- **`--auto` never invents absorb-into**; unresolvable source still stops.
+- **Auto never invents absorb-into**; unresolvable source still stops.
+- **Auto never invents absorb** when zero default-selected `skill_gap` topics.
+- **Re-entry:** Stop-hook inject may start one `--auto-learn` turn; after that turn completes, allow stop (do not re-fire).
 - No bible-sized handover: target + miss + approved table + non-goals + fix-vs-redesign hint only — **but** lean must not erase mechanism layers (effort bar §4, §8, §9) or recommend craft-unsafe absorb (effort bar §11).
 - No live run evidence (and no problem statement) → wrong action (use audit/fix). Painful-but-“successful” runs still count as live run evidence.
 - Creating a new artifact → **create** / **extract**, not learn.

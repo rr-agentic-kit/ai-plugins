@@ -170,7 +170,7 @@ After redesign completes (gates passed and file written, or user declined write)
 
 ## Pattern: post-learn-routing
 
-After learn handover is written (or chat-only draft accepted). **Skip when `--auto`** → emit **Next Up** only (no AskQuestion).
+After learn handover is written (or chat-only draft accepted). **Skip when `--learn --auto` / `--auto-learn`** → auto-start absorb when gaps exist, then emit **Next Up** only (no AskQuestion).
 
 - **question:** "Learn package ready. What next?"
 - **header:** "Next"
