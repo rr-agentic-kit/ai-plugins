@@ -40,14 +40,11 @@ def _path_or_cmd(event: dict[str, Any]) -> str:
     return str(event.get("fingerprint") or event.get("path") or event.get("cmd") or "")
 
 
-def score_tool_thrash(events: list[dict[str, Any]]) -> SignalHit | None:
-    """≥K consecutive explore tools with no Write/Edit in a sliding window."""
-    if not events:
-        return None
-    window = events[-THRASH_WINDOW:]
+def _explore_streak(events: list[dict[str, Any]]) -> int:
+    """Longest consecutive explore-tool streak with no Write/Edit."""
     streak = 0
     max_streak = 0
-    for ev in window:
+    for ev in events:
         name = _tool_name(ev)
         if name in WRITE_TOOLS:
             streak = 0
@@ -58,7 +55,11 @@ def score_tool_thrash(events: list[dict[str, Any]]) -> SignalHit | None:
         else:
             # Unknown tools break the thrash streak (conservative).
             streak = 0
-    # Also score full-tail streak beyond window for extreme.
+    return max_streak
+
+
+def _tail_explore_streak(events: list[dict[str, Any]]) -> int:
+    """Explore-tool streak at the end of the event list (newest first)."""
     full_streak = 0
     for ev in reversed(events):
         name = _tool_name(ev)
@@ -68,7 +69,17 @@ def score_tool_thrash(events: list[dict[str, Any]]) -> SignalHit | None:
             full_streak += 1
         else:
             break
-    best = max(max_streak, full_streak)
+    return full_streak
+
+
+def score_tool_thrash(events: list[dict[str, Any]]) -> SignalHit | None:
+    """≥K consecutive explore tools with no Write/Edit in a sliding window."""
+    if not events:
+        return None
+    best = max(
+        _explore_streak(events[-THRASH_WINDOW:]),
+        _tail_explore_streak(events),
+    )
     if best >= EXTREME_THRASH:
         return SignalHit(
             "tool_thrash",

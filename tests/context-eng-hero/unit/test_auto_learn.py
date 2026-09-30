@@ -129,7 +129,8 @@ def test_extreme_reread_alone_meets_bar() -> None:
     path = "/ws/plugins/a/skills/b/SKILL.md"
     events = [{"tool": "Read", "fingerprint": path, "path": path}] * 6
     hit = score_reread(events)
-    assert hit is not None and hit.extreme
+    assert hit is not None
+    assert hit.extreme
     assert meets_inject_bar([hit])
 
 
@@ -508,7 +509,7 @@ def test_cli_hook_fail_open(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("auto_learn_script.hook.run_hook", boom)
     monkeypatch.setattr("sys.stdin", type("S", (), {"read": lambda self: "{}"})())
-    assert run_hook_mode("cursor") == 0
+    run_hook_mode("cursor")
 
 
 def test_require_python_gate(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -608,7 +609,8 @@ def test_accumulate_camel_case_claude_fields(tmp_path: Path) -> None:
     state = load_state(session_dir(tmp_path, "camel1"))
     assert state["bound_skill"] == str(skill)
     events = load_events(session_dir(tmp_path, "camel1"))
-    assert events and events[0]["tool"] == "Read"
+    assert events
+    assert events[0]["tool"] == "Read"
 
 
 def test_post_tool_use_failure_via_run_hook(tmp_path: Path) -> None:

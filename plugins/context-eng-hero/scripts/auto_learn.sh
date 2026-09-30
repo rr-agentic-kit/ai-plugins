@@ -129,6 +129,7 @@ fi
 for _a in "$@"; do
   case "$_a" in
     --hook) exit 0 ;;
+    *) ;;
   esac
 done
 printf '%s\n' "auto_learn: need CPython 3.14+ with auto_learn_script on PYTHONPATH" >&2

@@ -17,22 +17,22 @@ def require_python() -> None:
         raise SystemExit(127)
 
 
-def run_hook_mode(runtime: str) -> int:
+def run_hook_mode(runtime: str) -> None:
+    """Fail-open hook path: swallow I/O/runtime errors; never raise to the host."""
     from .hook import run_hook
 
     try:
         stdin_text = sys.stdin.read()
     except OSError:
-        return 0
+        return
     try:
         out = run_hook(runtime=runtime, stdin_text=stdin_text)
     except Exception:
-        return 0
+        return
     if out:
         sys.stdout.write(out)
         if not out.endswith("\n"):
             sys.stdout.write("\n")
-    return 0
 
 
 def run_score_mode(workspace: Path, session_id: str) -> int:
@@ -113,6 +113,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.hook:
         if args.runtime is None:
             parser.error("--hook requires --runtime cursor|claude")
-        return run_hook_mode(args.runtime)
+        run_hook_mode(args.runtime)
+        return 0
     workspace = (args.workspace or Path.cwd()).resolve()
     return run_score_mode(workspace, args.session_id)

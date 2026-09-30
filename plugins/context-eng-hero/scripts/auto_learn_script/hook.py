@@ -31,7 +31,7 @@ def parse_hook_payload(raw: str) -> dict[str, Any] | None:
     return data
 
 
-def _event_name(data: dict[str, Any], runtime: str) -> str:
+def _event_name(data: dict[str, Any]) -> str:
     name = (
         data.get("hook_event_name")
         or data.get("hookEventName")
@@ -159,6 +159,41 @@ def evaluate_stop(
     return message, hits
 
 
+def _accumulate_tool_event(
+    *,
+    workspace: Path,
+    session_id: str,
+    data: dict[str, Any],
+    roots: list[str],
+    event: str,
+) -> None:
+    failed = _is_tool_failure(event, data)
+    user_text = None
+    for key in ("user_message", "last_user_message", "prompt"):
+        if data.get(key):
+            user_text = str(data[key])
+            break
+    accumulate(
+        workspace=workspace,
+        session_id=session_id,
+        data=data,
+        roots=roots,
+        failed=failed,
+        user_text=user_text,
+    )
+
+
+def _has_tool_fields(data: dict[str, Any]) -> bool:
+    return bool(
+        data.get("tool_name")
+        or data.get("toolName")
+        or data.get("tool_input")
+        or data.get("toolInput")
+        or data.get("file_path")
+        or data.get("filePath")
+    )
+
+
 def run_hook(*, runtime: str, stdin_text: str) -> str | None:
     """Return inject JSON string, or None for silent (fail-open)."""
     if runtime not in ("cursor", "claude"):
@@ -173,7 +208,7 @@ def run_hook(*, runtime: str, stdin_text: str) -> str | None:
     )
     workspace = _workspace(data, roots)
     session_id = _session_id(data)
-    event = _event_name(data, runtime)
+    event = _event_name(data)
 
     # Opportunistic orphan cleanup (fail-open).
     with contextlib.suppress(OSError):
@@ -201,29 +236,14 @@ def run_hook(*, runtime: str, stdin_text: str) -> str | None:
         return json.dumps(emit_stop_payload(runtime, message))
 
     # Tool accumulate (PostToolUse / failure / default when tool fields present).
-    has_tool = bool(
-        data.get("tool_name")
-        or data.get("toolName")
-        or data.get("tool_input")
-        or data.get("toolInput")
-        or data.get("file_path")
-        or data.get("filePath")
-    )
-    if _is_tool_event(event, runtime) or has_tool:
-        failed = _is_tool_failure(event, data)
-        user_text = None
-        for key in ("user_message", "last_user_message", "prompt"):
-            if data.get(key):
-                user_text = str(data[key])
-                break
+    if _is_tool_event(event, runtime) or _has_tool_fields(data):
         try:
-            accumulate(
+            _accumulate_tool_event(
                 workspace=workspace,
                 session_id=session_id,
                 data=data,
                 roots=roots,
-                failed=failed,
-                user_text=user_text,
+                event=event,
             )
         except OSError:
             return None

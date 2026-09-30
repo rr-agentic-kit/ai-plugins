@@ -25,6 +25,18 @@ def session_dir(workspace: Path, session_id: str) -> Path:
     return workspace / SCRATCH_REL / safe
 
 
+def _under_session(session: Path, candidate: Path) -> Path | None:
+    """Resolve candidate only when it stays under session (path-injection guard)."""
+    try:
+        root = session.resolve()
+        target = candidate.resolve()
+    except OSError:
+        return None
+    if not target.is_relative_to(root):
+        return None
+    return target
+
+
 def ensure_session(workspace: Path, session_id: str) -> Path | None:
     """Create session scratch. None on mkdir failure (fail-open)."""
     path = session_dir(workspace, session_id)
@@ -44,8 +56,8 @@ def state_path(session: Path) -> Path:
 
 
 def load_state(session: Path) -> dict[str, Any]:
-    path = state_path(session)
-    if not path.is_file():
+    path = _under_session(session, state_path(session))
+    if path is None or not path.is_file():
         return _empty_state()
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -59,7 +71,9 @@ def load_state(session: Path) -> dict[str, Any]:
 
 
 def save_state(session: Path, state: dict[str, Any]) -> bool:
-    path = state_path(session)
+    path = _under_session(session, state_path(session))
+    if path is None:
+        return False
     try:
         path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     except OSError:
@@ -69,18 +83,23 @@ def save_state(session: Path, state: dict[str, Any]) -> bool:
 
 def append_event(session: Path, event: dict[str, Any]) -> bool:
     """Append one JSONL event; enforce MAX_EVENTS / MAX_EVENTS_BYTES caps."""
-    path = events_path(session)
+    path = _under_session(session, events_path(session))
+    if path is None:
+        return False
     line = json.dumps(event, separators=(",", ":")) + "\n"
     try:
         with path.open("a", encoding="utf-8") as fh:
             fh.write(line)
     except OSError:
         return False
-    return _trim_events(path)
+    return _trim_events(session)
 
 
-def _trim_events(path: Path) -> bool:
+def _trim_events(session: Path) -> bool:
     """Keep the newest MAX_EVENTS lines and stay under MAX_EVENTS_BYTES."""
+    path = _under_session(session, events_path(session))
+    if path is None:
+        return False
     try:
         raw = path.read_text(encoding="utf-8")
     except OSError:
@@ -100,8 +119,8 @@ def _trim_events(path: Path) -> bool:
 
 
 def load_events(session: Path) -> list[dict[str, Any]]:
-    path = events_path(session)
-    if not path.is_file():
+    path = _under_session(session, events_path(session))
+    if path is None or not path.is_file():
         return []
     rows: list[dict[str, Any]] = []
     try:
