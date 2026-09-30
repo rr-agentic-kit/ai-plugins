@@ -21,6 +21,11 @@ ORPHAN_TTL_DAYS = 7
 
 MESSAGE_CAP = 2_000
 
+# Active-session resource caps (CWE-770) — TTL alone does not bound growth.
+MAX_EVENTS = 500
+MAX_EVENTS_BYTES = 512_000
+MAX_USER_TEXT = 4_000
+
 # Protocol tool names (host hook payloads).
 TOOL_READ = "Read"
 SHELL_TOOLS = frozenset({"Bash", "Shell"})

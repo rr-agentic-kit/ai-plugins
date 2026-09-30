@@ -6,8 +6,9 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .constants import TOOL_READ
+from .constants import MAX_USER_TEXT, TOOL_READ
 from .gates import is_local_source_skill, looks_like_skill_md
+from .redact import redact_secrets
 from .score import fingerprint_cmd
 from .store import append_event, ensure_session, load_state, save_state
 
@@ -57,7 +58,8 @@ def build_event(
     failed: bool = False,
 ) -> dict[str, Any]:
     tool = _extract_tool_name(data)
-    path = _extract_path(data)
+    raw_path = _extract_path(data)
+    path = redact_secrets(raw_path) if raw_path else None
     cmd = _extract_command(data)
     cmd_fp = fingerprint_cmd(cmd) if cmd else None
     fingerprint = path or (cmd_fp or "")
@@ -115,7 +117,11 @@ def accumulate(
         return False
     state = load_state(session)
     if user_text:
-        state["last_user_text"] = user_text
+        scrubbed = redact_secrets(user_text)
+        if len(scrubbed) > MAX_USER_TEXT:
+            suffix = "\n…(truncated)"
+            scrubbed = scrubbed[: max(0, MAX_USER_TEXT - len(suffix))] + suffix
+        state["last_user_text"] = scrubbed
     path = event.get("path")
     if isinstance(path, str) and event.get("tool") == TOOL_READ:
         state = maybe_bind_skill(state, path, roots)

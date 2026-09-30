@@ -625,3 +625,99 @@ def test_post_tool_use_failure_via_run_hook(tmp_path: Path) -> None:
     events = load_events(session_dir(tmp_path, "fail1"))
     assert events
     assert events[0]["failed"] is True
+
+
+def test_redact_secrets_common_shapes() -> None:
+    from auto_learn_script.redact import redact_secrets
+    from auto_learn_script.score import fingerprint_cmd
+
+    bearer = 'curl -H "Authorization: Bearer supersecrettoken"'
+    scrubbed = redact_secrets(bearer)
+    assert "supersecrettoken" not in scrubbed
+    assert "[REDACTED]" in scrubbed
+
+    assert "sk-abcdefghijklmnopqrstuvwxyz" not in redact_secrets(
+        "key sk-abcdefghijklmnopqrstuvwxyz end"
+    )
+    assert "ghp_abcdefghijklmnopqrstuv" not in redact_secrets(
+        "auth ghp_abcdefghijklmnopqrstuv"
+    )
+    fp = fingerprint_cmd("curl -H 'Authorization: Bearer abcdefghijklmnop'")
+    assert "abcdefghijklmnop" not in fp
+    assert "[REDACTED]" in fp
+
+
+def test_accumulate_redacts_user_text_and_cmd(tmp_path: Path) -> None:
+    ok = accumulate(
+        workspace=tmp_path,
+        session_id="sec1",
+        data={
+            "tool_name": "Bash",
+            "tool_input": {
+                "command": "curl -H 'Authorization: Bearer leakytoken123' https://x"
+            },
+        },
+        roots=[str(tmp_path)],
+        user_text="wrong — use api_key=supersecretvalue instead",
+    )
+    assert ok
+    session = session_dir(tmp_path, "sec1")
+    state = load_state(session)
+    assert "supersecretvalue" not in (state.get("last_user_text") or "")
+    assert "[REDACTED]" in (state.get("last_user_text") or "")
+    events = load_events(session)
+    assert events
+    assert "leakytoken123" not in json.dumps(events[0])
+    assert "[REDACTED]" in (events[0].get("cmd") or "")
+
+
+def test_accumulate_truncates_user_text(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("auto_learn_script.accumulate.MAX_USER_TEXT", 40)
+    ok = accumulate(
+        workspace=tmp_path,
+        session_id="cap1",
+        data={"tool_name": "Grep", "tool_input": {"pattern": "x"}},
+        roots=[str(tmp_path)],
+        user_text="x" * 200,
+    )
+    assert ok
+    text = load_state(session_dir(tmp_path, "cap1"))["last_user_text"]
+    assert text is not None
+    assert len(text) <= 40
+    assert text.endswith("…(truncated)")
+
+
+def test_append_event_caps_count(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from auto_learn_script.store import append_event, ensure_session
+
+    monkeypatch.setattr("auto_learn_script.store.MAX_EVENTS", 5)
+    monkeypatch.setattr("auto_learn_script.store.MAX_EVENTS_BYTES", 50_000)
+    session = ensure_session(tmp_path, "cap-events")
+    assert session is not None
+    for i in range(12):
+        assert append_event(session, {"tool": "Grep", "fingerprint": f"q{i}", "n": i})
+    events = load_events(session)
+    assert len(events) == 5
+    assert events[0]["n"] == 7
+    assert events[-1]["n"] == 11
+
+
+def test_inject_message_redacts_evidence() -> None:
+    from auto_learn_script.score import SignalHit
+
+    msg = build_inject_message(
+        bound_skill="/ws/plugins/a/skills/b/SKILL.md",
+        absorb_into="/ws/plugins/a/skills/b/SKILL.md",
+        signals=[
+            SignalHit(
+                "bash_info_loop",
+                "3 discovery Bash (curl -H Authorization: Bearer tok123456)",
+            )
+        ],
+    )
+    assert "tok123456" not in msg
+    assert "[REDACTED]" in msg

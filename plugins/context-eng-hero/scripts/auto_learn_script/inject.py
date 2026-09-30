@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from .constants import MESSAGE_CAP
+from .redact import redact_secrets
 from .score import SignalHit
 
 
@@ -24,7 +25,8 @@ def build_inject_message(
     ]
     for hit in signals[:5]:
         flag = " [extreme]" if hit.extreme else ""
-        lines.append(f"- {hit.class_id}{flag}: {hit.evidence}")
+        evidence = redact_secrets(hit.evidence)
+        lines.append(f"- {hit.class_id}{flag}: {evidence}")
     message = "\n".join(lines)
     if len(message) > MESSAGE_CAP:
         message = message[: MESSAGE_CAP - 20] + "\n…(truncated)"

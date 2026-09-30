@@ -22,6 +22,7 @@ from .constants import (
     TOOL_READ,
     WRITE_TOOLS,
 )
+from .redact import redact_secrets
 
 
 @dataclass(frozen=True)
@@ -138,7 +139,7 @@ def score_bash_info_loop(
         if BASH_DISCOVERY_RE.search(cmd or ""):
             hits += 1
             if not sample:
-                sample = (cmd or "")[:80]
+                sample = redact_secrets(cmd or "")[:80]
     if hits >= BASH_INFO_MIN:
         return SignalHit(
             "bash_info_loop",
@@ -165,7 +166,7 @@ def score_correction(
         )
         if explore < max(3, THRASH_MIN // 2):
             return None
-    snippet = match.group(0)[:40]
+    snippet = redact_secrets(match.group(0))[:40]
     return SignalHit("correction", f"user correction '{snippet}' with prior thrash")
 
 
@@ -211,6 +212,6 @@ def meets_inject_bar(hits: list[SignalHit]) -> bool:
 
 
 def fingerprint_cmd(cmd: str, *, max_len: int = 120) -> str:
-    """Lean command fingerprint (not full stdout)."""
-    compact = re.sub(r"\s+", " ", (cmd or "").strip())
+    """Lean command fingerprint (not full stdout); secrets scrubbed first."""
+    compact = re.sub(r"\s+", " ", redact_secrets(cmd or "").strip())
     return compact[:max_len]

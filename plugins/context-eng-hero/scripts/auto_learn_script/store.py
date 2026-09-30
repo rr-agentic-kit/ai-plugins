@@ -8,7 +8,14 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .constants import EVENTS_NAME, ORPHAN_TTL_DAYS, SCRATCH_REL, STATE_NAME
+from .constants import (
+    EVENTS_NAME,
+    MAX_EVENTS,
+    MAX_EVENTS_BYTES,
+    ORPHAN_TTL_DAYS,
+    SCRATCH_REL,
+    STATE_NAME,
+)
 
 
 def session_dir(workspace: Path, session_id: str) -> Path:
@@ -61,10 +68,32 @@ def save_state(session: Path, state: dict[str, Any]) -> bool:
 
 
 def append_event(session: Path, event: dict[str, Any]) -> bool:
+    """Append one JSONL event; enforce MAX_EVENTS / MAX_EVENTS_BYTES caps."""
     path = events_path(session)
+    line = json.dumps(event, separators=(",", ":")) + "\n"
     try:
         with path.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(event, separators=(",", ":")) + "\n")
+            fh.write(line)
+    except OSError:
+        return False
+    return _trim_events(path)
+
+
+def _trim_events(path: Path) -> bool:
+    """Keep the newest MAX_EVENTS lines and stay under MAX_EVENTS_BYTES."""
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    lines = [ln for ln in raw.splitlines() if ln.strip()]
+    if len(lines) <= MAX_EVENTS and len(raw.encode("utf-8")) <= MAX_EVENTS_BYTES:
+        return True
+    kept = lines[-MAX_EVENTS:]
+    # Drop oldest until under byte budget (newest-first retention).
+    while kept and len(("\n".join(kept) + "\n").encode("utf-8")) > MAX_EVENTS_BYTES:
+        kept = kept[1:]
+    try:
+        path.write_text(("\n".join(kept) + "\n") if kept else "", encoding="utf-8")
     except OSError:
         return False
     return True
