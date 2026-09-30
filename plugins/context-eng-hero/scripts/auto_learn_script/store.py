@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import time
 from pathlib import Path
@@ -17,6 +18,8 @@ from .constants import (
     STATE_NAME,
 )
 
+_ALLOWED_SESSION_FILES = frozenset({EVENTS_NAME, STATE_NAME})
+
 
 def session_dir(workspace: Path, session_id: str) -> Path:
     safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in session_id)[:128]
@@ -25,14 +28,20 @@ def session_dir(workspace: Path, session_id: str) -> Path:
     return workspace / SCRATCH_REL / safe
 
 
-def _under_session(session: Path, candidate: Path) -> Path | None:
-    """Resolve candidate only when it stays under session (path-injection guard)."""
+def _session_file(session: Path, name: str) -> Path | None:
+    """Allowlisted basename under session root (S2083/S8707 sanitizer)."""
+    if name not in _ALLOWED_SESSION_FILES or Path(name).name != name:
+        return None
     try:
-        root = session.resolve()
-        target = candidate.resolve()
+        root = Path(os.path.realpath(session))
+        target = Path(os.path.realpath(root / name))
     except OSError:
         return None
-    if not target.is_relative_to(root):
+    root_s = str(root)
+    target_s = str(target)
+    if target_s != root_s and not target_s.startswith(f"{root_s}{os.sep}"):
+        return None
+    if target.parent != root:
         return None
     return target
 
@@ -47,20 +56,13 @@ def ensure_session(workspace: Path, session_id: str) -> Path | None:
     return path
 
 
-def events_path(session: Path) -> Path:
-    return session / EVENTS_NAME
-
-
-def state_path(session: Path) -> Path:
-    return session / STATE_NAME
-
-
 def load_state(session: Path) -> dict[str, Any]:
-    path = _under_session(session, state_path(session))
+    path = _session_file(session, STATE_NAME)
     if path is None or not path.is_file():
         return _empty_state()
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        with open(str(path), encoding="utf-8") as fh:
+            data = json.loads(fh.read())
     except OSError, json.JSONDecodeError:
         return _empty_state()
     if not isinstance(data, dict):
@@ -71,11 +73,12 @@ def load_state(session: Path) -> dict[str, Any]:
 
 
 def save_state(session: Path, state: dict[str, Any]) -> bool:
-    path = _under_session(session, state_path(session))
+    path = _session_file(session, STATE_NAME)
     if path is None:
         return False
     try:
-        path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+        with open(str(path), "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(state, indent=2) + "\n")
     except OSError:
         return False
     return True
@@ -83,12 +86,12 @@ def save_state(session: Path, state: dict[str, Any]) -> bool:
 
 def append_event(session: Path, event: dict[str, Any]) -> bool:
     """Append one JSONL event; enforce MAX_EVENTS / MAX_EVENTS_BYTES caps."""
-    path = _under_session(session, events_path(session))
+    path = _session_file(session, EVENTS_NAME)
     if path is None:
         return False
     line = json.dumps(event, separators=(",", ":")) + "\n"
     try:
-        with path.open("a", encoding="utf-8") as fh:
+        with open(str(path), "a", encoding="utf-8") as fh:
             fh.write(line)
     except OSError:
         return False
@@ -97,11 +100,12 @@ def append_event(session: Path, event: dict[str, Any]) -> bool:
 
 def _trim_events(session: Path) -> bool:
     """Keep the newest MAX_EVENTS lines and stay under MAX_EVENTS_BYTES."""
-    path = _under_session(session, events_path(session))
+    path = _session_file(session, EVENTS_NAME)
     if path is None:
         return False
     try:
-        raw = path.read_text(encoding="utf-8")
+        with open(str(path), encoding="utf-8") as fh:
+            raw = fh.read()
     except OSError:
         return False
     lines = [ln for ln in raw.splitlines() if ln.strip()]
@@ -112,19 +116,21 @@ def _trim_events(session: Path) -> bool:
     while kept and len(("\n".join(kept) + "\n").encode("utf-8")) > MAX_EVENTS_BYTES:
         kept = kept[1:]
     try:
-        path.write_text(("\n".join(kept) + "\n") if kept else "", encoding="utf-8")
+        with open(str(path), "w", encoding="utf-8") as fh:
+            fh.write(("\n".join(kept) + "\n") if kept else "")
     except OSError:
         return False
     return True
 
 
 def load_events(session: Path) -> list[dict[str, Any]]:
-    path = _under_session(session, events_path(session))
+    path = _session_file(session, EVENTS_NAME)
     if path is None or not path.is_file():
         return []
     rows: list[dict[str, Any]] = []
     try:
-        text = path.read_text(encoding="utf-8")
+        with open(str(path), encoding="utf-8") as fh:
+            text = fh.read()
     except OSError:
         return []
     for line in text.splitlines():
