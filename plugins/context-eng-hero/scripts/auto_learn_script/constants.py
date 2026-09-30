@@ -21,14 +21,17 @@ ORPHAN_TTL_DAYS = 7
 
 MESSAGE_CAP = 2_000
 
+# Protocol tool names (host hook payloads).
+TOOL_READ = "Read"
+SHELL_TOOLS = frozenset({"Bash", "Shell"})
+
 # Tools treated as exploration (no write) for thrash.
 EXPLORE_TOOLS = frozenset(
     {
-        "Read",
+        TOOL_READ,
         "Grep",
         "Glob",
-        "Bash",
-        "Shell",
+        *SHELL_TOOLS,
         "LS",
         "find",
         "rg",
@@ -45,6 +48,8 @@ WRITE_TOOLS = frozenset(
         "MultiEdit",
     }
 )
+# Case-insensitive explore membership (bound once; used in thrash loop).
+EXPLORE_TOOLS_LOWER = frozenset(t.lower() for t in EXPLORE_TOOLS)
 
 # Bash command fingerprints that look like discovery after skill already bound.
 BASH_DISCOVERY_RE = re.compile(

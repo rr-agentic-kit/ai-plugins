@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from .constants import TOOL_READ
 from .gates import is_local_source_skill, looks_like_skill_md
 from .score import fingerprint_cmd
 from .store import append_event, ensure_session, load_state, save_state
@@ -58,13 +59,14 @@ def build_event(
     tool = _extract_tool_name(data)
     path = _extract_path(data)
     cmd = _extract_command(data)
-    fingerprint = path or (fingerprint_cmd(cmd) if cmd else "")
+    cmd_fp = fingerprint_cmd(cmd) if cmd else None
+    fingerprint = path or (cmd_fp or "")
     return {
         "ts": time.time(),
         "tool": tool,
         "fingerprint": fingerprint,
         "path": path,
-        "cmd": fingerprint_cmd(cmd) if cmd else None,
+        "cmd": cmd_fp,
         "failed": failed,
         "ok": not failed,
     }
@@ -115,6 +117,6 @@ def accumulate(
     if user_text:
         state["last_user_text"] = user_text
     path = event.get("path")
-    if isinstance(path, str) and event.get("tool") == "Read":
+    if isinstance(path, str) and event.get("tool") == TOOL_READ:
         state = maybe_bind_skill(state, path, roots)
     return save_state(session, state)

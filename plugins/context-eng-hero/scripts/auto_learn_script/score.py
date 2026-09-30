@@ -12,11 +12,14 @@ from .constants import (
     BASH_INFO_MIN,
     CORRECTION_RE,
     EXPLORE_TOOLS,
+    EXPLORE_TOOLS_LOWER,
     EXTREME_REREAD,
     EXTREME_THRASH,
     REREAD_MIN,
+    SHELL_TOOLS,
     THRASH_MIN,
     THRASH_WINDOW,
+    TOOL_READ,
     WRITE_TOOLS,
 )
 
@@ -48,7 +51,7 @@ def score_tool_thrash(events: list[dict[str, Any]]) -> SignalHit | None:
         if name in WRITE_TOOLS:
             streak = 0
             continue
-        if name in EXPLORE_TOOLS or name.lower() in {t.lower() for t in EXPLORE_TOOLS}:
+        if name in EXPLORE_TOOLS or name.lower() in EXPLORE_TOOLS_LOWER:
             streak += 1
             max_streak = max(max_streak, streak)
         else:
@@ -83,7 +86,7 @@ def score_reread(events: list[dict[str, Any]]) -> SignalHit | None:
     """Same path Read ≥M times."""
     counts: Counter[str] = Counter()
     for ev in events:
-        if _tool_name(ev) != "Read":
+        if _tool_name(ev) != TOOL_READ:
             continue
         path = _path_or_cmd(ev)
         if path:
@@ -129,7 +132,7 @@ def score_bash_info_loop(
     sample = ""
     for ev in events:
         name = _tool_name(ev)
-        if name not in ("Bash", "Shell"):
+        if name not in SHELL_TOOLS:
             continue
         cmd = _path_or_cmd(ev)
         if BASH_DISCOVERY_RE.search(cmd or ""):
@@ -149,7 +152,10 @@ def score_correction(
     last_user_text: str | None,
 ) -> SignalHit | None:
     """Correction lexicon on last user turn AND prior thrash."""
-    if not last_user_text or not CORRECTION_RE.search(last_user_text):
+    if not last_user_text:
+        return None
+    match = CORRECTION_RE.search(last_user_text)
+    if not match:
         return None
     thrash = score_tool_thrash(events)
     if thrash is None:
@@ -159,8 +165,7 @@ def score_correction(
         )
         if explore < max(3, THRASH_MIN // 2):
             return None
-    m = CORRECTION_RE.search(last_user_text)
-    snippet = (m.group(0) if m else "correction")[:40]
+    snippet = match.group(0)[:40]
     return SignalHit("correction", f"user correction '{snippet}' with prior thrash")
 
 
