@@ -32,9 +32,10 @@ Emit at **learn-4-handover** from **approved** topics only. Write under the **us
 ## Incorporate hint
 - Mode: **fix** | **redesign**
 - Touch list: `<plugin-source paths to edit>`
+- Craft-safe: absorb shapes must not leave ranked-eligible opportunity debt (author-to-bar); mechanism-complete companions required when outcome/north-star changes
 
 ---
 Ephemeral. Written in user project. Delete after fix/redesign absorb into **plugin source**.
 ```
 
-**Rules:** No full chat paste. No essay rationale sections. Approved table only—dropped classes stay out unless user forced them in. Handover file lives in the **user project**; absorb edits land only in **plugin source**.
+**Rules:** No full chat paste. No essay rationale sections. Approved table only—dropped classes stay out unless user forced them in. Handover file lives in the **user project**; absorb edits land only in **plugin source**. Incorporate hints stay lean but mechanism-complete **and** craft-safe (would not immediately fail CE opportunity-clean).

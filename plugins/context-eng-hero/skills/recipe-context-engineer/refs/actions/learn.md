@@ -19,6 +19,7 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 | `ui-brand.md` | `learn-1-bind` (banner); `learn-5-close` (Next Up under `--auto`) |
 | Target `SKILL.md` + named action refs | `learn-2-investigate` (effort bar) |
 | Sibling README (if present) | `learn-2-investigate` — When/What mismatch only |
+| `improvement-patterns.md` | `learn-2-investigate`, `learn-3-topics` (absorb craft bar / anti-patterns) |
 | `templates/learn-topics.template.md` | `learn-3-topics` (build/input — **not** chat-emit) |
 | `templates/learn-handover.template.md` | `learn-4-handover` |
 | `gate-prompts.md` | `learn-5-close` (**post-learn-routing**; skip under `--auto`) |
@@ -34,17 +35,17 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 ### Step 2: `learn-2-investigate`
 
 - **Outcome:** Gaps classified against on-disk procedure—not chat vibes alone.
-- **Done when:** Effort bar below completed (including **eager behavior curiosity** inventory + five probes, **genericness**, **layer-split**, and **mechanism-completeness**); economy inventory + probe answers recorded before classification completes; manual interventions and run-friction signals mapped to procedure loci; each candidate classified `skill_gap` \| `preference_oneoff` \| `env_tool` \| `already_covered`. When the Ref index co-names peers for a step under investigation, **Read them in one parallel turn** (same absorb shape learn recommends via `batch`).
+- **Done when:** Effort bar below completed (including **eager behavior curiosity** inventory + five probes, **genericness**, **layer-split**, **mechanism-completeness**, and **absorb craft**); economy inventory + probe answers recorded before classification completes; manual interventions and run-friction signals mapped to procedure loci; each candidate classified `skill_gap` \| `preference_oneoff` \| `env_tool` \| `already_covered`. When the Ref index co-names peers for a step under investigation, **Read them in one parallel turn** (same absorb shape learn recommends via `batch`).
 
 ### Step 3: `learn-3-topics`
 
 - **Outcome:** Internal topic package ready for handover (not a human gate).
-- **Done when:** Topics built from `templates/learn-topics.template.md` (≤7 topics; only `skill_gap` default-selected); **adequacy probe** satisfied or gaps added/dropped with reason (see effort bar §10); **no** full-report chat-emit; **no** approve gate; proceed to step 4.
+- **Done when:** Topics built from `templates/learn-topics.template.md` (≤7 topics; only `skill_gap` default-selected); **adequacy probe** + **craft adequacy** satisfied or gaps added/dropped with reason (see effort bar §10–§11); **no** full-report chat-emit; **no** approve gate; proceed to step 4.
 
 ### Step 4: `learn-4-handover`
 
 - **Outcome:** Lean handover from **default-selected `skill_gap`** topics only, written in the **user project**.
-- **Done when:** Handover filled from `templates/learn-handover.template.md`; write under the **user project** (prefer `docs/rr/LEARN-HANDOVER.<skill-name>.md` when `docs/rr/` exists, else project-root `LEARN-HANDOVER.<skill-name>.md`). **Target** + **Incorporate hint** list **absorb-into (plugin source)** paths — not cache. **Stop-rule:** never write handover or absorb edits under `~/.claude/plugins/cache/**` / installed runtime skill trees. If user-project path unwritable → chat-only draft + one path AskQuestion (under `--auto`, state path failure and stop — do not invent a path). No full chat paste.
+- **Done when:** Handover filled from `templates/learn-handover.template.md`; write under the **user project** (prefer `docs/rr/LEARN-HANDOVER.<skill-name>.md` when `docs/rr/` exists, else project-root `LEARN-HANDOVER.<skill-name>.md`). **Target** + **Incorporate hint** list **absorb-into (plugin source)** paths — not cache. Incorporate hints stay lean but **mechanism-complete and craft-safe** (would not immediately fail opportunity-clean). **Stop-rule:** never write handover or absorb edits under `~/.claude/plugins/cache/**` / installed runtime skill trees. If user-project path unwritable → chat-only draft + one path AskQuestion (under `--auto`, state path failure and stop — do not invent a path). No full chat paste.
 
 ### Step 5: `learn-5-close`
 
@@ -63,12 +64,13 @@ Package an evidence-backed gap list from a **live run miss** (failure **or** fri
 8. **Mechanism-completeness:** For each `skill_gap` that changes outcome, success metric, north-star, or Purpose language, require a companion absorb that forces runtime behavior (`step` \| `stop-rule` \| `probe` \| `anti-trigger`) — or mark the topic incomplete and add the companion. Purpose/README-only is **not** enough unless Auto-dropped states “prose-only OK” + reason.
 9. Cap **7** topics; merge related gaps; each topic needs evidence + skill locus + absorb shape (`step` \| `stop-rule` \| `ref` \| `anti-trigger` \| `probe` \| `readme-when` \| `batch` \| `read-budget` \| `script`). **Anti-trigger:** when under the cap, prefer dropping a duplicate outcome row over dropping the **only** mechanism companion (`step`/`probe`/`stop-rule`/`anti-trigger`/`script`) for an outcome/redesign topic.
 10. **Adequacy probe (before handover write):** Ask once — “Would absorb of *only* these selected topics still miss an operational nuance the founder/human named?” If yes → add a topic or list under Auto-dropped with reason. Do not present a philosophy-only package as complete. If founder/human named waste/friction (tools, Reads, tokens, interactions) and selected topics omit economy (`batch` / `read-budget` or Auto-dropped “economy: no gap”), **fail adequacy**.
+11. **Absorb craft (author-to-bar packaging):** Each `skill_gap` absorb shape must not recommend patterns that would immediately fail opportunity-clean on the write path (`improvement-patterns.md`: Purpose-only; echo into agent body; procedure invent/dump without `script`/`batch` when probes show waste; etc.). Adequacy probe add-on: “Would absorb of only these topics leave a ranked opportunity a CE write gate would FAIL?” If yes → add topic or Auto-drop with reason. Handover Incorporate hints stay lean but mechanism-complete **and** craft-safe.
 
 ## Stop
 
 - Learn **never** edits the target skill definition (absorb via **fix** / **redesign** on **plugin source** only).
 - Learn **never** writes into runtime/cache/installed skill copies — handover → **user project**; absorb → **source**.
 - **`--auto` never invents absorb-into**; unresolvable source still stops.
-- No bible-sized handover: target + miss + approved table + non-goals + fix-vs-redesign hint only — **but** lean must not erase mechanism layers (effort bar §4, §8, §9).
+- No bible-sized handover: target + miss + approved table + non-goals + fix-vs-redesign hint only — **but** lean must not erase mechanism layers (effort bar §4, §8, §9) or recommend craft-unsafe absorb (effort bar §11).
 - No live run evidence (and no problem statement) → wrong action (use audit/fix). Painful-but-“successful” runs still count as live run evidence.
 - Creating a new artifact → **create** / **extract**, not learn.

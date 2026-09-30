@@ -96,9 +96,9 @@ Evaluate each dimension. Emit 0–N candidates with evidence; omit empty dimensi
 
 | Field | Rule |
 |-------|------|
-| **Look for** | Hard to audit/test; no observable done-when; cannot thicken from FAIL |
+| **Look for** | Hard to audit/test; no observable done-when; cannot iterate from FAIL evidence (loop-fitness—not “must be thin for later thicken”) |
 | **Improve when** | Add probes/evidence hooks without outcome change |
-| **Restructure when** | Action/report contracts block eval-first loops |
+| **Restructure when** | Action/report contracts block auditable/testable loops |
 
 ### Executor cognitive load — `imp.load.executor`
 

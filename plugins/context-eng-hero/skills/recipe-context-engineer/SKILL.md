@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash(python3 scripts/audit_static.py*), Bash(p
 
 ## Purpose
 
-Make **skills, commands, rules, agents, and workflows** discoverable, bounded, and safe to reuse—without mixing judgment workflows with high-risk edits.
+Make **skills, commands, rules, agents, and workflows** discoverable, bounded, and safe to reuse—**author-to-bar** on every write (type rubric + opportunity-clean), without mixing judgment workflows with high-risk edits or shipping gate-clean / improve-dirty debt.
 
 ## When to use
 
@@ -101,7 +101,7 @@ Load these only when the active action Ref index names them (create/design/extra
 | audit | Static + rubric report (no edits) | `refs/actions/audit.md` |
 | audit-redesign | Ranked improvement opportunities (no edits) | `refs/actions/audit-redesign.md` |
 | improve | Parallel audits → merge → fix then redesign under write gates | `refs/actions/improve.md` |
-| fix | Minimal edits for existing intent | `refs/actions/fix.md` |
+| fix | Edits for existing intent + whole-artifact opportunity-clean | `refs/actions/fix.md` |
 | redesign | Change outcome/scope + write gates | `refs/actions/redesign.md` |
 | learn | Gap package from a live run miss—patch or friction (no skill edits); `--learn --auto` skips confirms | `refs/actions/learn.md` |
 | test | Behavior probe report | `refs/actions/test.md` |
@@ -117,6 +117,8 @@ Load these only when the active action Ref index names them (create/design/extra
 ## Execution rules
 
 - **Action ref is source of truth** for steps, staged Reads, and stop rules.
+- **Author-to-bar:** Write paths draft against design refs + `improvement-patterns.md`; pre-write reflection must pass judgment + harness + **opportunity-clean**. FAIL-scoped change sets ≠ thin drafts left for `--improve`.
+- **Anti-cheat:** Do **not** spawn `improve`, `audit-redesign`, or opportunity Tasks as a substitute for create/design/fix/redesign/extract drafting—verify opportunity-clean **inline** in reflection.
 - **TodoWrite:** `merge: false`; one todo per step id; mark `completed` before advancing. **Single-shot N/A** (one line) allowed for `audit`, `audit-redesign`, `diff`, and `test`; required for write paths and `improve`. Under **improve** nested apply: only `improve-1…6` todos — do not spawn nested `fix-*` / `redesign-*` lists (`actions/improve.md` Stop).
 - **Visual output:** Stage banner at action start (`ui-brand.md`).
 - **Post-action:** `close-contract.md`—never end on a bare report.

@@ -25,9 +25,10 @@
 | `templates/glossary.template.md` | `create-3-draft` (GLOSSARY.md) |
 | `helper-cli.md` | `create-3-draft` (when `scripts/` exists **or** deterministic fetch/filter/id-keyed write; SCRIPTABLE report waste → lean-emit recipe) |
 | `chat-orchestration.md` | `create-3-draft` (workflows) |
+| `improvement-patterns.md` | `create-3-draft` (author-to-bar; opportunity anti-patterns) |
 | `template-required-map.md` | `create-3-draft` |
 | `templates/<type>.template.md` (per `classify.md`) | `create-3-draft` |
-| Prior test/audit FAIL | `create-2-clarify` if supplied |
+| Prior test/audit FAIL | `create-2-clarify` if supplied (FAIL-scoped change set—not thin-draft license) |
 | `shared-write-gates.md` | `create-4-gates` |
 | `close-contract.md` | `create-5-close` |
 
@@ -43,12 +44,12 @@
 
 - **Outcome:** Outcome, audience, failure mode, and (for skills) **invoke mode** + **skill UX (input/delivery)** are resolved (or explicitly deferred with open questions listed).
 - **Done when:** Clarify fields answered per `questioning.md` (one question at a time); skills: invoke mode per `design/skill.md` **and** skill UX resolved via **skill-ux-delivery** (`gate-prompts.md`) or deferred as an open question; no REQUIRED hard-stop at intake.
-- **Eval-first:** If user supplied test FAIL or audit FAIL, treat as **minimum write scope**.
+- **FAIL-scoped:** If user supplied test FAIL or audit FAIL, bound the **change set** to those ids—do not invent unrelated capabilities; still draft to author-to-bar.
 
 ### Step 3: `create-3-draft`
 
-- **Outcome:** Draft file content from template; `<!-- REQUIRED -->` markers replaced per `template-required-map.md`.
-- **Done when:** Full draft in memory; workflow steps include `todo_id` column if type is workflow; skill: `description` ≤160 chars and matches invoke mode; skill folder: sibling README per `readme-spec.md` drafted or defer reason recorded; `ACRONYMS.md` + `GLOSSARY.md` at resolved path per `lexicon-spec.md` (empty table OK—companions ship every skill/plugin create); skills: **Delivery channels** wired from skill-UX choice into README **UX → Clarify/Close** and SKILL **Orchestration** / Execution rules (or one-line N/A if Minimal clarify and no enumerable forks). When the draft absorbs **SCRIPTABLE** fetch/filter/id-keyed or report/scaffold waste, apply `helper-cli.md` (thin shell script with filtered stdout, or **Lean emit + schema + render** for reports)—not more prose procedure.
+- **Outcome:** Draft file content from template; `<!-- REQUIRED -->` markers replaced per `template-required-map.md`; authored as if a competent opportunity assessor would rank **0** absorb rows.
+- **Done when:** Full draft in memory; workflow steps include `todo_id` column if type is workflow; skill: `description` ≤160 chars and matches invoke mode; skill folder: sibling README per `readme-spec.md` drafted or defer reason recorded; `ACRONYMS.md` + `GLOSSARY.md` at resolved path per `lexicon-spec.md` (empty table OK—companions ship every skill/plugin create); skills: **Delivery channels** wired from skill-UX choice into README **UX → Clarify/Close** and SKILL **Orchestration** / Execution rules (or one-line N/A if Minimal clarify and no enumerable forks). Draft already satisfies type rubric **and** leaves no ranked-eligible opportunity (`improvement-patterns.md` + same filter as improve apply: `impact` high|medium + confidence rules). When the draft absorbs **SCRIPTABLE** fetch/filter/id-keyed or report/scaffold waste, apply `helper-cli.md` (thin shell script with filtered stdout, or **Lean emit + schema + render** for reports)—not more prose procedure.
 - **Skill folder draft order:** (1) README spec from `templates/readme.template.md` if missing or user supplied spec only; (2) `SKILL.md` from README + `templates/skill.template.md`; (3) ensure `ACRONYMS.md` + `GLOSSARY.md` at plugin root (or skill sibling if standalone)—harvest jargon from draft + co-loaded refs. If README already exists and user asked for `SKILL.md`, derive from README—do not invent a second spec.
 - **Delivery from UX gate:** Inject a short Question delivery / Orchestration constraint citing `questioning.md` **Delivery channels**—prefer AskQuestion when gates exist; text-mode same options mandatory; do not stall. Never rewrite Purpose/When/Procedure from the UX choice alone.
 - **README → SKILL derivation map** (per `readme-spec.md` reconstructability):
@@ -77,4 +78,4 @@
 
 ## Stop
 
-Do not bypass reflection or pre-ship. Do not write outside agreed plugin-relative paths.
+Do not bypass reflection or pre-ship. Do not write outside agreed plugin-relative paths. **Anti-cheat:** do not spawn `improve`, `audit-redesign`, or opportunity Tasks as a draft substitute—opportunity-clean is owned by pre-write reflection.

@@ -27,5 +27,5 @@ List each probe id from `prompts/<type>.prompt.md` and the exact prompt variant 
 - Probe FAIL on **same contract** (wording, stop rule, missing step): fix using probe ids from this report
 - FAIL or user story implies **wrong outcome or capability**: redesign
 - PASS with unverified ship: optional audit
-- AMBIGUOUS only: re-run probe or ask once—do not thicken artifact from AMBIGUOUS alone
+- AMBIGUOUS only: re-run probe or ask once—do not expand artifact from AMBIGUOUS alone
 ```

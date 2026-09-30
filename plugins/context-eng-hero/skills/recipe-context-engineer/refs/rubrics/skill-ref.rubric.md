@@ -30,7 +30,7 @@ Judgment rows from `rubrics/skill.rubric.md` apply to SKILL.md. Additional rows 
 | `skill-ref.scripts.helper-cli` | minor | If `scripts/` exists: SKILL documents run lines per `helper-cli.md`; script source not pasted in body |
 | `skill-ref.readme.spec` | minor | Sibling README has **Why**, **What**, **When** with `### Use when` and `### Avoid when` per `readme-spec.md`; dense sections not verbose prose; paths only in **Notes**; does not restate **Procedure**; exists or defer reason recorded |
 | `skill-ref.readme.anti-triggers` | minor | **### Avoid when** under **When** lists mis-invocation cases; not duplicated in **What** out-of-scope |
-| `skill-ref.readme.philosophy` | minor | **Philosophy** present when skill has eval-first, gates, or methodology; 3–6 principle bullets, no prose blocks |
+| `skill-ref.readme.philosophy` | minor | **Philosophy** present when skill has author-to-bar, gates, or methodology; 3–6 principle bullets, no prose blocks |
 | `skill-ref.readme.ux` | minor | **UX** present when skill has clarify loops, gates, or multi-step close; `###` subsections (Invoke, Intake, Clarify, Output, Close) each ≤2 lines |
 | `skill-ref.readme.design-notes` | minor | **Design notes** present only when ≥2 non-obvious product tradeoffs exist; no process meta |
 | `skill.acronyms.present` | minor | Pack has `ACRONYMS.md` at plugin root (or skill sibling if standalone) per `lexicon-spec.md` |

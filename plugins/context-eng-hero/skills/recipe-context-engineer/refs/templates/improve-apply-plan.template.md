@@ -1,6 +1,6 @@
 # Improve apply plan (merge output)
 
-Emit after `improve-3-merge`. Persist as `.ai/learning/ce-improve/<run-id>/apply-plan.md`. Present **link + tables** in chat — not full audit dumps. **approve-apply-plan** must run before any target-path mutation. Write-gate Approve later still required before promoting draft → target.
+Emit after `improve-3-merge`. Persist as `.ai/learning/ce-improve/<run-id>/apply-plan.md`. Present **link + tables** in chat — not full audit dumps. **approve-apply-plan** must run before any target-path mutation. Write-gate Approve later still required before Write to final paths.
 
 ```markdown
 ## Combined apply plan

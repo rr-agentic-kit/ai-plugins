@@ -23,6 +23,7 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 | `templates/acronyms.template.md` | `redesign-3-apply` (ACRONYMS.md) |
 | `templates/glossary.template.md` | `redesign-3-apply` (GLOSSARY.md) |
 | `helper-cli.md` | `redesign-3-apply` (when `scripts/`; SCRIPTABLE report waste → lean-emit recipe) |
+| `improvement-patterns.md` | `redesign-2-plan`, `redesign-3-apply` (author-to-bar; opportunity anti-patterns) |
 | `template-required-map.md` | `redesign-3-apply` |
 | `templates/<type>.template.md` (per `classify.md`) | `redesign-3-apply` |
 | `chat-orchestration.md` | `redesign-2-plan` (workflows) |
@@ -40,18 +41,18 @@ Change what the artifact **does**: outcome, audience, capabilities, or contracts
 
 ### Step 2: `redesign-2-plan`
 
-- **Outcome:** Impact plan lists section/contract changes and tradeoffs.
-- **Done when:** Each delta maps to concrete edits (add/remove/revise sections, frontmatter, stop rules); optional diff notes referenced; old audit FAILs not treated as mandatory fix list.
+- **Outcome:** Impact plan lists section/contract changes and tradeoffs; plan already aims at author-to-bar (0 ranked-eligible opportunities after apply).
+- **Done when:** Each delta maps to concrete edits (add/remove/revise sections, frontmatter, stop rules); optional diff notes referenced; old audit FAILs not treated as mandatory fix list; `improvement-patterns.md` consulted so the redesigned shape would not immediately fail opportunity-clean.
 
 ### Step 3: `redesign-3-apply`
 
-- **Outcome:** Redesigned draft applied.
-- **Done when:** All planned edits applied in memory or working copy; harvest new/changed jargon into `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md` (ensure both exist at resolved path); if Procedure/Orchestration/close gains or keeps AskQuestion/enumerable gates, wire **Delivery channels** (or one-line N/A if Minimal clarify and no forks)—same contract as create draft. When absorbing **SCRIPTABLE** report/scaffold waste, apply `helper-cli.md` **Lean emit + schema + render**.
+- **Outcome:** Redesigned draft applied; authored as if a competent opportunity assessor would rank **0** absorb rows.
+- **Done when:** All planned edits applied in memory or working copy; harvest new/changed jargon into `ACRONYMS.md` + `GLOSSARY.md` per `lexicon-spec.md` (ensure both exist at resolved path); draft leaves no ranked-eligible opportunity; if Procedure/Orchestration/close gains or keeps AskQuestion/enumerable gates, wire **Delivery channels** (or one-line N/A if Minimal clarify and no forks)—same contract as create draft. When absorbing **SCRIPTABLE** report/scaffold waste, apply `helper-cli.md` **Lean emit + schema + render**.
 
 ### Step 4: `redesign-4-gates`
 
 - **Outcome:** Shared write gates passed or write blocked.
-- **Done when:** All four gates in `refs/actions/shared-write-gates.md` completed in order (static → reflect → pre-ship → write).
+- **Done when:** All four gates in `refs/actions/shared-write-gates.md` completed in order (reflect → pre-ship → Write → post-write static).
 
 ### Step 5: `redesign-5-close`
 
@@ -71,4 +72,4 @@ Standalone redesign uses the full Ref index and Steps 1–5 above.
 
 ## Stop
 
-Quality bar unchanged—static + reflection + pre-ship required before write. Do not claim parity with old audit PASS/FAIL lists.
+Quality bar unchanged—reflection (incl. opportunity-clean) + pre-ship + Write + post-write static required. Do not claim parity with old audit PASS/FAIL lists. **Anti-cheat:** do not spawn `improve`, `audit-redesign`, or opportunity Tasks as a draft substitute.

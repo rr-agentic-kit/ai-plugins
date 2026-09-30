@@ -1,8 +1,8 @@
 {# Pre-write reflection — scaffolding only. #}
 {% if result == "PASSED" %}
-{% set next_line = "PASSED: proceed to pre-ship, then write" %}
+{% set next_line = "PASSED: proceed to pre-ship, then write, then post-write static" %}
 {% else %}
-{% set next_line = "FAILED: revise draft; re-run static → reflection → pre-ship" %}
+{% set next_line = "FAILED: revise draft; re-run reflection → pre-ship; do not treat run-improve-next as gate satisfaction" %}
 {% endif -%}
 ## Pre-write reflection
 
@@ -35,6 +35,14 @@
 |----|----------|-----------|----------|
 {% for row in harness %}| {{ row.id }} | {{ row.severity }} | {{ row.result }} | {{ row.evidence }} |
 {% else %}| — | — | — | (none) |
+{% endfor %}
+
+### Opportunity checks
+
+| id | Severity | PASS/FAIL | Evidence |
+|----|----------|-----------|----------|
+{% for row in opportunity | default([]) %}| {{ row.id }} | {{ row.severity | default("major", true) }} | {{ row.result }} | {{ row.evidence }} |
+{% else %}| — | — | — | (none — emit eight imp.* dims or PASS-all note) |
 {% endfor %}
 
 ### Top patterns

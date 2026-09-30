@@ -25,6 +25,7 @@ Conditional procedure when skill **Classify** + **Clarify** ends with writing a 
 | `templates/acronyms.template.md` | `design-3-draft` (ACRONYMS.md) |
 | `templates/glossary.template.md` | `design-3-draft` (GLOSSARY.md) |
 | `helper-cli.md` | `design-3-draft` (when `scripts/` exists **or** deterministic fetch/filter/id-keyed write) |
+| `improvement-patterns.md` | `design-3-draft` (author-to-bar; opportunity anti-patterns) |
 | `template-required-map.md` | `design-3-draft` |
 | `templates/<type>.template.md` (per `classify.md`) | `design-3-draft` |
 | `shared-write-gates.md` | `design-4-gates` |
@@ -51,8 +52,8 @@ If the user only wanted guidance, **AskQuestion**: finish here or run **create**
 
 ### Step 3: `design-3-draft`
 
-- **Outcome:** Template-shaped draft at approved plugin-relative path.
-- **Done when:** Full draft in memory/working copy; markers replaced per `template-required-map.md`; eval-first minimum when FAIL list supplied; skills: empty `ACRONYMS.md` + `GLOSSARY.md` companions ship if missing; **Delivery channels** from skill-UX choice wired into README **UX** + SKILL Orchestration / Execution rules (or one-line N/A if no enumerable forks).
+- **Outcome:** Template-shaped draft at approved plugin-relative path; authored as if a competent opportunity assessor would rank **0** absorb rows.
+- **Done when:** Full draft in memory/working copy; markers replaced per `template-required-map.md`; FAIL list (if supplied) bounds the change set—not a thin-draft license; draft leaves no ranked-eligible opportunity (`improvement-patterns.md`); skills: empty `ACRONYMS.md` + `GLOSSARY.md` companions ship if missing; **Delivery channels** from skill-UX choice wired into README **UX** + SKILL Orchestration / Execution rules (or one-line N/A if no enumerable forks).
 - **Skill folder draft order:** Same as **create**—README spec first if missing; `SKILL.md` from README when both ship; ensure `ACRONYMS.md` + `GLOSSARY.md` at resolved path per `lexicon-spec.md`. If write target is only README, use **extract** ingestion rules on existing `SKILL.md`.
 - **Delivery from UX gate:** Same as **create**—inject Delivery channels constraint from skill-UX choice; do not rewrite Purpose/When/Procedure from that gate alone.
 - **README ↔ SKILL derivation:** Same reconstructability map as **create** (`readme-spec.md` table). README-only write: follow **extract** section map. SKILL-only write from existing README: derive per create map—do not invent parallel spec.
@@ -64,4 +65,4 @@ If the user only wanted guidance, **AskQuestion**: finish here or run **create**
 
 ## Stop
 
-Do not skip gates because "it's only design assist." No silent invention of missing business facts—list open questions if clarify incomplete.
+Do not skip gates because "it's only design assist." No silent invention of missing business facts—list open questions if clarify incomplete. **Anti-cheat:** do not spawn `improve`, `audit-redesign`, or opportunity Tasks as a draft substitute—opportunity-clean is owned by pre-write reflection.

@@ -32,7 +32,7 @@ Use `templates/readme.template.md`. Section read order:
 | **What** | Domain, types, boundaries; `### Verification` when non-obvious | Yes |
 | **Actions** | id, outcome, pick-when table (orchestrator skills only) | Yes if ≥3 actions |
 | **When** | `### Use when` + `### Avoid when` | Yes |
-| **Philosophy** | 3–6 methodology invariants (eval-first, scoped-only, gates) | If eval-first, gates, or methodology |
+| **Philosophy** | 3–6 methodology invariants (author-to-bar, scoped-only, gates) | If author-to-bar, gates, or methodology |
 | **UX** | `###` Invoke, Intake, Clarify, Output, Close | If clarify loops, gates, or multi-step close |
 | **Design notes** | 2–4 non-obvious product tradeoffs | Optional—≥2 surprising tradeoffs |
 | **Constraints** | Facts to regenerate `SKILL.md` (invoke, gates, paths) | Yes |
@@ -90,7 +90,7 @@ Required table when sibling `SKILL.md` has an **Actions** table or ≥3 action i
 
 ## Philosophy
 
-Short bullet list (3–6 items). Eval-first, scoped-only, spec/executor split, gates-before-write, etc.
+Short bullet list (3–6 items). Author-to-bar / first-write completeness, FAIL-scoped changes, scoped-only, spec/executor split, gates-before-write, etc.
 
 **SKILL derivation:** Advisory tone, Purpose emphasis—not pasted into Procedure.
 
@@ -170,9 +170,9 @@ Avoid paths here—concept names only. Paths belong in **Notes**.
 
 ## Two-way rules
 
-**Extract (SKILL → README):** Ingest `SKILL.md` + progressive-disclosure refs for **constraints** (invoke, gates, eval-first, paths). Do **not** copy **Procedure** steps or Load chains. Map **When not to use** → `### Avoid when`; **When to use** → `### Use when`. Fill Actions table + pick-when from classify routing. Derive Philosophy / UX / Design notes from advisory, questioning, close-contract, frontmatter tradeoffs. Paths → **Notes** only. Fill `readme.template.md`. Record provenance: source paths + assumptions.
+**Extract (SKILL → README):** Ingest `SKILL.md` + progressive-disclosure refs for **constraints** (invoke, gates, author-to-bar, paths). Do **not** copy **Procedure** steps or Load chains. Map **When not to use** → `### Avoid when`; **When to use** → `### Use when`. Fill Actions table + pick-when from classify routing. Derive Philosophy / UX / Design notes from advisory, questioning, close-contract, frontmatter tradeoffs. Paths → **Notes** only. Fill `readme.template.md`. Record provenance: source paths + assumptions.
 
-**Create / design (README → SKILL):** If README is missing, draft spec first (or record defer reason). If README exists and user asked for `SKILL.md`, do not invent a second spec—derive executor from README + type template. Draft order: README spec → `SKILL.md` → refs only when template or FAIL requires.
+**Create / design (README → SKILL):** If README is missing, draft spec first (or record defer reason). If README exists and user asked for `SKILL.md`, do not invent a second spec—derive executor from README + type template. Draft order: README spec → `SKILL.md` → refs as needed for author-to-bar completeness (not “refs only when FAIL proves the gap”).
 
 **Validate:** (1) Human one-pass—junior reader understands Why/What/When without opening `SKILL.md`. (2) Reverse direction still works—README alone could regenerate a coherent `SKILL.md` outline.
 

@@ -75,7 +75,7 @@ Chat return stays tiny (status + counts + path); parent reads lean JSON or rende
 | Task prompt | Fill `templates/task-prompt.template.md` or action-specific template |
 | Nested Task | **Forbidden** from executor |
 | Parent re-invoke | Executor MUST NOT invoke owning orchestrator skill for same job |
-| Write gates | Executor runs **no** write gates — parent owns static → reflection → pre-ship |
+| Write gates | Executor runs **no** write gates — parent owns reflection → pre-ship → Write → post-write static |
 
 Exemplar parent step: `actions/improve.md` → `improve-2-parallel-audits`.
 

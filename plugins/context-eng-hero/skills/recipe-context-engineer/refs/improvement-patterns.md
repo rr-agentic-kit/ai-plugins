@@ -11,7 +11,7 @@ Map each opportunity to one primary pattern. Group bullets under one pattern whe
 | **FRAMING** | LLM-hostile wording; buried constraints; weak forcing functions | `imp.framing.llm` |
 | **ORCHESTRATION** | Clarify/TodoWrite/close ergonomics costly or inconsistent | `imp.orchestration.ergonomics` |
 | **FREEDOM** | Degrees of freedom mismatch (too rigid or too open) | `imp.freedom.fit` |
-| **EVAL-LOOP** | Hard to audit/test/thicken from observed FAILs | `imp.eval.loop-fitness` |
+| **EVAL-LOOP** | Hard to audit/test; no observable done-when / auditable loop | `imp.eval.loop-fitness` |
 | **LOAD** | Executor cognitive load; too many hops or decisions per turn | `imp.load.executor` |
 | **SCRIPTABLE** | Agent forced to invent deterministic multi-step work (or dump→filter) a one-shot tool could return | `imp.load.executor` |
 | **COLLISION** | Discovery overlap or sibling skill/command collision | `imp.discovery.sibling-collision` |

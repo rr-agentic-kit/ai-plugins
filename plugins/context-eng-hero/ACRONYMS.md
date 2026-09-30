@@ -5,7 +5,8 @@
 | CE | Context Engineer / context-eng-hero | Plugin / skill banner prefix |
 | STATIC | Mechanical static audit | `scripts/audit_static.py` rows |
 | PRE-SHIP | Pre-ship checklist | Binary PASS/FAIL before write |
-| EVAL-FIRST | Eval-first authoring | Thicken from observed FAILs, not anticipation |
+| EVAL-FIRST | Eval-first (legacy FAIL-scope phrasing) | Prefer **author-to-bar**; FAIL-scoped ≠ thin draft |
+| AUTHOR-TO-BAR | Author-to-bar / first-write completeness | Type rubric + opportunity-clean before Write; improve-clean on disk = proof |
 | LEARN-HANDOVER | Learn handover package | Live-miss absorb input for fix/redesign |
 | Skill+Ref | Skill plus progressive-disclosure refs pack | Artifact type; not a single file |
 | STRUCTURE | Structure failure pattern | Missing required shape/sections |

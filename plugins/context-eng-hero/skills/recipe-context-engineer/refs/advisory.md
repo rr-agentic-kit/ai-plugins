@@ -1,19 +1,39 @@
 # Advisory (design partner)
 
-Loaded in the **Advise** orchestration step and after **Gather** in Clarify. Run for **create**, **design**, **extract**, **fix**, and **redesign**—skip for **audit**, **audit-redesign**, **improve**, **test**, **diff**, and **learn** (diagnosis-only or report-as-plan).
+Loaded in the **Advise** orchestration step and after **Gather** in Clarify. Run for **create**, **design**, **extract**, **fix**, and **redesign**—skip for **audit**, **audit-redesign**, **improve**, **test**, **diff**, and **learn** (diagnosis-only or report-as-plan). **Learn** still follows the craft bar inside `actions/learn.md` (absorb packaging)—Advise skip does not mean craft-free topics.
 
-## Eval-first authoring
+## Author-to-bar
 
-Default create/fix path (Anthropic eval-first): **observe a miss, write the minimum that would pass, then gates**—do not front-load research or anticipated constraints.
+Default create/design/extract/redesign path: **draft already meets the craft bar that `--improve` would apply**—type rubric **and** no ranked-eligible opportunity left—then gates. Do not front-load research phases; also do **not** ship thin and plan to thicken via `--improve`.
 
 | Signal | Authoring default |
 |--------|-------------------|
-| Failed **test** probe, audit FAIL, or user-reported miss | Write/fix only what that FAIL requires; re-probe before thickening |
-| **Extract** notes or chat transcript | Template-shaped draft + provenance; gaps = open questions—not invented policy |
-| No observed FAIL yet | Smallest draft that satisfies clarify (outcome, audience, failure mode); thicken after first FAIL |
+| Greenfield **create** / **design** / **extract** / **redesign** | Draft satisfies type rubric **and** leaves **0** ranked-eligible opportunities (`impact` high\|medium with improve’s confidence filter: `observed`, or `high`+`hypothesized`). Author against `improvement-patterns.md` during draft. |
+| **Fix** (same outcome) | Address FAIL list **and** clear remaining ranked-eligible opportunities on the **whole target**; if clearing requires outcome/audience/capability change → **fix-vs-redesign**. |
+| Failed **test** probe, audit FAIL, or user-reported miss | Scope the **change set** to what that FAIL requires—do not invent unrelated capabilities—but still leave the artifact opportunity-clean before Write to final paths. |
+| **Extract** notes or chat transcript | Template-shaped draft + provenance; gaps = open questions—not invented policy; still author-to-bar on filled sections. |
 | “Research how others do it” / web browse | **Optional** local sibling pattern match only—not a mandatory phase before draft |
 
-**Thicken from FAILs, not anticipation:** add refs, steps, or rules only when a probe, audit, or live miss proves the gap. Research-as-phase produces bloated READMEs and echo.
+**Success:** After a CE write/fix under author-to-bar, **on-disk files** should survive a subsequent `--improve` as diagnosis-only with **empty apply lists** (compliance FAILs ∪ Ranked Absorb `fix`/`redesign` at high\|medium). That improve-clean-on-disk result is the instruction-quality proof—not ceremony completion. Deferred / `impact: low` stay non-blocking. `--improve` still exists because judgment can miss, humans write outside CE, and later edits may land without this skill—not as the expected post-create thicken loop.
+
+**Anti-cheat:** Do **not** spawn `improve`, `audit-redesign`, or opportunity Tasks as part of create/design/fix/redesign/extract drafting. Primary mechanism = draft while loading design refs + `improvement-patterns.md`. Verification = **inline** opportunity-clean in pre-write reflection (same dimension ids + same ranked filter as improve apply policy)—judgment only, not a second improve pipeline.
+
+**FAIL-scoped ≠ thin draft:** FAIL lists bound what you add/change; they do **not** license leaving craft debt for `--improve`.
+
+## Opportunity anti-patterns (author during draft)
+
+Author against these during draft—do **not** “plan to improve later.” Detail + dimension ids: `improvement-patterns.md`.
+
+| Pattern | Draft risk to avoid |
+|---------|---------------------|
+| **COHESION** | Fuzzy seams; echo rubrics/templates into agent body; mixed concerns |
+| **DISCLOSURE** | Wrong always-on vs progressive load; body/ref economics ignored |
+| **FRAMING** | LLM-hostile wording; buried constraints; weak forcing functions |
+| **ORCHESTRATION** | Clarify/TodoWrite/close ergonomics costly or inconsistent |
+| **FREEDOM** | Degrees of freedom mismatch (too rigid or too open) |
+| **EVAL-LOOP** | No observable done-when; hard to audit/test (loop-fitness—not “must be thin”) |
+| **LOAD** / **SCRIPTABLE** | Executor overload; invent/dump deterministic work a script/CLI should return |
+| **COLLISION** | Discovery overlap or sibling skill/command collision |
 
 ## Goldilocks (over/under-spec)
 
