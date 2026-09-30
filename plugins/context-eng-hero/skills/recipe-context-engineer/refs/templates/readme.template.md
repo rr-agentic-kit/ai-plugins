@@ -34,7 +34,7 @@
 
 ## Philosophy
 
-<!-- OPTIONAL (skill-ref.readme.spec): 3–6 methodology invariants — eval-first, scoped-only, gates -->
+<!-- OPTIONAL (skill-ref.readme.spec): 3–6 methodology invariants — author-to-bar, scoped-only, gates -->
 
 ## UX
 
@@ -64,7 +64,7 @@
 
 ## Constraints
 
-<!-- REQUIRED (skill-ref.readme.spec): invoke mode, gates, eval-first, paths — facts to regenerate SKILL.md -->
+<!-- REQUIRED (skill-ref.readme.spec): invoke mode, gates, author-to-bar, paths — facts to regenerate SKILL.md -->
 
 ## Notes
 

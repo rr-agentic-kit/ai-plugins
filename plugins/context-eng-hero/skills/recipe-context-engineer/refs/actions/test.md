@@ -20,7 +20,7 @@ Probe files: `prompts/skill.prompt.md` | `prompts/skill-ref.prompt.md` | `prompt
 |---------|---------|
 | **PASS** | Behavior matches contract |
 | **FAIL** | Wrong behavior; counts toward fix scope |
-| **AMBIGUOUS** | Cannot verify without more input or runtime; **does not count as PASS**; does not alone justify thickening the artifact—re-run probe or ask once |
+| **AMBIGUOUS** | Cannot verify without more input or runtime; **does not count as PASS**; does not alone justify expanding the artifact—re-run probe or ask once |
 
 ## Steps
 
@@ -37,8 +37,8 @@ Probe files: `prompts/skill.prompt.md` | `prompts/skill-ref.prompt.md` | `prompt
 ### Step 3: `test-3-report`
 
 - **Outcome:** Behavior report complete.
-- **Done when:** Output matches `templates/test-output.template.md`; regression risks summarized; no file edits; FAIL probes listed as ids for **fix** (eval-first minimum scope); follow-ups verb-only per `close-contract.md`.
+- **Done when:** Output matches `templates/test-output.template.md`; regression risks summarized; no file edits; FAIL probes listed as ids for **fix** (FAIL-scoped change set); follow-ups verb-only per `close-contract.md`.
 
 ## Stop
 
-Behavior report only—not a code execution harness unless the user provides a real runtime. Route FAIL probes to **fix** before thickening with anticipated constraints.
+Behavior report only—not a code execution harness unless the user provides a real runtime. Route FAIL probes to **fix** (FAIL-scoped + opportunity-clean on absorb)—do not invent unrelated capabilities from AMBIGUOUS alone.

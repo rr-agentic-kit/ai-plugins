@@ -30,4 +30,6 @@ Use when the user did not supply an audit/test/learn report and intent is unclea
 
 Each FAIL id, Ranked Absorb `fix` opportunity id, approved learn topic id, or symptom must map to one concrete edit before step 2 (`fix-2-plan`) completes.
 
-**Eval-first:** Fix only what FAILs require; do not thicken with anticipated rules. Re-run **test** after fix when probes exist. After absorb from learn handover: recommend delete user-project `LEARN-HANDOVER.*` + re-audit/test on **plugin source** (never cache).
+**FAIL-scoped + opportunity-clean:** Fix what FAILs require **and** clear remaining ranked-eligible opportunities on the whole target while preserving outcome (`impact` high|medium + improve confidence filter; Absorb `fix`). Do not invent unrelated capabilities. Restructure / Absorb `redesign` → **redesign**. Re-run **test** after fix when probes exist. After absorb from learn handover: recommend delete user-project `LEARN-HANDOVER.*` + re-audit/test on **plugin source** (never cache).
+
+**AskQuestion Scope note:** “fix listed failures only” still implies whole-artifact opportunity-clean under author-to-bar; “extra edits” that change outcome/audience/capability remain redesign.

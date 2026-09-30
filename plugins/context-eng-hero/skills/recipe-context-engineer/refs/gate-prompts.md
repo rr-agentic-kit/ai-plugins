@@ -68,9 +68,9 @@ After `improve-3-merge` persists `apply-plan.md` and **before** any target-path 
 - **header:** "Apply plan?"
 - **options:** Approve plan | Edit plan | Abort improve
 - **Route map:**
-  - Approve plan → `improve-4-apply-fix` (draft off-path only)
+  - Approve plan → `improve-4-apply-fix` (memory draft only; no target Write)
   - Edit plan → user adjusts lanes/intents; re-persist `apply-plan.md`; re-ask once
-  - Abort improve → no draft; no target Write; **post-improve-routing** / Next Up
+  - Abort improve → no memory apply; no target Write; **post-improve-routing** / Next Up
 - **Packet (required before AskQuestion):** markdown links to `compliance.md`, `opportunity.md`, and `apply-plan.md` under `.ai/learning/ce-improve/<run-id>/`. Missing any → do not ask.
 
 Used by `refs/actions/improve.md` step `improve-3-merge`.
@@ -79,16 +79,16 @@ Used by `refs/actions/improve.md` step `improve-3-merge`.
 
 ## Pattern: approve-revise-abort
 
-Pre-write confirmation after gates pass on **draft** content (promote → target only on Approve).
+Pre-write confirmation after reflection + pre-ship pass on **in-memory** draft content (Write final paths only on Approve).
 
 - **question:** "Approve this draft for write?"
 - **header:** "Approve?"
 - **options:** Approve | Request changes | Abort
 - **Route map:**
-  - Approve → promote draft to approved path
-  - Request changes → revise draft; re-run gates from static; targets unchanged
-  - Abort → no promote; restore/discard draft; targets unchanged; offer **post-fix-routing** or **post-create-routing** as appropriate
-- **Packet (required before AskQuestion):** lean summary + links to diagnosis/apply-plan/draft artifacts when this action produced them (improve: Reports + apply-plan + draft). Missing required improve links → do not ask.
+  - Approve → Write/Edit intended final path(s); then post-write static
+  - Request changes → revise memory draft; re-run gates from pre-write reflection; targets unchanged
+  - Abort → no Write; discard memory draft; targets unchanged; offer **post-fix-routing** or **post-create-routing** as appropriate
+- **Packet (required before AskQuestion):** lean summary + links to diagnosis/apply-plan artifacts when this action produced them (improve: Reports + apply-plan; optional lean reflection under report scratch). Missing required improve links → do not ask. Do **not** require a `draft/` dir.
 
 Used by `refs/actions/shared-write-gates.md` **Write gate**.
 
@@ -170,7 +170,7 @@ After redesign completes (gates passed and file written, or user declined write)
 
 ## Pattern: post-learn-routing
 
-After learn handover is written (or chat-only draft accepted). **Skip when `--auto`** → emit **Next Up** only (no AskQuestion).
+After learn handover is written (or chat-only draft accepted). **Skip when `--learn --auto` / `--auto-learn`** → auto-start absorb when gaps exist, then emit **Next Up** only (no AskQuestion).
 
 - **question:** "Learn package ready. What next?"
 - **header:** "Next"

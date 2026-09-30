@@ -18,9 +18,9 @@ Under write gates:
 **Two human gates (not one theatrical approve):**
 
 1. **approve-apply-plan** after `improve-3-merge` — before any target-path mutation
-2. **approve-revise-abort** after shared write gates — before promoting draft → target
+2. **approve-revise-abort** after shared write gates (reflection + pre-ship) — before Write to final paths
 
-After Write-gate **Approve** (promote succeeded): leave promoted paths as **unstaged** working-tree changes (default `git status`). Never `git add`, `git commit`, or PR from improve. Abort → no promote.
+After Write-gate **Approve** (Write succeeded): leave written paths as **unstaged** working-tree changes (default `git status`). Never `git add`, `git commit`, or PR from improve. Abort → no Write.
 
 ## Report scratch (read-budget)
 
@@ -31,8 +31,8 @@ Per improve run, create `.ai/learning/ce-improve/<run-id>/` under the **user pro
 | `compliance.json` / `opportunity.json` | Lean executor payloads (Task return / stdin to render) |
 | `compliance.md` / `opportunity.md` | Full reports via `python3 scripts/render_ce_report.py` — **not** agent `Write` of full bodies |
 | `apply-plan.json` / `apply-plan.md` | Merged plan lean + rendered |
-| `touch-list.txt` | Newline-separated repo-relative paths improve wrote/promoted (inventory + close narrative only — **not** for `git add`) |
-| `draft/` | Off-path draft tree (optional mirror of target relatives) |
+| `touch-list.txt` | Newline-separated repo-relative paths improve **actually wrote** after Write-gate Approve (inventory + close narrative only — **not** for `git add`) |
+| `reflection.json` (optional) | Lean pre-write reflection for improve read-budget — **not** an artifact draft tree |
 
 Chat after audits: status + Verdict / ranked counts + **links** to rendered `.md` files — **do not** paste full report bodies.
 
@@ -77,7 +77,7 @@ python3 scripts/render_ce_report.py apply-plan --in …/apply-plan.json --out �
 | `helper-cli.md` | Report render / touch-list inventory |
 | `actions/fix.md` | `improve-4-apply-fix` |
 | `actions/redesign.md` | `improve-5-apply-redesign` |
-| `actions/shared-write-gates.md` | After apply drafts (one combined write approve; promote leaves unstaged dirty) |
+| `actions/shared-write-gates.md` | After memory apply drafts (one combined write approve; Write leaves unstaged dirty; static post-write) |
 | `gate-prompts.md` | `improve-3-merge` (**approve-apply-plan**); write gate; `improve-6-close` |
 | `close-contract.md` | `improve-6-close` |
 | Executors: `executors/compliance.md`, `executors/opportunity.md` | `improve-2-parallel-audits` (Read via Caller Load — not catalog agents) |
@@ -112,31 +112,31 @@ python3 scripts/render_ce_report.py apply-plan --in …/apply-plan.json --out �
 
 ### Step 4: `improve-4-apply-fix`
 
-- **Outcome:** Compliance FAILs + Absorb `fix` opportunities addressed with minimal same-intent edits **off target path**.
+- **Outcome:** Compliance FAILs + Absorb `fix` opportunities addressed with minimal same-intent edits **held in memory**.
 - **Done when:** If fix list empty → mark completed and continue. Else run `actions/fix.md` **Nested under improve** short path against the merged fix list (not the full standalone Steps 1–5). **Nested intake:** `fix-1-read` done-when satisfied from the merge plan—path + type already known; failure source = compliance Findings FAIL ids ∪ Ranked Absorb `fix` ids; skip AskQuestion for Missing failure source (`fix-intake.md`). **TodoWrite:** only `improve-1…6` — do not spawn `fix-*` todos.
-- **stop-rule:** Do **not** Write/Edit the approved **target** plugin paths in this step. Hold draft in memory and/or under `.ai/learning/ce-improve/<run-id>/draft/`. Append intended promote paths to `touch-list.txt` as drafts are finalized. **Filesystem snapshot is not a goal** — optional only as intermediary to know/restore the touch list on Abort (see T3). Prefer draft-tree static over mutating live targets for the static gate.
-- Produce draft only—**do not** run write gates yet if redesign list is non-empty (combine drafts). If redesign list empty → proceed to shared write gates on the fix draft before close.
+- **stop-rule:** Do **not** Write/Edit the approved **target** plugin paths in this step. Hold fix draft **in memory only** — do **not** create `.ai/learning/ce-improve/<run-id>/draft/`. Intended target relatives stay known from the apply plan; `touch-list.txt` is filled **after** Write-gate Approve with paths actually written.
+- Produce memory draft only—**do not** run write gates yet if redesign list is non-empty (combine drafts). If redesign list empty → proceed to shared write gates on the fix draft before close.
 
 ### Step 5: `improve-5-apply-redesign`
 
-- **Outcome:** Absorb `redesign` opportunities applied to the **draft** set (or skipped).
-- **Done when:** If redesign list empty → mark completed. Else run `actions/redesign.md` **Nested under improve** short path against the redesign list. **Nested intake:** treat full `redesign-1-clarify` / `redesign-intake.md` done-when as satisfied from the merge plan—delta brief = Ranked Absorb `redesign` opportunity detail; skip **all** redesign-intake AskQuestions (outcome/audience/capabilities/failure modes/breaking-change); record breaking-change assumption once in the apply plan. **TodoWrite:** only `improve-1…6` — do not spawn `redesign-*` todos. Merge with any fix draft into one candidate artifact set; keep `touch-list.txt` complete.
-- **Same stop-rule** as improve-4: no target-path promotion yet.
-- **Gates:** Run `shared-write-gates.md` once on the combined **draft**. One **approve-revise-abort** for the whole plan — AskQuestion **must** include Reports + apply-plan + draft links. On **Approve** → promote draft → target paths **driven by `touch-list.txt`**: copy each listed repo-relative path from the draft tree to its target relative (no ad-hoc extra copies); then reconcile — `git status --porcelain` entries under the target tree must equal the touch-list count; mismatch → stop and reconcile (remove strays or complete missing promotes) before continuing. Leave **unstaged** (default dirty `git status`); **never** `git add` / `git commit`. On **Abort** → discard draft / restore only if a restore intermediary was used; **target paths unchanged**; still close with Next Up.
+- **Outcome:** Absorb `redesign` opportunities applied to the **in-memory** draft set (or skipped).
+- **Done when:** If redesign list empty → mark completed. Else run `actions/redesign.md` **Nested under improve** short path against the redesign list. **Nested intake:** treat full `redesign-1-clarify` / `redesign-intake.md` done-when as satisfied from the merge plan—delta brief = Ranked Absorb `redesign` opportunity detail; skip **all** redesign-intake AskQuestions (outcome/audience/capabilities/failure modes/breaking-change); record breaking-change assumption once in the apply plan. **TodoWrite:** only `improve-1…6` — do not spawn `redesign-*` todos. Merge with any fix draft into one candidate artifact set **in memory**.
+- **Same stop-rule** as improve-4: no target-path Write yet; no `draft/` tree.
+- **Gates:** Run `shared-write-gates.md` once on the combined **memory** draft (reflection → pre-ship → Write → post-write static). One **approve-revise-abort** for the whole plan — AskQuestion **must** include Reports + apply-plan links (optional lean reflection under report scratch). On **Approve** → **Write/Edit** intended final paths from the memory draft; then set `touch-list.txt` to every repo-relative path **actually written** (no ad-hoc extras). Leave **unstaged** (default dirty `git status`); **never** `git add` / `git commit`. Post-write static on those paths per shared gates. On **Abort** → discard memory draft; **target paths unchanged**; still close with Next Up.
 
 ### Step 6: `improve-6-close`
 
 - **Outcome:** User routed after improve.
-- **Done when:** **post-improve-routing** AskQuestion per `gate-prompts.md`; follow-ups verb-only per `close-contract.md`. Close narrative cites **paths** to persisted reports (and apply-plan) — not full report bodies. Note promote left paths unstaged (or Abort).
+- **Done when:** **post-improve-routing** AskQuestion per `gate-prompts.md`; follow-ups verb-only per `close-contract.md`. Close narrative cites **paths** to persisted reports (and apply-plan) — not full report bodies. Note Write left paths unstaged (or Abort).
 
 ## Stop
 
 - No ambient improve without a declared path.
-- Executors never Write **except** improve `lean_out` under `.ai/learning/ce-improve/<run-id>/` when Caller Load names it. Parent owns **render script**, apply drafts, and gates.
+- Executors never Write **except** improve `lean_out` under `.ai/learning/ce-improve/<run-id>/` when Caller Load names it. Parent owns **render script**, memory apply drafts, and gates.
 - Do not auto-apply Deferred / Keep / Absorb `defer` / Impact `low`.
 - Do not spawn a third “write agent”; parent executes fix/redesign **Nested under improve** short paths.
 - Nested apply: TodoWrite **only** `improve-1…6`; never nest `fix-*` / `redesign-*` todo lists.
-- **No target-path Write before approve-apply-plan.** **No target-path promotion before Write-gate Approve.**
-- **No `git add` / `git commit` / forge PR from improve.** Promote leaves unstaged dirty; touch-list is inventory only.
+- **No target-path Write before approve-apply-plan.** **No target-path Write before Write-gate Approve.** Do **not** create `draft/`.
+- **No `git add` / `git commit` / forge PR from improve.** Write leaves unstaged dirty; touch-list is inventory of written paths only.
 - **read-budget:** never paste full compliance/opportunity reports or lean JSON into chat when scratch + render exist — link rendered files; never re-table well-formed `apply-plan.md`.
-- **Snapshot is not a success criterion.**
+- **Draft tree / filesystem snapshot is not a success criterion.** Report scratch is diagnosis-only.

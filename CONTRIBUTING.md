@@ -18,7 +18,7 @@ uv sync --all-groups
 lefthook install
 ```
 
-Non-merge commits run `scripts/bump_plugins_version.py rc` (stages version files; stdout via lefthook `execution_out`), then the quality jobs in [`lefthook.yml`](lefthook.yml). Skip with `LEFTHOOK=0` or `git commit --no-verify`.
+Pre-commit runs the quality jobs in [`lefthook.yml`](lefthook.yml) (3m timeout per job). It does **not** bump versions — that is manual or [release-control](.github/workflows/release-control.yml). Skip with `LEFTHOOK=0` or `git commit --no-verify`.
 
 First-time baseline (optional, matches CI lint/format/type/security hooks):
 
@@ -110,7 +110,7 @@ Lockstep bump (lifts every plugin to the PEP 440 max, then increments):
 uv run python scripts/bump_plugins_version.py {major|minor|patch|rc}
 ```
 
-`rc` starts or ticks a local prerelease (`0.0.4` → `0.0.4-rc-1`, `0.0.2-beta-4` → `0.0.2-beta-5`) so Claude Code / Cursor cache a new version, then runs `install_claude_local`. Non-merge commits run `rc` automatically via lefthook (see Setup). `stable` graduates a prerelease (`0.0.2-beta-4` → `0.0.2`); `patch` does not (`0.0.2-beta-4` → `0.0.3`). Re-run the validator after a manual bump.
+`rc` starts or ticks a local prerelease (`0.0.4` → `0.0.4-rc-1`, `0.0.2-beta-4` → `0.0.2-beta-5`) so Claude Code / Cursor cache a new version, then runs `install_claude_local`. Use it when you want a fresh local plugin install; release branches use [release-control](.github/workflows/release-control.yml). `stable` graduates a prerelease (`0.0.2-beta-4` → `0.0.2`); `patch` does not (`0.0.2-beta-4` → `0.0.3`). Re-run the validator after a manual bump.
 
 ## Plugin validation
 

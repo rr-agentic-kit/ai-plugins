@@ -1,12 +1,12 @@
 # recipe-context-engineer
 
-Eval-first orchestrator for designing, auditing, fixing, and creating plugin context artifacts.
+Author-to-bar orchestrator for designing, auditing, fixing, and creating plugin context artifacts.
 
 ## Why
 
 Plugin teams ship skills, commands, rules, agents, and workflows that other engineers and agents reuse. Those definitions fail when they are hard to discover, unbounded, or unsafe to edit without gates. This skill exists so authors can harden one scoped artifact at a time—with mechanical checks and judgment rubrics—without turning every session into ambient code review.
 
-**Done when:** A target path has a clear type, a chosen action completed, and (on write paths) static + reflection + pre-ship passed—or the user has an explicit draft-only outcome.
+**Done when:** A target path has a clear type, a chosen action completed, and (on write paths) reflection (judgment + harness + opportunity-clean) + pre-ship + Write + post-write static passed—or the user has an explicit draft-only outcome. **CE-written on disk ⇒ next `--improve` is diagnosis-only with empty apply lists** (or only low/deferred)—that improve-clean result is the author-to-bar proof.
 
 ## What
 
@@ -27,9 +27,9 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 | audit | Static + rubric report (no edits) | Check compliance quality without changing files |
 | audit-redesign | Ranked Keep/Improve/Restructure opportunities (no edits) | Improvement diagnosis only; no auto-apply |
 | improve | Parallel compliance + opportunity audits, then absorb under write gates | Declared path; want diagnose-and-apply (`--improve`) |
-| fix | Minimal edits for existing intent | Audit or test FAIL; same outcome and scope |
+| fix | Edits for existing intent + whole-artifact opportunity-clean | Audit or test FAIL; same outcome and scope |
 | redesign | Change outcome/scope + write gates | Wrong capability, audience, or outcome |
-| learn | Gap package from a live run miss—patch or friction (no skill edits); no topics gate; `--learn --auto` runs without AskQuestion stops | Live run miss (patch or friction); fold learning back via fix/redesign |
+| learn | Gap package from a live run miss—patch or friction; `--learn` interactive; `--learn --auto` ≡ `--auto-learn` = silent learn + absorb on plugin source | Live run miss (patch or friction); fold learning back via fix/redesign |
 | test | Behavior probe report | Verify agent behavior against prompts |
 | diff | Two-path tradeoff summary | Compare two approaches or paths |
 | design | Inline write from classify/clarify | Classify/clarify done; user requests file write this turn |
@@ -42,7 +42,7 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 - Auditing, improving, fixing, creating, extracting, testing, comparing, or learning from a live run miss (patch or friction) on a scoped definition
 - Clarifying outcome, audience, and failure modes before authoring
 - Generating or updating a skill README from an existing `SKILL.md` (**extract**)
-- Packaging gaps after a live run miss (patch or friction) so fix/redesign can absorb without re-deriving the miss (**learn**); topics are internal → handover (no approve gate); `--learn --auto` skips AskQuestion stops
+- Packaging gaps after a live run miss (patch or friction) so fix/redesign can absorb without re-deriving the miss (**learn**); topics are internal → handover (no approve gate); `--learn --auto` / `--auto-learn` skips AskQuestion and auto-starts absorb on plugin source
 
 ### Avoid when
 
@@ -52,12 +52,14 @@ Mechanical static audit; judgment type rubrics; prompt-based behavior probes.
 
 ## Philosophy
 
-- **Eval-first** — thicken from observed compliance FAILs and ranked improvement opportunities, not anticipated rules
-- **Two-level audit** — compliance (`audit`: binary ship/write gate) stays separate from improvement (`audit-redesign`: ranked Keep/Improve/Restructure); `--improve` runs both then applies absorb hints (fix then redesign) under write gates
-- **Live-miss → learn → absorb** — diagnose existing skill gaps from a live run miss (patch or friction); packages handover without a topics gate; fix/redesign folds the handover in; `--learn --auto` runs learn without AskQuestion stops (does not auto-start absorb)
+- **Author-to-bar** — first-write completeness: draft already satisfies type rubric **and** leaves no ranked-eligible opportunity (`impact` high|medium with improve’s confidence filter); **on-disk** CE write success ⇒ next `--improve` is diagnosis-only with empty apply lists (instruction-quality proof)
+- **FAIL-scoped changes** — on fix/absorb, change only what FAILs and ranked absorb require (don’t invent unrelated capabilities)—not permission to ship thin and thicken later via `--improve`
+- **Anti-cheat** — do **not** spawn `improve`, `audit-redesign`, or opportunity Tasks as part of create/design/fix/redesign/extract drafting; verify opportunity-clean **inline** in pre-write reflection
+- **Two-level audit** — compliance (`audit`: binary ship/write gate) stays separate from improvement (`audit-redesign`: ranked Keep/Improve/Restructure); `--improve` remains because writes can still miss, artifacts may be **manual / non-CE**, and later edits can land outside this skill—not because CE create should ship thin and thicken via improve
+- **Live-miss → learn → absorb** — diagnose existing skill gaps from a live run miss (patch or friction); packages handover without a topics gate; fix/redesign folds the handover in; `--learn --auto` ≡ `--auto-learn` runs silent learn then auto-starts absorb on plugin source (zero gaps → Next Up only; never invent source)
 - **Scoped-only** — one declared artifact path per session; never ambient repo review
 - **Spec/executor split** — README = human spec; `SKILL.md` = Procedure and action refs
-- **Gates-before-write** — static → reflection → pre-ship → approve before any file write
+- **Gates-before-write** — draft in memory → reflection (judgment + harness + opportunity-clean) → pre-ship → approve Write to final paths → post-write static
 
 ## UX
 
@@ -71,7 +73,7 @@ Read user message and editor context; route plain requests to classified action 
 
 ### Clarify
 
-AskQuestion (or text-mode same options) on path/action/type/invoke/skill-UX; create/design: **skill-ux-delivery** after invoke — SoT `refs/questioning.md`. Learn: no topics approve gate; `--learn --auto` skips remaining learn confirms.
+AskQuestion (or text-mode same options) on path/action/type/invoke/skill-UX; create/design: **skill-ux-delivery** after invoke — SoT `refs/questioning.md`. Learn: no topics approve gate; `--learn --auto` / `--auto-learn` skips confirms and auto-absorbs.
 
 ### Output
 
@@ -86,8 +88,8 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 - **Self-invoke** (`disable-model-invocation`) — orchestrator is expensive; requires explicit invocation
 - **Dual close surface** — skill uses AskQuestion; commands may name slash as user homework only
 - **STATIC SKIPPED** — audit continues judgment; write paths block until static PASS or user accepts draft-only
-- **Minimum draft** — smallest template-shaped draft that satisfies clarify; refs only when FAIL proves the gap
-- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits (lean JSON → `render_ce_report.py`) + gated apply; promote leaves unstaged dirty (parent-only executors; not catalog agents)
+- **First-write completeness** — draft loads design refs + `improvement-patterns.md`; ship only when opportunity-clean would pass (not “smallest draft / thicken via improve”)
+- **audit-redesign + improve** — diagnosis-only `audit-redesign`; `--improve` owns parallel Task audits (lean JSON → `render_ce_report.py`) + gated apply for residual misses, manual/non-CE artifacts, and out-of-band edits; Write leaves unstaged dirty (parent-only executors; not catalog agents)
 - **Inline executor authoring** — parent-only Task executors SoT: `refs/design/inline-executor.md`; exemplar = `refs/executors/compliance.md` + `opportunity.md` under improve
 - **Question tool fallback** — AskQuestion preferred; text-mode channel mandatory when tool/harness missing (`refs/questioning.md`)
 
@@ -96,8 +98,8 @@ Stage banners per action; PASS/FAIL evidence tables; draft-only in chat when wri
 | Topic | Fact |
 |-------|------|
 | **Invoke** | `disable-model-invocation: true` — slash or explicit `Read` of `SKILL.md` |
-| **Eval-first** | Thicken from observed audit/test FAILs—not anticipated rules or mandatory research |
-| **Write gates** | Static → pre-write reflection → pre-ship → approve-revise-abort; `--improve` promote leaves touch-list paths unstaged (never `git add`) |
+| **Author-to-bar** | First-write completeness + opportunity-clean before Write to final paths; improve-clean on disk = instruction proof; FAIL-scoped ≠ thin draft; no spawn-improve-as-write-substitute |
+| **Write gates** | Memory draft → pre-write reflection (judgment + harness + opportunity-clean) → pre-ship → approve-revise-abort Write → post-write static; `--improve` leaves touch-list paths unstaged (never `git add`) |
 | **Paths** | Plugin-relative only; no `..` or absolute paths in authored content |
 | **README ↔ SKILL** | README = spec; SKILL = executor. Extract derives README from SKILL constraints, not Procedure paste |
 | **Lexicon** | `ACRONYMS.md` + `GLOSSARY.md` at plugin root (or skill sibling if standalone); harvest overloaded plugin-wide senses (not flags/templates); empty tables allowed |

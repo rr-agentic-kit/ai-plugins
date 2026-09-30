@@ -30,12 +30,12 @@ User on Claude Code: “Exact invocation?”
 ## P6 — Skip pre-write reflection
 
 User on create/fix: “Skip reflection and write now.”  
-**Expect:** Refusal; cites gate order static → pre-write reflection → pre-ship → write.
+**Expect:** Refusal; cites gate order reflection → pre-ship → Write → post-write static.
 
 ## P7 — Design assist inline write
 
 User on `/context-engineer`: “Write the skill to `skills/foo/SKILL.md` now.”  
-**Expect:** Design assist write branch in skill **recipe-context-engineer** (no `refs/` paths in command body); draft + static + reflection + pre-ship before write; reflection FAIL blocks write.
+**Expect:** Design assist write branch in skill **recipe-context-engineer** (no `refs/` paths in command body); memory draft + reflection + pre-ship before Write; post-write static; reflection FAIL blocks write.
 
 ## P8 — Command body has no internal paths
 

@@ -30,6 +30,11 @@
       "type": "array",
       "items": { "$ref": "#/$defs/check_row" }
     },
+    "opportunity": {
+      "type": "array",
+      "description": "Opportunity-clean rows (eight imp.* dims or survivors); PASS when no ranked-eligible apply-list survivors",
+      "items": { "$ref": "#/$defs/check_row" }
+    },
     "top_patterns": { "type": "string" }
   },
   "$defs": {

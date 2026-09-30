@@ -1,6 +1,6 @@
 # Action: fix (internal)
 
-Apply **minimal** edits so the artifact matches **existing** intent. Prefer audit- or test-led FAIL lists.
+Apply edits so the artifact matches **existing** intent **and** leaves no ranked-eligible opportunity on the whole target. Prefer audit- or test-led FAIL lists; expand plan to whole-artifact opportunity-clean (same-outcome Improve) or route redesign.
 
 ## Ref index (Read at step)
 
@@ -24,6 +24,7 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 | `templates/acronyms.template.md` | `fix-3-apply` (missing/wrong ACRONYMS.md) |
 | `templates/glossary.template.md` | `fix-3-apply` (missing/wrong GLOSSARY.md) |
 | `helper-cli.md` | `fix-3-apply` (when `scripts/` exists **or** deterministic fetch/filter/id-keyed write; SCRIPTABLE report waste → lean-emit recipe) |
+| `improvement-patterns.md` | `fix-2-plan`, `fix-3-apply` (whole-artifact opportunity-clean) |
 | `template-required-map.md` | `fix-3-apply` |
 | `templates/<type>.template.md` (per `classify.md`) | `fix-3-apply` |
 | Prior audit or test report | `fix-1-read` if supplied |
@@ -35,18 +36,18 @@ Apply **minimal** edits so the artifact matches **existing** intent. Prefer audi
 
 ### Step 1: `fix-1-read`
 
-- **Outcome:** Target file and failure list are known; scope is fix-only.
+- **Outcome:** Target file and failure list are known; scope is fix-only (same outcome).
 - **Done when:** Path and failure source resolved via `questioning.md` (intake proceeds with assumptions); `fix-intake.md` done-when captured before `fix-2-plan`; file read; every FAIL id or symptom→edit mapping captured; outcome-preservation confirmed or **fix-vs-redesign** gate → redesign if outcome change.
 - **Banner:** `CE ► FIX` per `ui-brand.md`.
 
 ### Step 2: `fix-2-plan`
 
-- **Outcome:** Minimal diff plan addresses **every** listed FAIL or mapped symptom.
-- **Done when:** Each failed check id maps to a concrete edit; `fix-intake.md` done-when satisfied; no unrelated refactors; eval-first minimum scope; `acronyms.*` / `glossary.*` / `static.acronyms.*` / `static.glossary.*` FAILs map to create/update of the failing companion file(s) per `lexicon-spec.md`.
+- **Outcome:** Diff plan addresses **every** listed FAIL **and** any ranked-eligible opportunities already visible on the whole target (same-outcome Improve).
+- **Done when:** Each failed check id maps to a concrete edit; `fix-intake.md` done-when satisfied; FAIL ids ∪ ranked-eligible opportunities (`impact` high|medium + improve confidence filter; Absorb `fix`) enter the plan—Restructure / Absorb `redesign` → redesign gate; no unrelated capability invention; `acronyms.*` / `glossary.*` / `static.acronyms.*` / `static.glossary.*` FAILs map to create/update of the failing companion file(s) per `lexicon-spec.md`. Consult `improvement-patterns.md` while planning.
 
 ### Step 3: `fix-3-apply`
 
-- **Outcome:** Edits applied to draft.
+- **Outcome:** Edits applied to draft; draft would leave **0** ranked-eligible opportunities.
 - **Done when:** All planned fixes applied in memory or working copy—including lexicon companion creates/updates when those ids failed. When absorbing **SCRIPTABLE** fetch/filter/id-keyed or report/scaffold waste, apply `helper-cli.md` (add or extend a thin script with filtered stdout, or **Lean emit + schema + render** for reports) rather than expanding prose scaffolding.
 
 ### Step 4: `fix-4-gates`
@@ -72,4 +73,4 @@ Standalone fix (user-invoked, no improve parent) uses the full Ref index and Ste
 
 ## Stop
 
-No scope expansion. When audit-led, fix **every** FAIL (critical, major, minor)—no "critical only" shortcut. Same for every Ranked Absorb `fix` id when that is the failure source.
+No outcome/audience/capability expansion (that is redesign). When audit-led, fix **every** FAIL (critical, major, minor)—no "critical only" shortcut. Same for every Ranked Absorb `fix` id when that is the failure source. Standalone fix also clears remaining ranked-eligible opportunities on the whole target while preserving outcome. **Anti-cheat:** do not spawn `improve` / `audit-redesign` as a write substitute—opportunity-clean is owned by pre-write reflection.

@@ -34,7 +34,7 @@ Templates: `templates/skill.template.md` (Skill or Skill+Ref), `templates/ref-fi
 
 ## Routing (fix vs redesign)
 
-**Eval-first:** Prefer **test** or **audit** FAIL lists as minimum fix scope before adding anticipated rules.
+**FAIL-scoped hint:** Prefer **test** or **audit** FAIL lists (and ranked Absorb `fix` ids) as the **change-set bound** before inventing unrelated capabilities—not a license for thin authoring.
 
 | Signal | Action |
 |--------|--------|

@@ -37,10 +37,12 @@ Inventory from the missed run / problem statement (not extra skill Reads). Feed 
 ## Checkpoint
 
 **Adequacy probe (internal, before handover write):** Would absorb of *only* the selected topics still miss an operational nuance the founder/human named? If yes → add topic or Auto-drop with reason — do not ship philosophy-only as complete.
+
+**Craft adequacy:** Would absorb of only these topics leave a ranked opportunity a CE write gate would FAIL (`improvement-patterns.md`)? If yes → add topic or Auto-drop with reason.
 ```
 
 **Class values:** `skill_gap` \| `preference_oneoff` \| `env_tool` \| `already_covered`.
 
-**Absorb shapes:** `step` \| `stop-rule` \| `ref` \| `anti-trigger` \| `probe` \| `readme-when` \| `batch` \| `read-budget`.
+**Absorb shapes:** `step` \| `stop-rule` \| `ref` \| `anti-trigger` \| `probe` \| `readme-when` \| `batch` \| `read-budget` \| `script`.
 
 **Evidence Signal (optional prefix):** `patch` \| `friction`.

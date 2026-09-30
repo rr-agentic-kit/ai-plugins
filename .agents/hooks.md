@@ -21,18 +21,27 @@ Do **not** point Cursor at Claude’s `hooks.json` — schemas collide (`version
 |--------|--------|-------------|
 | Grow-on-write | `afterFileEdit` | `PostToolUse` matcher `Edit\|Write` |
 | Prompt-gated entry | `beforeSubmitPrompt` | `UserPromptSubmit` |
+| Tool evidence accumulate | `postToolUse` / `postToolUseFailure` | `PostToolUse` / `PostToolUseFailure` |
+| Keep session + inject follow-up | `stop` (`followup_message`; `loop_limit`) | `Stop` (`decision: "block"` + `reason` / `additionalContext`; check `stop_hook_active`) |
+| Scratch cleanup only (no inject) | `sessionEnd` | `SessionEnd` |
 | Not used for first-prompt detect | `sessionStart` | `SessionStart` |
 
 `SessionStart` / `sessionStart` cannot read the first user message — keep them out of prompt-gated scans.
+
+**Stop vs SessionEnd:** SessionEnd is fire-and-forget / cleanup-only on both hosts (response ignored or discarded; cannot block termination). The mechanism that continues the chat for auto-learn is **`stop` / `Stop`**. Do not “fix” inject back onto SessionEnd.
 
 ## Inject fields
 
 | Runtime | Soft/hard attention inject | Cap |
 |---------|----------------------------|-----|
 | Cursor | Top-level `additional_context` and/or `agent_message` | ~10k chars |
+| Cursor `stop` | Top-level `followup_message` (auto-submits next user turn) | lean ~2k for auto-learn |
 | Claude | `hookSpecificOutput.additionalContext` (+ `hookEventName`) | ~10k chars |
+| Claude `Stop` | `decision: "block"` + `reason` (and/or `additionalContext`) | lean ~2k for auto-learn |
 
 Budget / attention hooks: inject **receipts only** (`path`, `tokens`, `tier`, needs attention / `--optimize`). **Never** inject file bodies.
+
+Auto-learn Stop inject: lean instruction only (bound skill, absorb-into, signal ids + one evidence line each, `--auto-learn` verb). Mark session evidence **consumed** so a second Stop does not re-fire.
 
 Cursor event support for inject fields evolves — prefer fail-open when the host ignores unknown output keys. When grow-on-write inject is unreliable on `afterFileEdit`, document the gap in the plugin README (dual-runtime parity rule).
 
@@ -75,3 +84,4 @@ Skill cascade gating (non-zero CLI exit on any `hard`) is separate from the hook
 - Cursor hooks: https://cursor.com/docs/hooks
 - Claude Code hooks: https://code.claude.com/docs/en/hooks
 - First dual example: `plugins/rrraw` context-budget (`hooks/` + `scripts/context_budget.sh` → `context_budget_script.hook` + `skills/rr-planner/refs/context-budget.md`)
+- Auto-learn drift: `plugins/context-eng-hero` (`hooks/` + `scripts/auto_learn.sh` → `auto_learn_script` + skill `--auto-learn`)

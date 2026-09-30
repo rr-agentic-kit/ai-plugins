@@ -32,7 +32,7 @@ Anthropic agent-skills guidance: scripts are **executed**, not loaded as docs.
 |--------|------|
 | `python3 scripts/audit_static.py . <rel>` | Static gate |
 | `python3 scripts/render_ce_report.py <kind> --in <json> --out <md>` | Validate lean JSON against `templates/reports/<kind>.schema.json`, Jinja-render markdown; agent must not Write full bodies. Exit **2** = schema/JSON error **or** smashed markdown tables (fix JSON/j2, re-run). |
-| `.ai/learning/ce-improve/<run-id>/touch-list.txt` | After Write-gate Approve promote — inventory of promoted paths for close narrative only; **never** `git add` |
+| `.ai/learning/ce-improve/<run-id>/touch-list.txt` | After Write-gate Approve — inventory of **written** paths for close narrative only; **never** `git add` |
 
 ## Lean emit + schema + render
 

@@ -28,6 +28,22 @@ Design and validate **skills**, **commands**, **rules**, **agents**, and **workf
 | Skills | `skills/recipe-context-engineer/`, `skills/recipe-static-memory/` | Public API per skill |
 | Commands | `commands/*.md` | Design assist + plugin verbs + static memory verbs |
 | Static audit | `scripts/audit_static.py` | Reproducible schema/section/link checks |
+| Auto-learn hooks | `hooks/` + `scripts/auto_learn.sh` | Dual-runtime drift detector → Stop inject `--auto-learn` |
+
+## Auto-learn (Stop-hook drift detector)
+
+When a session Reads a **local source** skill (`plugins/.../skills/.../SKILL.md` or project `.claude/skills` / `.agents/skills` under the workspace — **not** `~/.claude/plugins/cache/**` or `~/.cursor/plugins/cache/**`) and drift signals fire (thrash, reread, fail-retry, bash discovery loop, correction+thrash), the **Stop** hook may inject:
+
+`Run /recipe-context-engineer --auto-learn on <absorb-into SKILL.md> …`
+
+| Mode | Behaviour |
+|------|-----------|
+| `--learn` | Interactive: AskQuestion + **post-learn-routing** |
+| `--learn --auto` ≡ `--auto-learn` | Silent learn steps 1–4, then auto-start absorb (fix/redesign) on plugin source; **Next Up**; no second loop |
+
+**SessionEnd is not the learn trigger** — cleanup of `.ai/learning/ce-auto-learn/<session_id>/` only. Fail-open: missing Python / mkdir / below-threshold → silent exit 0, no inject. Cursor `stop` uses `loop_limit: 1`; evidence is marked **consumed** after inject.
+
+Dual-runtime: `hooks/hooks.json` (Claude) + `hooks/cursor.json` (via `.cursor-plugin/plugin.json` `"hooks"`).
 
 ## Commands — plugin artifacts (context-engineer)
 

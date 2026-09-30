@@ -19,6 +19,7 @@
 | `templates/acronyms.template.md` | `extract-3-draft` (ACRONYMS.md) |
 | `templates/glossary.template.md` | `extract-3-draft` (GLOSSARY.md) |
 | `helper-cli.md` | `extract-3-draft` (when `scripts/`) |
+| `improvement-patterns.md` | `extract-3-draft` (author-to-bar; opportunity anti-patterns) |
 | `template-required-map.md` | `extract-3-draft` |
 | `templates/<type>.template.md` (per `classify.md`) | `extract-3-draft` |
 | `shared-write-gates.md` | `extract-4-gates` (file write only) |
@@ -39,9 +40,9 @@
 
 ### Step 3: `extract-3-draft`
 
-- **Outcome:** Template-shaped **minimum** draft produced (eval-first).
-- **Done when:** All template sections filled or gaps explicitly marked; only constraints justified by source or observed FAIL—no anticipated thickening; workflow includes `todo_id` if applicable.
-- **Skill README** (output `skills/<name>/README.md`): Read `SKILL.md` + progressive-disclosure refs for **constraints** (invoke mode, gates, eval-first, paths)—**not** to dump **Procedure** or Load chains. Fill `templates/readme.template.md` per `readme-spec.md` scannable section model and clarity rules. Provenance lists source paths (`SKILL.md`, ref paths used) + assumptions + open questions.
+- **Outcome:** Template-shaped draft produced to **author-to-bar** (not a thin stub left for `--improve`).
+- **Done when:** All template sections filled or gaps explicitly marked; constraints justified by source or observed FAIL (no invented policy); draft would leave **0** ranked-eligible opportunities on filled surfaces (`improvement-patterns.md`); workflow includes `todo_id` if applicable.
+- **Skill README** (output `skills/<name>/README.md`): Read `SKILL.md` + progressive-disclosure refs for **constraints** (invoke mode, gates, author-to-bar, paths)—**not** to dump **Procedure** or Load chains. Fill `templates/readme.template.md` per `readme-spec.md` scannable section model and clarity rules. Provenance lists source paths (`SKILL.md`, ref paths used) + assumptions + open questions.
 - **Lexicon harvest** (when writing skill/plugin artifacts): Scan draft + co-loaded refs; merge domain acronyms into `ACRONYMS.md` and overloaded terms into `GLOSSARY.md` at resolved path per `lexicon-spec.md`. Create empty companions if missing (companions ship every skill/plugin extract).
 - **Delivery channels** (skills/commands/workflows): If draft Procedure/Orchestration/close uses AskQuestion or enumerable gates, state Delivery channels per `questioning.md` / `design/design-core.md`; if no gates, one-line N/A. When extracting README **UX**, preserve Clarify/Close fallback language.
 - **README section map (extract):**
@@ -53,10 +54,10 @@
   | **Actions** | SKILL **Actions** table (id, outcome); **Pick when** from `classify.md` routing (includes **learn** when present) |
   | **When → Use when** | SKILL **When to use** |
   | **When → Avoid when** | SKILL **When not to use** (dedupe What out-of-scope) |
-  | **Philosophy** | Eval-first, scoped-only, gates from advisory + Constraints facts |
+  | **Philosophy** | Author-to-bar, scoped-only, gates from advisory + Constraints facts |
   | **UX** (`###` subsections) | Execution rules, Exit conditions, `questioning.md`, `close-contract.md`, `ui-brand.md` |
   | **Design notes** | Frontmatter tradeoffs (`disable-model-invocation`, dual close, STATIC SKIPPED) when ≥2 |
-  | **Constraints** | Invoke flags, write gates, eval-first, path rules |
+  | **Constraints** | Invoke flags, write gates, author-to-bar, path rules |
   | **Notes** | Script paths, rubric/prompt dirs—footer only |
 
 ### Step 4: `extract-4-gates`
@@ -71,4 +72,4 @@
 
 ## Stop
 
-No silent invention of missing business facts—list open questions explicitly.
+No silent invention of missing business facts—list open questions explicitly. **Anti-cheat:** do not spawn `improve`, `audit-redesign`, or opportunity Tasks as a draft substitute—opportunity-clean is owned by pre-write reflection when writing.

@@ -1,10 +1,10 @@
 # Pre-ship checklist (binary)
 
-Run after **pre-write reflection** passes and before **write** on **create**, **fix**, **redesign**, **design**, and **extract** (file write). Judgment rubric depth is in `pre-write-reflection.md`—do not re-score rubric ids here.
+Run after **pre-write reflection** passes and before **write** on **create**, **fix**, **redesign**, **design**, and **extract** (file write). Judgment rubric depth is in `pre-write-reflection.md`—do not re-score rubric ids here. Mechanical `audit_static.py` runs **after** Write (shared write gates **Static gate**)—not as a hard pre-write dependency here.
 
 For each item: **PASS** or **FAIL** with one line of evidence (quote or line ref).
 
-**Stop rule:** any **FAIL** → emit `PRE-SHIP FAILED` and **do not** write the target file.
+**Stop rule:** any **FAIL** → emit `PRE-SHIP FAILED` and **do not** write the target file. **Do not claim the write action done** until post-write static PASS (or user accepts draft-only) after Write.
 
 ---
 
@@ -12,9 +12,9 @@ For each item: **PASS** or **FAIL** with one line of evidence (quote or line ref
 
 | # | Check |
 |---|--------|
-| 1.1 | Reuse last **STATIC PASS** from shared write gates on same draft hash—all static rows **PASS** (re-run shell only if draft changed after static) |
-| 1.2 | Required keys and naming match `frontmatter-schemas.md` (covered by static script; re-check only if script skipped) |
-| 1.3 | Skill/command/agent `description` length ≤1024 (static `static.description.max-length` when applicable) |
+| 1.1 | **Post-write static committed:** state that `audit_static.py` **will** run on written final paths before claiming done (shared write gates Static gate). Verify frontmatter/schema shape that does **not** need the script here; do **not** require a pre-write static hash. |
+| 1.2 | Required keys and naming match `frontmatter-schemas.md` (covered by static script post-write; re-check only if you need evidence before Write) |
+| 1.3 | Skill/command/agent `description` length ≤1024 (static `static.description.max-length` when applicable—confirm intent here; script verifies after Write) |
 | 1.4 | `description` ≤160 recommended unless user accepted over-budget this session |
 
 ## 2. Discovery

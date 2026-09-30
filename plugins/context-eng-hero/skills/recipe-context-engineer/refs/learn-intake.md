@@ -16,7 +16,7 @@ Used by **Action: learn** step 1. Intake proceeds with stated assumptions per `q
 
 ## AskQuestion (when ambiguous)
 
-Use when path or miss is unclear (interactive). Under **`--auto`**, bind with stated defaults when signals present; unresolvable absorb-into still stops.
+Use when path or miss is unclear (interactive **`--learn`**). Under **`--learn --auto`** / **`--auto-learn`**, bind with stated defaults when signals present; unresolvable absorb-into still stops.
 
 1. **Target skill?** — paste path / describe location (same pattern as `questioning.md` Missing path). Prefer binding **source** for absorb-into; if user only has cache path, Ask once for source checkout.
 2. **Miss overlay?** — use this chat only / add a short problem statement / both.
@@ -30,7 +30,7 @@ Use when path or miss is unclear (interactive). Under **`--auto`**, bind with st
 
 ## Mapping rule
 
-Miss source must be bound before step 2 (`learn-2-investigate`) completes. Evidence = run behavior or problem statement—do not invent FAILs without that evidence. User may revise topics via **Revise topics** on **post-learn-routing** (interactive) or by editing the written handover.
+Miss source must be bound before step 2 (`learn-2-investigate`) completes. Evidence = run behavior or problem statement—do not invent FAILs without that evidence. User may revise topics via **Revise topics** on **post-learn-routing** (interactive `--learn`) or by editing the written handover. Auto absorb skips revise — run learn again if topics need change.
 
 ## Investigate done-when extras (layer-split)
 

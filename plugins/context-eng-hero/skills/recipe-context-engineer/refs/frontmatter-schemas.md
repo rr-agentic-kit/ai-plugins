@@ -95,4 +95,4 @@ Skill-private docs — **not** entry points. YAML frontmatter and `description` 
 
 ## Validity
 
-After authoring, run static → `pre-write-reflection.md` → `pre-ship-checklist.md` (see `refs/actions/shared-write-gates.md`) for **create** / **fix** / **redesign** / **design assist write** before writing files.
+After authoring, run `pre-write-reflection.md` → `pre-ship-checklist.md` → Write → post-write static (see `refs/actions/shared-write-gates.md`) for **create** / **fix** / **redesign** / **design assist write**.
