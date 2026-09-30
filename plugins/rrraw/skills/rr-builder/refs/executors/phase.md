@@ -14,6 +14,7 @@ Does **not** own prepare, sibling phases, or re-invoke **rr-builder**. `pr_valid
 - MUST Write/Edit only per phase write-fence below.
 - MUST commit successful work **before** returning `ok` or `needs_ship`, so parent dirty-tree gate sees empty porcelain.
 - MUST NOT commit on failure — return `failed`.
+- MUST follow the Caller Load **Commit policy** block verbatim. `pr_validate` may push CI fixes to the PR branch only; no other phase pushes.
 - MUST NOT invoke **rr-builder**, spawn Tasks for a different phase, run `--add-endless-test`, or open forge POST (return `needs_ship` from validate when appropriate).
 - MUST NOT prompt the user — clarifications as short markdown bullets.
 - Nested lane skills: this executor **is** their parent session; leaf Tasks those skills document stay allowed.
@@ -34,7 +35,7 @@ Caller Load (parent Task prompt / payload):
 
 | Kind | Fields / paths |
 |------|----------------|
-| **Required** | `PLUGIN_ROOT`, `REPO_ROOT`, `slice_id`, `artifact_root`, `{NNNN}`, `phase`, resume `builder_stage` + task-run cursor fields, `scope` (`task` \| `slice`), `build_unit_index` when `phase: build` |
+| **Required** | `PLUGIN_ROOT`, `REPO_ROOT`, `slice_id`, `artifact_root`, `{NNNN}`, `phase`, resume `builder_stage` + task-run cursor fields, `scope` (`task` \| `slice`), `COMMIT_POLICY`, `COMMIT_TRAILERS`, `build_unit_index` when `phase: build` |
 | **Stable hard-links** | `skills/rr-builder/refs/task-run.md`; `skills/rr-builder/refs/slice-pipeline.md` stage contracts; `skills/rr-builder/refs/plan-knowledge.md`; `skills/rr-builder/refs/plan-schema.md`; `skills/rr-builder/refs/feature-branch.md`; `skills/rr-builder/refs/task-validate.md`; `skills/rr-builder/refs/pr-validate.md` when `phase: pr_validate` |
 | **Lane hard-links (phase-conditional)** | `plan` → none (knowledge only); `build` → `skills/s-coder/SKILL.md` + `skills/s-tester/SKILL.md`; `refactor` → `skills/s-refactor/SKILL.md`; `review` → `skills/s-review/SKILL.md`; `validate` → none; `pr_validate` → `skills/s-ci/SKILL.md` via `skills/rr-builder/refs/pr-validate.md` |
 | **Variant inject** | `{NNNN}.md`, `{NNNN}.plan.md`, current build unit excerpt from task plan when `phase: build` |
@@ -43,6 +44,8 @@ Caller Load (parent Task prompt / payload):
 Missing required fields → `failed` + clarification bullets.
 
 ## Write fence (by phase)
+
+No phase writes `task-summary.md` — the parent owns it (`skills/rr-builder/refs/task-run.md` cursor table).
 
 | Phase | May Write/Edit |
 |-------|----------------|

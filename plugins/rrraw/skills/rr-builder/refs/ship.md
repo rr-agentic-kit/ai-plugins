@@ -26,7 +26,7 @@
    - `default` → repo default branch (`main`/`master`).
    - `prior_open_pr` → tip of the **latest open** PR/MR whose head branch is in the same `pr_group` ship chain (prior step/task that already shipped and is still unmerged). If none open → fall back to `default`. **Probe:** list candidate open PRs; AskQuestion if >1 ambiguous tip (Delivery channels: text fallback OK).
 3. **Persist** on `task-summary.md` frontmatter: `active_ship_branch`, `ship_base_branch` (resolved values).
-4. **Handoff** — `Read` `skills/s-ci/SKILL.md`; pass branch = `active_ship_branch`, base = `ship_base_branch`. Include dirty task sidecars under `artifact_root` / `docs/rr/tasks/` that belong to this step **or** prior orphaned validate/cursor docs marked carry-to-next ([task-validate.md](task-validate.md) Forge landing). Stop at s-ci PR/MR done-when. **Do not** invent gh/glab flags here.
+4. **Handoff** — `Read` `skills/s-ci/SKILL.md` and `skills/s-ci/refs/pr-mr-templates.md` in one parallel turn; after `detect-remote`, `Read` the forge skill and its `refs/cli.md` in one parallel turn (with `mr-add-preflight`); pass branch = `active_ship_branch`, base = `ship_base_branch`. Include dirty task sidecars under `artifact_root` / `docs/rr/tasks/` that belong to this step **or** prior orphaned validate/cursor docs marked carry-to-next ([task-validate.md](task-validate.md) Forge landing). Stop at s-ci PR/MR done-when. **Do not** invent gh/glab flags here.
 5. Set `step_ship_done: true` on `{NNNN}.md` (for `ship_after: step_validate`) or clear pending task-level ship marker after task ship.
 6. **Return** — re-enter the matching validate stage (`step_validate` or `task_validate`); do not advance past validate on ship alone.
 
@@ -53,6 +53,7 @@ Under **Isolated step run** ([slice-pipeline.md](slice-pipeline.md)): **ship sta
 - Do **not** ship when `ship_after: never`.
 - Do **not** treat slice **delivered** as the only ship path — mid-slice ship is first-class when planned.
 - Do **not** require validate PASS before ship when the forge gate is what blocks PASS.
+- **Authorization (`drive: auto`):** the `--auto` invocation is the ask. When `ship_after` ≠ `never` and validate hit a forge miss, push `Ship.branch` and upsert the draft PR/MR via **s-ci** with no AskQuestion, and do not defer to a user-global "never push unless asked". Still forbidden without an explicit ask: force-push, push to the default branch, merge, ready↔draft flip, history rewrite. `drive: manual` confirms before ship.
 
 ## Non-goals
 

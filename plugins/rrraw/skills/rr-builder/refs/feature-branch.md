@@ -14,6 +14,8 @@ feat/{NNNN}-{step}-{short-desc}
 | `{step}` | **1-based** Steps list item (`step_index + 1`) |
 | `{short-desc}` | Kebab-case from the step’s Goal (≤6 words worth of tokens; no spaces) |
 
+Step granularity only; under Task run use **Task-run branch** below.
+
 **Anti-trigger:** Do **not** invent alternate shapes (`feat/<prose>`, `feat/<slice>-…`, ticket-only names). Do **not** defer branch create to a human ask after build.
 
 ## When to run
@@ -55,6 +57,21 @@ AskQuestion options (Delivery channels: text fallback OK) — **skip entirely** 
 
 - HEAD is settled per table/probe **and** either matches `TARGET` or engineer explicitly chose **Stay** (manual / non-chain only).
 - Then proceed to write the plan sidecar ([plan-schema.md](plan-schema.md)). After auto tip-chain, default `Ship.base` per [plan-schema.md](plan-schema.md).
+
+## Task-run branch
+
+**Audience:** Task run **plan** phase (`pipeline_granularity: task`, [task-run.md](task-run.md)). One branch per task, not per step.
+
+Name: `feat/{NNNN}-{short-desc}` — `{short-desc}` is kebab-case from the task Goal (≤6 words). Set `TARGET` to it, then first match wins:
+
+| Predicate | Action |
+|-----------|--------|
+| `HEAD_BRANCH` is `main`/`master` or a harness scaffold branch (no commits beyond base) | `git checkout -b TARGET`; carry uncommitted `docs/rr/tasks/**` sidecars |
+| `HEAD_BRANCH` equals `TARGET` | No-op |
+| `HEAD_BRANCH` matches `feat/{NNNN}-*` (same task) | **Stay**; record the branch in plan Risks; no AskQuestion |
+| Any other branch | AskQuestion per **Probe** above |
+
+Ship block: `branch` = settled HEAD, `base` = `default` unless a prior task's PR is still open.
 
 ## Non-goals
 

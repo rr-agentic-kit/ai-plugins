@@ -28,6 +28,11 @@ On success (ok|needs_ship): commit before return so porcelain is empty. On faile
 - task_ship_done: {task_ship_done}
 - scope: {scope}
 
+## Commit policy (caller-filled)
+{COMMIT_POLICY}
+Trailers (verbatim, last lines of every commit message):
+{COMMIT_TRAILERS}
+
 ## Required refs (Read first under PLUGIN_ROOT)
 1. skills/rr-builder/refs/executors/phase.md
 2. skills/rr-builder/refs/task-run.md
@@ -81,5 +86,7 @@ On success (ok|needs_ship): commit before return so porcelain is empty. On faile
 | `{build_unit_index}` | 0-based; required when `phase: build` |
 | `{builder_stage}` / task-run `task_*_done` | Resume cursor fields |
 | `{scope}` | `task` \| `slice` |
+| `{COMMIT_POLICY}` | Parent fills from the session git contract: short why-focused message via HEREDOC; no `--no-verify`; amend only when a pre-commit hook auto-fixed the just-created unpushed commit; no push (except `pr_validate` fix-push); Edit tool over `sed -i` |
+| `{COMMIT_TRAILERS}` | Attribution lines from the session's system reminder, verbatim; empty when none |
 
 **Spawn rules:** `subagent_type: generalPurpose` only; **one** Task at a time per phase; never parallel build units; never `git worktree`.
