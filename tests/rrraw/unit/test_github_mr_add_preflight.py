@@ -116,8 +116,9 @@ def test_add_preflight_probe_failure_does_not_ready_create(
         )
 
     gh = _FakeGh(handler=handler)
+    args = Namespace(branch_name=None, base=None)
     with pytest.raises(GhError, match="failed"):
-        github_backend._add_preflight(gh, Namespace(branch_name=None, base=None))
+        github_backend._add_preflight(gh, args)
 
 
 def test_pr_number_uses_positional_branch(monkeypatch: pytest.MonkeyPatch) -> None:
