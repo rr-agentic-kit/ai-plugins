@@ -21,5 +21,5 @@
 | PASS | Check passed | Static or judgment |
 | FAIL | Check failed | Static or judgment |
 | AMBIGUOUS | Judgment inconclusive | Needs human call |
-| SoT | Source of truth | Always-on body is `AGENTS.md`; Claude pointer is `CLAUDE.md` |
+| SoT | Source of truth | Project: always-on body is `AGENTS.md`, Claude pointer `CLAUDE.md`. User-global: shared body is `~/.agents/AGENTS.md`; harness files are thin adapters (+ optional overlays) |
 | ACP | Agent Client Protocol | Harness/channel gaps where AskQuestion may be absent (`questioning.md`) |

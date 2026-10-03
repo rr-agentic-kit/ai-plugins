@@ -6,17 +6,18 @@
 
 - `memory-hierarchy.md`
 - `agents-md-bridge.md`
+- `user-global-multi-harness.md` (scope `user`)
 - `situation-groups.md` (scope `project`, and `user` when packs considered)
 - `user-sections-template.md` (scope `user`) or `project-sections-template.md` + `project-init-flow.md` (scope `project`)
 - `communication-role-exhaustive.md` (**user** scope only — mandatory)
 - `tooling-orchestration.md` (**user** scope only — mandatory unless user waives §6)
-- `user-global-synthesis.md` (**user** scope — adaptive buckets)
+- `user-global-synthesis.md` (**user** scope — adaptive buckets + overlays)
 - `effective-writing.md`
 
 ## REQUIRED (command)
 
-- `scope`: `project` (default) | `user` — treat as `project` unless user explicitly names user-global / `~/.claude/`
-- Optional explicit path (defaults: project `AGENTS.md` + `CLAUDE.md` pointer; user `~/.claude/CLAUDE.md` / always-on import)
+- `scope`: `project` (default) | `user` — treat as `project` unless user explicitly names user-global / `~/.agents/` / `~/.claude/` / multi-harness home paths
+- Optional explicit path (defaults: project `AGENTS.md` + `CLAUDE.md` pointer; user shared SoT `~/.agents/AGENTS.md` + selected harness adapters/overlays)
 
 ## Stop
 
@@ -29,24 +30,29 @@ Challenge requests that fail the 90% inclusion bar—route to docs / skills / pa
 ### Step 1: `1-design-scope`
 
 - **Outcome:** Scope, paths, and scratch intent confirmed.
-- **Done when:** `project` (default) vs `user` set; always-on + Claude pointer paths agreed; rewrite confirmed if files exist.
+- **Done when:**
+  - `project` (default) vs `user` set
+  - **project:** always-on + Claude pointer paths agreed; rewrite confirmed if files exist
+  - **user:** SoT path default `~/.agents/AGENTS.md`; harness interview complete (which adapters this pass); rewrite confirmed if SoT or selected adapters exist with meaningful content
 
 ### Step 2: `2-design-gather`
 
 - **Outcome:** All required inputs collected.
 - **Done when:**
-  - **user:** `communication-role-exhaustive.md` complete for groups **A** and **B** (all dimensions resolved or N/A with reason; checkpoint/resume allowed); then `tooling-orchestration.md` group **C** complete or §6 explicitly waived; then adaptive buckets per `user-global-synthesis.md`
+  - **user:** `communication-role-exhaustive.md` complete for groups **A** and **B** (all dimensions resolved or N/A with reason; checkpoint/resume allowed); then `tooling-orchestration.md` group **C** complete or §6 explicitly waived; then harness-overlay fork after C (or overlays deferred); then adaptive buckets per `user-global-synthesis.md`
   - **project:** `project-init-flow.md` explore done; stack/commands grounded in repo; inclusion bar applied; situational groups derived only if leftover fails always-on budget; shorter tooling pass per `tooling-orchestration.md` if repo has local plugins/skills
 
 ### Step 3: `3-design-draft`
 
-- **Outcome:** Full markdown draft for always-on (+ pointer + optional packs).
-- **Done when:** Draft per template leverage (omit empty sections); `CLAUDE.md` thin `@AGENTS.md` for project; packs only if `situation-groups.md` justifies; no `@` of situational packs; comm/role exhaustive for user scope; §6 trigger table when group C done; project omits comm/role unless user insisted; pointers to README/CONTRIBUTING where docs are authoritative.
+- **Outcome:** Full markdown draft for always-on (+ pointer/adapters + optional packs/overlays).
+- **Done when:**
+  - **project:** Draft per template leverage (omit empty sections); `CLAUDE.md` thin `@AGENTS.md`; packs only if `situation-groups.md` justifies; no `@` of situational packs; project omits comm/role unless user insisted; pointers to README/CONTRIBUTING where docs are authoritative
+  - **user:** Shared SoT draft per `user-sections-template.md`; thin adapters for selected harnesses only (templates in `user-global-multi-harness.md`); overlays only when harness-only constraints exist; no SoT body in adapters; comm/role exhaustive; §6 cross-harness trigger table when group C done; harness-native rows in overlays
 
 ### Step 4: `4-design-confirm`
 
 - **Outcome:** User-approved draft.
-- **Done when:** Full draft shown (always-on + pointer + any packs); user approves or ≤2 revision rounds complete.
+- **Done when:** Full draft shown (project: always-on + pointer + any packs; user: SoT + selected adapters + overlays + any packs); user approves or ≤2 revision rounds complete. Confirm-before-write covers the **whole set**.
 
 ### Step 5: `5-design-write`
 
@@ -59,7 +65,7 @@ Not plugin `shared-write-gates.md`. **Confirm-before-write:** no disk write unti
 
 ## Output
 
-- Paths written (`AGENTS.md`, `CLAUDE.md`, any `.agents/{group}.md`)
-- Sections / packs included (and which were omitted for leverage)
-- Import paths if any `@` always-on splits
-- Hint: `.gitignore` for `.agents/local.md` when relevant
+- Paths written (project: `AGENTS.md`, `CLAUDE.md`, any `.agents/{group}.md`; user: `~/.agents/AGENTS.md`, selected adapters, any `*.specific.md`)
+- Sections / packs / overlays included (and which were omitted for leverage)
+- Import / Read-force paths for adapters
+- Hint: `.gitignore` for `.agents/local.md` when relevant (project)

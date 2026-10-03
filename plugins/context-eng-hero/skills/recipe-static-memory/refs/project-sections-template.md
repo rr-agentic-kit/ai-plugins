@@ -22,7 +22,7 @@ Derive names via `situation-groups.md`. Zero packs is valid. Never `@`-import pa
 
 ## Docs boundary
 
-Point to user-global for tone/role: “See `~/.claude/CLAUDE.md` Communication / Role.”  
+Point to user-global for tone/role: “See `~/.agents/AGENTS.md` Communication / Role” (Claude loads via `~/.claude/CLAUDE.md` `@` adapter; other harnesses via their thin stubs—see `user-global-multi-harness.md`).
 Full contributor matrices → `CONTRIBUTING.md`. Product narrative → `README.md`.
 
 ## Claude pointer
