@@ -14,6 +14,7 @@
 | [success-criteria.md](success-criteria.md) | Static + judgment gates |
 | [decision-ledger.md](decision-ledger.md) | Rationale / evidence ledger |
 | [progress.md](progress.md) | Verifying phrases + Next Up / risk-accept close |
+| [intake.md](intake.md) | Shared situate + process pipeline (stages 1–7) for `--intake` / `--feature` / `--adhoc` preflight |
 | [doc-standards/](doc-standards/) | Item schema (identity — not SemVer) |
 
 Plugin Spec (process-ownership UX): [`INTENT.md`](../../INTENT.md).

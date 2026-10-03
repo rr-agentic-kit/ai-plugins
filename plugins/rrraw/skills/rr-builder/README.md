@@ -1,6 +1,6 @@
 # rr-builder
 
-Slice build **orchestrator** for software engineers: advances an execute-slice under drive×scope (`--auto`\|`--manual` × `--next`\|`--step`\|`--task`\|`--slice`), mints an ad-hoc task via `--feature` (stop at task-validate), or hands off to one nested lane on an explicit flag.
+Slice build **orchestrator** for software engineers: advances an execute-slice under drive×scope (`--auto`\|`--manual` × `--next`\|`--step`\|`--task`\|`--slice`), walks intake pipeline via `--intake`, mints via `--feature` (planned) or `--adhoc` (urgent) after gates (stop at task-validate), or hands off to one nested lane on an explicit flag.
 
 ## Why
 
@@ -8,7 +8,7 @@ Execute needs one entry that owns pipeline cursor (prepare → plan → build �
 
 ## What
 
-Owns flag/NL normalization, **orchestrate vs feature vs handoff** mode, drive×scope run loop, `--feature` mint+task-branch ensure, stage→load contracts, plan-stage **feature branch ensure** (`feat/{NNNN}-{step}-{short-desc}`; `feat/{NNNN}-{short-desc}` under Task run), plan **Ship** intent (`ship_after` / stacked `base`), and on-demand load of `s-prepare`, `s-coder`, `s-tester`, `s-security`, `s-review`, `s-refactor`, or **s-ci** on **ship** / **pr-validate**. **Durable** under `docs/rr/tasks/` or feature `artifact_root` (`.ai/tasks/{feature_id}/` when non-rr). **Scratch:** `.ai/review/<runId>/`, `.ai/refactor/<runId>/`.
+Owns flag/NL normalization, **orchestrate vs intake vs feature vs adhoc vs handoff** mode, drive×scope run loop, `--feature`/`--adhoc` mint+task-branch ensure, peer planner SKILL for Plan stages under `--intake`, stage→load contracts, plan-stage **feature branch ensure** (`feat/{NNNN}-{step}-{short-desc}`; `feat/{NNNN}-{short-desc}` under Task run), plan **Ship** intent (`ship_after` / stacked `base`), and on-demand load of `s-prepare`, `s-coder`, `s-tester`, `s-security`, `s-review`, `s-refactor`, or **s-ci** on **ship** / **pr-validate**. **Durable** under `docs/rr/tasks/` or feature/adhoc `artifact_root` (`.ai/tasks/{feature_id|adhoc_id}/` when non-rr). **Scratch:** `.ai/review/<runId>/`, `.ai/refactor/<runId>/`.
 
 **Out of scope:** squash/worktree/prune (those stay **s-git**); inventing forge CLI (those stay **s-ci**); README tone rewrites. Mis-invocation redirects live under **Avoid when** only.
 
@@ -16,7 +16,9 @@ Owns flag/NL normalization, **orchestrate vs feature vs handoff** mode, drive×s
 
 | id | outcome | pick when |
 |----|---------|-----------|
-| `feature` | Mint one task → run to task-validate PASS (no slice-validate) | `--feature` / “implement this feature” / “ad-hoc feature” |
+| `intake` | Walk shared pipeline stages 1→7 (peer planner SKILL for 2–4) | `--intake` / idea / coverage / “build X” needing docs |
+| `feature` | Planned mint/detail → task-validate when stages 2–4 PASS (no slice-validate) | `--feature` / planned “implement feature X” |
+| `adhoc` | Urgent wrap of feature runner (same gates; one-session bias) | `--adhoc` / urgent / unplanned / ship-now |
 | `auto` | Orchestrate with `drive=auto` (default `scope=step`) | `--auto` / “full auto” / “chain without asking” |
 | `manual` | Orchestrate with confirm before each execute | `--manual` / “confirm each stage” |
 | `next` | Only cursor-next stage | `--next` / “next stage only” |
@@ -31,14 +33,14 @@ Owns flag/NL normalization, **orchestrate vs feature vs handoff** mode, drive×s
 | `refactor` | Fixed-point behavior-invariant coder-rule refactor via s-refactor | `--refactor` (+ optional `--scope`, `--epoch-cap`, paths) |
 | `add_endless_test` | Coverage-first multi-epoch test loop via s-test-endless | `--add-endless-test` |
 
-Defaults: orchestrate without drive/scope → `auto` × `step`. `--feature` → `auto` × forced `task` (allow `--manual`). Lone `--manual` → `scope=step`. Lone `--next` → `drive=manual`. Lone `--step`/`--task`/`--slice` → `drive=auto`. Explicit lane flags ignore drive/scope. `--feature` incompatible with lane flags and with `--slice`/`--next`/`--step`. Reject `--full` → use `--slice`.
+Defaults: orchestrate without drive/scope → `auto` × `step`. `--feature`/`--adhoc` → `auto` × forced `task` (allow `--manual`). Lone `--manual` → `scope=step`. Lone `--next` → `drive=manual`. Lone `--step`/`--task`/`--slice` → `drive=auto`. Explicit lane flags ignore drive/scope. `--intake`/`--feature`/`--adhoc` mutually exclusive; incompatible with lane flags and with `--slice`/`--next`/`--step`. Reject `--full` → use `--slice`.
 
 ## When
 
 ### Use when
 
 - Resume or advance a frozen execute-slice through build stages
-- Ad-hoc feature work without a prior prepare/slice chain (`--feature`)
+- Intent via `--intake` (pipeline), `--feature` (planned), or `--adhoc` (urgent) when docs+task gates PASS
 - Unattended chain (`--auto`) or single cursor stage (`--next`)
 - Prepare a pin-complete slice into ordered tasks
 - Implement, test, security-audit, or review a scoped change without full-slice orchestrate
@@ -49,60 +51,60 @@ Defaults: orchestrate without drive/scope → `auto` × `step`. `--feature` → 
 
 - Cascade planning (exec-summary → PRD) → **rr-planner**
 - Forge POST / pipeline debug without a builder ship or review-ci handoff → **s-ci** directly
-- Local git only (rebase, worktree, squash) → **s-git** (plan-stage / `--feature` branch ensure is **not** this case)
+- Local git only (rebase, worktree, squash) → **s-git** (plan-stage / `--feature`/`--adhoc` branch ensure is **not** this case)
 - Docs humanization → **s-humanize**
 
 ## Philosophy
 
-- **Orchestrate by default; feature / handoff on explicit flag** — `--feature` is a third mode (mint + `scope=task`); explicit lane never silently re-enters orchestrate; drive/scope do not mutate handoff lanes
+- **Orchestrate by default; intake / feature / adhoc / handoff on explicit flag** — `--intake` walks pipeline (peer planner for Plan stages); `--feature` planned / `--adhoc` urgent post-pipeline mint + `scope=task`; explicit lane never silently re-enters orchestrate; drive/scope do not mutate handoff lanes
 - **Task run (`auto` × `task`\|`slice`, default)** — one sequential phase Task at a time (plan, build per unit, refactor, review, validate, pr-validate; same working tree, never parallel); parent owns prepare / dirty-tree gate / ship / slice-validate; cursor and stop boundary are SoT in `refs/task-run.md`
 - **Isolated step run (`auto` × `task`\|`slice`, step-granularity tasks)** — one sequential `generalPurpose` Task per remaining task-step (same working tree; no worktree; never parallel); parent owns prepare / dirty-tree gate / ship / **pr-validate** / task-validate / slice-validate; executor owns plan→build→refactor→review→step-validate (`ok` ≠ CI green); dirty porcelain after a Task → hard-stop (no silent-commit; carry-to-next does not waive this cell)
-- **`--feature` stays parent-inline** — not in the isolation cell this pass; still stops at task-validate
+- **`--intake` / `--feature` / `--adhoc` stay parent-inline** — not in the isolation cell this pass; feature/adhoc still stop at task-validate
 - **Default auto × step** — no drive/scope flags chain the current task-step to step-validate PASS + forge landing + pr-validate when tip pushed (parent-inline); stop boundaries incl. the final-step `--step` ≡ `--task` equivalence are SoT-owned by `refs/slice-pipeline.md` **Scope stop boundaries** — do not park on `task_validate` and exit; prepare-only cursor stops after prepare
 - **Validate reports land on forge** — shippable step/task-validate PASS is incomplete until the sidecars (+ Verify/cursor) are on the tip or carried to the next ship; mechanics SoT: `refs/task-validate.md` **Forge landing**
 - **PR validation after tip push** — do not advance past a landed open tip until CI is clean (or skip when never/carry-to-next); wait/fix via **s-ci**; SoT: `refs/pr-validate.md`
-- **`--feature` stops at task-validate** — never slice-validate / delivered; rr vs non-rr roots (`docs/rr/tasks/` vs `.ai/tasks/`); never invent `docs/rr/` in non-rr repos
+- **`--feature` / `--adhoc` stop at task-validate** — never slice-validate / delivered; rr code only after intake stages 1–6 PASS; rr vs non-rr roots (`docs/rr/tasks/` vs `.ai/tasks/`); never invent `docs/rr/` in non_rr repos; urgency ≠ skip gates
 - **`--next` unchanged** — lone `--next` is still `manual` × `next`; `--auto --next` runs one stage without confirm
 - **Manual never executes without confirm** — AskQuestion (or text fallback) before each stage; under `--slice` the ready list marks cursor stage **`(next)`**; silent chain only with `--auto`
 - **Refactor before review** — clean build-touched scope first; orchestrate review is `--fix --all --endless`
 - **One nested skill (or stage knowledge set) per stage turn** — never preload all lane skills
 - **Plan ≠ build** — plan stage loads knowledge only; no application source edits; plan lands in `{NNNN}-{step}.plan.md` with **Verify hooks** as `- [ ]` checkboxes so build loads one step’s plan, not a bloated task body
 - **`--auto` owns ship** — the planned push and draft-PR upsert run without a confirm, and pr-validate fix-pushes stay on the PR branch; force-push, merge and undraft stay out; `--manual` still gates
-- **Feature branch at plan start** — on `main`/`master`, create `feat/{NNNN}-{step}-{short-desc}` before writing the plan; under `drive: auto`, when HEAD is already `feat/{NNNN}-*` for the same task, create the next step `TARGET` from that tip **without** AskQuestion and default `Ship.base: prior_open_pr`; otherwise AskQuestion (stay / new from base / rename / abort) — never invent alternate names or defer to post-build; `--feature` settles `feat/{NNNN}-{short-desc}` first (origin AskQuestion)
+- **Feature branch at plan start** — on `main`/`master`, create `feat/{NNNN}-{step}-{short-desc}` before writing the plan; under `drive: auto`, when HEAD is already `feat/{NNNN}-*` for the same task, create the next step `TARGET` from that tip **without** AskQuestion and default `Ship.base: prior_open_pr`; otherwise AskQuestion (stay / new from base / rename / abort) — never invent alternate names or defer to post-build; `--feature`/`--adhoc` settle `feat/{NNNN}-{short-desc}` first (origin AskQuestion)
 - **Ship is planned** — each step plan’s **Ship** sets `branch`, `ship_after`, `base`; `never` = non-shippable (no Forge/PR gate); shippable validate requires an open PR; forge open is **s-ci** via **ship** before that validate can PASS; `prior_open_pr` stacks onto the latest still-open PR in the `pr_group` chain (auto tip-chain default when branching from a prior same-task tip)
 - **Refactor lean note** — orchestrate writes `{NNNN}-{step}.refactor.md`; `.ai/refactor/` is scratch only (no required `report.md`)
 - **Review under orchestrate is `--fix --all --endless`** — terminal `{NNNN}-{step}.review.md`; scratch under `.ai/review/`; report-only review uses explicit `--review` without `--fix`; handoff `--fix` also forces endless until clear + residual probe
 - Orchestrate **review** endless max-epochs without clear → hard stop (`step_review_done` unset)
 - Orchestrate **review** success without task `{NNNN}-{step}.review.md` → hard stop (`step_review_done` unset)
 - **Validate reports mark checkboxes** — step/task/slice validate persist reports with plan + PASS/FAIL; item PASS flips `- [x]` on plan/task Verify
-- **Delivered → residual s-ci** — mid-slice ships already handed off; delivered only covers unshipped remainder (not used on `--feature`)
+- **Delivered → residual s-ci** — mid-slice ships already handed off; delivered only covers unshipped remainder (not used on `--feature`/`--adhoc`)
 
 ## UX
 
 ### Invoke
 
-`rr-builder` with `--feature`, or `--auto|--manual` and/or `--next|--step|--task|--slice`, or no flag (defaults `auto` × `step`); or `--prepare|--coder|--tester|--security|--review|--refactor|--add-endless-test`. Nested skills are path-loaded only.
+`rr-builder` with `--intake` / `--feature` / `--adhoc`, or `--auto|--manual` and/or `--next|--step|--task|--slice`, or no flag (defaults `auto` × `step`); or `--prepare|--coder|--tester|--security|--review|--refactor|--add-endless-test`. Nested skills are path-loaded only.
 
 ### Intake
 
-Normalize via input-resolution into `payload.mode` (`orchestrate` \| `feature` \| `handoff`) + `drive`/`scope` + optional `feature` / lane/stage (+ optional review/test payloads).
+Normalize via input-resolution into `payload.mode` (`orchestrate` \| `intake` \| `feature` \| `adhoc` \| `handoff`) + `drive`/`scope` + optional `feature`/`adhoc` / lane/stage (+ optional review/test payloads).
 
 ### Clarify
 
-Ambiguous mode → AskQuestion once (feature \| orchestrate drive×scope \| prepare \| coder \| tester \| security \| review \| refactor). Manual → confirm/edit next stage, or ready-vs-blocked pick under `--slice` with cursor stage marked **`(next)`**. Missing kernel/`slice_id`/feature intent → AskQuestion or stop. `--feature` off a task-dedicated branch → origin probe (`origin/main` \| `origin/master` \| current). Plan stage off `main`/`master` → feature-branch probe (stay \| new from base \| rename \| abort) **except** under `drive: auto` same-task tip-chain (silent `checkout -b` from prior `feat/{NNNN}-*`). Ship `prior_open_pr` with >1 candidate tip → AskQuestion. Incompatible `--fix` + `--ci` under `--review`, `--endless` + `--ci`, `--feature` + lane/scope flags, `--refactor` + another lane flag, dual drive/scope flags, or `--full` → stop with one-line error.
+Ambiguous mode → AskQuestion once (intake \| feature \| adhoc \| orchestrate drive×scope \| prepare \| coder \| tester \| security \| review \| refactor). Manual → confirm/edit next stage, or ready-vs-blocked pick under `--slice` with cursor stage marked **`(next)`**. Missing kernel/`slice_id`/feature|adhoc intent → AskQuestion or stop. `--feature`/`--adhoc` off a task-dedicated branch → origin probe (`origin/main` \| `origin/master` \| current). Plan stage off `main`/`master` → feature-branch probe (stay \| new from base \| rename \| abort) **except** under `drive: auto` same-task tip-chain (silent `checkout -b` from prior `feat/{NNNN}-*`). Ship `prior_open_pr` with >1 candidate tip → AskQuestion. Incompatible `--fix` + `--ci` under `--review`, `--endless` + `--ci`, `--intake`/`--feature`/`--adhoc` + lane/scope flags or with each other, `--refactor` + another lane flag, dual drive/scope flags, or `--full` → stop with one-line error.
 
 ### Output
 
-Nested skill / stage owns artifacts; `--feature` writes under `artifact_root` (`docs/rr/tasks/{slice_id}/` or `.ai/tasks/{feature_id}/`); prepare writes `docs/rr/tasks/`; orchestrate review/refactor/validate write task sidecars under the active root; `.ai/review/` and `.ai/refactor/` are scratch; validate reports include plan + per-item PASS/FAIL; **ship** persists `active_ship_branch` / `ship_base_branch` then hands off **s-ci**.
+Nested skill / stage owns artifacts; `--feature`/`--adhoc` write under `artifact_root` (`docs/rr/tasks/{slice_id}/` or `.ai/tasks/{feature_id|adhoc_id}/`); prepare writes `docs/rr/tasks/`; orchestrate review/refactor/validate write task sidecars under the active root; `.ai/review/` and `.ai/refactor/` are scratch; validate reports include plan + per-item PASS/FAIL; **ship** persists `active_ship_branch` / `ship_base_branch` then hands off **s-ci**.
 
 ### Close
 
-Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard stop, dirty-tree gate under Isolated step run, or decline). `--feature` stops at task-validate. Handoff does not auto-advance the pipeline. Shippable validate forge-miss → **ship** → **s-ci** → re-validate → forge landing push → **pr-validate**. Under Isolated step run, executor `needs_ship` → parent ship + inline re-validate + commit + pr-validate (when tip open) before the next step Task. Slice validate PASS → **delivered** → residual **s-ci** only. Load **s-ci** also after review `--ci`.
+Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard stop, dirty-tree gate under Isolated step run, or decline). `--feature`/`--adhoc` stop at task-validate. Handoff does not auto-advance the pipeline. Shippable validate forge-miss → **ship** → **s-ci** → re-validate → forge landing push → **pr-validate**. Under Isolated step run, executor `needs_ship` → parent ship + inline re-validate + commit + pr-validate (when tip open) before the next step Task. Slice validate PASS → **delivered** → residual **s-ci** only. Load **s-ci** also after review `--ci`.
 
 ## Constraints
 
 - Explicit lane flag wins over cursor; drive/scope ignored on handoff
-- `--feature` incompatible with lane flags and with `--slice` / `--next` / `--step`; never invents `docs/rr/` in non-rr repos; never advances past task-validate; stays parent-inline (not Isolated step run)
+- `--intake`/`--feature`/`--adhoc` mutually exclusive; incompatible with lane flags and with `--slice` / `--next` / `--step`; never invents `docs/rr/` in non_rr repos; feature/adhoc never advance past task-validate; stay parent-inline (not Isolated step run); refuse when rr stages 2–4 incomplete
 - Isolated step run (`auto` × `task`\|`slice`): sequential step Tasks only; dirty-tree gate after each return; no parallel steps; no `git worktree`
 - Nested skills are not listed in `plugin.json` — parent **Read**s them
 - `--fix` and `--ci` are mutually exclusive under `--review`
@@ -117,6 +119,6 @@ Stop per drive×scope loop (stage done-when, scope boundary, delivered, hard sto
 
 Nested lane skills intentionally fail context-engineer `static.name.path-match` — they are path-loaded children of `rr-builder`, not top-level `skills/<name>/` entries.
 
-Layout: `refs/` (router + feature + pipeline + validate + plan allowlist/schema + ship + executors/templates), `s-prepare/`, `s-coder/`, `s-tester/`, `s-security/`, `s-review/`, `s-refactor/`.
+Layout: `refs/` (router + intake + feature + adhoc + pipeline + validate + plan allowlist/schema + ship + executors/templates), `s-prepare/`, `s-coder/`, `s-tester/`, `s-security/`, `s-review/`, `s-refactor/`.
 
 After Isolated step run / pr-validate redesign writes: shared write gates (static → reflect → pre-ship → write); recommend post-redesign re-audit on `skills/rr-builder/SKILL.md` and `refs/pr-validate.md` (do not treat prior audit FAILs as mandatory absorb list).

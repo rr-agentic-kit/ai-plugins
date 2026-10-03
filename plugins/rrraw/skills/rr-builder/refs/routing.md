@@ -2,13 +2,32 @@
 
 **Audience:** `rr-builder` after [input-resolution.md](input-resolution.md).
 
+## Intake mode
+
+When `payload.mode: intake`:
+
+1. **Read** [intake-absorb.md](intake-absorb.md) (shared `refs/planning/intake.md` via wrapper).
+2. Walk pipeline per wrapper; stages 2–4 via peer `skills/rr-planner/SKILL.md` (Task or Read SKILL + purpose) — never planner refs.
+3. On stage-3 block → stop + peer planner/discovery.
+4. When stages 1–6 PASS, continue into [feature.md](feature.md) (default) or [adhoc.md](adhoc.md) (urgent) or AskQuestion offer.
+
 ## Feature mode
 
 When `payload.mode: feature`:
 
-1. **Read** [feature.md](feature.md) (detect → branch ensure → mint → cursor).
+1. **Read** [feature.md](feature.md) (pipeline preflight → detect → branch ensure → mint/detail → cursor).
 2. Enter the task run-loop from [slice-pipeline.md](slice-pipeline.md) with forced `scope=task` and durable paths under `payload.feature.artifact_root`.
 3. **Hard stop** at task-validate done-when — do **not** treat as a nested-skill handoff; do **not** advance to slice-validate / delivered.
+4. If preflight stages 2–4 FAIL → stop; peer-invoke planner `--intake` if needed; do **not** enter the run loop.
+
+## Adhoc mode
+
+When `payload.mode: adhoc`:
+
+1. **Read** [adhoc.md](adhoc.md) (urgency preflight → delegates to [feature.md](feature.md)).
+2. Enter the task run-loop from [slice-pipeline.md](slice-pipeline.md) with forced `scope=task` and durable paths under `payload.adhoc.artifact_root`.
+3. **Hard stop** at task-validate done-when — do **not** treat as a nested-skill handoff; do **not** advance to slice-validate / delivered.
+4. If preflight stages 2–4 FAIL → stop; do **not** enter the run loop.
 
 ## Handoff load table
 

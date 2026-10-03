@@ -10,7 +10,7 @@ Write the six required sections to:
 
 `{artifact_root}/{NNNN}-{step}.plan.md`
 
-Default `artifact_root` = `docs/rr/tasks/{slice_id}/`. When `payload.feature.artifact_root` is set (feature / non_rr), use that root instead — see [slice-pipeline.md](slice-pipeline.md) Artifact root.
+Default `artifact_root` = `docs/rr/tasks/{slice_id}/`. When `payload.adhoc.artifact_root` is set (adhoc / non_rr), use that root instead — see [slice-pipeline.md](slice-pipeline.md) Artifact root.
 
 | Token | Meaning |
 |-------|---------|

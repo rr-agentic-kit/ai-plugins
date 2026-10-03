@@ -6,12 +6,12 @@
 
 | Predicate | Detail |
 |-----------|--------|
-| Mode | `payload.mode: orchestrate` (not `--feature`, not handoff) |
+| Mode | `payload.mode: orchestrate` (not `--adhoc` / `--intake`, not handoff) |
 | Drive × scope | `drive: auto` ∧ `scope: task` \| `slice` |
 | Granularity | `pipeline_granularity: task` on `{NNNN}.md` (locked at first task-plan write) |
 | Cursor | Inside a remaining **task** (not prepare / slice-validate / delivered) |
 
-**Out of this cell:** `--feature` (parent-inline), `--manual`, `--auto --next`, `--auto --step`, explicit lane handoffs. Feature-mode parity is a tracked follow-up.
+**Out of this cell:** `--intake` / `--adhoc` (parent-inline), `--manual`, `--auto --next`, `--auto --step`, explicit lane handoffs. Adhoc-mode parity is a tracked follow-up.
 
 **Mid-flight:** A task started under `pipeline_granularity: step` finishes its in-flight step with step-mode rules ([slice-pipeline.md](slice-pipeline.md) task-step contracts). After that step closes, the task plan covers only **remaining** steps; earlier step sidecars stay as evidence.
 

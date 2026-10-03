@@ -52,6 +52,7 @@ flowchart TD
 | `research` / `challenge` alone | `resolve` → context-budget detect → research/challenge (scoped load per [context-budget.md](context-budget.md)) → `write` |
 | `optimize` | `resolve` → audit + suggest alternatives → AskQuestion → apply ≤2 loops → `write` ([context-budget.md](context-budget.md)) |
 | `freeze-slice` (selection already done) | `resolve` → `entry-gate` → `exit-gates` (smell) → `tech-challenge?` → `slice-freeze` → `write` |
+| `intake` | `resolve` → `entry-gate` → [intake-absorb.md](intake-absorb.md) stages 1–4 (+ open-task sync) → `write`; **never code**; Next Up peer builder `--feature` / `--adhoc` for 5–7. Stage 3 may spawn challenge / Discover reopen per `refs/planning/intake.md` |
 | `change` | Same spine, section-scoped; re-enter at affected phase, not full replay from posture unless redirect. **Stop-rule:** any constitution / PRD / delta prose persist → mandatory `compose-prose` humanize + dirty challenge attestation **before** any challenge `Task` |
 
 ## Entry gate (before Plan)

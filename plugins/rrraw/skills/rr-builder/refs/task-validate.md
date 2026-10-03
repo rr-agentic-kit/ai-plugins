@@ -4,7 +4,7 @@
 
 ## Persist paths (canonical)
 
-Resolve under **`artifact_root`** when `payload.feature.artifact_root` is set; otherwise `docs/rr/tasks/{slice_id}/` ([slice-pipeline.md](slice-pipeline.md) Artifact root).
+Resolve under **`artifact_root`** when `payload.adhoc.artifact_root` is set; otherwise `docs/rr/tasks/{slice_id}/` ([slice-pipeline.md](slice-pipeline.md) Artifact root).
 
 | Scope | Path |
 |-------|------|

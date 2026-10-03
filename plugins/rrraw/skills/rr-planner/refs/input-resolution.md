@@ -22,6 +22,7 @@ Shared schemas: `refs/planning/contracts.md`, `refs/planning/baselines.md`, `ref
 |------|----------------|
 | `--prd` | `prd` |
 | `--change` | `change` |
+| `--intake` | `intake` |
 | `--research` | `research` |
 | `--challenge` | `challenge` |
 | `--review` | `challenge` |
@@ -39,7 +40,7 @@ When no primary flag is present, run **NL intent fallback**, then **Out-of-scope
 | `--discover` / `--all` / Discover stems | `OUT_OF_SCOPE` — cite `rr-discovery` |
 | NL: problem, market, viability, ideation, GTM, freeze business-case | `OUT_OF_SCOPE` → `rr-discovery` unless a Plan primary is present |
 | NL: sprint planning, velocity, capacity, sprint retro-as-Plan | **Anti-trigger** — refuse; reframe as **slice selection** / phase ([execute-handoff.md](execute-handoff.md)) |
-| NL: implement / Execute / ship-check / tickets as Plan | `OUT_OF_SCOPE` — Execute future / When-not-to-use |
+| NL: implement / Execute / ship-check / tickets as Plan | Prefer `intake` when intent is “build X” / add requirement (docs+select before code); else `OUT_OF_SCOPE` → **rr-builder** `--feature` (planned) or `--adhoc` (urgent) for stages 5–7 only after intake |
 | NL: release plan / version bundling of slices | `OUT_OF_SCOPE` this redesign — selection + slice freeze are the building blocks; do not invent release artifacts |
 
 ## Project root
@@ -65,6 +66,7 @@ Default `output_dir` = `{PROJECT_ROOT}/docs/rr/{track}/plan/` (track from `docs/
 | `--section` | item id, heading, or section name | null — required with `--change` |
 | `--target` | `prd` / standing doc / track | null — required with `--change` |
 | `--freeze-slice` | _(flag)_ or with requirement id list | off |
+| `--intake` | _(flag)_ | off — situate + stages 1–4 absorb |
 | `--questions-per-cycle` | positive integer | `1` |
 
 `--format yaml|json` → `UNSUPPORTED_FORMAT`.
@@ -135,6 +137,7 @@ Entry gate still requires frozen BRD + handoff for **freeze mint** and default c
 | Intent signal | `action` |
 |---------------|----------|
 | setup, bootstrap planning, init plans | `setup` |
+| intake, coverage check, add requirement, idea for, build X (docs before code) | `intake` |
 | product requirements, PRD, features, RICE, stories, requirements, constitution, architecture spine | `prd` |
 | freeze this slice, freeze-slice, select slice | `freeze-slice` |
 | research, competitors deep-dive (post-compose) | `research` |
@@ -153,7 +156,7 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 | Class | Match |
 |-------|--------|
 | Discover work | Problem/market/viability/ideation/GTM / freeze handoff → `rr-discovery` |
-| Execute / code / ticket | Implement, ship-check, tickets, CI — unless they asked to Plan that product |
+| Execute / code after Plan ready | Implement / ship-check / tickets → peer **rr-builder** `--feature` (default) / `--adhoc` (urgent) or orchestrate — not Plan code; invoke `skills/rr-builder/SKILL.md` + purpose, do not Read builder refs |
 | Release/version plan | Grouping slices into a version — deferred; cite selection + slice freeze only |
 
 ## Conflict matrix
@@ -161,8 +164,9 @@ If multiple intent signals match with equal confidence → `AMBIGUOUS_ACTION`.
 | Dimension | Rule |
 |-----------|------|
 | Action | Exactly one primary per invocation |
-| Plan focus | `--prd` mutually exclusive with `--change` / `--research` / `--challenge` / `--optimize` / `--freeze-slice` |
+| Plan focus | `--prd` mutually exclusive with `--change` / `--intake` / `--research` / `--challenge` / `--optimize` / `--freeze-slice` |
 | `--change` | Requires `--section` and `--target` |
+| `--intake` | Mutually exclusive with other Plan primaries; never codes |
 | `--setup` | Never combines with Plan primaries; never starts compose |
 | Discover flags | Always `OUT_OF_SCOPE` |
 | Format | Single value; must be `md` |
@@ -184,6 +188,7 @@ Load `docs/rr/rrr-status.yaml` (fall back to legacy `docs/rrr-status.yaml`), the
 | `resume` | `--resume`, NL continue, or paused Plan checkpoint |
 | `continue-prd` | PRD draft `rev: ?` and entry gate passes |
 | `freeze-slice` | Selected requirements ready / `--freeze-slice` |
+| `start-intake` | `--intake` / NL idea / coverage / build-X needing docs |
 | `start-change` | `--change` with no in-flight change |
 | `continue-change` | In-flight change |
 | `continue-next-track` | `next` set and next-track docs still `?` |
@@ -193,7 +198,7 @@ Load `docs/rr/rrr-status.yaml` (fall back to legacy `docs/rrr-status.yaml`), the
 
 ## Entry gate (Plan compose)
 
-Before `prd`, `change` targeting plan docs, or `freeze-slice`:
+Before `prd`, `change` targeting plan docs, `intake`, or `freeze-slice`:
 
 1. Frozen BRD + valid `business-case.yaml` — **required to mint** freeze / handoff pins
 2. On fail → `PLAN_ENTRY_REFUSED` for freeze-slice and default silent compose. For exploratory Plan body on a **solid subset** of draft Discover: AskQuestion confirm subset + impact tracking — do not invent frozen pins
@@ -231,6 +236,7 @@ Before `prd`, `change` targeting plan docs, or `freeze-slice`:
 | `action` | `cascade_levels` | Default `chain` |
 |----------|------------------|-----------------|
 | `prd` / `change` | `["prd"]` | `["compose"]` (+ humanize by skill) |
+| `intake` | `["prd"]` | `["intake-absorb"]` (+ challenge when stage 3 needs it) |
 | `freeze-slice` | `[]` | `["slice-freeze"]` |
 | `research` | `[]` | `["research"]` |
 | `challenge` | `[]` | `["challenge"]` — mode from `challenge_depth` |

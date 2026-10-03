@@ -31,6 +31,7 @@ Map script TSV `created|fixed|ok|failed` → `is created` / `is fixed` / `was ok
 | Resolve `--sync-agent-config` | `agent.plan.md`, `root SoT load line` |
 | Freeze mint | `status.yaml` |
 | Write `status.yaml` / `agent.plan.md` | those filenames as section names |
+| Intake situate / absorb / challenge / select / mint / detail / ready | `intake situate`, `intake docs`, `intake challenge`, `intake select`, `intake mint`, `intake detail`, `intake ready` |
 
 Section names are locked in [setup.md](setup.md). Do not paraphrase (`plans dir` ≠ `plans directory`).
 
@@ -51,3 +52,21 @@ Skill owns the close offer. User supplies product judgment and **risk acceptance
 | Quality veto | Refuse freeze-by-say-so over open quality debt without risk-accept |
 
 Discover Next Up after BRD freeze → Plan. Plan Next Up after slice freeze → future Execute. Mid-chain: goal-likelihood / challenge / reopen work — not freeze-by-default. When open queues block challenge, offer drain first; challenge only after the pre-Task probe passes.
+
+## Intake pipeline Next Up
+
+Shared stages: [intake.md](intake.md). AskQuestion options = **legal pipeline moves only** (never “skip to code”).
+
+| Stage / block | Phrase / section | Next Up |
+|---------------|------------------|---------|
+| Situate | `intake situate` | Report match class + first blocking stage |
+| Docs gap (2) | `intake docs` | Planner absorb / `--intake` |
+| Cohesion / Discover-arch drift (3) | `intake challenge` | Plan challenge / Discover reopen / baselines Ask / risk-accept — **block code** |
+| Select / slice (4) | `intake select` | Thin select or planner select |
+| No task (5) | `intake mint` | Builder mint after 2–4 PASS |
+| Thin task (6) | `intake detail` | Goal/Steps / plan stage |
+| Ready (1–6 PASS) | `intake ready` | **`--feature`** (default) or **`--adhoc`** (urgent) or orchestrate `--task`/`--step` |
+| Planner intake done | — | Peer **rr-builder** `--feature` / `--adhoc` for stages 5–7 — planner never codes |
+| Builder stage-3 block | — | Peer-invoke planner/discovery SKILL; resume intake/`--feature`/`--adhoc` only after return |
+
+**Anti-triggers on close:** do not offer “code now” while stages 2–6 incomplete on rr; do not frame obligation-only task body as substitute for docs absorb.

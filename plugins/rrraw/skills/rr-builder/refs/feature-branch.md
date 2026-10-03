@@ -22,12 +22,12 @@ Step granularity only; under Task run use **Task-run branch** below.
 
 At **plan** stage start — before writing `{NNNN}-{step}.plan.md`. Re-check is a no-op when HEAD already matches the convention for this task-step.
 
-**Feature-mode Stay:** when `mode: feature` and HEAD is already `feat/{NNNN}-*` from [feature.md](feature.md) task-branch ensure, prefer **Stay** (do not force rename to the step-suffixed `TARGET` unless the engineer asks). **Does not** override **auto tip-chain** below (orchestrate `drive: auto` step→step targets).
+**Adhoc-mode Stay:** when `mode: adhoc` and HEAD is already `feat/{NNNN}-*` from [adhoc.md](adhoc.md) task-branch ensure, prefer **Stay** (do not force rename to the step-suffixed `TARGET` unless the engineer asks). **Does not** override **auto tip-chain** below (orchestrate `drive: auto` step→step targets).
 
 ## Ensure procedure
 
 0. **Precondition:** Confirm every nested skill directory this stage's Loads row names ([routing.md](routing.md) **Orchestrate stage → load** / [slice-pipeline.md](slice-pipeline.md) Stage contracts) exists on disk **at `skills/rr-builder/<lane>/`** — nested under this skill's own folder, not a sibling `skills/<lane>/`. Check the exact qualified path each table now gives; do not stat a top-level `skills/` listing and conclude a lane is missing because it isn't a sibling of `rr-builder`. Missing → stop with a one-line reason (`SKILL.md` Missing ref rule) **before** any checkout/branch mutation below — do not `EnterWorktree` / create / rename a branch for a stage whose nested skill can't run.
-1. Resolve repo root; `git branch --show-current` → `HEAD_BRANCH`. Read `payload.drive` from the run (orchestrate / feature).
+1. Resolve repo root; `git branch --show-current` → `HEAD_BRANCH`. Read `payload.drive` from the run (orchestrate / adhoc).
 2. Build `TARGET=feat/{NNNN}-{step}-{short-desc}` from the step Goal (kebab).
 3. Branch on `HEAD_BRANCH` — **first match wins**:
 
