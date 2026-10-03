@@ -28,6 +28,7 @@ Routes MR upsert (create if missing, update if exists), pipeline debug, inline t
 
 - `disable-model-invocation` — load by path from parent only
 - Do not invent `glab` flags or `s-ci` subcommands — parent `SCRIPTS-SPEC.md`
+- MR title/body: `refs/ci/pr-mr-templates.md` (do not fork)
 - Inline / `new_line` rules: [refs/inline-comments.md](refs/inline-comments.md)
 - Default MR ship flags: SKILL **Default MR ship** (not duplicated in [refs/cli.md](refs/cli.md))
 

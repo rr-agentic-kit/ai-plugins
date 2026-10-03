@@ -10,7 +10,7 @@ Loaded only from parent **s-ci** `SKILL.md` when `result.forge` is `github`.
 
 ## Purpose
 
-Route GitHub PR, **issue**, Actions, review, and check-run work through **gh** (if installed) or GitHub MCP. Generic PR/MR title/description rules stay in parent `refs/pr-mr-templates.md`.
+Route GitHub PR, **issue**, Actions, review, and check-run work through **gh** (if installed) or GitHub MCP. Title/body SoT: `refs/ci/pr-mr-templates.md` (do not restate).
 
 ## When to use
 
@@ -64,9 +64,9 @@ Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: fal
 
 ### Default PR ship
 
-For `--create-pr` / `--update-pr` / `--add-pr` / `--create-pr-mr` / `--update-pr-mr` / `--add-pr-mr` / prose “create|open|update|add PR” — **one upsert path**. Title/body: parent step **title** (after skill `--draft` gate if any, prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). Pass handoff/user base as `mr-add-preflight --base <name>` when known. After `mr-add-preflight`, use `result.base_branch` on forge create/edit. Branch on `result.status`:
+For `--create-pr` / `--update-pr` / `--add-pr` / `--create-pr-mr` / `--update-pr-mr` / `--add-pr-mr` / prose “create|open|update|add PR” — **one upsert path**. Title/body: `refs/ci/pr-mr-templates.md` **Author every ship invoke** (do not restate). Pass handoff/user base as `mr-add-preflight --base <name>` when known. After `mr-add-preflight`, use `result.base_branch` on forge create/edit. Branch on `result.status`:
 
-- **`exists`** — push commits if needed; `gh pr edit --title … --body-file …` when title/body should change; `gh pr edit --base <base_branch>` when the PR base differs from `result.base_branch`. Do **not** convert ready↔draft. Done: existing PR URL (`result.mr_url`). Never open a second PR for the branch.
+- **`exists`** — push commits if needed; `gh pr edit --title … --body-file …` with the current draft; `gh pr edit --base <base_branch>` when the PR base differs from `result.base_branch`. Do **not** convert ready↔draft. Done: existing PR URL (`result.mr_url`). Never open a second PR for the branch.
 - **`ready_create`** — `gh pr create --draft --base <base_branch> --fill --title "…" --body-file …`. Always pass forge `--draft` and `--base` from preflight. Do **not** invent merge-method flags on create. Done: draft PR created. Stop: create fails.
 - Other preflight statuses (`error`, `no_commits`, `escalate_*`, `needs_branch_from_default`) → stop or escalate per envelope; do not invent a create.
 

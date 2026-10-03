@@ -17,7 +17,7 @@ Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pip
 ### Use when
 
 - Opening or updating a PR/MR (including commit/push for that flow)
-- Named routes: `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` / `--add-pr` / `--add-mr` (or `-pr-mr` aliases) — all mean upsert; combine with skill `--draft` to gate title/body on disk. Ship opens **forge draft** PRs/MRs into the resolved origin/base (not always trunk).
+- Named routes: `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` / `--add-pr` / `--add-mr` (or `-pr-mr` aliases) — all mean upsert; combine with skill `--draft` to gate title/body on disk. Every ship invoke regenerates title/body from `base...HEAD` per `refs/ci/pr-mr-templates.md` (never reuse stale `.ai/ci/pr-mr-*`). Ship opens **forge draft** PRs/MRs into the resolved origin/base (not always trunk).
 - Drafting or creating a GitHub/GitLab issue (same or other `owner/repo`)
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
 - `--fix --sonar` to remediate open SonarQube issues on a PR/branch (no human issue dump)

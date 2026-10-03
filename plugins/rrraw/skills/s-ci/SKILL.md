@@ -17,7 +17,7 @@ disable-model-invocation: true
 | Forge ops (PR/MR, issue, Actions/CI) | `skills/s-gh/SKILL.md` or `skills/s-glab/SKILL.md` after `detect-remote` |
 | Publish artifacts | `skills/s-publish/SKILL.md` after forge skill |
 | Cluster deploy | `skills/s-deploy/SKILL.md` after forge skill |
-| PR/MR title/body | [refs/pr-mr-templates.md](refs/pr-mr-templates.md) |
+| PR/MR title/body | `refs/ci/pr-mr-templates.md` |
 | Pipeline fix anti-patterns | [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) |
 | Sonar remediations (`--fix --sonar`) | [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) |
 | Dependabot remote merges (`--pull-dependabot`) | [refs/pull-dependabot.md](refs/pull-dependabot.md) |
@@ -61,7 +61,7 @@ TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` wh
 
 2. **forge** — Run `rr-ci detect-remote` ([scripts/README.md](scripts/README.md)). Branch on `result.forge`: `github` | `gitlab` | `unknown`. If `unknown`, AskQuestion: GitHub | GitLab (no Other). **Forge target probe:** if the user named `owner/repo` (or equivalent URL) and it differs from `result.owner`/`result.repo`, set **forge target** to that `owner/repo` and pass it to the nested skill (`gh --repo` / `glab --repo`); do not silently use cwd origin. If ambiguous which repo → one AskQuestion (cwd origin | named `owner/repo`). Done: forge + forge target selected. Stop: user declines or forge is neither GitHub nor GitLab — say “GitHub/GitLab only.” **Skip** for `--fix --sonar` (CLI resolves PR via origin; forge bind only if user needs an override AskQuestion). For **`--pull-dependabot`:** require `github` (stop if not).
 
-3. **title** — **PR/MR only.** Load [refs/pr-mr-templates.md](refs/pr-mr-templates.md). Author title + description per that ref. For `--draft` gate vs in-context draft, follow [refs/task-shapes.md](refs/task-shapes.md) `--draft` section. Skip for **issue**, **`--fix --sonar`**, and **`--pull-dependabot`**.
+3. **title** — **PR/MR only.** Load `refs/ci/pr-mr-templates.md`. Author per that ref’s **Author every ship invoke** (fresh draft from `base...HEAD`; never reuse stale `.ai/ci/pr-mr-*`). For `--draft` gate vs in-context draft, follow [refs/task-shapes.md](refs/task-shapes.md) `--draft` section. Skip for **issue**, **`--fix --sonar`**, and **`--pull-dependabot`**.
 
 4. **load** — In **one** tool turn after forge bind: Read the nested forge skill **and** that forge’s `refs/cli.md`, and run `mr-add-preflight` when the task is PR/MR ship. Do not invent-search for skill flags as `s-ci` JSON-CLI subcommands — ship routes are task-shape only (not SCRIPTS-SPEC). For `github` / `gitlab`, run the forge skill’s matching task row. For **`--fix --sonar`:** Read [refs/sonar-fix.md](refs/sonar-fix.md) + [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) (and forge skill only if PR number must be resolved). For **`--pull-dependabot`:** Read [refs/pull-dependabot.md](refs/pull-dependabot.md) only (no forge nested skill).
 
@@ -71,12 +71,12 @@ TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` wh
 
 ## Invariants
 
-- **Titles/descriptions (PR/MR):** only [refs/pr-mr-templates.md](refs/pr-mr-templates.md) — do not restate that policy here.
+- **Titles/descriptions (PR/MR):** only `refs/ci/pr-mr-templates.md` — do not restate that policy here.
 - **Issues:** draft → human approve → create; never skip draft when the user asked to draft first (default: always draft once before create).
 - **Ship git:** Commit/push allowed from this skill when upserting a PR/MR. Still confirm before history rewrite or discarding work (`skills/s-git/refs/safety.md`).
 - **Ship routes:** `--create-*` / `--update-*` / `--add-*` are aliases for the same upsert ship — skill invoke/task-shape flags, **not** `s-ci` JSON-CLI subcommands unless added to [SCRIPTS-SPEC.md](SCRIPTS-SPEC.md). Never open a second PR/MR for the same branch.
 - **Forge draft on create:** nested forge create always passes forge `--draft` plus `--base` / `--target-branch` from `mr-add-preflight` `result.base_branch`. On `exists`, update title/body/base only — do **not** convert ready↔draft.
-- **`--draft` + ship:** human gate via `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md`; user disk edits win; distinct from forge `--draft` (always on create).
+- **`--draft` + ship:** human gate via `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md`; user disk edits win on **I'll edit**; distinct from forge `--draft` (always on create). New ship invokes always regenerate title/body per `refs/ci/pr-mr-templates.md` **Author every ship invoke**.
 - **`--fix --sonar`:** list + remediations per [refs/sonar-fix.md](refs/sonar-fix.md); Sonar-scoped only — not general implement.
 - **`--pull-dependabot`:** CLI loop + escalate per [refs/pull-dependabot.md](refs/pull-dependabot.md); GitHub-only; no invent merge chains; no invent `dependabot.yml` directory rewrites.
 - **Disk sidecars:** Any file this skill or its CLI writes (job traces, dumps, PR/MR drafts) lands under **`.ai/ci/`** at the target repo root — never cwd clutter. Review run artifacts stay under `.ai/review/` (**s-review**).

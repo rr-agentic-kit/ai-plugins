@@ -10,7 +10,7 @@ Loaded only from parent **s-ci** `SKILL.md` when `result.forge` is `gitlab`.
 
 ## Purpose
 
-Route GitLab MR, **issue**, pipeline, discussion, and CI report work through **glab** (if installed) or **GitLab MCP**. Generic PR/MR title/description rules stay in parent `refs/pr-mr-templates.md`.
+Route GitLab MR, **issue**, pipeline, discussion, and CI report work through **glab** (if installed) or **GitLab MCP**. Title/body SoT: `refs/ci/pr-mr-templates.md` (do not restate).
 
 ## When to use
 
@@ -64,9 +64,9 @@ Done: matching row applied (ref loaded or CLI run). Stop: hard failure (`ok: fal
 
 ### Default MR ship
 
-For `--create-mr` / `--update-mr` / `--add-mr` / `--create-pr-mr` / `--update-pr-mr` / `--add-pr-mr` / prose “create|open|update|add MR” — **one upsert path**. Title/body: parent step **title** (after skill `--draft` gate if any, prefer `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when present). Pass handoff/user base as `mr-add-preflight --base <name>` when known. After `mr-add-preflight`, use `result.base_branch` on forge create/update. Branch on `result.status`:
+For `--create-mr` / `--update-mr` / `--add-mr` / `--create-pr-mr` / `--update-pr-mr` / `--add-pr-mr` / prose “create|open|update|add MR” — **one upsert path**. Title/body: `refs/ci/pr-mr-templates.md` **Author every ship invoke** (do not restate). Pass handoff/user base as `mr-add-preflight --base <name>` when known. After `mr-add-preflight`, use `result.base_branch` on forge create/update. Branch on `result.status`:
 
-- **`exists`** — push commits if needed; `glab mr update` with title/description from disk when they should change; `glab mr update --target-branch <base_branch>` when the MR target differs from `result.base_branch`. Do **not** convert ready↔draft. Done: existing MR URL (`result.mr_url`). Never open a second MR for the branch.
+- **`exists`** — push commits if needed; `glab mr update` with title/description from the current draft; `glab mr update --target-branch <base_branch>` when the MR target differs from `result.base_branch`. Do **not** convert ready↔draft. Done: existing MR URL (`result.mr_url`). Never open a second MR for the branch.
 - **`ready_create`** — `glab mr create --draft --target-branch <base_branch> --fill --yes --squash-before-merge --remove-source-branch` plus title/description. Always pass forge `--draft` and `--target-branch` from preflight. Done: draft MR created. Stop: create fails.
 - Other preflight statuses (`error`, `no_commits`, `escalate_*`, `needs_branch_from_default`) → stop or escalate per envelope; do not invent a create.
 

@@ -12,13 +12,13 @@ Pass explicit merge base via `mr-add-preflight --base` when handoff/user names o
 
 ## `--draft` (optional, with ship routes)
 
-Human title/body gate — **not** a toggle for forge `gh`/`glab` `--draft`. Forge create **always** passes `--draft`; skill `--draft` only gates disk title/body AskQuestion.
+Human title/body gate — **not** a toggle for forge `gh`/`glab` `--draft`. Forge create **always** passes `--draft`; skill `--draft` only gates disk title/body AskQuestion. Title/body authoring SoT: `refs/ci/pr-mr-templates.md` **Author every ship invoke**.
 
-1. Write `.ai/ci/pr-mr-title.txt` and `.ai/ci/pr-mr-body.md`; report paths.
+1. Run **Author every ship invoke**; write `.ai/ci/pr-mr-title.txt` and `.ai/ci/pr-mr-body.md`; report paths.
 2. AskQuestion: **Ship** | **Keep draft only** | **I'll edit**.
 3. **Keep draft only** → stop (files remain). **I'll edit** → wait; on continue **re-read disk files** (user edits win — do not regenerate) and AskQuestion again. **Ship** → proceed using current disk title/body.
 
-Without skill `--draft`: draft title/body in context (may still write body file for CLI `--body-file`); no AskQuestion gate. Forge create still uses `--draft`.
+Without skill `--draft`: still run **Author every ship invoke** (may write body file for CLI `--body-file`); no AskQuestion gate. Forge create still uses `--draft`. Never reuse a prior `.ai/ci/pr-mr-*` from an earlier invoke.
 
 ## `--fix --sonar`
 
@@ -41,7 +41,7 @@ TodoWrite ids: `root`, `forge`, `load`, `execute` (skip `title`).
 
 ## issue
 
-Skip root step `title` / [pr-mr-templates.md](pr-mr-templates.md). After forge bind, load forge skill and run its **Issue create** row. TodoWrite ids: `root`, `forge`, `load`, `execute`.
+Skip root step `title` / `refs/ci/pr-mr-templates.md`. After forge bind, load forge skill and run its **Issue create** row. TodoWrite ids: `root`, `forge`, `load`, `execute`.
 
 ## CI / review / publish / deploy
 
