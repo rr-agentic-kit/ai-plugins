@@ -49,20 +49,26 @@ def dispatch(args: Namespace) -> int:
         return emit.fail_exception(command, exc)
 
 
+def _gh_no_open_pr(exc: GhError) -> bool:
+    """True when gh pr view failed because the branch has no open PR."""
+    text = f"{exc} {exc.stderr}".lower()
+    return "no pull requests found" in text
+
+
 def _pr_number(client: GhClient, explicit: str | None) -> str:
     if explicit:
         return str(explicit)
     branch = current_branch()
+    # `gh pr view` takes branch as positional; `--head` is not a valid flag.
     raw = client.cli(
         [
             "pr",
             "view",
+            branch,
             "--json",
             "number",
             "--jq",
             ".number",
-            "--head",
-            branch,
         ]
     )
     number = raw.strip()
@@ -413,8 +419,9 @@ def _add_preflight(client: GhClient, args: Namespace) -> int:
     branch = getattr(args, "branch_name", None) or current_branch()
     base_branch = resolve_pr_base(getattr(args, "base", None))
     try:
+        # `gh pr view` takes branch as positional; `--head` is not a valid flag.
         url = client.cli(
-            ["pr", "view", "--json", "url", "--jq", ".url", "--head", branch]
+            ["pr", "view", branch, "--json", "url", "--jq", ".url"]
         ).strip()
         if url:
             return emit.succeed(
@@ -426,9 +433,10 @@ def _add_preflight(client: GhClient, args: Namespace) -> int:
                     "message": "PR already exists",
                 },
             )
-    except GhError:
-        # No open PR for --head (or gh probe failed) → create path.
-        pass
+    except GhError as exc:
+        if not _gh_no_open_pr(exc):
+            raise
+        # No open PR for branch → create path.
     return emit.succeed(
         "mr-add-preflight",
         {
