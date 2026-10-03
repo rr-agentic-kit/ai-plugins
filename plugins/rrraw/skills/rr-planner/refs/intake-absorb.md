@@ -23,13 +23,14 @@ Read refs/planning/intake.md
 | **1 Situate** | Match class + evidence; report stage reached / first block |
 | **2 Docs absorb** | PRD (± WWAS) + feature-delta when mechanism/Effort/UX-shape required; selection `_status_`. Prefer `--change` / dual-lens paths already owned by Plan when Effort sitting needed. |
 | **3 Challenge / impact** | If not cohesive with frozen Discover or standing constitution/ADR → cheaper-first + challenge / Discover reopen / baselines Ask / risk-accept. **Block** advance until resolved. Mark downstream impact per `refs/planning/baselines.md`. |
-| **4 Select / slice** | Requirement selected or open-slice posture consistent; no shrink-table. |
+| **4 Select / slice** | Requirement selected or open-slice posture consistent; no shrink-table. **Frozen slice gate:** if `status.slice.freeze_status=frozen` (or equivalent) and the absorb would (a) mint/sync an open-slice task, (b) pin/change `execute-slice.yaml`, or (c) extend the freeze requirement set → **Ask** before advancing: include on **current slice** \| park for **next cut** \| **docs-only** (Plan docs OK; no task/kernel pin). Block open-task sync and kernel edits until answered. |
 
 ## Open-task sync
 
 After stages 2–4 PASS (or when docs already covered and only stubs lag):
 
-- Ensure selected leaves map to open-slice task stubs under `docs/rr/tasks/{slice_id}/` when a slice exists (thin Goal citing PRD/delta ids — not full prepare L2 unless user asks).
+- **Gate:** when a frozen slice exists, open-task sync and kernel pins run **only** after stage-4 Ask answered **current slice** (or founder already named the slice). **Next cut** / **docs-only** → do not mint under the frozen `slice_id`; do not patch `execute-slice.yaml`.
+- Ensure selected leaves map to open-slice task stubs under `docs/rr/tasks/{slice_id}/` when a slice exists **and** inclusion was confirmed (thin Goal citing PRD/delta ids — not full prepare L2 unless user asks).
 - Do **not** invent a phantom slice or run prepare/coder.
 - Do **not** treat cascade gaps as “builder will put it in the task body.”
 - Do **not** load builder `refs/feature.md` / `adhoc.md` — peer-invoke builder SKILL when execute readiness needs mint/detail/code.
@@ -46,7 +47,7 @@ When task situate / mint/detail / code readiness is needed beyond stub sync: **I
 | Stages 1–4 PASS; task missing or thin | peer `rr-builder --intake` or `--feature` (builder owns 5–7) |
 | Stages 1–4 PASS; task ready | peer `rr-builder --feature` (default) or `--adhoc` (urgent) or orchestrate `--task` |
 
-**Anti-flip:** Never auto-code. Never AskQuestion “skip to implement.” Never `Read` builder refs to perform execute work.
+**Anti-flip:** Never auto-code. Never AskQuestion “skip to implement.” Never `Read` builder refs to perform execute work. Never silent-include on a frozen slice (task/kernel/freeze-set) without the stage-4 Ask.
 
 ## Done-when
 
