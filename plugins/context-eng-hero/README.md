@@ -3,14 +3,14 @@
 **Version:** 0.0.2  
 **License:** Unlicense (see repo root `LICENSE`)
 
-Design and validate **skills**, **commands**, **rules**, **agents**, and **workflows**—and author **project / user-global agent instruction packs** (`AGENTS.md` + optional `.agents/` situational packs; Claude `CLAUDE.md` pointer).
+Design and validate **skills**, **commands**, **rules**, **agents**, and **workflows**—and author **project / user-global agent instruction packs** (project: `AGENTS.md` + optional `.agents/` packs + Claude `CLAUDE.md` pointer; user-global: shared `~/.agents/AGENTS.md` + thin multi-harness adapters).
 
 ## Skills (recipe-* convention)
 
 | Skill | Path | Role |
 |-------|------|------|
 | **recipe-context-engineer** | `skills/recipe-context-engineer/SKILL.md` | Plugin artifacts: classify, clarify, actions (create, audit, fix, …) |
-| **recipe-static-memory** | `skills/recipe-static-memory/SKILL.md` | Project (default) / user-global `AGENTS.md` packs (design, review, fix) |
+| **recipe-static-memory** | `skills/recipe-static-memory/SKILL.md` | Project (default) / user-global multi-harness `AGENTS.md` packs (design, review, fix) |
 
 ### Skill vs command
 
@@ -62,8 +62,8 @@ Dual-runtime: `hooks/hooks.json` (Claude) + `hooks/cursor.json` (via `.cursor-pl
 
 | Slash (Cursor) | Claude Code | Purpose |
 |----------------|-------------|---------|
-| `/static-memory-design` | `/context-eng-hero:static-memory-design` | Full `AGENTS.md` (+ `CLAUDE.md` `@` pointer) from scratch; default scope=project |
-| `/static-memory-review` | `/context-eng-hero:static-memory-review` | Section walkthrough; may delete low-leverage; optional packs |
+| `/static-memory-design` | `/context-eng-hero:static-memory-design` | Full pack from scratch; default scope=project (`AGENTS.md` + `CLAUDE.md`); user-global → `~/.agents/AGENTS.md` + adapters |
+| `/static-memory-review` | `/context-eng-hero:static-memory-review` | Section walkthrough; may delete low-leverage; optional packs/overlays |
 | `/static-memory-fix` | `/context-eng-hero:static-memory-fix` | Symptom-led minimal patch |
 
 ### Static memory layout (project default)
@@ -75,7 +75,18 @@ AGENTS.md          # Always-on: ~90%-leverage only (inclusion bar)
 .agents/local.md   # Gitignored personal override (sole .agents @ exception)
 ```
 
-**Inclusion bar:** agent contract, not project bible—pointer to README/CONTRIBUTING over paste. Zero packs is valid.
+### Static memory layout (user-global opt-in)
+
+```text
+~/.agents/AGENTS.md                 # Shared SoT (cross-harness)
+~/.agents/{HARNESS}.specific.md     # Optional harness overlays
+~/.claude/CLAUDE.md                 # Thin @ adapter → SoT (+ overlay)
+~/.cursor/rules/user-global.mdc     # Thin alwaysApply Read-forcing stub
+~/.codex/AGENTS.md                  # Thin Read-forcing stub
+~/.copilot/copilot-instructions.md  # Thin Read-forcing stub
+```
+
+**Inclusion bar:** agent contract, not project bible—pointer to README/CONTRIBUTING over paste. Zero packs is valid. Adapters never mirror SoT body. Detail: `skills/recipe-static-memory/refs/user-global-multi-harness.md`.
 
 ### Static memory routing
 

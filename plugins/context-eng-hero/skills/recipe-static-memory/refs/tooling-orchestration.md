@@ -46,9 +46,20 @@ After groups **A** (Communication) and **B** (Role), run **Tooling orchestration
 
 Follow-up (if auto): free text or pick from Phase A suggestions → one **trigger phrase** + **capability id** (skill path, agent name, or `server.tool`).
 
-## Output shape in always-on §6
+## Interview fork (after group C, scope=user)
 
-Compact **trigger table** (not prose essay)—in user-global always-on (often via `CLAUDE.md` `@` import):
+When `scope=user`, after group **C** completes (or §6 waived), run a short **harness overlay** fork (see `user-global-multi-harness.md`):
+
+1. Confirm which harness adapters are in scope this pass.
+2. **AskQuestion** per selected harness: any harness-only prefs (default models, Task/subagent spawn policy, harness-native skill/MCP quirks, runtime mode)?
+3. Encode answers into `~/.agents/{HARNESS}.specific.md` — **not** into shared SoT §6.
+4. Cross-harness trigger rows stay in SoT §6; if a row is only meaningful in one harness, move it to that overlay.
+
+Set `group_done: C+overlays` (or note `overlays: deferred`) in the Interview state block when finished.
+
+## Output shape in always-on §6 (shared SoT)
+
+Compact **trigger table** (not prose essay)—in `~/.agents/AGENTS.md`:
 
 ```markdown
 ## Tooling & agents
@@ -62,14 +73,23 @@ Compact **trigger table** (not prose essay)—in user-global always-on (often vi
 | — | security auditor | never-auto |
 ```
 
+Harness-native extras (example overlay bullet list—not in SoT):
+
+```markdown
+# CURSOR.specific.md
+- Default Task model prefs for explore/shell when spawning subagents
+- alwaysApply adapter already forces Read of SoT; do not restate SoT policy here
+```
+
 ## Synthesis rules
 
-- Cap at ~15 rows; defer rare cases to “ask user.” Apply the 90% bar—no preference dump.
+- Cap at ~15 rows in SoT §6; defer rare cases to “ask user.” Apply the 90% bar—no preference dump.
 - Triggers must be **observable** (phrase, file pattern, task class)—not “when appropriate.”
 - Project-only skills belong in **project** `AGENTS.md` (or a situational pack with Read trigger), not user-global.
 - Deduplicate: orchestration ≠ “read CONTRIBUTING first” (that’s a **where-to-look** / docs pointer).
 - User may **waive** §6 on design only with explicit opt-in (“no installed plugins / I drive tools manually”).
+- Model tables, sub-agent spawn matrices, and harness-only MCP quirks → overlay, never SoT.
 
 ## Project scope (design/review)
 
-Shorter pass: repo-local plugins, CI vendor—after `project-init-flow.md` explore. Align with `agents-md-bridge.md` + `situation-groups.md`. Do not invent packs for tooling catalogs.
+Shorter pass: repo-local plugins, CI vendor—after `project-init-flow.md` explore. Align with `agents-md-bridge.md` + `situation-groups.md`. Do not invent packs for tooling catalogs. No harness-overlay interview on project scope.

@@ -9,10 +9,10 @@ description: Authors or repairs project/user AGENTS.md instruction packs. Use wh
 
 Author or repair **agent instruction packs**—persistent instructions that improve agent results. Default **scope = project**. User-global only when the user says so.
 
-| Scope | Always-on SoT | Claude Code pointer | Optional depth |
-|-------|---------------|---------------------|----------------|
-| **Project** (default) | `AGENTS.md` | `CLAUDE.md` → `@AGENTS.md` | `.agents/{group}.md` |
-| **User** (opt-in) | Same shape under user config | User `CLAUDE.md` → `@` always-on | Same pack rules |
+| Scope | Always-on SoT | Entry / adapters | Optional depth |
+|-------|---------------|------------------|----------------|
+| **Project** (default) | `AGENTS.md` | `CLAUDE.md` → `@AGENTS.md` (Claude); Cursor loads `AGENTS.md` | `.agents/{group}.md` |
+| **User** (opt-in) | `~/.agents/AGENTS.md` (shared, multi-harness) | Thin adapters: Claude `@`, Cursor `.mdc` Read force, Codex/Copilot stubs — see `user-global-multi-harness.md` | `~/.agents/{HARNESS}.specific.md` overlays |
 
 **Inclusion bar (non-negotiable):** Not a project bible. Not “everything the user asked for.” Keep only constraints that improve or prevent mistakes in **~90%+** of chats. Prefer pointers to README / CONTRIBUTING / ADRs / plugin docs over absorbing them.
 
@@ -21,7 +21,7 @@ Not plugin artifacts (**recipe-context-engineer**).
 ## When to use
 
 - Creating **from scratch** project (default) or user-global instruction packs
-- **Section-by-section** review of existing always-on / situational files
+- **Section-by-section** review of existing always-on / situational files (and user-global adapters/overlays)
 - **Symptom-led** minimal fixes when agent behavior diverges from stated preferences
 
 ## Procedure
@@ -30,7 +30,7 @@ Not plugin artifacts (**recipe-context-engineer**).
 2. If ambient (no slash): apply **Routing**; end with **Next step (user)** to one slash—no user-file write.
 3. Parse the initial prompt to pre-fill questionnaires; do not re-ask captured preferences.
 4. Load shared refs only via the active action **Load** list—never invent steps outside that ref.
-5. Default `scope=project` unless user explicitly names user-global / `~/.claude/`.
+5. Default `scope=project` unless user explicitly names user-global / `~/.agents/` / `~/.claude/` / other harness home paths.
 6. Memory-file writes require explicit confirm-before-write per the action ref.
 
 ## When not to use
@@ -39,6 +39,7 @@ Not plugin artifacts (**recipe-context-engineer**).
 - One-off task prompts with no durable memory file
 - Dumping README / CONTRIBUTING / product narrative into agent memory “for completeness”
 - Enterprise policy paths (out of scope)
+- Editing the operator’s live home-dir packs without an explicit design/review/fix request (this skill authors packs; it does not ambient-migrate `~`)
 
 ## Harness precedence
 
@@ -71,29 +72,30 @@ When ambiguous, one **AskQuestion**: “No file / section walkthrough / fix a pr
 
 **Parse initial prompt** on all verbs to pre-fill answers; avoid re-asking captured preferences.
 
-On design/review/fix: **challenge** user requests that fail the 90% bar—route to docs, skills, or situational packs only when the miss is real and recurring.
+On design/review/fix: **challenge** user requests that fail the 90% bar—route to docs, skills, or situational packs only when the miss is real and recurring. On user-global: challenge SoT body mirrors in adapters → thin stub (user confirm).
 
 ## Communication + Role (user-global design)
 
-On **design** for **user** scope: **Communication contract** and **Role framing** are **mandatory** and **exhaustive**—load `communication-role-exhaustive.md` (checkpoint groups A/B; resumable). **Tooling & agents** (§6) uses `tooling-orchestration.md` (checkpoint C). No whole-section skip; per-dimension N/A only with reason. See action **design** ref.
+On **design** for **user** scope: **Communication contract** and **Role framing** are **mandatory** and **exhaustive**—load `communication-role-exhaustive.md` (checkpoint groups A/B; resumable). **Tooling & agents** (§6) uses `tooling-orchestration.md` (checkpoint C + harness-overlay fork). Multi-harness layout: `user-global-multi-harness.md`. No whole-section skip; per-dimension N/A only with reason. See action **design** ref.
 
-Project scope: usually **omit** comm/role (point to user-global); always-on stays lean per `effective-writing.md`.
+Project scope: usually **omit** comm/role (point to user-global SoT `~/.agents/AGENTS.md`); always-on stays lean per `effective-writing.md`.
 
 ## Shared refs
 
 | Ref | Role |
 |-----|------|
-| `memory-hierarchy.md` | Scopes, load order, `@` vs backtick |
-| `agents-md-bridge.md` | Canonical layout, load semantics, docs boundary |
+| `memory-hierarchy.md` | Scopes; project vs user-global; `@` vs Read force vs backtick |
+| `agents-md-bridge.md` | Project layout + user-global multi-harness bridge; load semantics; docs boundary |
+| `user-global-multi-harness.md` | Shared SoT, adapters, overlays, migration, anti-mirror |
 | `situation-groups.md` | Derive situational pack names; anti-catalog; when not to pack |
 | `communication-role-exhaustive.md` | Mandatory questionnaires for comm + role (checkpoint A/B) |
-| `tooling-orchestration.md` | Situation → capability triggers for §6 (checkpoint C) |
-| `user-global-synthesis.md` | Global vs project buckets; synthesis rules |
-| `user-sections-template.md` | User-global section order (review + design) |
+| `tooling-orchestration.md` | Situation → capability triggers for §6 (checkpoint C + overlay fork) |
+| `user-global-synthesis.md` | SoT vs overlay buckets; synthesis rules |
+| `user-sections-template.md` | User-global section order (review + design) including overlays |
 | `project-init-flow.md` | Project **design**: explore codebase |
 | `project-sections-template.md` | Always-on sections shaped by leverage |
-| `effective-writing.md` | 90% filter, budgets, pointer-over-paste, no `@` packs |
-| `fix-intake.md` | Symptom → always-on vs trigger vs docs |
+| `effective-writing.md` | 90% filter, budgets, pointer-over-paste, no `@` packs, anti-mirror |
+| `fix-intake.md` | Symptom → always-on vs overlay vs trigger vs docs |
 
 ## Orchestration
 

@@ -23,7 +23,8 @@ After each group, emit an **Interview state** block:
 
 ```text
 scope: user
-path: <agreed path>
+path: ~/.agents/AGENTS.md   # shared SoT (not ~/.claude/CLAUDE.md alone)
+adapters: [claude|cursor|codex|copilot]  # selected this pass
 group_done: A | B
 dimensions_pending: [<dimension names>]
 draft_bullets_so_far: <short summary>
@@ -79,8 +80,8 @@ draft_bullets_so_far: <short summary>
 1. Convert answers to **imperative, testable** bullets (micro-examples: `effective-writing.md`).
 2. Prefer concrete negatives (“Do not open with Great question”) over vague positives (“be helpful”).
 3. Deduplicate overlapping dimensions (tone vs pushback vs directness vs challenge)—one home per rule; cross-reference elsewhere.
-4. If combined comm+role would exceed ~60 lines in root file, offer `@~/.claude/communication-role.md` import—user must approve; content stays exhaustive, root stays scannable.
-5. Target ~100 lines total user-global **except** comm/role may use import split or ~60–80 lines inline with user opt-in.
+4. If combined comm+role would exceed ~60 lines in shared SoT, offer an always-on `@` split under `~/.agents/` (e.g. `@~/.agents/communication-role.md`) imported from SoT or the Claude adapter—user must approve; content stays exhaustive, SoT stays scannable. Do **not** put exhaustive comm/role only under `~/.claude/` as the SoT.
+5. Target ~100 lines total for `~/.agents/AGENTS.md` **except** comm/role may use import split or ~60–80 lines inline with user opt-in. Harness-only prefs belong in `*.specific.md`, not in Communication/Role.
 
 ---
 
