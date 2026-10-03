@@ -1,6 +1,6 @@
 ---
 name: rr-planner
-description: /rr-planner — honest RICE Effort + slice kernel after Discover freeze; PRD compose, freeze-slice, challenge.
+description: /rr-planner — honest RICE Effort + slice kernel after Discover freeze; PRD compose, freeze-slice, challenge, intake.
 disable-model-invocation: true
 ---
 
@@ -16,6 +16,7 @@ Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sittin
 
 - Bootstrap or repair the docs framework (`--setup`) — does not start Plan
 - Compose or change PRD / standing Plan docs (`--prd`, `--change`) after Discover freeze
+- Absorb ad-hoc product intent into Plan docs + selection (`--intake`) — stages 1–4 only; no code
 - Select requirements and freeze a slice (`--freeze-slice` / NL)
 - Resume a paused Plan session (`--resume`)
 - Research or challenge **existing** Plan docs (PRD, constitution, deltas, AC)
@@ -34,23 +35,26 @@ Produce a **trustworthy Plan** from a **frozen business case**: dual-lens sittin
 
 ## Procedure
 
-TodoWrite `merge: false` before step 1 with stable ids matching [cascade.md](refs/cascade.md) Happy path (Plan): `resolve` → `setup?` → `entry-gate` → `posture` → `standing` → `dual-lens` → `requirements` → `compose` → `humanize` → `select` → `exit-gates` → `tech-challenge` → `slice-freeze` → `write`. Mark `completed` before advancing. Omit Plan-body todos when `action` is `research` or `challenge` (only `resolve` → detect → research/challenge → `write`). When `action` is `setup`: only `resolve`, `setup`. When `action` is `optimize`: `resolve` → optimize loop → `write`. When `action` is `freeze-slice` with selection already done: `resolve` → `entry-gate` → `exit-gates` → `tech-challenge?` → `slice-freeze` → `write`.
+TodoWrite `merge: false` before step 1 with stable ids matching [cascade.md](refs/cascade.md) Happy path (Plan): `resolve` → `setup?` → `entry-gate` → `posture` → `standing` → `dual-lens` → `requirements` → `compose` → `humanize` → `select` → `exit-gates` → `tech-challenge` → `slice-freeze` → `write`. Mark `completed` before advancing. Omit Plan-body todos when `action` is `research` or `challenge` (only `resolve` → detect → research/challenge → `write`). When `action` is `setup`: only `resolve`, `setup`. When `action` is `optimize`: `resolve` → optimize loop → `write`. When `action` is `freeze-slice` with selection already done: `resolve` → `entry-gate` → `exit-gates` → `tech-challenge?` → `slice-freeze` → `write`. When `action` is `intake`: `resolve` → `entry-gate` → intake-absorb (stages 1–4 + open-task sync) → `write`.
 
 Phrases: `refs/planning/progress.md` on every invocation.
 
-1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Prefer `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--optimize` / `--setup` / `--resume`. Discover flags/NL → stop and route to `rr-discovery`. Sprint/capacity/velocity → refuse and reframe as slice selection. Status-first: `docs/rr/rrr-status.yaml` then `docs/rr/{track}/plan/status.yaml` + **session-state via** `sh scripts/session_state.sh view --path {output_dir}/session-state.json` (never full-file `Read`). Entry gate also reads discovery detail. Rewrite/sync via `refs/planning/setup.md` / `refs/planning/agent-config.md`. Done: payload emitted; resume/status-first tool output includes a session-state projection.
+1. **resolve** — Load [input-resolution.md](refs/input-resolution.md). Prefer `--prd` / `--change` / `--intake` / `--freeze-slice` / `--research` / `--challenge` / `--optimize` / `--setup` / `--resume`. Discover flags/NL → stop and route to `rr-discovery`. Sprint/capacity/velocity → refuse and reframe as slice selection. Status-first: `docs/rr/rrr-status.yaml` then `docs/rr/{track}/plan/status.yaml` + **session-state via** `sh scripts/session_state.sh view --path {output_dir}/session-state.json` (never full-file `Read`). Entry gate also reads discovery detail. Rewrite/sync via `refs/planning/setup.md` / `refs/planning/agent-config.md`. Done: payload emitted; resume/status-first tool output includes a session-state projection.
 
 | `payload.action` | Next | Todos after `resolve` |
 |------------------|------|------------------------|
 | `setup` | step 2 (completes `write`). Stop. | `setup` |
 | `prd`, `change` | step 3 → Plan body → write | Happy path: `entry-gate` through `write` |
+| `intake` | step 3 → [intake-absorb.md](refs/intake-absorb.md) → write | `entry-gate` → intake stages → `write` |
 | `freeze-slice` | step 3 → truncated freeze path → write | `entry-gate` → `exit-gates` → `tech-challenge?` → `slice-freeze` → `write` |
 | `optimize` | step 5b (completes `write`) | `write` only |
 | `research`, `challenge` | step 5 (completes `write`) | `write` only |
 
 2. **setup** — Load `refs/planning/setup.md`. Run `sh scripts/validate_planning.sh --setup --repo-root <PROJECT_ROOT>`. Completes `write`. Do not start Plan compose. Do **not** install host CI/Actions for planning validation — validate only when the plugin runs `validate_planning.sh`. Default `output_dir` = `docs/rr/{track}/plan/`.
 
-3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose.
+3. **entry-gate** — Enforce [input-resolution.md](refs/input-resolution.md) Entry gate. On fail → AskQuestion (migrate brownfield | run `rr-discovery` | abort). Do not silent-compose. For `intake`, also load `refs/planning/intake.md`.
+
+3b. **intake** — When `action: intake`: load [intake-absorb.md](refs/intake-absorb.md). Drive stages 1–4 (situate → docs absorb → challenge/impact → select) + open-task stub sync. **Never code.** Completes `write` with Next Up peer **rr-builder** `--feature` (default) or `--adhoc` (urgent) for stages 5–7 when ready — invoke `skills/rr-builder/SKILL.md` + purpose (Task or Read SKILL); do not Read builder refs. On Discover reopen / unfreeze → route per absorb wrapper (block builder code).
 
 4. **Plan body** — Load [cascade.md](refs/cascade.md) Happy path / Side paths; for `prd` / `change` / `freeze-slice` run phases in that order (truncated per Side paths). Before marking any phase todo `completed`, run [goal-anchor.md](refs/goal-anchor.md) **Standing self-challenge** (auto-reflection — `refs/planning/challenge-layers.md`). Invariants only: dual-lens same sitting; humanize-before-select order per cascade; scoped load per [context-budget.md](refs/context-budget.md); freeze bar per [execute-handoff.md](refs/execute-handoff.md). Done: cascade Advancing vs stopping or pause checkpoint.
 
@@ -65,6 +69,8 @@ Phrases: `refs/planning/progress.md` on every invocation.
 | Ref | When |
 |-----|------|
 | [input-resolution.md](refs/input-resolution.md) | Every invocation |
+| [intake-absorb.md](refs/intake-absorb.md) | `action: intake` |
+| `refs/planning/intake.md` | Intake situate + pipeline stages |
 | `refs/planning/progress.md` | Every invocation |
 | `refs/planning/challenge-layers.md` | Challenge / freeze-suggest / auto-reflection |
 | `refs/planning/setup.md` / `refs/planning/baselines.md` / `refs/planning/agent-config.md` | Setup; **version law** (freeze / open-next / ship); sync |

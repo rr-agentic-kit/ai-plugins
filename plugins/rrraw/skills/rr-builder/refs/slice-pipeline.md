@@ -1,6 +1,6 @@
 # Slice pipeline (builder orchestration)
 
-**Audience:** `rr-builder` in **orchestrate** or **feature** mode (drive/scope flags, `--feature`, or no lane flag). SoT for lifecycle, task-step stage contracts, cursor, and drive×scope run loop. Handoff mode does **not** advance this pipeline beyond the explicit nested skill. Handoff load table: [routing.md](routing.md). Feature mint + hard stop: [feature.md](feature.md).
+**Audience:** `rr-builder` in **orchestrate**, **intake**, or **adhoc** mode (drive/scope flags, `--intake`, `--adhoc`, or no lane flag). SoT for lifecycle, task-step stage contracts, cursor, and drive×scope run loop. Handoff mode does **not** advance this pipeline beyond the explicit nested skill. Handoff load table: [routing.md](routing.md). Intake walk: [intake-absorb.md](intake-absorb.md). Adhoc mint + hard stop: [adhoc.md](adhoc.md).
 
 ## Artifact root (durable paths)
 
@@ -8,7 +8,7 @@ Default (orchestrate on an rr-project slice):
 
 `docs/rr/tasks/{slice_id}/`
 
-When `payload.feature.artifact_root` is set (feature mode / non_rr), resolve **all** durable task/step sidecars under that root instead:
+When `payload.adhoc.artifact_root` is set (adhoc mode / non_rr), resolve **all** durable task/step sidecars under that root instead:
 
 | Kind | Under `artifact_root` |
 |------|------------------------|
@@ -17,7 +17,7 @@ When `payload.feature.artifact_root` is set (feature mode / non_rr), resolve **a
 | Task-validate / task pr-validate | `{NNNN}.task-validate.md`, `{NNNN}.pr-validate.md` |
 | Summary / registry (rr) | `task-summary.md`, `docs/rr/tasks/registry.yaml` (rr only) |
 
-Scratch stays `.ai/review/<runId>/`, `.ai/refactor/<runId>/` — never relocated under `artifact_root`. Slice-validate / delivered paths apply only to orchestrate `scope: slice` — **feature mode never reaches them**.
+Scratch stays `.ai/review/<runId>/`, `.ai/refactor/<runId>/` — never relocated under `artifact_root`. Slice-validate / delivered paths apply only to orchestrate `scope: slice` — **adhoc mode never reaches them**.
 
 Below, paths written as `docs/rr/tasks/{slice_id}/…` mean **`{artifact_root}/…`** when `artifact_root` is set.
 
@@ -260,7 +260,7 @@ Probe order — **first match wins** (this is the **next** stage for `scope: nex
 
 12. **While on pr-validate (task)** — Same as step 9 for task scope ([pr-validate.md](pr-validate.md) → `{NNNN}.pr-validate.md`). Skip when never/carry-to-next. PASS → final-task-step close / next task or step 13.
 
-13. **All tasks validated** → **slice validate** (orchestrate `scope: slice` only — skip under feature).
+13. **All tasks validated** → **slice validate** (orchestrate `scope: slice` only — skip under adhoc).
 14. **Slice validate PASS** → stop: **slice delivered** → point engineer to **s-ci** only for residual unshipped work (do **not** open PR from builder). Mid-slice ships already handed off via **ship**.
 
 Explicit lane flag wins over this cursor even if `builder_stage` says otherwise ([input-resolution.md](input-resolution.md)).
@@ -278,7 +278,7 @@ Explicit lane flag wins over this cursor even if `builder_stage` says otherwise 
 | `next` | Cursor-next stage done-when met (no chaining) |
 | `step` | **Non-final** task-step: step-validate PASS + forge landing + **pr-validate PASS** when an open tip was landed this run (skip pr-validate on never/carry-to-next). **Final** task-step (no more steps after advance), **or** cursor already on `task_validate`: continue through **task-validate PASS** + forge landing of **both** last-step and task validate sidecars onto tip (+ **pr-validate PASS** when tip pushed) — same stop as `scope: task` for that run. If cursor is still **prepare**, complete prepare then stop (do not enter first step). **Anti-trigger:** do **not** park `builder_stage: task_validate` and exit `--step` after the last step’s step-validate PASS; do **not** stop `--step`/`--task` with validate docs only on disk; do **not** advance past a landed open tip with failing/pending CI. |
 | `task` | Active task reaches task-validate PASS + forge landing (+ pr-validate when tip pushed) (all its steps + task-validate). **Feature mode** always uses this boundary and **must not** advance to slice-validate / delivered. |
-| `slice` | Slice validate PASS → delivered (or hard stop). Replaces retired `--full`. Not used under `--feature`. |
+| `slice` | Slice validate PASS → delivered (or hard stop). Replaces retired `--full`. Not used under `--adhoc`. |
 
 **Last-step equivalence:** On the final task-step, `scope: step` ≡ `scope: task` through task-validate PASS **and** forge landing of last-step + task validate reports onto the open tip (or carry-to-next) **and** pr-validate PASS when tip was pushed — then stop (do not enter next task / slice-validate). Mid-task steps keep the narrower step-validate + forge-landing + pr-validate boundary.
 
@@ -298,7 +298,7 @@ Linear pipeline usually yields **one** ready stage (that item is also **`(next)`
 
 **When:** `payload.mode: orchestrate` ∧ `drive: auto` ∧ `scope: task|slice` (includes lone `--task` / `--slice`). Cursor is inside a remaining **task-step** (plan→…→step-validate), not prepare / task-validate / slice-validate / delivered.
 
-**Out of this cell:** `--feature` (parent-inline), `--manual`, `--auto --next`, `--auto --step`, explicit lane handoffs.
+**Out of this cell:** `--intake` / `--adhoc` (parent-inline), `--manual`, `--auto --next`, `--auto --step`, explicit lane handoffs.
 
 **Isolation:** context only — **same working tree**; never parallel steps; never `git worktree`.
 
@@ -381,4 +381,4 @@ resolve flags + cursor
 
 **Handoff:** skip this loop — [routing.md](routing.md) handoff table; stop at nested done-when. Drive/scope do not mutate handoff lanes.
 
-**Feature:** after [feature.md](feature.md) mint + cursor, run this loop with `scope: task` and paths under `artifact_root` **parent-inline** (not Isolated step run); hard-stop at task-validate (step 10) — never slice-validate / delivered.
+**Adhoc:** after [adhoc.md](adhoc.md) preflight + mint/detail + cursor, run this loop with `scope: task` and paths under `artifact_root` **parent-inline** (not Isolated step run); hard-stop at task-validate (step 10) — never slice-validate / delivered.

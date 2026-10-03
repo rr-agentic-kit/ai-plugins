@@ -28,6 +28,7 @@ Routes PR upsert (create if missing, update if exists), Actions debug, inline re
 
 - `disable-model-invocation` — load by path from parent only
 - Do not invent `gh` flags or `s-ci` subcommands — parent `SCRIPTS-SPEC.md`
+- PR title/body: `refs/ci/pr-mr-templates.md` (do not fork)
 - Inline comment rules: [refs/inline-comments.md](refs/inline-comments.md)
 
 ## Notes

@@ -1,23 +1,27 @@
 # rr-builder input resolution
 
-**Audience:** Every `rr-builder` invocation. Normalize before orchestrate, feature, or handoff.
+**Audience:** Every `rr-builder` invocation. Normalize before orchestrate, intake, feature, adhoc, or handoff.
 
 ## Modes
 
 | Mode | Trigger | Behavior |
 |------|---------|----------|
-| **Feature** | `--feature` (or NL ad-hoc feature intent) | Mint one task → run effective `drive` × `scope=task` until task-validate ([feature.md](feature.md)); hard stop — no slice-validate/delivered |
-| **Orchestrate** | `--auto` / `--manual` / `--next` / `--step` / `--task` / `--slice`, or **no** explicit lane/`--feature` flag | Resolve slice/task cursor → run drive×scope loop ([slice-pipeline.md](slice-pipeline.md)) |
+| **Intake** | `--intake` (or NL idea / coverage / “build X” on rr that needs docs/pipeline) | Walk stages 1→7 per [intake-absorb.md](intake-absorb.md); peer planner SKILL for 2–4 when needed; may continue to `--feature` / `--adhoc` when unblocked |
+| **Feature** | `--feature` (or NL planned implement when pipeline already clear) | Pipeline preflight → mint/detail if needed → run `drive` × `scope=task` until task-validate ([feature.md](feature.md)); hard stop — no slice-validate/delivered. Refuse if rr stages 2–4 FAIL → Next Up `--intake` |
+| **Adhoc** | `--adhoc` (or NL urgent/unplanned implement when pipeline already clear) | Same runner as feature via [adhoc.md](adhoc.md) urgency wrap; same gates. Refuse if rr stages 2–4 FAIL → Next Up `--intake` |
+| **Orchestrate** | `--auto` / `--manual` / `--next` / `--step` / `--task` / `--slice`, or **no** explicit lane/`--intake`/`--feature`/`--adhoc` flag | Resolve slice/task cursor → run drive×scope loop ([slice-pipeline.md](slice-pipeline.md)) |
 | **Handoff** | `--prepare` \| `--coder` \| `--tester` \| `--security` \| `--review` \| `--refactor` \| `--add-endless-test` | Classify → load **one** nested skill → stop at its done-when (no pipeline advance beyond that skill) |
 
-**Explicit lane flag wins** over drive/scope flags and over `builder_stage` / cursor. When handoff wins, ignore `drive` / `scope` (omit from payload or one-line note: drive/scope ignored for handoff). **`--feature` wins** over bare orchestrate defaults; incompatible with lane flags and with `--slice` / `--next` / `--step`.
+**Explicit lane flag wins** over drive/scope flags and over `builder_stage` / cursor. When handoff wins, ignore `drive` / `scope` (omit from payload or one-line note: drive/scope ignored for handoff). **`--intake` / `--feature` / `--adhoc` win** over bare orchestrate defaults; mutually exclusive with each other; incompatible with lane flags and with `--slice` / `--next` / `--step`. NL: idea/coverage/docs-gap → `--intake`; planned feature/PRD id → `--feature`; urgent/unplanned/interrupt → `--adhoc`.
 
 ## Top-level flags
 
 | Signal | Mode | `payload.mode` | `payload.lane` / stage |
 |--------|------|----------------|------------------------|
-| `--feature` | feature | `feature` | mint + task run; see Feature mode below |
-| Drive/scope flags and/or no lane/`--feature` flag | orchestrate | `orchestrate` | resolve `builder_stage` via cursor |
+| `--intake` | intake | `intake` | situate → peer planner for 2–4 → … per intake-absorb |
+| `--feature` | feature | `feature` | planned mint + task run after preflight; see Feature mode below |
+| `--adhoc` | adhoc | `adhoc` | urgent mint + task run after preflight; see Adhoc mode below |
+| Drive/scope flags and/or no lane/`--intake`/`--feature`/`--adhoc` flag | orchestrate | `orchestrate` | resolve `builder_stage` via cursor |
 | `--prepare` | handoff | `handoff` | `prepare` |
 | `--coder` | handoff | `handoff` | `coder` |
 | `--tester` | handoff | `handoff` | `tester` |
@@ -26,9 +30,21 @@
 | `--refactor` | handoff | `handoff` | `refactor` |
 | `--add-endless-test` | handoff | `handoff` | `add_endless_test` |
 
+### Intake mode (`--intake`)
+
+Procedure SoT: [intake-absorb.md](intake-absorb.md) + shared `refs/planning/intake.md`.
+
+| Rule | Detail |
+|------|--------|
+| Drive/scope | Omit until continuing into feature/adhoc run; then default `auto` × forced `task` |
+| Lanes | Incompatible with any lane flag → stop: `intake incompatible with lane flags` |
+| Peer | Stages 2–4 via peer `skills/rr-planner/SKILL.md` (Task or Read SKILL + purpose) — not planner refs |
+| Intent | Missing title/desc → one AskQuestion or stop |
+| Code | Only after stages 1–6 PASS |
+
 ### Feature mode (`--feature`)
 
-Third top-level mode (not a lane handoff). Procedure SoT: [feature.md](feature.md).
+Top-level path (not a lane handoff). Procedure SoT: [feature.md](feature.md).
 
 | Rule | Detail |
 |------|--------|
@@ -36,6 +52,7 @@ Third top-level mode (not a lane handoff). Procedure SoT: [feature.md](feature.m
 | Scope | Forced `task` — reject `--slice` / `--next` / `--step` with one-line stop |
 | Lanes | Incompatible with any lane flag → stop: `feature incompatible with lane flags` |
 | Intent | Missing title/desc → one AskQuestion or stop |
+| Preflight | rr stages 2–4 FAIL → stop + Next Up `--intake` / peer planner (do not mint-to-code) |
 | Payload | `payload.feature` (see Output payload) |
 
 ```yaml
@@ -49,7 +66,28 @@ feature:
   base: string               # origin/main | origin/master | current branch name
 ```
 
+### Adhoc mode (`--adhoc`)
+
+Same runner as feature; urgency wrap SoT: [adhoc.md](adhoc.md) → [feature.md](feature.md).
+
+| Rule | Detail |
+|------|--------|
+| Drive / scope / lanes / intent / preflight | Same matrix as Feature mode (`adhoc incompatible with lane flags`) |
+| Payload | `payload.adhoc` (same shape as `feature`, with `adhoc_id` instead of `feature_id`) |
+
+```yaml
+adhoc:
+  title: string
+  project_kind: rr | non_rr
+  artifact_root: string      # docs/rr/tasks/{slice_id}/ | .ai/tasks/{adhoc_id}/
+  slice_id: null | string
+  adhoc_id: string
+  branch: string
+  base: string
+```
+
 ### Drive × scope (orchestrate only)
+
 
 | Flag | Field | Values |
 |------|-------|--------|
@@ -122,22 +160,25 @@ When `lane: refactor`, normalize per `skills/s-refactor/refs/input-resolution.md
 | `docs/plans/*.md` with implement intent | `payload.plan_path` (orchestrate still prefers task tree under `docs/rr/tasks/`) |
 | Cascade dir with `status.yaml` only, no prepare/implement | `OUT_OF_SCOPE` → **rr-planner** |
 
-## Natural language (no lane flag → orchestrate or feature)
+## Natural language (no lane flag → orchestrate, intake, feature, or adhoc)
 
 | Pattern | Effect |
 |---------|--------|
-| "implement this feature", "ad-hoc feature", "build X as a feature task" | `mode: feature`; force `scope: task`; default `drive: auto` unless `--manual` / “confirm each stage” |
+| "intake", "coverage check", "add this requirement", "idea for X", "build X" on rr when docs/cohesion unclear | `mode: intake` |
+| "implement planned feature", "implement feature X", PRD/requirement id, selected requirement ready | `mode: feature` when stages 2–4 PASS or `non_rr`; else `mode: intake` |
+| "urgent", "unplanned", "interrupt", "ship this now", "implement this adhoc", "ad-hoc task" | `mode: adhoc` when pipeline clear / gates PASS; else `mode: intake` |
+| "ad-hoc feature" (legacy phrasing) | Prefer `mode: intake` on rr unless urgency words → `adhoc`, or planned surface clear → `feature` |
 | "continue build", "build the slice", "pick a stage" | `mode: orchestrate`; default `drive: auto`, `scope: step` unless user says otherwise |
 | "next stage only", "just the next step" | `mode: orchestrate`, `drive: manual`, `scope: next` |
 | "auto next", "auto one stage" | `mode: orchestrate`, `drive: auto`, `scope: next` |
 | "one step", "continue step", "finish this step" | `mode: orchestrate`, `drive: auto`, `scope: step` (final step ≡ `--task` through task-validate) |
 | "finish this task", "complete the task" | `mode: orchestrate`, `drive: auto`, `scope: task` |
 | "full auto", "finish the slice", "chain until delivered", "run through without asking" | `mode: orchestrate`, `drive: auto`, `scope: slice` |
-| "manual", "step by step", "confirm each stage" | `mode: orchestrate` or `feature` if already feature-intent; `drive: manual` (orchestrate scope stays default `step` unless “next only” / “finish task” / “finish slice”) |
+| "manual", "step by step", "confirm each stage" | `mode: orchestrate` or `feature`/`adhoc`/`intake` if already that intent; `drive: manual` (orchestrate scope stays default `step` unless “next only” / “finish task” / “finish slice”) |
 | "prepare slice", "decompose execute-slice", "tech plan for slice" | Prefer handoff `prepare` if clearly prepare-only; else orchestrate (cursor may land on prepare) |
-| "implement", "write tests only", "OWASP audit", "review my PR", "endless test", "perfect tests loop" **with** clear single-lane intent | AskQuestion once if ambiguous between handoff vs orchestrate vs feature; else map to matching handoff lane |
+| "implement", "write tests only", "OWASP audit", "review my PR", "endless test", "perfect tests loop" **with** clear single-lane intent | AskQuestion once if ambiguous between handoff vs orchestrate vs intake/feature/adhoc; else map to matching handoff lane |
 | "refactor my MR", "behavior-invariant refactor", "phased refactor on this branch" | handoff `refactor` when clearly refactor-only (not full-slice orchestrate) |
-| Ambiguous | AskQuestion once: feature \| orchestrate (auto/manual × next/step/task/slice) \| prepare \| coder \| tester \| security \| review \| refactor |
+| Ambiguous | AskQuestion once: intake \| feature \| adhoc \| orchestrate (auto/manual × next/step/task/slice) \| prepare \| coder \| tester \| security \| review \| refactor |
 
 ## Prepare path
 
@@ -152,11 +193,12 @@ prepare:
 ## Output payload (skill session)
 
 ```yaml
-mode: orchestrate | feature | handoff
-drive: auto | manual          # orchestrate + feature; default auto; omit or ignore on handoff
-scope: next | step | task | slice   # orchestrate: default step; feature: forced task; omit or ignore on handoff
+mode: orchestrate | intake | feature | adhoc | handoff
+drive: auto | manual          # orchestrate + feature + adhoc; default auto; omit or ignore on handoff/intake until feature/adhoc continue
+scope: next | step | task | slice   # orchestrate: default step; feature/adhoc: forced task; omit or ignore on handoff/intake until continue
 lane: null | prepare | coder | tester | security | review | refactor | add_endless_test
 feature: null | { title, project_kind, artifact_root, slice_id, feature_id, branch, base }
+adhoc: null | { title, project_kind, artifact_root, slice_id, adhoc_id, branch, base }
 builder_stage: null | prepare | plan | build | refactor | review | step_validate | task_validate | slice_validate | delivered
 step_index: null | integer
 plan_path: null | string
@@ -172,16 +214,19 @@ code_scope: null | { scope, paths, plan_excerpt }
 ## Stop conditions
 
 - Two+ explicit lane flags
-- `--feature` + any lane flag
-- `--feature` + `--slice` / `--next` / `--step`
+- `--intake` or `--feature` or `--adhoc` + any lane flag
+- `--intake` or `--feature` or `--adhoc` + `--slice` / `--next` / `--step`
+- Any two of `--intake` / `--feature` / `--adhoc` together
 - `--auto` and `--manual` together, or any two of `--next` / `--step` / `--task` / `--slice`
 - Retired `--full` present → `use --slice`
 - `--fix` and `--ci` together (under `--review`)
 - `--endless` and `--ci` together (under `--review`)
-- `--feature` with missing intent/desc and user declines AskQuestion
+- `--feature` / `--adhoc` / `--intake` with missing intent/desc and user declines AskQuestion
+- `--feature` / `--adhoc` on rr when stages 2–4 FAIL (route intake / peer planner)
 - No lane/mode and user declines AskQuestion
 - Manual gate declined / user declines continue
 - Request is clearly **rr-planner** or **s-ci**-only → redirect per [anti-overlap.md](anti-overlap.md)
 - Orchestrate with no pin-complete kernel / no `slice_id` → stop or AskQuestion
 - Hard stop from stage failure / validate FAIL / endless review max-epochs without clear exit (do not chain further under `step` / `task` / `slice`)
-- Feature mode after task-validate done-when — do not chain to slice-validate / delivered
+- Feature / adhoc mode after task-validate done-when — do not chain to slice-validate / delivered
+- Intake stage-3 block — do not code; peer-invoke planner/discovery

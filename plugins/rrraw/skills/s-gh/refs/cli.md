@@ -2,6 +2,8 @@
 
 Official docs: [GitHub CLI](https://cli.github.com/manual/). This ref is flags agents actually need.
 
+Title/body SoT: `refs/ci/pr-mr-templates.md`. Default create flags: nested SKILL **Default PR ship**.
+
 ```bash
 gh auth status
 gh pr view

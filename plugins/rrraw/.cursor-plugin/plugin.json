@@ -28,6 +28,7 @@
     "review"
   ],
   "skills": [
+    "./skills/rr-main/",
     "./skills/rr-discovery/",
     "./skills/rr-planner/",
     "./skills/rr-builder/",

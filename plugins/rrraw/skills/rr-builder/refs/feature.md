@@ -1,19 +1,34 @@
-# Feature mode (ad-hoc task mint + run)
+# Feature mode (planned stages 5–7 runner)
 
-**Audience:** `rr-builder` when `payload.mode: feature`. SoT for detect → branch ensure → mint → task-scoped pipeline → hard stop at task-validate. Reuses prepare mint templates + [slice-pipeline.md](slice-pipeline.md) — **do not** fork a second stage matrix.
+**Audience:** `rr-builder` when `payload.mode: feature`. **SoT** for pipeline preflight → detect → branch ensure → mint → detail → task-scoped run → hard stop at task-validate. Reuses prepare mint templates + [slice-pipeline.md](slice-pipeline.md) — **do not** fork a second stage matrix. [adhoc.md](adhoc.md) thin-wraps this file with urgency bias only.
 
-**Not:** plan-stage [feature-branch.md](feature-branch.md) (per-step `feat/{NNNN}-{step}-*`); product Feature delta / rr-planner Plan; full-slice `--slice`.
+**Not:** plan-stage [feature-branch.md](feature-branch.md) (per-step `feat/{NNNN}-{step}-*`); product Feature delta / rr-planner Plan; full-slice `--slice`; intake/docs authoring (`refs/planning/intake.md` stages 2–4).
+
+**Pipeline role:** Stages **5–7 runner** for **planned** work — Plan already has (or just absorbed) the surface. Code only after shared intake stages **1–6 PASS** on rr. If stages **2–4 FAIL** → stop and Next Up `--intake` / peer planner — do **not** build.
 
 ## Flow
 
 ```
-detect project_kind
+situate + pipeline preflight (stages 1–4)
+  → if FAIL: stop → Next Up --intake / peer planner SKILL
   → AskQuestion origin if branch not task-dedicated
-  → mint task (rr vs .ai)
-  → set cursor on new task
+  → mint / ensure task (rr vs .ai) when stage 5 missing
+  → detail Goal/Steps when stage 6 thin
+  → set cursor on task
   → run slice-pipeline with scope=task until task-validate PASS
   → stop (no slice-validate / delivered)
 ```
+
+## Pipeline preflight
+
+Load `refs/planning/intake.md`. Run situate; report **stage reached** and **first blocking stage**.
+
+| `project_kind` | Gate |
+|----------------|------|
+| `rr` | Stages **2–4** must PASS (docs absorb + cohesion/challenge clear or risk-accepted + select/slice posture). Stages **5–6** may be ensured in this mode (mint + detail). Stage **7** = run loop below. |
+| `non_rr` | Collapsed pipeline: situate → mint → detail → code. **Never** invent `docs/rr/`. |
+
+**Refuse and route** when rr stages 2–4 FAIL (docs gap, open cohesion/challenge block, unaddressed impact, no selection/open-slice posture). Do **not** treat missing Plan truth as task-body obligations. Peer Plan work → invoke `skills/rr-planner/SKILL.md` with purpose (`--intake` / `--change` / `--challenge`) — do **not** `Read` planner `refs/*`.
 
 ## Detect (`project_kind`)
 
@@ -28,7 +43,7 @@ detect project_kind
 
 | `project_kind` | `artifact_root` | Notes |
 |----------------|-----------------|-------|
-| `rr` | `docs/rr/tasks/{slice_id}/` | Mint into open slice; registry + cascade updates that the feature needs are **task obligations** |
+| `rr` | `docs/rr/tasks/{slice_id}/` | Mint into open slice; Plan docs/deltas already absorbed under stages 2–4 — **not** deferred as task obligations |
 | `non_rr` | `.ai/tasks/{feature_id}/` | Mirror task + step sidecars; **no** project-root process/control files under `docs/rr/` |
 
 Scratch stays `.ai/review/<runId>/`, `.ai/refactor/<runId>/` regardless of `project_kind`.
@@ -60,15 +75,15 @@ Dirty tree: carry uncommitted work onto the new branch, or warn per plan-stage p
 
 Wire Delivery channels (AskQuestion + text fallback). After branch settled, plan-stage step ensure treats `feat/{NNNN}-*` as Stay-friendly (do not force step rename unless engineer asks).
 
-## Mint
+## Mint (stage 5) + detail (stage 6)
 
-Gate: missing feature intent/desc → one AskQuestion or stop.
+Gate: missing intent/desc → one AskQuestion or stop. On rr, only after stages 2–4 PASS.
 
 ### rr
 
-1. Allocate id via [s-prepare/refs/task-template.md](../s-prepare/refs/task-template.md) (`docs/rr/tasks/registry.yaml` / max-id under `docs/rr/tasks/`).
+1. Allocate id via `skills/s-prepare/refs/task-template.md` (`docs/rr/tasks/registry.yaml` / max-id under `docs/rr/tasks/`).
 2. Write `{NNNN}.md` under the open slice’s `artifact_root` with **Goal** from user intent; **Steps** grain via prepare grain rules (thin L2 — enough to run plan→…→task-validate).
-3. Body shape + frontmatter cursor fields per task-template. Upstream doc/ADR/cascade edits the feature requires are **task obligations**, not a separate mode.
+3. Body shape + frontmatter cursor fields per task-template. **Obligations cite** absorbed PRD/delta/AC paths — do not invent missing Plan cascade as task-body substitutes for stages 2–4.
 
 ### non_rr
 
@@ -77,26 +92,30 @@ Gate: missing feature intent/desc → one AskQuestion or stop.
 3. Write `{NNNN}.md` + later sidecars under `.ai/tasks/{feature_id}/` with the same body shape as task-template.
 4. Follow host conventions from project docs / `AGENTS.md` / code — **never** create `docs/rr/`.
 
-Set cursor on the minted task (`builder_stage` ready for first step **plan**, `step_index: 0`, step done flags false).
+Set cursor on the minted (or detailed) task (`builder_stage` ready for first step **plan**, `step_index: 0`, step done flags false).
 
-## Run loop
+## Run loop (stage 7)
 
 1. Set `payload.drive` default `auto` (allow `--manual`); force `payload.scope: task`.
-2. Delegate to [slice-pipeline.md](slice-pipeline.md) with cursor on the minted task and durable paths under `artifact_root`.
+2. Delegate to [slice-pipeline.md](slice-pipeline.md) with cursor on the task and durable paths under `artifact_root`.
 3. **Hard stop** after task-validate done-when (PASS or hard FAIL) — **never** advance to slice-validate or delivered.
 
-Incompatible with lane flags and with `--slice` / `--next` / `--step` (scope forced to task). See [input-resolution.md](input-resolution.md).
+Incompatible with lane flags and with `--slice` / `--next` / `--step` (scope forced to task). Mutually exclusive with `--intake` and `--adhoc`. See [input-resolution.md](input-resolution.md).
 
 ## Done-when
 
-- `project_kind` + `artifact_root` resolved without inventing `docs/rr/` in non-rr repos
-- Task minted under the correct root (open slice when rr + open)
+- Pipeline preflight PASS (rr: stages 2–4; non_rr: collapsed) or explicit stop + Next Up intake/planner
+- `project_kind` + `artifact_root` resolved without inventing `docs/rr/` in non_rr repos
+- Task minted/detailed under the correct root (open slice when rr + open)
 - Task branch settled (dedicated name or confirmed Stay)
 - Pipeline stopped at task-validate PASS or hard FAIL — no slice-validate / delivered
 
 ## Non-goals
 
 - Auto-creating `docs/rr/` via `--feature`
+- Code-first / docs-later / obligation-only cascade on rr
 - Running slice-validate / delivered on this path
 - Forking a second pipeline (reuse slice-pipeline stages)
 - Replacing per-step feature-branch ensure (still runs at plan; Stay-friendly on `feat/{NNNN}-*`)
+- Skipping intake when stages 2–4 incomplete
+- Thin-patching Plan docs inside this mode (Plan absorb → peer planner SKILL entry)

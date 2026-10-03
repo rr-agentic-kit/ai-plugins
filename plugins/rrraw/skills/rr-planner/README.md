@@ -23,6 +23,7 @@ Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX;
 | `setup` | docs/ framework bootstrap | Shared setup |
 | `prd` | Compose PRD + standing Plan path | Entry gate passed |
 | `change` | Patch PRD / delta / AC section | `--change` + section + target |
+| `intake` | Situate + docs absorb + cohesion/challenge + select; open-task sync; **no code** | `--intake` / idea / coverage / “build X” needing Plan |
 | `freeze-slice` | Mint `execute-slice.yaml` + stamp slice | Selected requirements + standard challenge clear or risk-accept (smell-clean alone insufficient) + Effort drivers |
 | `research` | Cited findings on existing docs (scoped load) | Post-compose |
 | `challenge` | Technical pre-mortem + red-team (**standard**; add `deep` for exhaustive) | Prefer Plan targets; compact parent summary |
@@ -34,7 +35,8 @@ Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX;
 
 ### Use when
 
-- Frozen BRD + `business-case.yaml` exist and you need Plan (`--prd`, `--change`, `--freeze-slice`)
+- Frozen BRD + `business-case.yaml` exist and you need Plan (`--prd`, `--change`, `--intake`, `--freeze-slice`)
+- Absorb an ad-hoc idea / requirement / “build X” into docs+selection before builder code (`--intake`)
 - Research or challenge **Plan** docs (`--research`, `--challenge`) with scoped load
 - Plan docs hit soft/hard token tiers (`--optimize`) or ambient hook attention
 - Shared `--setup` or continue a paused Plan session (`--resume` selector) — `--setup` does **not** install host planning CI
@@ -45,6 +47,7 @@ Owns Plan Q&A, PRD compose/change, standing **constitution** (always-load INDEX;
 - Starting Plan without freeze + handoff (entry gate)
 - Asking for sprint planning / velocity as Plan process
 - Asking this skill to invent a release/version plan this pass
+- Asking this skill to code / run `--feature` / `--adhoc` — Next Up peer **rr-builder** after stages 1–4
 - Expecting silent auto-rewrite of fat docs without AskQuestion
 - Expecting the host repo’s Actions to validate planning docs — plugin-runtime only
 
@@ -64,11 +67,11 @@ Process-ownership (user is not process-owner): `INTENT.md` UX. Skill-local chrom
 
 ### Invoke
 
-Flags (`--setup` / `--prd` / `--change` / `--freeze-slice` / `--research` / `--challenge` / `--challenge deep` / `--optimize` / …) or clear Plan NL; bare invoke never silent-composes without entry gate.
+Flags (`--setup` / `--prd` / `--change` / `--intake` / `--freeze-slice` / `--research` / `--challenge` / `--challenge deep` / `--optimize` / …) or clear Plan NL; bare invoke never silent-composes without entry gate.
 
 ### Intake
 
-Status-first (`rrr-status` → phase `status.yaml` + session-state **via** `scripts/session_state.sh view`); resolve emits payload before Plan body. Entry gate also reads discovery freeze + handoff. Solid-subset Plan body on draft Discover allowed when cited subset is load-bearing-stable — freeze mint still needs frozen parents ([input-resolution.md](refs/input-resolution.md)).
+Status-first (`rrr-status` → phase `status.yaml` + session-state **via** `scripts/session_state.sh view`); resolve emits payload before Plan body. Entry gate also reads discovery freeze + handoff. `--intake` loads `refs/planning/intake.md` + [intake-absorb.md](refs/intake-absorb.md). Solid-subset Plan body on draft Discover allowed when cited subset is load-bearing-stable — freeze mint still needs frozen parents ([input-resolution.md](refs/input-resolution.md)).
 
 ### Clarify
 
@@ -80,7 +83,7 @@ PRD + standing constitution/deltas (+ tech ADRs on demand) + WWAS AC + selection
 
 ### Close
 
-Session-state + status stamps written. **Next Up** per `refs/planning/progress.md`: offer slice freeze only after standard challenge clear (or risk-accept) + auto-reflection / red-flag / Discover-reopen check ([cascade.md](refs/cascade.md), [execute-handoff.md](refs/execute-handoff.md)); after hard budget → `--optimize`; after freeze → Execute (future); after compose → research/challenge or goal-likelihood gap work — **not** freeze-by-default after smell-clean. Do not incentivize skip.
+Session-state + status stamps written. **Next Up** per `refs/planning/progress.md`: after `--intake` stages 1–4 PASS → peer **rr-builder** `--feature` (default) or `--adhoc` (urgent) for mint/detail/code (never Plan code; SKILL entry only); offer slice freeze only after standard challenge clear (or risk-accept) + auto-reflection / red-flag / Discover-reopen check ([cascade.md](refs/cascade.md), [execute-handoff.md](refs/execute-handoff.md)); after hard budget → `--optimize`; after freeze → Execute (future); after compose → research/challenge or goal-likelihood gap work — **not** freeze-by-default after smell-clean. Do not incentivize skip.
 
 ## Technique index
 
@@ -103,6 +106,7 @@ Session-state + status stamps written. **Next Up** per `refs/planning/progress.m
 | Architecture (tech ADRs) | [refs/doc-standards/architecture.md](refs/doc-standards/architecture.md) |
 | Feature deltas | [refs/doc-standards/feature-delta.md](refs/doc-standards/feature-delta.md) |
 | WWAS + smell gate | [refs/req-smell.md](refs/req-smell.md) |
+| Intake pipeline (shared) | `refs/planning/intake.md` + [refs/intake-absorb.md](refs/intake-absorb.md) |
 | Slice freeze kernel | [refs/execute-handoff.md](refs/execute-handoff.md) |
 | Technical challenge | [refs/challenge-method.md](refs/challenge-method.md) |
 | Research method | [refs/research-method.md](refs/research-method.md) |

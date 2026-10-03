@@ -74,5 +74,6 @@ Facts that regenerate shared law + skill Specs:
 ## Notes
 
 - Install / quick start / skills table: [README.md](README.md)
-- Per-skill Spec: `skills/rr-discovery/README.md`, `skills/rr-planner/README.md`, `skills/rr-test/README.md`
+- Interactive UX entry (orient / situate / suggest / confirm-handoff): `skills/rr-main/` — not Spec; this file stays spine-focused
+- Per-skill Spec: `skills/rr-discovery/README.md`, `skills/rr-planner/README.md`, `skills/rr-builder/README.md`, `skills/rr-main/README.md`
 - Runtime: `refs/planning/` + skill `refs/`

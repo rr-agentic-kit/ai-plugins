@@ -8,9 +8,9 @@
 
 **rr-builder does not:** compose planning docs, run `agents/planning/*`, or validate cascade format.
 
-**`--feature` ≠ product Plan:** ad-hoc `--feature` mints one execute task and runs to task-validate ([feature.md](feature.md)) — it does **not** author cascade/PRD or replace **rr-planner**. Upstream cascade/docs edits required by the feature are **task obligations**, not a Plan phase.
+**`--intake` / `--feature` / `--adhoc` ≠ product Plan authoring:** shared pipeline lives in `refs/planning/intake.md`. Planner `--intake` owns docs+challenge/impact+select (stages 1–4). Builder `--intake` situates then **peer-invokes** `skills/rr-planner/SKILL.md` for stages 2–4 (Task or Read SKILL + purpose) — never thin-patches Plan or `Read`s planner `refs/*`. **`--feature`** = planned stages 5–7 after 2–4 PASS ([feature.md](feature.md)); **`--adhoc`** = urgent wrap of the same runner ([adhoc.md](adhoc.md)). Neither replaces **rr-planner** compose/`--change`. **Retired:** treating cascade/docs edits as task-body obligations so code can start first; builder thin-Plan absorb.
 
-**`--feature` ≠ full-slice `--slice`:** stops at task-validate; never slice-validate / delivered on this path.
+**`--feature` / `--adhoc` ≠ full-slice `--slice`:** stops at task-validate; never slice-validate / delivered on these paths.
 
 **Stop phrase:** "This is planning-only — use **rr-planner**."
 ## s-ci
@@ -19,7 +19,7 @@
 
 **When builder hands off:** (1) orchestrate **ship** after planned validate ([ship.md](ship.md) — mid-slice or task-scoped); (2) **pr-validate** wait/fix probes (`pre-merge-status`, `debug-pipeline`, `--fix --sonar`) after forge landing push ([pr-validate.md](pr-validate.md)); (3) **slice delivered** residual; (4) **s-review** `--ci`.
 
-**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--step`/`--task`/`--slice`), ad-hoc **`--feature`** (mint + `scope=task`), and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **s-ci** — does **not** invent forge CLI. **pr-validate:** builder waits/orchestrates; s-ci owns wait probes + Sonar fix.
+**rr-builder owns:** Slice build **orchestration** (drive×scope: `--auto`/`--manual` × `--next`/`--step`/`--task`/`--slice`), **`--intake`** (pipeline walk + peer planner for Plan stages), **`--feature`** / **`--adhoc`** (post-pipeline mint + `scope=task` when gates PASS), and explicit lane **handoffs**. Resolves `Ship.branch` / stacked `base` then **Reads** **s-ci** — does **not** invent forge CLI. **pr-validate:** builder waits/orchestrates; s-ci owns wait probes + Sonar fix.
 **rr-builder does not:** open MR/PR except by handing off to **s-ci** (ship stage, delivered residual, or review `--ci`); invent forge wait CLI or list Sonar issues itself.
 
 **Stop phrase:** "Ship/CI forge mechanics — use **s-ci**." Builder may **enter** ship and load s-ci when shippable validate hits the Forge/PR gate (or plan declares `ship_after`); it must not skip a planned ship, require PASS-before-ship for that gate, or open the PR itself. After tip push, builder enters **pr-validate** and load s-ci for status/fix — it must not invent wait flags or treat Sonar as ad-hoc outside `--fix --sonar`.
@@ -30,7 +30,7 @@
 
 **Owns:** Local git safety, worktrees, squash, conflict resolution, merged branch cleanup.
 
-**rr-builder owns (narrow):** (1) **`--feature`** task-branch ensure per [feature.md](feature.md) (`feat/{NNNN}-{short-desc}` + origin AskQuestion). (2) At orchestrate **plan** start, **ensure** the task-step feature branch per [feature-branch.md](feature-branch.md) (`feat/{NNNN}-{step}-{short-desc}`). Both are create/checkout (+ optional rename/origin after AskQuestion) only — not squash/worktree/prune.
+**rr-builder owns (narrow):** (1) **`--feature` / `--adhoc`** task-branch ensure per [feature.md](feature.md) (`feat/{NNNN}-{short-desc}` + origin AskQuestion). (2) At orchestrate **plan** start, **ensure** the task-step feature branch per [feature-branch.md](feature-branch.md) (`feat/{NNNN}-{step}-{short-desc}`). Both are create/checkout (+ optional rename/origin after AskQuestion) only — not squash/worktree/prune.
 **rr-builder may Read** `skills/s-git/refs/safety.md` when the feature-branch probe chooses rename/`-D`, or worktree refs during review `--fix`. It does **not** replace **s-git** for squash, worktrees, prune, or standalone git tasks.
 
 **Stop phrase (standalone git):** "Local git only — use **s-git**." (Does not apply to the plan-stage feature-branch ensure.)

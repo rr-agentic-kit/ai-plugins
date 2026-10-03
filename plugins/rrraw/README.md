@@ -20,24 +20,30 @@ Versioning lives on the Discover→Plan→(Execute) spine only: shared track + d
 
 | Skill | Path | Role | Boundary |
 |-------|------|------|----------|
+| **rr-main** | [`skills/rr-main/`](skills/rr-main/README.md) | Orient / explain / situate / suggest; confirm-before-handoff | No Discover/Plan/Build/CI side effects; not static Spec |
 | **rr-discovery** | [`skills/rr-discovery/`](skills/rr-discovery/README.md) | ES→MRD→BRD cascade + `business-case.yaml` freeze | Not PRD, RICE, stories, or architecture authorship |
 | **rr-planner** | [`skills/rr-planner/`](skills/rr-planner/README.md) | PRD+ / spine / slice freeze from frozen business-case | Entry gate: frozen BRD + handoff; no Discover work |
-| **rr-test** | [`skills/rr-test/`](skills/rr-test/README.md) | Assess, find gaps, write/fix tests, triage flaky | Orthogonal to Discover/Plan; no planning docs / versions |
+| **rr-builder** | [`skills/rr-builder/`](skills/rr-builder/README.md) | Slice orchestrate / intake / feature / adhoc / lane handoff | Not cascade planning; forge-only → `s-ci`; local-git-only → `s-git` |
 
 ## Pipeline
 
 ```mermaid
 flowchart LR
+  M[rr-main<br/>guide] -.->|confirm handoff| D
   D[rr-discovery<br/>ES→MRD→BRD] -->|freeze handoff<br/>business-case.yaml| P[rr-planner<br/>PRD+ / slice]
-  P -->|execute-slice.yaml| E[Execute<br/>future]
-  T[rr-test] -.->|side path| Code[repo / diff]
+  P -->|execute-slice.yaml| B[rr-builder<br/>prepare→delivered]
 ```
 
-Versioning (track / docs patch / product patch / pins) is owned by the Discover→Plan→(Execute) spine only. `rr-test` and `s-humanize` do not load or mint versions.
+Versioning (track / docs patch / product patch / pins) is owned by the Discover→Plan→(Execute) spine only. `rr-main` and `s-humanize` do not load or mint versions.
 
 No slash commands. Invoke skills with flags or clear natural language; details live in each skill README.
 
 ## Quick start
+
+```
+rr-main
+```
+→ Orient: pitch + role cheat sheets; situate/suggest without side effects; confirm before peer handoff.
 
 ```
 rr-discovery --setup
@@ -51,23 +57,23 @@ rr-planner --prd
 → After freeze: compose PRD+ (entry gate must pass).
 
 ```
-rr-test --assess --scope diff
+rr-builder
 ```
-→ Quality verdict for changed production code.
+→ Advance a frozen execute-slice (defaults `auto` × `step`).
 
-Flags, actions, and gates → each skill’s [README](skills/rr-discovery/README.md).
+Flags, actions, and gates → each skill’s [README](skills/rr-main/README.md).
 
 ## Components
 
 | Kind | Path | Role |
 |------|------|------|
-| Skills | `skills/rr-discovery/`, `skills/rr-planner/`, `skills/rr-test/` | Public flag-driven APIs |
+| Skills | `skills/rr-main/`, `skills/rr-discovery/`, `skills/rr-planner/`, `skills/rr-builder/`, `skills/s-*` | Public flag-driven APIs (+ ops/lanes) |
 | Planning agents | `agents/planning/` | Compose, research, challenge Task agents |
 | Test agents | `agents/test/` | Assess, gaps, write, fix, flaky, … |
 | Validate | `scripts/validate_planning*` | Planning artifact shape / ledger checks (plugin-runtime; not host CI) |
 | Shared refs | `refs/planning/` | Ledger, baselines, contracts (flow skills only for versioning) |
 
-`skills/s-humanize/` is an internal prose helper (cascade humanize gate) — not a top-level skill; no version mint.
+`skills/s-humanize/` is listed for cascade humanize gate — no version mint.
 
 ## Install
 

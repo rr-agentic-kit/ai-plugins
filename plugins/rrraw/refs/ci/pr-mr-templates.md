@@ -90,7 +90,7 @@ Revisit the below-the-fold section after pushes that change user-visible behavio
 Before forge create/edit, run the Summary through **s-humanize** — mandatory, not optional when dense.
 
 1. **Draft facts** from task + plan + diff (meaning lock — no invented tickets/metrics).
-2. Load [`skills/s-humanize/SKILL.md`](../../skills/s-humanize/SKILL.md):
+2. Load `skills/s-humanize/SKILL.md`:
    - first body → **generate** (`refs/generate.md`)
    - update/edit existing body → **rewrite** (`refs/rewrite.md`)
    - always apply `refs/readability.md`
@@ -104,14 +104,27 @@ Defaults: `active` + `plain` (same as cascade prose).
 
 Forge upsert uses the active skill **Default PR ship** or **Default MR ship** row with title + body file from disk or context. Body must pass the **Summary humanize gate** above before ship.
 
+## Author every ship invoke
+
+**SoT** for `s-ci` step **title** and for direct `s-gh` / `s-glab` Default PR/MR ship. Nested forge skills do **not** restate these rules — they only run forge create/edit with the current draft.
+
+On every `--create-*` / `--update-*` / `--add-*` / prose PR/MR upsert:
+
+1. Evidence vs ship base (`result.base_branch` from `mr-add-preflight`, or user/handoff base): `git diff --name-only` and `git diff --stat` for `<base>...HEAD` (fetch base if stale). Batch with preflight when possible. Done: name-only + stat in hand.
+2. Always author a **new** title + description from that evidence (Title + Description above). Overwrite `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` when writing disk. Stop: body claims paths outside the name-only list.
+3. **Anti-trigger:** Never reuse a prior disk draft on a new ship invoke — existing `.ai/ci/pr-mr-*` is not authority to skip authoring.
+4. **Only exception:** continuing after skill `--draft` **I'll edit** in the same gate — re-read user-edited disk files; do not regenerate.
+
+Then run the **Summary humanize gate** before forge create/edit (AskQuestion when still dense after one pass).
+
 ### `--draft` disk gate (ship routes)
 
 When the invoke includes `--draft` (or prose asks to draft title/description first):
 
-1. Run the **Summary humanize gate**; then write **`.ai/ci/pr-mr-title.txt`** (title only, one line) and **`.ai/ci/pr-mr-body.md`** (full description per sections above).
+1. Run **Author every ship invoke** → **Summary humanize gate**; then write **`.ai/ci/pr-mr-title.txt`** (title only, one line) and **`.ai/ci/pr-mr-body.md`** (full description per sections above).
 2. Report both paths. AskQuestion (or prose): **Ship** | **Keep draft only** | **I'll edit**.
 3. **Keep draft only** → stop; leave files.
 4. **I'll edit** → do not rewrite the files; after the user continues, **re-read** both paths and use that content (user edition wins). AskQuestion again.
 5. **Ship** → forge upsert uses the current disk title/body. Forge create always includes forge `--draft` (and `--base` / `--target-branch` from preflight); skill `--draft` is only this disk gate.
 
-Without `--draft`, authoring may still write a body file for CLI `--body-file`. The ship step still runs the **Summary humanize gate** before forge create/edit.
+Without `--draft`, still run **Author every ship invoke** (may write body file for CLI `--body-file`); no AskQuestion gate. The ship step still runs the **Summary humanize gate** before forge create/edit.
