@@ -38,7 +38,7 @@ Do **not** invent `gh`/`glab` flags in builder. Follow `skills/s-ci/refs/pipelin
 | Outcome | Action |
 |---------|--------|
 | **PASS** | `verdict == ready` **or** pipeline/checks success with no blocking security/quality blockers per pre-merge envelope |
-| **FAIL → Sonar / quality** | Hand off **`/s-ci --fix --sonar`**; after remediations → s-ci update/push tip → re-enter wait |
+| **FAIL → Sonar / quality** | Hand off **`/s-ci --fix --sonar`** (PR-scoped Sonar owns commit/push + wait + re-enter until tip clean); on return success → treat wait as satisfied for that epoch; on hard-stop → FAIL with that reason. Do **not** double-push or invent a second wait loop around Sonar |
 | **FAIL → other jobs** | `debug-pipeline` → ad-hoc code/test fix in working tree → s-ci update/push tip → re-enter wait |
 | **Unrecoverable** (non-Sonar) | Hard-stop with one-line reason |
 

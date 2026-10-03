@@ -22,13 +22,13 @@ Without skill `--draft`: still run **Author every ship invoke** (may write body 
 
 ## `--fix --sonar`
 
-Sonar remediations. Skip root `title` / forge bind unless PR lookup needs an override AskQuestion.
+Sonar remediations. Skip root `title`. Forge bind optional at start; **required** once the run is PR-scoped (list `result.pull_request` or user `--pr`) so Ship/Wait can use forge wait primitives.
 
-1. Load [sonar-fix.md](sonar-fix.md) + [pipeline-fix-rules.md](pipeline-fix-rules.md).
+1. Load `refs/ci/sonar-fix.md` + `refs/ci/fix/pipeline-fix-rules.md`.
 2. Run `sonar-list-issues --lean` (default: open PR/MR for current branch). Optional `--pr <id>` or `--branch <name>` overrides.
-3. Apply fixes per sonar-fix.md.
+3. Apply fixes per `refs/ci/sonar-fix.md`. **PR-scoped:** after edits, commit+push tip → wait CI (`pre-merge-status` / `gh run watch`) → re-enter list→edit→ship→wait for new Sonar dirty until clean (`epoch_cap: 5`). **Branch-only:** stop after Summary counts.
 
-TodoWrite ids: `root`, `load`, `execute` (skip forge/title unless scope needs forge PR lookup).
+TodoWrite ids: `root`, `load`, `execute` (add `forge` when PR-scoped ship/wait runs).
 
 ## `--pull-dependabot`
 
