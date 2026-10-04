@@ -39,7 +39,7 @@ Own the **ship path** (commit/push when creating or updating a PR/MR, and when *
 - Draft and create a GitHub or GitLab **issue** (including on a forge `owner/repo` other than cwd origin)
 - Author PR/MR **title** and **description**
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
-- **`--fix --sonar`** — auto-remediate open SonarQube issues for a PR or branch (scripted list; agent applies edits; **PR-scoped:** commit/push + wait CI + re-enter until tip clean)
+- **`--fix --sonar`** — auto-remediate open SonarQube issues for a PR, branch, or whole project (`--sonar overall|new-code`; scripted list; `CODE_SMELL` edits auto-delegated to **s-refactor**, other types inline; **PR-scoped:** commit/push + wait CI + re-enter until tip clean)
 - **`--pull-dependabot`** — batch-merge `origin/dependabot/**` into the current branch with verify (GitHub only)
 - Publish artifacts to a static or registry destination
 - Deploy via Helm, Kubernetes, Argo CD, or similar

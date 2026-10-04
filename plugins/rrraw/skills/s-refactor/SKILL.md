@@ -16,6 +16,7 @@ Drive expanded production-source scope to **two consecutive** full-scope assessm
 ## When to use
 
 - **`rr-builder --refactor`** handoff (parent sets `lane: refactor`)
+- **s-ci `--fix --sonar`** edit phase — `CODE_SMELL` findings arrive as `--sonar-seed` (auto-handoff, no human gate)
 - Orchestrate **refactor** stage after build, before review (pre-review, pre-step-validate)
 - God methods/classes, magic numbers, visibility drift, dead code, stack Prefer/Avoid cleanup
 
@@ -24,7 +25,7 @@ Drive expanded production-source scope to **two consecutive** full-scope assessm
 | Need | Use instead |
 |------|-------------|
 | Feature implementation | **s-coder** `--coder` |
-| Sonar-only fix loop | **s-ci** |
+| Sonar list / commit / CI-wait loop | **s-ci** (it calls this skill for `CODE_SMELL` edits) |
 | Multi-lane review + fix | **s-review** `--review --fix` |
 
 ## Procedure
@@ -37,7 +38,7 @@ TodoWrite **`merge: false`** before step 3 — `refactor-parse`, `refactor-scope
 
 ### 1. parse
 
-Confirm param block. Default → `scope: MR`, `epoch_cap: 5`. **Abort before step 2:** unknown flag; invalid path; conflicting scope; invalid **`--epoch-cap`**.
+Confirm param block. Default → `scope: MR`, `epoch_cap: 5`. A `sonar_seed` replaces MR scope with the seed's paths. **Abort before step 2:** unknown flag; invalid path; conflicting scope; invalid **`--epoch-cap`**.
 
 ### 2. id
 
@@ -62,6 +63,8 @@ For `epoch = 1..epoch_cap`, execute:
 | **expand-scope** | orchestrator session | Update **`scope.json`** **`expanded_files`** when execute ran |
 
 Substep contracts: **`refs/leaf-contract.md`**, **`refs/artifacts.md`**. **Collect default:** command session **`Read`**s collector spec (**inline-spec**). **`Task`** collector **only** when >50 files / multi-module — one Task per module (`ASSESS_MODE: full`, `BAND: all`).
+
+With `sonar_seed`: merge its rows into the **epoch-1** manifest as `fix` items (**`refs/fix-disposition.md`** § Sonar seed rows) before collector items.
 
 Write **`state.json`** after every assess. Do not mark phases or an epoch complete without its assess, manifest, and state artifacts.
 
@@ -98,6 +101,7 @@ Apply fixes in phase order **1→8** per **`refs/fix-disposition.md`**. Mandator
 ## Stop conditions
 
 - Invalid params; empty scope after resolution
+- Never invoke **s-ci** (callee of its Sonar loop; no recursion)
 - Collector **`Task`** failure after one retry → **AskQuestion**
 - Test failure after rollback → **AskQuestion** or **`stopped`**
 - **`epoch_cap`** before two clean assessments → **`partial`**; use `confirmation_pending` when `remaining_fix: 0`

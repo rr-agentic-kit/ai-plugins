@@ -12,7 +12,7 @@ Production code accumulates structural violations (god methods, visibility drift
 
 Behavior-invariant refactoring on production source only. Collects violations in eight phased packs, triages to a manifest, applies fixes inline in the orchestrator session (no fix **`Task`**), verifies tests + lint on touched files, and expands scope when edits surface new neighbors.
 
-**Out of scope:** observable behavior changes, commit/push/MR, Sonar-only remediation (**s-ci**), feature work (**s-coder**).
+**Out of scope:** observable behavior changes, commit/push/MR, the Sonar list/commit/CI-wait loop (**s-ci** — it hands `CODE_SMELL` edits to this skill via `--sonar-seed`), feature work (**s-coder**).
 
 ### Verification
 
@@ -23,6 +23,7 @@ Mechanical tool seeds (Checkstyle/Biome/Spotless) plus mandatory LLM assess pack
 ### Use when
 
 - **`rr-builder --refactor`** handoff with validated param block
+- **s-ci `--fix --sonar`** edit phase: `CODE_SMELL` findings via `--sonar-seed` (automatic)
 - Orchestrate **refactor** stage after build, before review (pre-review, pre-step-validate)
 - God methods/classes, magic numbers, visibility drift, dead code, stack Prefer/Avoid cleanup on MR or repo scope
 
@@ -31,7 +32,7 @@ Mechanical tool seeds (Checkstyle/Biome/Spotless) plus mandatory LLM assess pack
 | Need | Use instead |
 |------|-------------|
 | Feature implementation | **s-coder** `--coder` |
-| Sonar-only fix loop | **s-ci** |
+| Sonar list / commit / CI-wait loop | **s-ci** (it calls this skill for `CODE_SMELL` edits) |
 | Multi-lane review + fix | **s-review** `--review --fix` |
 | One-off assess without epoch loop | Collector spec only — not this orchestrator |
 

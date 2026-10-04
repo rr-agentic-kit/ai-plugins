@@ -52,4 +52,10 @@ Honor collector **`disposition`** on every item. Complete one full pass over all
 
 ## Other violations
 
-Fix per phase/order in the manifest (magic numbers, nesting, DRY, naming). Sonar **remediation** rows on **test-only** paths: skip (Sonar-only loop → **s-ci**). That skip does **not** waive Phase 8 Prefer/Avoid assertion hygiene when execute already touches assertions.
+Fix per phase/order in the manifest (magic numbers, nesting, DRY, naming). Sonar **remediation** rows on **test-only** paths: skip unless the run has a `sonar_seed` naming that path (then § Sonar seed rows). That skip does **not** waive Phase 8 Prefer/Avoid assertion hygiene when execute already touches assertions.
+
+## Sonar seed rows (`sonar_seed`, from **s-ci**)
+
+- Each seed row is a `fix` item on its path/line; apply behavior-invariantly (extract, parameterize, simplify; test files included), verify with the normal tests + lint step.
+- **`escalate_human`** → mark the row `behavior_change` (fix would alter observable I/O, e.g. sync-vs-async throw/return semantics) and **do not** edit; report it back — **s-ci** applies it inline.
+- Report `sonar_seed: {fixed, skipped[]}` in the lean summary/note. Never call **s-ci** (callee only).

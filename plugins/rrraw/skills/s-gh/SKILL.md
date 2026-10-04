@@ -42,7 +42,7 @@ Parent **s-ci** already selected GitHub. Do not load for GitLab remotes.
 | Thread disposition (triage rules) | Parent `refs/review-comment-triage.md` (Read from s-ci root; do not invent path) |
 | Failed Actions run | `debug-pipeline` `[PR_NUMBER]` — `result.status`, `result.error_lines`, `result.failed_job_id` (check-run / job id) |
 | Code scanning / quality | `code-quality-reports` |
-| **Sonar fix** (`--fix --sonar`) | `refs/ci/sonar-fix.md` + `sonar-list-issues --lean` (default: open PR for current branch); PR-scoped: commit/push tip, `gh run watch` / `pre-merge-status`, re-enter until CI clean |
+| **Sonar fix** (`--fix --sonar`) | `refs/ci/sonar-fix.md` + `sonar-list-issues --lean` (default: open PR for current branch; `--sonar overall\|new-code` or a pasted Sonar URL → whole-project scope, branch-only; `CODE_SMELL` edits auto-handed to **s-refactor**); PR-scoped: commit/push tip, `gh run watch` / `pre-merge-status`, re-enter until CI clean |
 | Security / Dependabot / code scanning | `pipeline-security-reports` — treat `merge_blocked` as merge-state dirty when GitHub reports failing required checks |
 | Resolve review threads | `mr-skip-threads` |
 | PR add preflight | `mr-add-preflight` |

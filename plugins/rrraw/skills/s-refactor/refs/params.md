@@ -9,7 +9,7 @@ Paths in this doc are relative to **`PLUGIN_ROOT`** unless noted.
 ## Grammar
 
 ```text
-[--scope MR|PR|all|full] [--epoch-cap N] [paths…]
+[--scope MR|PR|all|full] [--epoch-cap N] [--sonar-seed PATH] [paths…]
 ```
 
 Tokens are case-sensitive. Positional `paths…` narrow scope after flag parsing (directories, files, globs as today).
@@ -48,6 +48,14 @@ Empty branch diff → clarify once (path or `all`). Empty resolved path/all scop
 
 **INVALID:** `N < 1` or non-integer → stop: `invalid --epoch-cap`.
 
+## Sonar seed
+
+| Flag | Param | Meaning |
+|------|-------|---------|
+| `--sonar-seed PATH` | `sonar_seed: PATH` | JSON `{repo-relative path: [{key, rule, line}]}` from **s-ci** `--fix --sonar` (`CODE_SMELL` rows). Seed paths **replace** MR scope resolution and count as explicit targets (test files allowed); positional `paths…` may narrow further |
+
+**INVALID:** missing or unparseable file → stop: `invalid --sonar-seed`. Seed rows enter the epoch-1 manifest as `fix` items (**`refs/fix-disposition.md`** § Sonar seed rows).
+
 ## Worktree
 
 Inline fixes use the **main working tree** only — no isolated worktree.
@@ -58,4 +66,5 @@ Inline fixes use the **main working tree** only — no isolated worktree.
 scope: MR | all
 paths: []          # optional narrowers after scope resolution
 epoch_cap: 5
+sonar_seed: null  # path to s-ci seed JSON, else null
 ```

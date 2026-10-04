@@ -10,6 +10,7 @@ Grammar and validation: **`refs/params.md`** (canonical scope rules — do not d
 |------|-------|---------|
 | `--scope MR\|PR\|all\|full` | `scope` | `MR` |
 | `--epoch-cap N` | `epoch_cap` | **5** |
+| `--sonar-seed PATH` | `sonar_seed` | `null` (set by **s-ci** `--fix --sonar`, not by rr-builder) |
 | repo-relative paths | `paths` | `[]` (after scope resolution) |
 
 ## Parent payload mapping
@@ -19,6 +20,7 @@ Grammar and validation: **`refs/params.md`** (canonical scope rules — do not d
 | `payload.refactor.scope` | `scope` |
 | `payload.refactor.paths` | `paths` |
 | `payload.refactor.epoch_cap` | `epoch_cap` |
+| `payload.refactor.sonar_seed` | `sonar_seed` |
 
 Scope resolution (MR merge-base recipe, production-source filter, positional narrowers, empty-diff clarify): **`refs/params.md`** § Scope.
 
@@ -36,6 +38,7 @@ When builder runs **refactor** stage (not handoff), parent pre-resolves scope:
 | Condition | Result |
 |-----------|--------|
 | Invalid `--epoch-cap` | **Stopped:** `invalid --epoch-cap` |
+| Invalid `--sonar-seed` | **Stopped:** `invalid --sonar-seed` |
 | Unknown flag | **Stopped:** one-line error |
 | Conflicting scope selectors | **Stopped:** `conflicting scope selectors` |
 | Non-existent path | **Stopped:** one-line error |
@@ -48,6 +51,7 @@ refactor:
   scope: MR | all
   paths: []
   epoch_cap: 5
+  sonar_seed: null
 ```
 
 Parent sets `payload.lane: refactor` and ignores `drive` / `scope` orchestrate axes.

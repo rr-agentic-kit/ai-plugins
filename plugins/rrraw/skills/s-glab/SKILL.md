@@ -40,7 +40,7 @@ Parent **s-ci** already selected GitLab. Do not load for GitHub remotes.
 | Resolve open MR | [refs/mr-resolve.md](refs/mr-resolve.md) |
 | Failed pipeline | `debug-pipeline` `[MR_IID]` — branch on `result.status`, `result.error_lines`, `result.failed_job_id` |
 | CI code-quality | `code-quality-reports` — `result.reports.count`, `result.reports.nodes` |
-| **Sonar fix** (`--fix --sonar`) | `refs/ci/sonar-fix.md` + `sonar-list-issues --lean` (default: open MR for current branch); MR-scoped: commit/push tip, `pre-merge-status` (or forge wait), re-enter until CI clean |
+| **Sonar fix** (`--fix --sonar`) | `refs/ci/sonar-fix.md` + `sonar-list-issues --lean` (default: open MR for current branch; `--sonar overall\|new-code` or a pasted Sonar URL → whole-project scope, branch-only; `CODE_SMELL` edits auto-handed to **s-refactor**); MR-scoped: commit/push tip, `pre-merge-status` (or forge wait), re-enter until CI clean |
 | Pipeline security | `pipeline-security-reports` — `result.merge_blocked`, `result.findings.*` |
 | Bulk resolve threads | `mr-skip-threads` |
 | MR add preflight | `mr-add-preflight` |

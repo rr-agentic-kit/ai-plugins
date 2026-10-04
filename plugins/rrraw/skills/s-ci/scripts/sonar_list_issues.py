@@ -23,6 +23,10 @@ _PROJECT_KEY_RE = re.compile(r"^[a-zA-Z0-9_\-\.:]+$")
 _BRANCH_RE = re.compile(r"^[a-zA-Z0-9_\-\./]+$")
 _PROPS_NAME = "sonar-project.properties"
 _PROPS_GLOB_DEPTH = ("*", "*/*", "*/*/*")
+_ORG_RE = re.compile(r"^[a-zA-Z0-9_\-\.]+$")
+_SCOPES = ("overall", "new-code")
+_PAGE_SIZE = 500
+_MAX_PAGES = 20
 
 
 class SonarError(Exception):
@@ -37,8 +41,10 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="List SonarQube issues (machine JSON; wrap sonarqube-cli)",
         description=(
             "Result keys: project, total, issues[]; optional pull_request, branch. "
-            "With --lean: by_file map (key/rule/severity/line), issues omitted. "
-            "Default scope: open PR/MR for current branch"
+            "With --lean: by_file map (key/rule/severity/type/line), issues omitted. "
+            "Default scope: open PR/MR for current branch; --scope overall|new-code "
+            "queries the whole project via the Sonar API (organization from "
+            "sonar.organization)"
         ),
     )
     parser.add_argument(
@@ -54,6 +60,18 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     parser.add_argument(
         "--branch",
         help="Branch name for Sonar analysis (skips PR auto-detect)",
+    )
+    parser.add_argument(
+        "--scope",
+        choices=_SCOPES,
+        help=(
+            "Whole-project scope, no PR/branch: overall = every open issue; "
+            "new-code = since the project's new-code period"
+        ),
+    )
+    parser.add_argument(
+        "--organization",
+        help="Sonar organization (default: sonar.organization in properties)",
     )
     parser.add_argument(
         "--statuses",
@@ -75,6 +93,8 @@ def _handler(args: argparse.Namespace) -> int:
         branch=args.branch,
         statuses=args.statuses,
         lean=args.lean,
+        scope=args.scope,
+        organization=args.organization,
     )
 
 
@@ -89,6 +109,7 @@ def lean_reshape(result: dict[str, Any]) -> dict[str, Any]:
             "key": issue.get("key"),
             "rule": issue.get("rule"),
             "severity": issue.get("severity"),
+            "type": issue.get("type"),
             "line": issue.get("line"),
         }
         by_file.setdefault(path, []).append(row)
@@ -101,20 +122,30 @@ def lean_reshape(result: dict[str, Any]) -> dict[str, Any]:
         lean["pull_request"] = result["pull_request"]
     if result.get("branch") is not None:
         lean["branch"] = result["branch"]
+    for field in ("scope", "source", "organization"):
+        if result.get(field) is not None:
+            lean[field] = result[field]
     return lean
 
 
-def _project_key_from_properties(props: Path) -> str | None:
+def _property(props: Path, name: str) -> str | None:
+    prefix = f"{name}="
     for line in props.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
-        if stripped.startswith("sonar.projectKey="):
-            key = stripped.split("=", 1)[1].strip()
-            if _PROJECT_KEY_RE.fullmatch(key):
-                return key
-            raise SonarError(
-                f"invalid project key in properties: {key!r}", code="invalid_project"
-            )
+        if stripped.startswith(prefix):
+            return stripped.split("=", 1)[1].strip()
     return None
+
+
+def _project_key_from_properties(props: Path) -> str | None:
+    key = _property(props, "sonar.projectKey")
+    if key is None:
+        return None
+    if _PROJECT_KEY_RE.fullmatch(key):
+        return key
+    raise SonarError(
+        f"invalid project key in properties: {key!r}", code="invalid_project"
+    )
 
 
 def _discover_properties_files(root: Path) -> list[Path]:
@@ -156,6 +187,26 @@ def _resolve_project_key(explicit: str | None) -> str:
         f"(searched repo root and depth≤3 */{_PROPS_NAME})",
         code="missing_project",
     )
+
+
+def _resolve_organization(explicit: str | None, project: str) -> str | None:
+    """Org the Sonar API must be queried with; the CLI's auth org can differ."""
+    if explicit:
+        org = explicit.strip()
+        if not _ORG_RE.fullmatch(org):
+            raise SonarError(
+                f"invalid organization: {org!r}", code="invalid_organization"
+            )
+        return org
+    found: list[tuple[str | None, str]] = []
+    for props in _discover_properties_files(Path(repo_root())):
+        org = _property(props, "sonar.organization")
+        if org and _ORG_RE.fullmatch(org):
+            found.append((_project_key_from_properties(props), org))
+    for key, org in found:
+        if key == project:
+            return org
+    return found[0][1] if found else None
 
 
 def _component_file(component: str, project: str) -> str:
@@ -212,8 +263,15 @@ def _open_pr_for_current_branch() -> str:
 
 
 def _resolve_scope(
-    pull_request: str | None, branch: str | None
+    pull_request: str | None, branch: str | None, scope: str | None = None
 ) -> tuple[str | None, str | None]:
+    if scope and (branch or pull_request):
+        raise SonarError(
+            "--scope cannot combine with --branch or --pull-request",
+            code="invalid_scope",
+        )
+    if scope:
+        return None, None
     if branch and pull_request:
         raise SonarError(
             "pass only one of --branch or --pull-request",
@@ -233,7 +291,9 @@ def _resolve_scope(
     return _open_pr_for_current_branch(), None
 
 
-def _parse_issues_payload(stdout: str, project: str) -> tuple[list[dict[str, Any]], int]:
+def _parse_issues_payload(
+    stdout: str, project: str
+) -> tuple[list[dict[str, Any]], int]:
     try:
         payload = json.loads(stdout)
     except json.JSONDecodeError as exc:
@@ -296,40 +356,56 @@ def _run_sonar_list(
 def _run_sonar_api_search(
     *,
     project: str,
+    organization: str | None,
     pull_request: str | None,
     branch: str | None,
+    new_code: bool,
     statuses: str,
 ) -> tuple[list[dict[str, Any]], int]:
-    """Fallback when `sonar list issues` returns empty but issues exist via API."""
+    """`/api/issues/search` with organization + paging (CLI list cannot set the org)."""
     params: dict[str, str] = {
         "componentKeys": project,
-        "ps": "500",
+        "ps": str(_PAGE_SIZE),
         "statuses": statuses,
     }
+    if organization:
+        params["organization"] = organization
     if pull_request:
         params["pullRequest"] = str(pull_request)
     if branch:
         params["branch"] = branch
-    endpoint = f"/api/issues/search?{urlencode(params, quote_via=quote)}"
-    completed = subprocess.run(
-        ["sonar", "api", "get", endpoint],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if completed.returncode != 0:
-        detail = (
-            completed.stderr or completed.stdout or ""
-        ).strip() or "sonar api issues search failed"
-        raise SonarError(detail, code="sonar_cli_failed")
-    return _parse_issues_payload(completed.stdout, project)
+    if new_code:
+        params["sinceLeakPeriod"] = "true"
+    issues: list[dict[str, Any]] = []
+    total = 0
+    for page in range(1, _MAX_PAGES + 1):
+        query = urlencode({**params, "p": str(page)}, quote_via=quote)
+        endpoint = f"/api/issues/search?{query}"
+        completed = subprocess.run(
+            ["sonar", "api", "get", endpoint],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if completed.returncode != 0:
+            detail = (
+                completed.stderr or completed.stdout or ""
+            ).strip() or "sonar api issues search failed"
+            raise SonarError(detail, code="sonar_cli_failed")
+        page_issues, total = _parse_issues_payload(completed.stdout, project)
+        issues.extend(page_issues)
+        if not page_issues or len(issues) >= total:
+            break
+    return issues, total
 
 
 def _run_sonar(
     *,
     project: str,
+    organization: str | None,
     pull_request: str | None,
     branch: str | None,
+    scope: str | None,
     statuses: str,
 ) -> dict[str, Any]:
     if shutil.which("sonar") is None:
@@ -337,34 +413,49 @@ def _run_sonar(
             "sonarqube-cli (`sonar`) not on PATH — install/auth before --fix --sonar",
             code="sonar_not_found",
         )
-    pull_request, branch = _resolve_scope(pull_request, branch)
+    pull_request, branch = _resolve_scope(pull_request, branch, scope)
+    api_args: dict[str, Any] = {
+        "project": project,
+        "organization": organization,
+        "pull_request": pull_request,
+        "branch": branch,
+        "new_code": scope == "new-code",
+        "statuses": statuses,
+    }
 
-    issues, total = _run_sonar_list(
-        project=project,
-        pull_request=pull_request,
-        branch=branch,
-        statuses=statuses,
-    )
-    # `sonar list issues` can return total=0 while /api/issues/search still has OPEN
-    # findings for the same PR (observed SonarCloud). Fall back once when empty.
-    if total == 0 and (pull_request or branch):
-        try:
-            api_issues, api_total = _run_sonar_api_search(
-                project=project,
-                pull_request=pull_request,
-                branch=branch,
-                statuses=statuses,
-            )
-        except SonarError:
-            api_issues, api_total = issues, total
-        if api_total > 0:
-            issues, total = api_issues, api_total
+    source = "cli"
+    if scope:
+        # Whole-project scopes go straight to the API: `sonar list issues` cannot set
+        # the organization or new-code period; on an org mismatch it returns total=0.
+        issues, total = _run_sonar_api_search(**api_args)
+        source = "api"
+    else:
+        issues, total = _run_sonar_list(
+            project=project,
+            pull_request=pull_request,
+            branch=branch,
+            statuses=statuses,
+        )
+        # `sonar list issues` can return total=0 while /api/issues/search still has OPEN
+        # findings (CLI auth org != project org; observed SonarCloud). Never trust a CLI
+        # zero: cross-check once via the API with the project's organization.
+        if total == 0:
+            try:
+                api_issues, api_total = _run_sonar_api_search(**api_args)
+            except SonarError:
+                api_issues, api_total = issues, total
+            if api_total > 0:
+                issues, total, source = api_issues, api_total, "api"
 
     result: dict[str, Any] = {
         "project": project,
         "total": total,
         "issues": issues,
+        "scope": scope or ("pr" if pull_request else "branch"),
+        "source": source,
     }
+    if organization:
+        result["organization"] = organization
     if pull_request:
         result["pull_request"] = str(pull_request)
     if branch:
@@ -379,11 +470,15 @@ def main(
     branch: str | None = None,
     statuses: str = "OPEN,CONFIRMED",
     lean: bool = False,
+    scope: str | None = None,
+    organization: str | None = None,
 ) -> int:
     try:
         key = _resolve_project_key(project)
         result = _run_sonar(
             project=key,
+            organization=_resolve_organization(organization, key),
+            scope=scope,
             pull_request=pull_request,
             branch=branch,
             statuses=statuses,

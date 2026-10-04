@@ -25,8 +25,8 @@ Without skill `--draft`: still run **Author every ship invoke** (may write body 
 Sonar remediations. Skip root `title`. Forge bind optional at start; **required** once the run is PR-scoped (list `result.pull_request` or user `--pr`) so Ship/Wait can use forge wait primitives.
 
 1. Load `refs/ci/sonar-fix.md` + `refs/ci/fix/pipeline-fix-rules.md`.
-2. Run `sonar-list-issues --lean` (default: open PR/MR for current branch). Optional `--pr <id>` or `--branch <name>` overrides.
-3. Apply fixes per `refs/ci/sonar-fix.md`. **PR-scoped:** after edits, commit+push tip → wait CI (`pre-merge-status` / `gh run watch`) → re-enter list→edit→ship→wait for new Sonar dirty until clean (`epoch_cap: 5`). **Branch-only:** stop after Summary counts.
+2. Run `sonar-list-issues --lean` (default: open PR/MR for current branch). Scope tokens: `--pr <id>`, `--branch <name>`, `--sonar overall|new-code`, or a pasted Sonar issues URL — mapping in `refs/ci/sonar-fix.md` List step.
+3. Apply fixes per `refs/ci/sonar-fix.md` (`CODE_SMELL` rows go to **s-refactor** automatically). **PR-scoped:** after edits, commit+push tip → wait CI (`pre-merge-status` / `gh run watch`) → re-enter list→edit→ship→wait for new Sonar dirty until clean (`epoch_cap: 5`). **Branch-only / `overall` / `new-code`:** stop after Summary counts.
 
 TodoWrite ids: `root`, `load`, `execute` (add `forge` when PR-scoped ship/wait runs).
 
