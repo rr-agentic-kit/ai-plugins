@@ -206,39 +206,59 @@ jobs:
           git push origin "HEAD:refs/heads/${target}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
-  release:
+  publish_release:
     needs: [resolve, bump]
     if: >-
       always() &&
       needs.resolve.result == 'success' &&
       needs.bump.result == 'success' &&
-      contains(fromJSON('["promote", "hotfix"]'), needs.resolve.outputs.command)
+      needs.bump.outputs.changed == 'true' &&
+      contains(fromJSON('["rc", "promote", "hotfix"]'), needs.resolve.outputs.command)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: master
+          ref: >-
+            ${{
+              needs.resolve.outputs.command == 'rc' && github.event.pull_request.base.ref ||
+              'master'
+            }}
           fetch-depth: 0
           token: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - name: Tag and create GitHub release
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python 3.14
+        run: uv python install 3.14
+
+      - name: Sync dependencies
+        run: uv sync --all-groups
+
+      - name: Build zip, tag, and create GitHub release
         env:
           GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           version="${{ needs.bump.outputs.version }}"
-          tag="v${version}"
-          git tag "$tag"
-          git push origin "$tag"
-          gh release create "$tag" --generate-notes --target master --title "$version"
+          if [[ "${{ needs.resolve.outputs.command }}" == "rc" ]]; then
+            publish_ref="${{ github.event.pull_request.base.ref }}"
+            release_target="${{ github.event.pull_request.base.ref }}"
+          else
+            publish_ref="master"
+            release_target="master"
+          fi
+          bash scripts/ci_publish_github_release.sh "$version" "$publish_ref" "$release_target"
 
   open-next-release:
-    needs: [resolve, bump, release]
+    needs: [resolve, bump, publish_release]
     if: >-
       always() &&
       needs.resolve.result == 'success' &&
       needs.bump.result == 'success' &&
-      needs.release.result == 'success' &&
+      needs.publish_release.result == 'success' &&
       needs.resolve.outputs.command == 'promote'
     runs-on: ubuntu-latest
     steps:
@@ -334,20 +354,25 @@ jobs:
           git push origin "HEAD:refs/heads/${target}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Tag and create GitHub release
-        if: contains(fromJSON('["promote", "hotfix"]'), inputs.action)
+      - name: Build zip, tag, and create GitHub release
+        if: >-
+          steps.commit.outputs.changed == 'true' &&
+          contains(fromJSON('["rc", "promote", "hotfix"]'), inputs.action)
         env:
           GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN != '' && secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git fetch origin master
-          git checkout master
-          git pull --ff-only origin master
           version="${{ steps.control.outputs.version }}"
-          tag="v${version}"
-          git tag "$tag"
-          git push origin "$tag"
-          gh release create "$tag" --generate-notes --target master --title "$version"
+          if [[ "${{ inputs.action }}" == "rc" ]]; then
+            publish_ref="${{ inputs.branch != '' && inputs.branch || github.ref_name }}"
+            release_target="${publish_ref}"
+          else
+            git fetch origin master
+            git checkout master
+            publish_ref="master"
+            release_target="master"
+          fi
+          bash scripts/ci_publish_github_release.sh "$version" "$publish_ref" "$release_target"
 
       - name: Open next minor release branch
         if: inputs.action == 'promote'
