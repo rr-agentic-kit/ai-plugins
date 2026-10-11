@@ -63,6 +63,24 @@ Record after feature-branch ensure. Do **not** invent a second branch naming sch
 
 **Ship-intent review (plan stage):** `never` is valid when this step will not open a PR. If Goal/Approach/pr_group clearly imply a forge open this step, AskQuestion once: keep `never` \| set `step_validate` or `task_validate` \| abort — do not silently coerce.
 
+## Task plan variant
+
+**Audience:** Task run **plan** phase (`pipeline_granularity: task`, [task-run.md](task-run.md)). One plan per task, not per step; every rule above applies except where this section overrides it.
+
+Path: `{artifact_root}/{NNNN}.plan.md` (no `{step}`). Frontmatter: `task_id`, `slice_id`, `unit_count` (number of **Build units**).
+
+| Section | Content |
+|---------|---------|
+| **Goal** | The task outcome plus a verified **state of the world** (what exists on the settled branch: files, symbols, consumers) so build units do not re-explore |
+| **Build units** | Ordered `### Unit N — <title>`; each has **Goal**, **Seams / files** (≤ ~15 files, test files included) and **Unit hooks** as `- [ ]` checkboxes. Order units so the committed tree stays green after each one (additive first, behavior flips later) |
+| **Verify hooks** | Task-level `- [ ]` checklist for **task-validate** (same checkbox contract as above); maps to task Goal/AC, not to units |
+| **Risks** / **Non-goals** | As above, scoped to the task |
+| **Ship** | One block. `branch` is the settled `feat/{NNNN}-{short-desc}` ([feature-branch.md](feature-branch.md) **Task-run branch**); `ship_after` is `task_validate` unless `never` |
+
+**Hook rule:** every Unit hook and Verify hook is a command that fails when the thing it checks is absent. A command that can exit 0 while matching nothing (a package filter that names no package, a glob with no files) is not a hook — write the real invocation, including working directory and runner.
+
+**Done-when (task plan):** branch settled; file exists and `unit_count` equals the number of `### Unit` headings; every unit within the file budget; Verify hooks and all Unit hooks are checkboxes; Ship present; then set `task_plan_done: true` and `pipeline_granularity: task` on `{NNNN}.md`. **Stop:** a unit over budget → split it; do not set `task_plan_done` with an oversized unit.
+
 ## Done-when
 
 0. Feature branch settled per [feature-branch.md](feature-branch.md) (**before** writing the sidecar).
