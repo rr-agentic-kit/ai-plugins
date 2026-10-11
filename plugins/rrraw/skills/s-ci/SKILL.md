@@ -1,6 +1,6 @@
 ---
 name: s-ci
-description: /s-ci — forge router for PR/MR ship, issues, CI debug, publish, deploy; --fix --sonar and --pull-dependabot.
+description: /s-ci — forge router for PR/MR ship, issues, CI debug, publish, deploy; --fix --pr, --fix --sonar, and --pull-dependabot.
 disable-model-invocation: true
 ---
 
@@ -40,6 +40,7 @@ Own the **ship path** (commit/push when creating or updating a PR/MR, and when *
 - Draft and create a GitHub or GitLab **issue** (including on a forge `owner/repo` other than cwd origin)
 - Author PR/MR **title** and **description**
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
+- **`--fix --pr`** — fix failing checks on the open PR for the current branch (classify root cause per [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md); not general implement)
 - **`--fix --sonar`** — auto-remediate open SonarQube issues for a PR, branch, or whole project (`--sonar overall|new-code`; scripted list; `CODE_SMELL` edits auto-delegated to **s-refactor**, other types inline; **PR-scoped:** commit/push + wait CI + re-enter until tip clean)
 - **`--pull-dependabot`** — batch-merge `origin/dependabot/**` into the current branch with verify (GitHub only)
 - Publish artifacts to a static or registry destination
@@ -56,7 +57,7 @@ Own the **ship path** (commit/push when creating or updating a PR/MR, and when *
 
 TodoWrite `merge: false` with ids `root`, `forge`, `title`, `load`, `execute` when shipping a PR/MR or running 3+ CLI commands. Single CLI call: skip TodoWrite. Shape-specific TodoWrite ids: see [refs/task-shapes.md](refs/task-shapes.md).
 
-0. **task-shape** — Classify: **ship** (named routes or prose PR/MR upsert) | **`--draft`** (with ship) | **`--fix --sonar`** | **`--pull-dependabot`** | **issue** | **CI / review / publish / deploy**. Load [refs/task-shapes.md](refs/task-shapes.md) only when the shape needs draft-gate, sonar, pull-dependabot, issue, or ship-route detail beyond this line. Done: shape recorded. Stop: shape unclear after one AskQuestion (Issue | PR/MR ship | Sonar fix | Pull Dependabot | CI/other).
+0. **task-shape** — Classify: **ship** (named routes or prose PR/MR upsert) | **`--draft`** (with ship) | **`--fix --sonar`** | **`--fix --pr`** (open PR CI / merge-ready) | **`--pull-dependabot`** | **issue** | **CI / review / publish / deploy**. Load [refs/task-shapes.md](refs/task-shapes.md) when the shape needs draft-gate, sonar, **`--fix --pr`**, pull-dependabot, issue, or ship-route detail beyond this line. Done: shape recorded. Stop: shape unclear after one AskQuestion (Issue | PR/MR ship | Sonar fix | Fix PR CI | Pull Dependabot | CI/other).
 
 1. **root** — Resolve `REPO_ROOT` via plugin-relative `skills/s-git/refs/repo-root.md`. Load `skills/s-git/refs/safety.md` **only when** this ship may rewrite history, force-push, reset/clean, or discard work — not on clean upsert of an already-pushed branch. Done: cwd/`git -C` is the repo root (local work tree for git ops). Issue create on another forge project does **not** require that path to be a clone of the target.
 

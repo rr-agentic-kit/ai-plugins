@@ -43,6 +43,17 @@ TodoWrite ids: `root`, `forge`, `load`, `execute` (skip `title`).
 
 Skip root step `title` / `refs/ci/pr-mr-templates.md`. After forge bind, load forge skill and run its **Issue create** row. TodoWrite ids: `root`, `forge`, `load`, `execute`.
 
+## `--fix --pr`
+
+Merge-ready / fix failing checks on the **open PR for the current branch** (prose: fix PR CI, unblock checks, autopilot-style). Not `--fix --sonar`.
+
+1. Load [pipeline-fix-rules.md](pipeline-fix-rules.md) (classify before unblocking).
+2. `pre-merge-status` on the open PR — conflicts → threads → CI per priority in that ref (not `debug-pipeline` alone).
+3. For each failing check: read **that job’s log**; run **Classify before unblocking** (log vs live PR state).
+4. Apply root-cause edits (code, workflow, or label-on-create per nested forge ship rules). Symptom-only empty commit or rerun **only** when user asked for a one-off unblock **or** classification is code retest — not when class is **stale event** / **workflow / config**.
+
+TodoWrite ids: `root`, `forge`, `load`, `execute` (skip `title`).
+
 ## CI / review / publish / deploy
 
-Steps `root` → `forge`, then matching Shared-refs load row (no invent). No `title` unless the ask also ships a PR/MR.
+Steps `root` → `forge`, then matching Shared-refs load row (no invent). No `title` unless the ask also ships a PR/MR. Prose PR CI fix without `--fix --pr` → same shape as **`--fix --pr`** above.
