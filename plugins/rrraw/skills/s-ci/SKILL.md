@@ -18,6 +18,7 @@ disable-model-invocation: true
 | Publish artifacts | `skills/s-publish/SKILL.md` after forge skill |
 | Cluster deploy | `skills/s-deploy/SKILL.md` after forge skill |
 | PR/MR title/body | `refs/ci/pr-mr-templates.md` |
+| Version labels on GitHub PR create | `refs/ci/version-labels.md` (nested **s-gh** Default PR ship) |
 | Pipeline fix anti-patterns | [refs/pipeline-fix-rules.md](refs/pipeline-fix-rules.md) |
 | Sonar remediations (`--fix --sonar`) | `refs/ci/sonar-fix.md` + `refs/ci/fix/pipeline-fix-rules.md` |
 | Dependabot remote merges (`--pull-dependabot`) | [refs/pull-dependabot.md](refs/pull-dependabot.md) |

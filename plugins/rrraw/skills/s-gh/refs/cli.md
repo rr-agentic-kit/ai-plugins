@@ -7,9 +7,11 @@ Title/body SoT: `refs/ci/pr-mr-templates.md`. Default create flags: nested SKILL
 ```bash
 gh auth status
 gh pr view
-gh pr create --draft --base BASE --fill --title "..." --body-file .ai/ci/pr-mr-body.md
+gh pr create --draft --base BASE --title "..." --body-file .ai/ci/pr-mr-body.md --label v::patch
+gh label list --search 'v::' --limit 20
 gh pr edit --title "..." --body-file .ai/ci/pr-mr-body.md
 gh pr edit --base BASE
+gh pr edit --add-label v::patch
 gh pr checks
 gh pr review --approve
 gh pr review --request-changes --body "..."
@@ -21,7 +23,7 @@ gh issue create --repo OWNER/REPO --title "..." --body "..."
 gh issue create --title "..." --body-file body.md
 ```
 
-Default ship create always includes `--draft` and `--base` from `mr-add-preflight` `result.base_branch`. Prefer `gh` over raw `curl` to `api.github.com` when `gh` is authenticated. JSON: `gh … --json fields`. Use `--repo OWNER/REPO` when forge target ≠ cwd origin.
+Default ship create always includes `--draft` and `--base` from `mr-add-preflight` `result.base_branch`. When the repo has `v::patch` / `v::minor` / `v::major` / `v::skip` labels, include **one** `--label` on `gh pr create` (pick per `refs/ci/version-labels.md`) — not a separate edit after create. Prefer `gh` over raw `curl` to `api.github.com` when `gh` is authenticated. JSON: `gh … --json fields`. Use `--repo OWNER/REPO` when forge target ≠ cwd origin.
 
 `gh run watch RUN_ID --exit-status` blocks until a run finishes and exits non-zero on failure — the sanctioned wait for a run in progress ([pr-validate.md](../../rr-builder/refs/pr-validate.md) Wait). Prefer it over a manual sleep/re-poll loop.
 
