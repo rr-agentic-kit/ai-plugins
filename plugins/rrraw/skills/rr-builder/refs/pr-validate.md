@@ -27,19 +27,29 @@ Do **not** invent `gh`/`glab` flags in builder. Follow `skills/s-ci/refs/pipelin
 
 ## Wait
 
+0. **Host monitor first:** when the host exposes a PR/CI monitor (a bound-PR status tool or CI-monitor events), read check state from it instead of starting a poll or watch loop beside it. Checks pending → record `pending` and wait for the host event. A single blocking watch (item 1) is allowed only when this invoke must return the result in-session.
 1. Poll via s-ci `pre-merge-status <PR#>` (pass the PR number; the bare form can fail on some `gh` versions) until pipeline/checks leave the pending set. On GitHub, prefer the blocking `gh run watch <RUN_ID> --exit-status` ([s-gh/refs/cli.md](../../s-gh/refs/cli.md)) over a manual sleep/backoff loop — it is the allowlisted wait primitive precisely because ad hoc short-sleep polling is disallowed for agents.
 2. Backoff ~30–60s between polls when no blocking watch command exists for the forge.
 3. Wall timeout default ~30 min → hard-stop with one-line reason.
 4. Pending CI is **wait**, not FAIL.
-5. **Self-retrigger:** writing and pushing *this stage's own* `{NNNN}(-{step}).pr-validate.md` report (or any cursor-only commit) is itself a new commit. On repos whose CI listens to `synchronize`, that push starts a **new** run — poll/watch that run too before Done-when, not just the run that justified writing the report.
+5. **Self-retrigger:** writing and pushing *this stage's own* `{NNNN}(-{step}).pr-validate.md` report (or any cursor-only commit) is itself a new commit. On repos whose CI listens to `synchronize`, that push starts a **new** run. Resolve it with the **closing commit** rule below instead of chasing every report push forever.
+
+### Closing commit (report-only push)
+
+The **closing commit** is the one that persists this stage's report + cursor and touches **only** durable sidecars (`{artifact_root}/**`, `task-summary.md`) — no code, tests, config or workflow files.
+
+1. **Skip-safety probe** — the forge accepts a CI-skip token in the head commit message (GitHub `[skip ci]`; GitLab `[ci skip]`) **and** no required status checks are configured (protection/ruleset lookup returns none, or the forge reports the feature unavailable for this plan). Required checks that a skipped workflow cannot satisfy would block the merge, so a probe that is undecidable counts as **fail**.
+2. Probe passes → append the token to the closing commit message. It starts no run; the evidence is the last **code-bearing** tip, whose SHA the report names.
+3. Probe fails (or the commit includes any non-sidecar file, or a fix epoch is still open) → no token; watch the retrigger run to a terminal result before Done-when.
 
 ## Verdict / fix loop
 
 | Outcome | Action |
 |---------|--------|
 | **PASS** | `verdict == ready` **or** pipeline/checks success with no blocking security/quality blockers per pre-merge envelope |
-| **FAIL → Sonar / quality** | Hand off **`/s-ci --fix --sonar`**; after remediations → s-ci update/push tip → re-enter wait |
+| **FAIL → Sonar / quality** | Hand off **`/s-ci --fix --sonar`** (PR-scoped Sonar owns commit/push + wait + re-enter until tip clean); on return success → treat wait as satisfied for that epoch; on hard-stop → FAIL with that reason. Do **not** double-push or invent a second wait loop around Sonar |
 | **FAIL → other jobs** | `debug-pipeline` → ad-hoc code/test fix in working tree → s-ci update/push tip → re-enter wait |
+| **FAIL → stale base** | Failure text names a value that differs from the default branch (version, lockfile, workflow drift) and the default branch tip is ahead of the branch's merge base → merge the default branch into the branch (host sync tool, else `git merge`; never rebase or force-push), re-run the local checks for the files the merge touched, push, re-enter wait |
 | **Unrecoverable** (non-Sonar) | Hard-stop with one-line reason |
 
 **Epoch cap:** `epoch_cap: 5` (same as review). Each push→re-poll cycle counts one epoch. Hitting the cap without PASS → hard-stop.
@@ -62,6 +72,7 @@ Short report only: wait outcome, fix epochs used, final PASS/FAIL. Resolve under
 ## Wait
 - outcome: ready | timeout | pending-exit-fail
 - polls: <n>
+- closing commit: skip-token (evidence SHA <sha>) | watched run <id>
 
 ## Fix epochs
 | Epoch | Branch | Summary |
@@ -86,12 +97,12 @@ Mid-flight cursors without `pr_validate` / missing `step_pr_validate_done`: trea
 
 - Report written with overall **PASS**.
 - Tip still includes prior validate sidecars (re-push after fixes if dirty).
-- The commit that persisted **this** report + cursor frontmatter was pushed to the open tip, and — if that specific push triggered a new CI run — that run also reached a terminal **PASS**. A poll taken *before* this report-commit was pushed is not evidence for the tip that now exists.
+- The **closing commit** (report + cursor) was pushed to the open tip, and either it carried the skip token (probe passed — the report names the code-bearing SHA that is the evidence) or the run it triggered reached a terminal **PASS**. A poll taken *before* the closing commit was pushed is not evidence for a tip that has a new run.
 - `step_pr_validate_done: true` when step-scoped.
 
 ## Anti-trigger: report-push retrigger
 
-Do **not** treat `gh pr view --json mergeable` (or any other cached merge-state field) as evidence of CI conclusion for the latest push — `mergeable` reflects diff conflicts, not check/pipeline status. Before declaring `scope: step` / `task` / `slice` closed, re-resolve pipeline/checks (`pre-merge-status`, or the forge run list) keyed to the **current** HEAD SHA, not the SHA that was true when an earlier poll passed.
+Do **not** treat `gh pr view --json mergeable` (or any other cached merge-state field) as evidence of CI conclusion for the latest push — `mergeable` reflects diff conflicts, not check/pipeline status. Before declaring `scope: step` / `task` / `slice` closed, re-resolve pipeline/checks (`pre-merge-status`, or the forge run list) keyed to the **current** HEAD SHA, not the SHA that was true when an earlier poll passed. Exception: a skip-token closing commit starts no run, so key the check to the last code-bearing SHA and say so in the report.
 
 ## Hard-stops
 

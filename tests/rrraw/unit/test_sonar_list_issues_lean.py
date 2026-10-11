@@ -62,11 +62,29 @@ def test_lean_reshape_groups_by_file_omits_issues_and_messages() -> None:
     assert lean["pull_request"] == "14"
     assert "issues" not in lean
     assert lean["by_file"]["src/a.py"] == [
-        {"key": "k1", "rule": "python:S1", "severity": "MAJOR", "line": 3},
-        {"key": "k2", "rule": "python:S2", "severity": "MINOR", "line": 9},
+        {
+            "key": "k1",
+            "rule": "python:S1",
+            "severity": "MAJOR",
+            "type": "BUG",
+            "line": 3,
+        },
+        {
+            "key": "k2",
+            "rule": "python:S2",
+            "severity": "MINOR",
+            "type": "CODE_SMELL",
+            "line": 9,
+        },
     ]
     assert lean["by_file"]["src/b.py"] == [
-        {"key": "k3", "rule": "python:S3", "severity": "INFO", "line": 1},
+        {
+            "key": "k3",
+            "rule": "python:S3",
+            "severity": "INFO",
+            "type": "CODE_SMELL",
+            "line": 1,
+        },
     ]
     for rows in lean["by_file"].values():
         for row in rows:

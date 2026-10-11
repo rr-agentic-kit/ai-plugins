@@ -96,6 +96,8 @@ After each Task return (and after parent post-ship commit), parent runs `git sta
 
 **Failure path:** executor must **not** commit; dirty tree expected; parent stops.
 
+**Parent-owned edits:** the parent's own writes (`task-summary.md` mirror fields, cursor fixes) also dirty the tree. Commit them yourself — stage only the paths the parent wrote, one docs-only commit with the same message policy and trailers handed to executors, no push — **before** the next dirty-tree gate or spawn. At the first plan handoff, overwrite stale summary values (`builder_stage`, `active_ship_branch`) left by a previous task with the active task's values; a stale mirror is not cursor evidence.
+
 ### `needs_ship`
 
 Executor may return `needs_ship` after writing/committing a forge-miss task-validate report. Parent runs [ship.md](ship.md) → **s-ci** (push + draft-PR upsert need no confirm under `drive: auto` — [ship.md](ship.md) **Stop / anti-trigger**), re-runs task-validate **inline** (assessment only), commits cursor/validate, dirty-gates, then spawns **pr-validate** Task when an open tip was landed.

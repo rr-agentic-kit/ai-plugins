@@ -22,13 +22,13 @@ Without skill `--draft`: still run **Author every ship invoke** (may write body 
 
 ## `--fix --sonar`
 
-Sonar remediations. Skip root `title` / forge bind unless PR lookup needs an override AskQuestion.
+Sonar remediations. Skip root `title`. Forge bind optional at start; **required** once the run is PR-scoped (list `result.pull_request` or user `--pr`) so Ship/Wait can use forge wait primitives.
 
-1. Load [sonar-fix.md](sonar-fix.md) + [pipeline-fix-rules.md](pipeline-fix-rules.md).
-2. Run `sonar-list-issues --lean` (default: open PR/MR for current branch). Optional `--pr <id>` or `--branch <name>` overrides.
-3. Apply fixes per sonar-fix.md.
+1. Load `refs/ci/sonar-fix.md` + `refs/ci/fix/pipeline-fix-rules.md`.
+2. Run `sonar-list-issues --lean` (default: open PR/MR for current branch). Scope tokens: `--pr <id>`, `--branch <name>`, `--sonar overall|new-code`, or a pasted Sonar issues URL — mapping in `refs/ci/sonar-fix.md` List step.
+3. Apply fixes per `refs/ci/sonar-fix.md` (`CODE_SMELL` rows go to **s-refactor** automatically). **PR-scoped:** after edits, commit+push tip → wait CI (`pre-merge-status` / `gh run watch`) → re-enter list→edit→ship→wait for new Sonar dirty until clean (`epoch_cap: 5`). **Branch-only / `overall` / `new-code`:** stop after Summary counts.
 
-TodoWrite ids: `root`, `load`, `execute` (skip forge/title unless scope needs forge PR lookup).
+TodoWrite ids: `root`, `load`, `execute` (add `forge` when PR-scoped ship/wait runs).
 
 ## `--pull-dependabot`
 
@@ -43,6 +43,17 @@ TodoWrite ids: `root`, `forge`, `load`, `execute` (skip `title`).
 
 Skip root step `title` / `refs/ci/pr-mr-templates.md`. After forge bind, load forge skill and run its **Issue create** row. TodoWrite ids: `root`, `forge`, `load`, `execute`.
 
+## `--fix --pr`
+
+Merge-ready / fix failing checks on the **open PR for the current branch** (prose: fix PR CI, unblock checks, autopilot-style). Not `--fix --sonar`.
+
+1. Load [pipeline-fix-rules.md](pipeline-fix-rules.md) (classify before unblocking).
+2. `pre-merge-status` on the open PR — conflicts → threads → CI per priority in that ref (not `debug-pipeline` alone).
+3. For each failing check: read **that job’s log**; run **Classify before unblocking** (log vs live PR state).
+4. Apply root-cause edits (code, workflow, or label-on-create per nested forge ship rules). Symptom-only empty commit or rerun **only** when user asked for a one-off unblock **or** classification is code retest — not when class is **stale event** / **workflow / config**.
+
+TodoWrite ids: `root`, `forge`, `load`, `execute` (skip `title`).
+
 ## CI / review / publish / deploy
 
-Steps `root` → `forge`, then matching Shared-refs load row (no invent). No `title` unless the ask also ships a PR/MR.
+Steps `root` → `forge`, then matching Shared-refs load row (no invent). No `title` unless the ask also ships a PR/MR. Prose PR CI fix without `--fix --pr` → same shape as **`--fix --pr`** above.

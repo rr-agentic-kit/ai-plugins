@@ -29,7 +29,7 @@ flowchart TD
 | **1. Situate** | Match class + evidence | Shared this file |
 | **2. Docs absorb** | PRD (± WWAS) + feature-delta when mechanism/Effort/UX-shape required; selection `_status_` | **Planner** via peer `skills/rr-planner/SKILL.md` entry (`--intake` / `--change`) — builder does **not** thin-patch Plan internals |
 | **3. Challenge / impact** | If PRD/delta change is **not cohesive** with frozen Discover (ES/MRD/BRD/business-case) or standing **constitution / tech ADRs / architecture** → Plan challenge (cheaper-first) and/or Discover reopen candidates; mark downstream impact per [baselines.md](baselines.md); **block advance** until resolved, risk-accepted, or correctly routed | Planner challenge path via peer SKILL; builder **stops** and peer-invokes planner/discovery — does not code through it |
-| **4. Select / slice** | Requirement selected (or open-slice posture consistent); no shrink-table cheats | Planner via peer SKILL |
+| **4. Select / slice** | Requirement selected (or open-slice posture consistent); no shrink-table cheats. **When a frozen slice exists** and absorb would pin kernel / mint an open-slice task / extend the freeze set: **Ask** whether to include on the **current slice**, park for a **next cut**, or keep **docs-only** (no task/kernel pin) — do not silent-include. | Planner via peer SKILL |
 | **5. Task create** | Task minted under open slice (rr) | Builder mint (or planner stub sync only) |
 | **6. Task detail** | Goal, Steps grain, obligations citing docs/deltas — enough for plan→build; **plan stage** for first step when entering run | Builder |
 | **7. Code** | Only after 1–6 PASS | `--feature` (default planned) / `--adhoc` (urgent) or orchestrate `--task`/`--step` |
@@ -67,6 +67,8 @@ Same pipeline; bias = default pace and who authors early stages.
 ## Situate (stage 1)
 
 Run in order; record evidence. Report **pipeline stage reached** and **first blocking stage**.
+
+**Evidence default = read-only.** Snapshot / load / `session_state.sh view` are fine. Do **not** mutate live product/demo state (form Activate, redeem, burn, mint, SSO start, destructive admin actions) to “prove” situate — Ask first if a mutation is the only way to gather evidence.
 
 | Step | Probe | Output |
 |------|-------|--------|
@@ -141,3 +143,5 @@ Keep drive×scope `--task` and planner `--change` as scoped work — not substit
 - No cross-skill `Read` of peer `refs/*` — peer `SKILL.md` entry only
 - `--feature` / `--adhoc` never past task-validate; never invents missing Plan truth
 - No “cascade edits = task obligations only” as a substitute for stages 2–4
+- No silent include of intake absorb on a **frozen** slice (kernel pin / open-slice task / freeze-set extend) without the stage-4 Ask (current \| next cut \| docs-only)
+- No situate mutation of live product/demo state without Ask (read-only evidence default)

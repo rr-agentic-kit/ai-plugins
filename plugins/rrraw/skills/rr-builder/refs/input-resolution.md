@@ -110,6 +110,8 @@ Conflicting pairs (`--auto` + `--manual`, or any two of `--next` \| `--step` \| 
 
 Reject retired `--full` with one-line: `use --slice` (no alias).
 
+**Task target (`--task <id>`):** a number or zero-padded id right after `--task` (`--task 23`, `--task 0023`) is a **cursor target**, not a second scope flag: set `payload.task_id` (zero-padded, 4 digits) and resolve it to `{artifact_root}/{NNNN}.md`. Unknown id → one-line stop. `--task` with no id keeps the cursor's active task. Under a handoff lane (`--prepare --task 23`) the id is a **target selector** for that lane — pass it through; drive/scope are still ignored.
+
 **Drive × scope behavior** (execution SoT: [slice-pipeline.md](slice-pipeline.md)):
 
 | | `--next` | `--step` | `--task` | `--slice` |
@@ -188,6 +190,7 @@ When `lane: prepare` or orchestrate stage **prepare**, resolve `execute-slice.ya
 prepare:
   kernel_path: null | string
   slice_id: null | string
+  task_id: null | string     # from --task <id>; s-prepare already-prepared probe target
 ```
 
 ## Output payload (skill session)
@@ -200,9 +203,10 @@ lane: null | prepare | coder | tester | security | review | refactor | add_endle
 feature: null | { title, project_kind, artifact_root, slice_id, feature_id, branch, base }
 adhoc: null | { title, project_kind, artifact_root, slice_id, adhoc_id, branch, base }
 builder_stage: null | prepare | plan | build | refactor | review | step_validate | task_validate | slice_validate | delivered
+task_id: null | string       # --task <id> target (zero-padded NNNN)
 step_index: null | integer
 plan_path: null | string
-prepare: null | { kernel_path, slice_id }
+prepare: null | { kernel_path, slice_id, task_id }
 review: null | { lanes, outcome, endless, max_epochs, scope, paths }
 test: null | object   # s-tester normalized payload
 endless_test: null | { max_epochs, max_parallel, start, scope }   # s-test-endless

@@ -6,9 +6,9 @@
 
 1. [feature-branch.md](feature-branch.md) — ensure `feat/{NNNN}-{step}-{short-desc}` **before** writing the plan (**first**, alone if branch may change).
 2. Then **one parallel** tool turn for the rest of the allowlist (do not serial-chain these):
-   - [../s-coder/refs/code.principles.md](../s-coder/refs/code.principles.md)
-   - [../s-tester/refs/shared-heuristics.md](../s-tester/refs/shared-heuristics.md)
-   - [../s-tester/refs/contracts.md](../s-tester/refs/contracts.md)
+   - [../../s-coder/refs/code.principles.md](../../s-coder/refs/code.principles.md)
+   - [../../s-tester/refs/shared-heuristics.md](../../s-tester/refs/shared-heuristics.md)
+   - [../../s-tester/refs/contracts.md](../../s-tester/refs/contracts.md)
    - [plan-schema.md](plan-schema.md) — output shape before writing the step plan
    - Plus any **Conditional** rows whose predicate holds (same turn)
 
@@ -16,8 +16,8 @@
 
 | When | Read |
 |------|------|
-| Task cites architecture / ADR / layered seams (AR-relevant) | [../s-coder/refs/architecture.md](../s-coder/refs/architecture.md) |
-| Step verify needs deterministic fixtures / seed rules | [../s-tester/refs/determinism.md](../s-tester/refs/determinism.md) |
+| Task cites architecture / ADR / layered seams (AR-relevant) | [../../s-coder/refs/architecture.md](../../s-coder/refs/architecture.md) |
+| Step verify needs deterministic fixtures / seed rules | [../../s-tester/refs/determinism.md](../../s-tester/refs/determinism.md) |
 
 ## Do not load on plan
 

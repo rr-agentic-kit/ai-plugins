@@ -40,7 +40,7 @@ Parent **s-ci** already selected GitLab. Do not load for GitHub remotes.
 | Resolve open MR | [refs/mr-resolve.md](refs/mr-resolve.md) |
 | Failed pipeline | `debug-pipeline` `[MR_IID]` — branch on `result.status`, `result.error_lines`, `result.failed_job_id` |
 | CI code-quality | `code-quality-reports` — `result.reports.count`, `result.reports.nodes` |
-| **Sonar fix** (`--fix --sonar`) | Parent `refs/sonar-fix.md` + `sonar-list-issues --lean` (default: open MR for current branch) |
+| **Sonar fix** (`--fix --sonar`) | `refs/ci/sonar-fix.md` + `sonar-list-issues --lean` (default: open MR for current branch; `--sonar overall\|new-code` or a pasted Sonar URL → whole-project scope, branch-only; `CODE_SMELL` edits auto-handed to **s-refactor**); MR-scoped: commit/push tip, `pre-merge-status` (or forge wait), re-enter until CI clean |
 | Pipeline security | `pipeline-security-reports` — `result.merge_blocked`, `result.findings.*` |
 | Bulk resolve threads | `mr-skip-threads` |
 | MR add preflight | `mr-add-preflight` |
@@ -78,7 +78,7 @@ When asked — run `pre-merge-status` once; branch on `result.verdict` / `result
 
 ## Invariants
 
-- After pipeline fixes: commit/push allowed (parent s-ci); retry with `glab ci retry JOB_ID`.
+- After pipeline fixes **and** MR-scoped Sonar remediations: commit/push allowed (parent s-ci); retry with `glab ci retry JOB_ID` only when replaying the same tip without new commits.
 - Do not invent `s-ci` subcommands — parent `SCRIPTS-SPEC.md`.
 - Do not invent `glab` flags — only [refs/cli.md](refs/cli.md) + task rows above.
 - Inline comment / `new_line` rules: [refs/inline-comments.md](refs/inline-comments.md).

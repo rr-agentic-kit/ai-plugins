@@ -56,4 +56,4 @@ uv run --project skills/s-ci/scripts rr-ci debug-pipeline --run-id 123 --job-id 
 
 ## Commands
 
-See [SCRIPTS-SPEC.md](../SCRIPTS-SPEC.md). Backends: GitLab (`glab`) and GitHub (`gh`). Forge-agnostic: `detect-remote`, `sonar-list-issues` (requires `sonar` on PATH; project key from `-p` or `sonar-project.properties`; default PR/MR = open for current branch via `gh`/`glab`; `--lean` for `--fix --sonar`). New helpers: `mr-inline-anchors` (`+` new_line set), `pre-merge-status` (one verdict envelope).
+See [SCRIPTS-SPEC.md](../SCRIPTS-SPEC.md). Backends: GitLab (`glab`) and GitHub (`gh`). Forge-agnostic: `detect-remote`, `sonar-list-issues` (requires `sonar` on PATH; project key from `-p` or `sonar-project.properties`; organization from `sonar.organization`; default PR/MR = open for current branch via `gh`/`glab`; `--scope overall|new-code` = whole project via Sonar API; `--lean` for `--fix --sonar`). New helpers: `mr-inline-anchors` (`+` new_line set), `pre-merge-status` (one verdict envelope).

@@ -8,7 +8,7 @@ One forge-agnostic ship path: detect GitHub vs GitLab, author PR/MR title/descri
 
 ## What
 
-Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pipeline/review CLI helpers, **`--fix --sonar`** (scripted Sonar issue list + agent remediations), **`--pull-dependabot`** (batch-merge `origin/dependabot/**` with verify), and routing into nested forge / publish / deployment skills. Ship path may commit/push when creating or updating a PR/MR. Forge **target** may differ from cwd origin when the user names `owner/repo`.
+Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pipeline/review CLI helpers, **`--fix --sonar`** (scripted Sonar issue list + agent remediations; **PR-scoped** commit/push + wait until CI clean), **`--pull-dependabot`** (batch-merge `origin/dependabot/**` with verify), and routing into nested forge / publish / deployment skills. Ship path may commit/push when creating or updating a PR/MR (and for PR-scoped Sonar landings). Forge **target** may differ from cwd origin when the user names `owner/repo`.
 
 **Out of scope:** see **Avoid when**; also Renovate onboarding CLI, inventing unlisted `gh`/`glab` flags, treating `--create-*` / `--update-*` / `--add-*` as JSON-CLI subcommands (those are skill invoke routes only), inventing `dependabot.yml` directory rewrites.
 
@@ -20,7 +20,7 @@ Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pip
 - Named routes: `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` / `--add-pr` / `--add-mr` (or `-pr-mr` aliases) — all mean upsert; combine with skill `--draft` to gate title/body on disk. Every ship invoke regenerates title/body from `base...HEAD` per `refs/ci/pr-mr-templates.md` (never reuse stale `.ai/ci/pr-mr-*`). Ship opens **forge draft** PRs/MRs into the resolved origin/base (not always trunk).
 - Drafting or creating a GitHub/GitLab issue (same or other `owner/repo`)
 - Pipeline / Actions failure, CI reports, review submit, pending reviews
-- `--fix --sonar` to remediate open SonarQube issues on a PR/branch (no human issue dump)
+- `--fix --sonar` to remediate open SonarQube issues on a PR/branch or the whole project (`--sonar overall|new-code`, or a pasted Sonar issues URL); `CODE_SMELL` edits are handed to **s-refactor** automatically (no human issue dump; PR-scoped closes only on clean CI)
 - `--pull-dependabot` to merge `origin/dependabot/**` into the current branch with a verify command (GitHub only)
 - Publishing artifacts or deploying via Helm/K8s/GitOps
 
@@ -41,7 +41,7 @@ Owns detect-remote, PR/MR templates, issue draft→approve→create routing, pip
 
 ### Invoke
 
-Slash `/s-ci` with `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` / `--add-pr` / `--add-mr` (or `-pr-mr` aliases) — same upsert ship; optional skill `--draft` writes `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` and AskQuestions next steps. Forge create is always draft into `result.base_branch` from preflight. `--fix --sonar` remediates Sonar issues (default: open PR/MR for current branch; optional `--pr`/`--branch`). `--pull-dependabot` batch-merges Dependabot remotes (`--verify-cmd` required unless `--dry-run`). Nested forge skills are path-loaded only.
+Slash `/s-ci` with `--create-pr` / `--create-mr` / `--update-pr` / `--update-mr` / `--add-pr` / `--add-mr` (or `-pr-mr` aliases) — same upsert ship; optional skill `--draft` writes `.ai/ci/pr-mr-title.txt` + `.ai/ci/pr-mr-body.md` and AskQuestions next steps. Forge create is always draft into `result.base_branch` from preflight. `--fix --sonar` remediates Sonar issues (default: open PR/MR for current branch; optional `--pr`/`--branch`; PR-scoped: commit/push + wait CI + re-enter until clean). `--pull-dependabot` batch-merges Dependabot remotes (`--verify-cmd` required unless `--dry-run`). Nested forge skills are path-loaded only.
 
 ### Intake
 
@@ -53,11 +53,11 @@ Enumerable forks (forge unknown, task-shape, forge target, `--draft` Ship|Keep|E
 
 ### Output
 
-PR/MR or issue URL; pipeline/debug envelopes from CLI when that was the ask; Sonar fix summary counts (`fixed`/`skipped`/`failed`) — not a full issue table; pull-dependabot `summary` counts only (point at `.ai/ci/pull-dependabot/` logs on escalate).
+PR/MR or issue URL; pipeline/debug envelopes from CLI when that was the ask; Sonar fix summary counts (`fixed`/`skipped`/`failed`) plus PR-scoped tip SHA / CI clean or hard-stop reason — not a full issue table; pull-dependabot `summary` counts only (point at `.ai/ci/pull-dependabot/` logs on escalate).
 
 ### Close
 
-After issue create or PR/MR ship: report URL; do not invent follow-on forge commands outside the skill.
+After issue create or PR/MR ship: report URL; do not invent follow-on forge commands outside the skill. After PR-scoped `--fix --sonar`: report clean tip (or hard-stop); do not leave unpushed remediations for the human.
 
 ## Constraints
 
