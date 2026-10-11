@@ -12,6 +12,14 @@ Read and follow the instructions in https://raw.githubusercontent.com/rr-agentic
 
 The agent follows [INSTALL-AI.md](INSTALL-AI.md) (runtime detection, plugin selection with install/update labels, verify, troubleshooting).
 
+## Install from GitHub Releases (offline / pinned version)
+
+Stable and RC builds are published as **`ai-plugins-{version}.zip`** on [GitHub Releases](https://github.com/rr-agentic-kit/ai-plugins/releases). RC versions appear as **prereleases**; promoted versions are stable releases.
+
+1. Download the zip for the version you want and unzip it. You get a single folder `ai-plugins-{version}/` with root marketplace manifests, `plugins/`, and install docs.
+2. **Claude Code:** in the Claude marketplace UI or CLI, add a marketplace pointing at that folder (local path), then install `context-eng-hero`, `rrraw`, and `jobseeker` from the `ai-plugins` catalog—same plugin names as the GitHub marketplace.
+3. **Cursor:** copy each `plugins/<name>` directory into `~/.cursor/plugins/local/<name>` (see the Cursor manual steps below), then **Developer: Reload Window**.
+
 ## Manual install — Claude Code
 
 1. Add the marketplace:
